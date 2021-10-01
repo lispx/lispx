@@ -1,0 +1,12 @@
+We should use the .mjs file extension instead of .js since the files
+are ESM modules (pretty much: the import statements for .lispx files
+are a Webpack extension).
+
+However, if we use .mjs, then we can no longer easily use Webpack's
+`global' thingy, which gives us cross-architecture (Node and browser)
+access to global variables.  Presumably, this is because Webpack
+treats .mjs differently from .js, even when the .js files contain ESM
+export statements.
+
+Deno supports `window', so maybe instead of `global' we could use that
+for the browser and Deno, and have a special case for Node.
