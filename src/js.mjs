@@ -36,10 +36,7 @@ export function init_js(vm)
     vm.js_global = (name) =>
     {
         vm.assert_type(name, vm.String);
-        /*
-         * global is provided by Webpack.
-         */
-        return global[name.to_js_string()];
+        return globalThis[name.to_js_string()];
     };
 
     /*

@@ -34,7 +34,7 @@ module.exports = [
 function make_entry(filename, libraryTarget, minimize)
 {
     return {
-        entry: "./src/vm.js",
+        entry: "./src/vm.mjs",
         output: {
             libraryTarget: libraryTarget,
             filename: filename,
@@ -89,7 +89,7 @@ function make_entry_esm(minimize)
 function make_test_entry(library, filename)
 {
     const entry = {
-        entry: "./test/all-tests.js",
+        entry: "./test/all-tests.mjs",
         output: {
             library: library,
             libraryTarget: "umd",

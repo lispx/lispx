@@ -15,12 +15,12 @@ import Big from "big.js";
  * be possible to make them optional, so that one can obtain e.g. an
  * even smaller VM without IO support.
  */
-import { init_eval } from "./eval.js";
-import { init_control } from "./control.js";
-import { init_stream } from "./stream.js";
-import { init_read } from "./read.js";
-import { init_print } from "./print.js";
-import { init_js } from "./js.js";
+import { init_eval } from "./eval.mjs";
+import { init_control } from "./control.mjs";
+import { init_stream } from "./stream.mjs";
+import { init_read } from "./read.mjs";
+import { init_print } from "./print.mjs";
+import { init_js } from "./js.mjs";
 
 /*
  * A build system contraption loads the contents of the files into the
