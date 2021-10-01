@@ -1,0 +1,110 @@
+;;; LispX JavaScript Interface
+
+;; Copyright (c) 2021 Manuel Simoni
+
+(defun js-eq (a b)
+  "Return true if the values A and B are equal per JavaScript's strict
+equality, false otherwise."
+  (eq a b))
+
+(defun to-lisp-boolean (js-boolean)
+  "Convert the JS-BOOLEAN to a Lisp boolean."
+  (%%to-lisp-boolean js-boolean))
+
+(defun to-js-boolean (lisp-boolean)
+  "Convert the LISP-BOOLEAN to a JS boolean."
+  (%%to-js-boolean lisp-boolean))
+
+(defun to-lisp-number (js-number)
+  "Convert the JS-NUMBER to a Lisp number."
+  (%%to-lisp-number js-number))
+
+(defun to-js-number (lisp-number)
+  "Convert the LISP-NUMBER to a JS number."
+  (%%to-js-number lisp-number))
+
+(defun to-lisp-string (js-string)
+  "Convert the JS-STRING to a Lisp string."
+  (%%to-lisp-string js-string))
+
+(defun to-js-string (lisp-string)
+  "Convert the LISP-STRING to a JS string."
+  (%%to-js-string lisp-string))
+
+(defun to-lisp-function (js-function)
+  "Convert the JS-FUNCTION to a Lisp function."
+  (%%to-lisp-function js-function))
+
+(defun to-js-function (lisp-operator)
+  "Convert the LISP-OPERATOR to a JS function."
+  (%%to-js-function lisp-operator))
+
+(defun apply-js-function (js-function arguments)
+  "Call JS-FUNCTION with a list of ARGUMENTS."
+  (apply (to-lisp-function js-function) arguments))
+
+(defun call-js-function (js-function . arguments)
+  "Call JS-FUNCTION with the rest ARGUMENTS."
+  (apply-js-function js-function arguments))
+
+(defmacro js-lambda (parameter-tree . forms)
+  "Construct a lambda with the given PARAMETER-TREE and body FORMS
+that's callable from JS."
+  (list #'to-js-function
+        (list #'lambda parameter-tree
+              ;; Push a barrier around the body forms to prevent
+              ;; continuations from escaping to JS.
+              (list* #'push-subcont-barrier
+                     forms))))
+
+(defun js-global (name)
+  "Access a JS global by NAME (a string).  Return undefined if the
+global doesn't exist."
+  (%%js-global name))
+
+(defun js-new (constructor . arguments)
+  "Call the JS CONSTRUCTOR function with ARGUMENTS."
+  (apply #'%%js-new (cons constructor arguments)))
+
+(defun apply-js-method (receiver name arguments)
+  "Invoke a JS method by NAME (a string) on the RECEIVER object,
+passing along the list of ARGUMENTS."
+  (%%apply-js-method receiver name arguments))
+
+(defun call-js-method (receiver name . arguments)
+  "Invoke a JS method by NAME (a string) on the RECEIVER object,
+passing along the rest ARGUMENTS."
+  (apply #'apply-js-method (list receiver name arguments)))
+
+(defmacro define-js-method (name method-name)
+  "Define a new function with the given NAME (a symbol) that invokes a
+JS method named METHOD-NAME (a string).  The function takes one or
+more arguments.  The first argument is the receiver of the method
+call (\"this\"), the rest are the normal method arguments."
+  (flet ((method (receiver . arguments)
+           (apply-js-method receiver method-name arguments)))
+    (list #'def (function-symbol name) #'method)))
+
+(defun js-log arguments
+  "Log the ARGUMENTS to the JS console."
+  (apply #'%%js-log arguments))
+
+(defun await (promise)
+  "Wait for the PROMISE to become fulfilled or rejected."
+  ;; Capture to the default prompt, and...
+  (take-subcont +default-prompt+ k
+    ;; ...return a new promise there.  From the caller's perspective,
+    ;; we are now paused -- but from context's perspective, we are
+    ;; returning a promise.  See `deftest' for how this nicely
+    ;; interacts with promise-based test frameworks.
+    (call-js-method promise "then"
+                    (js-lambda (value)
+                      ;; When the original promise is fulfilled with a
+                      ;; value, reinstate the continuation, returning
+                      ;; the value where `await' was called.
+                      (push-delim-subcont +default-prompt+ k value))
+                    (js-lambda (error)
+                      ;; When the original promise is rejected,
+                      ;; reinstate the continuation, signalling an
+                      ;; error where `await' was called.
+                      (push-delim-subcont +default-prompt+ k (error error))))))

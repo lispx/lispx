@@ -1,0 +1,3 @@
+Currently, calling DEFCLASS again with the same name creates a new
+class.  Instead, it should redefine the existing class and update
+its superclass if it was changed.

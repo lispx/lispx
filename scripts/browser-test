@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -eux
+# Browser tests
+./node_modules/karma/bin/karma start

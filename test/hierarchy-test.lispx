@@ -1,0 +1,60 @@
+;;; Class Hierarchy Integrity Test
+
+(defsection class-hierarchy
+
+  (defun test-hierarchy (classes)
+    (let ((env (the-environment)))
+      (rec test-classes-loop ((classes classes) (root-class (class object)))
+        (dolist (c classes #t)
+          (typecase c
+            (symbol
+             (let ((class (find-class c env)))
+               (assert (subclassp class root-class))))
+            (cons
+             (let ((class (find-class (car c) env)))
+               (assert (subclassp class root-class))
+               (test-classes-loop (cdr c) class)))
+            (object
+             (assert #f)))))))
+
+  (deftest test-hierarchy
+    (test-hierarchy
+     '(string
+       symbol
+       number
+       boolean
+       (list cons
+             nil)
+       void
+       ignore
+       environment
+       (class built-in-class
+              standard-class)
+       (operator built-in-operator
+                 fexpr
+                 function)
+       (input-stream string-input-stream)
+       (output-stream string-output-stream)
+       (standard-object dynamic
+                        (condition (error type-error
+                                          unbound-symbol-error
+                                          unbound-slot-error
+                                          unbound-method-error
+                                          assertion-error
+                                          match-error
+                                          (stream-error end-of-file)
+                                          reader-error
+                                          prompt-not-found-error
+                                          restart-error
+                                          simple-error))
+                        handler-frame
+                        restart-handler
+                        condition-handler)
+       continuation)))
+
+  (deftest test-hierarchy.sanity-check
+    (signals-error
+     (test-hierarchy
+      '((number
+         boolean)))
+     assertion-error)))

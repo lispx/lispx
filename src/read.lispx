@@ -1,0 +1,22 @@
+;;; LispX Reader
+
+;; Copyright (c) 2021 Manuel Simoni
+
+(defun read arguments
+  "Reads an object from the STREAM (which defaults to
+`*standard-input*').  If EOF is reached, and `eof-error-p' is true
+(the default), `end-of-file' is signalled. If it is false, `eof-value'
+is returned (it defaults to void).
+$(fn (&optional stream eof-error-p eof-value))"
+  (apply #'stream-read (optionals arguments (dynamic *standard-input*) #t #void)))
+
+;;; Unstable/Experimental API:
+
+(defgeneric stream-read (stream eof-error-p eof-value)
+  (:documentation "Underlying, generic implementation of `read'.
+Every stream class can provide a specialized method."))
+
+(defmethod stream-read ((stream input-stream) eof-error-p eof-value)
+  "The default implementation of `stream-read' calls a built-in
+function written in JS."
+  (%%read stream eof-error-p eof-value))

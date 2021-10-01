@@ -1,0 +1,30 @@
+;;; LispX Printer
+
+;; Copyright (c) 2021 Manuel Simoni
+
+(defun write (object . keywords)
+  "Write OBJECT to STREAM (defaults to `*standard-output*').  Main
+printer entry point.
+
+$(fn (object &key stream))"
+  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))
+
+(defun print1 (object)
+  "Print OBJECT readably on the current line."
+  (dynamic-let ((*print-escape* #t))
+    (write object)))
+
+(defun uprint1 (object)
+  "Print OBJECT unreadably on the current line."
+  (dynamic-let ((*print-escape* #f))
+    (write object)))
+
+(defun print (object)
+  "Print OBJECT readably on a fresh line."
+  (fresh-line)
+  (print1 object))
+
+(defun uprint (object)
+  "Print OBJECT unreadably on a fresh line."
+  (fresh-line)
+  (uprint1 object))

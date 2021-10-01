@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# ./scripts/run-matching-tests <pattern>
+#
+# Runs all tests whose name matches pattern.
+#
+# Note: doesn't build the tests, so don't forget to call ./scripts/build
+
+set -eux
+# Node tests
+./node_modules/mocha/bin/mocha --slow 5000 --timeout 10000 dist/test/lispx-test-node.js --grep $1

@@ -1,0 +1,3 @@
+The Lisp code now uses the Elisp docstring conventions, but the JS
+code does not.  It's not clear if they are the right thing for the JS
+code, since it needs to refer to both Lisp and JS program elements.

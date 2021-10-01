@@ -1,0 +1,3426 @@
+;;; LispX Main Test Suite
+
+;; The order of the tests is haphazard.  It should be brought in line
+;; with how the operators appear in boot.lispx.
+
+(defsection signals-error
+
+  (deftest |SIGNALS-ERROR returns true if the expression signals.|
+    (signals-error
+     x
+     unbound-symbol-error))
+
+  (deftest |SIGNALS-ERROR returns true if the expression signals a subclass.|
+    (signals-error
+     x
+     error))
+
+  (deftest |SIGNALS-ERROR returns true if the expression signals and slots match.|
+    (signals-error
+     x
+     unbound-symbol-error :symbol 'x))
+
+  (deftest |SIGNALS-ERROR returns true if the expression signals a subclass and slots match.|
+    (signals-error
+     x
+     error :symbol 'x))
+
+  (deftest |SIGNALS-ERROR returns false if the expression signals but slots don't match.|
+    (signals-error
+     x
+     unbound-symbol-error :symbol 'y)
+    #f)
+
+  (deftest |SIGNALS-ERROR returns false if the expression doesn't signal.|
+    (signals-error
+     1
+     error)
+    #f)
+
+  (deftest |SIGNALS-ERROR returns false if the expression signals another condition type.|
+    (signals-error
+     x
+     match-error)
+    #f))
+
+(defsection assert
+
+  (deftest assert.1
+    (assert (= 1 1))
+    #void)
+
+  (deftest assert.2
+    (signals-error
+     (assert (= 1 2))
+     assertion-error))
+
+  (deftest assert.3
+    (signals-error
+     (assert)
+     match-error))
+
+  (deftest assert.4
+    (signals-error
+     (assert 1)
+     type-error :datum 1 :expected-type 'boolean))
+
+  (deftest assert.5
+    (signals-error
+     (assert #t #t)
+     match-error)))
+
+(defsection error
+
+  (deftest error.1
+    (signals-error
+     (error (make-instance (class standard-object) :x 1 :y 2))
+     standard-object :x 1 :y 2))
+
+  (deftest error.2
+    (signals-error
+     (error)
+     match-error))
+
+  (deftest error.3
+    (handler-bind ((simple-error (lambda (e)
+                                   (invoke-restart 'continue 12))))
+      (error (make-simple-error "Foo!")
+        (abort (lambda (value) (* value 10)))
+        (continue (lambda (value) (* value 2)))))
+    24)
+
+  (deftest error.3b
+    (handler-bind ((simple-error (lambda (e)
+                                   (invoke-restart 'abort 12))))
+      (error (make-simple-error "Foo!")
+        (abort (lambda (value) (* value 10)))
+        (continue (lambda (value) (* value 2)))))
+    120)
+
+  (deftest error.4
+    (restart-case ((abort (lambda (value) (* 1000 value))))
+      (handler-bind ((simple-error (lambda (e)
+                                     (invoke-restart 'abort 12))))
+        (error (error (make-simple-error "Foo!"))
+          (abort (lambda (value) (* value 10)))
+          (continue (lambda (value) (* value 2))))))
+    12000)
+
+  (deftest error.4b
+    (block b
+      (restart-case ((abort (lambda (value) (* 1000 value))))
+        (handler-bind ((simple-error (lambda (e)
+                                       (invoke-restart 'abort 12))))
+          (error (error (make-simple-error "Foo!")
+                   (abort (lambda (value) (return-from b (* 10000 value)))))
+            (abort (lambda (value) (* value 10)))
+            (continue (lambda (value) (* value 2)))))))
+    120000))
+
+(defsection assert-type
+
+  (deftest assert-type.1
+    (assert-type #t (class boolean)))
+
+  (deftest assert-type.2
+    (signals-error
+     (assert-type #t (class string))
+    type-error :datum #t :expected-type 'string))
+
+  (deftest assert-type.3
+    (signals-error
+     (assert-type #t #f)
+     type-error :datum #f :expected-type 'class))
+
+  (deftest assert-type.4
+    (signals-error
+     (assert-type)
+     match-error))
+
+  (deftest assert-type.5
+    (signals-error
+     (assert-type #t)
+     match-error)))
+
+(defsection the
+
+  (deftest the.1
+    (the boolean (= 1 1))
+    #t)
+
+  (deftest the.2
+    (signals-error
+     (the string #t)
+     type-error :datum #t :expected-type 'string))
+
+  (deftest the.3
+    (signals-error
+     (the #t #f)
+     type-error :datum #t :expected-type 'symbol))
+
+  (deftest the.4
+    (signals-error
+     (the)
+     match-error))
+
+  (deftest the.5
+    (signals-error
+     (the #t)
+     match-error)))
+
+(defsection make-type-error
+
+  (deftest make-type-error.1
+    (let ((e (make-type-error "foo" 'number)))
+      (assert (typep e (class type-error)))
+      (assert (typep e (class error)))
+      (assert (typep e (class condition)))
+      (assert (= "foo" (slot-value e 'datum)))
+      (assert (= 'number (slot-value e 'expected-type))))
+    #void))
+
+(defsection make-simple-error
+
+  (deftest make-simple-error.1
+    (let ((e (make-simple-error "foo")))
+      (assert (typep e (class simple-error)))
+      (assert (typep e (class error)))
+      (assert (typep e (class condition)))
+      (assert (= "foo" (slot-value e 'message))))
+    #void))
+
+(defsection make-restart-error
+
+  (deftest make-restart-error.1
+    (let ((e (make-restart-error 'continue)))
+      (assert (typep e (class restart-error)))
+      (assert (typep e (class error)))
+      (assert (typep e (class condition)))
+      (assert (= 'continue (slot-value e 'restart-name))))
+    #void))
+
+(defsection vau
+
+  (deftest |A fexpr without body expression results in #VOID.|
+    ((vau #ignore #ignore))
+    #void)
+
+  (deftest |A fexpr returns its operands unevaluated.|
+    ((vau ops #ignore ops) x y z)
+    '(x y z))
+
+  (deftest |A fexpr can have multiple body expressions.|
+    (progn
+      (def env (the-environment))
+      (assert (= ((vau ops #ignore (set env var 1) ops) x y z)
+                 '(x y z)))
+      (assert (= (eval 'var env) 1)))
+    #void)
+
+  (deftest |The environment parameter receives the current environment.|
+    (progn
+      (def env (the-environment))
+      (eq ((vau #ignore e e)) env)))
+
+  (deftest |Fexprs are instances of FEXPR, OPERATOR, OBJECT.|
+    (let ((#'fexpr (vau #ignore #ignore 12)))
+      (typep #'fexpr (class fexpr))
+      (typep #'fexpr (class operator))
+      (typep #'fexpr (class object))
+      (fexpr))
+    12)
+
+  (deftest |Arity check 1.|
+    (signals-error
+     (vau)
+     match-error))
+
+  (deftest |Arity check 2.|
+    (signals-error
+     (vau x)
+     match-error)))
+
+(defsection quote
+
+  (deftest |Quoted symbols are pointer identical.|
+    (and
+     (eq 'foo 'foo)
+     (eq '#'foo '#'foo)
+     (eq (class-symbol 'foo) (class-symbol 'foo))))
+
+  (deftest |Ordinary symbols can be quoted.|
+    (eq 'foo (variable-symbol 'foo)))
+
+  (deftest |Function symbols can be quoted.|
+    (eq '#'foo (function-symbol 'foo)))
+
+  (deftest |Lists can be quoted.|
+    (= '(1 2 3) (list 1 2 3)))
+
+  (deftest |Numbers can be quoted.|
+    (= '1 1))
+
+  (deftest |Strings can be quoted.|
+    (= '"foo" "foo"))
+
+  (deftest |QUOTE requires at least one argument.|
+    (signals-error
+     (quote)
+     match-error))
+
+  (deftest |QUOTE requires at most one argument.|
+    (signals-error
+     (quote 1 2 3)
+     match-error)))
+
+(defsection list
+
+  (deftest list.1
+    (eq #nil (list)))
+
+  (deftest list.2
+    (= '(1) (list 1)))
+
+  (deftest list.3
+    (= '((1) (2)) (list (list 1) (list 2)))))
+
+(defsection list*
+
+  (deftest list*.1
+    (list*)
+    #nil)
+
+  (deftest list*.2
+    (list* 1 2 '(3))
+    '(1 2 3))
+
+  (deftest list*.3
+    (list* 1 2 3)
+    '(1 2 . 3))
+
+  (deftest list*.4
+    (list* 1 2)
+    '(1 . 2))
+
+  (deftest list*.5
+    (list* 2)
+    '2))
+
+(defsection the-environment
+
+  (deftest the-environment.1
+    (let ((x 1))
+      (eval 'x (the-environment)))
+    1)
+
+  (deftest the-environment.2
+    (let ((x 1)
+          (env (the-environment)))
+      (boundp 'x env))
+    #f)
+
+  (deftest the-environment.3
+    (let* ((x 1)
+           (env (the-environment)))
+      (boundp 'x env))
+    #t)
+
+  (deftest the-environment.4
+    (signals-error
+     (the-environment #t)
+     match-error)))
+
+(defsection boundp
+
+  (deftest boundp.1
+    (boundp 'nope (the-environment))
+    #f)
+
+  (deftest boundp.2
+    (boundp '#'defun (the-environment)))
+
+  (deftest boundp.3
+    (boundp (class-symbol 'standard-object) (the-environment)))
+
+  (deftest boundp.4
+    (signals-error
+     (boundp)
+     match-error))
+
+  (deftest boundp.5
+    (signals-error
+     (boundp 'x)
+     match-error))
+
+  (deftest boundp.6
+    (signals-error
+     (boundp 12 (the-environment))
+     type-error :datum 12 :expected-type 'symbol))
+
+  (deftest boundp.7
+    (signals-error
+     (boundp 'x 33)
+     type-error :datum 33 :expected-type 'environment))
+
+  (deftest boundp.8
+    (signals-error
+     (boundp 12 (the-environment) #t)
+     match-error)))
+
+(defsection macro
+
+  (deftest macro.0
+    ((macro ()))
+    #void)
+
+  (deftest macro.1
+    (let ((z 1))
+      ((macro () 'x 'y 'z)))
+    1)
+
+  (deftest macro.2
+    ((macro () (list #'= 1 1)))
+    #t)
+
+  (deftest macro.3
+    (signals-error
+     (macro)
+     match-error)
+    #t))
+
+(defsection defmacro
+
+  (deftest defmacro.1
+    (progn
+      (defmacro myprogn body
+        (list* #'progn body))
+      (myprogn 1 2 3))
+    3)
+
+  (deftest defmacro.2
+    (signals-error
+     (defmacro)
+     match-error))
+
+  (deftest defmacro.3
+    (signals-error
+     (defmacro foo)
+     match-error))
+
+  (deftest defmacro.4
+    (progn
+      (defmacro foo ())
+      (foo))
+    #void))
+
+(defsection defexpr
+
+  (deftest defexpr.1
+    (progn
+      (defexpr myprogn body env
+        (eval (list* #'progn body) env))
+      (myprogn 1 2 3))
+    3)
+
+  (deftest defexpr.2
+    (signals-error
+     (defexpr)
+     match-error))
+
+  (deftest defexpr.3
+    (signals-error
+     (defexpr foo)
+     match-error))
+
+  (deftest defexpr.3b
+    (signals-error
+     (defexpr foo ())
+     match-error))
+
+  (deftest defexpr.4
+    (progn
+      (defexpr foo () #ignore)
+      (foo))
+    #void))
+
+(defsection def
+
+  (deftest def.1
+    (progn
+      (def (x y z) (list 1 2 3))
+      (assert (= x 1))
+      (assert (= y 2))
+      (assert (= z 3)))
+    #void)
+
+  (deftest def.2
+    (def :key :key)
+    :key)
+
+  (deftest def.2b
+    (signals-error
+     (def :key :key2)
+     match-error :definiend :key :value :key2))
+
+  (deftest def.3
+    (def #ignore 2)
+    2)
+
+  (deftest def.4
+    (def x 1)
+    1)
+
+  (deftest def.5
+    (def () ())
+    ())
+
+  (deftest def.6
+    (signals-error
+     (def)
+     match-error))
+
+  (deftest def.7
+    (signals-error
+     (def x)
+     match-error))
+
+  (deftest def.8
+    (signals-error
+     (def #t 12)
+     type-error :datum #t :expected-type '(or symbol ignore list)))
+
+  (deftest def.9
+    (def x 1 "docstring")
+    1))
+
+(defsection defconstant
+
+  (deftest defconstant.1
+    (progn
+      (defconstant x 1)
+      x)
+    1)
+
+  (deftest defconstant.2
+    (signals-error
+     (defconstant)
+     match-error))
+
+  (deftest defconstant.3
+    (signals-error
+     (defconstant x)
+     match-error))
+
+  (deftest defconstant.4
+    (progn
+      (defconstant x 1)
+      x)
+    1))
+
+(defsection lambda
+
+  (deftest lambda.1
+    ((lambda ()))
+    #void)
+
+  (deftest lambda.2
+    ((lambda args 'whatever args) 1 2 (intern "foo"))
+    '(1 2 foo))
+
+  (deftest lambda.3
+    (signals-error
+     (lambda)
+     match-error))
+
+  (deftest lambda.4
+    (signals-error
+     ((lambda #t))
+     type-error :datum #t :expected-type '(or symbol ignore list))))
+
+(defsection defun
+
+  (deftest defun.1
+    (progn
+      (defun foo () 'foo)
+      (defun bar (x) (list (foo) x))
+      (bar 'bar))
+    '(foo bar))
+
+  (deftest defun.2
+    (progn
+      (defun nope ())
+      (nope))
+    #void)
+
+  (deftest defun.3
+    (signals-error
+     (defun)
+     match-error))
+
+  (deftest defun.4
+    (signals-error
+     (defun foo)
+     match-error))
+
+  (deftest defun.5
+    (signals-error
+     (defun #t ())
+     type-error :datum #t :expected-type 'symbol)))
+
+(defsection progn
+
+  (deftest progn.1
+    (progn)
+    #void)
+
+  (deftest progn.2
+    (progn (list))
+    (list))
+
+  (deftest progn.3
+    (progn
+      (def env (the-environment))
+      (progn (set env x 1) (set env x 2) x))
+    2))
+
+(defsection prog1
+
+  (deftest prog1.1
+    (prog1 1)
+    1)
+
+  (deftest prog1.2
+    (prog1 1 2 3)
+    1)
+
+  (deftest prog1.3
+    (signals-error
+     (prog1)
+     match-error))
+
+  (deftest prog1.4
+    (progn
+      (def env (the-environment))
+      (assert (= 4 (prog1 4 (set env x 2))))
+      x)
+    2))
+
+(defsection eval
+
+  (deftest eval.1
+    (eval #nil (the-environment))
+    #nil)
+
+  (deftest eval.2
+    (eval '(= 1 2) (the-environment))
+    #f)
+
+  (deftest eval.3
+    (signals-error
+     (eval)
+     match-error))
+
+  (deftest eval.4
+    (signals-error
+     (eval '1)
+     match-error))
+
+  (deftest eval.5
+    (signals-error
+     (eval 'x (the-environment))
+     unbound-symbol-error
+     :symbol 'x))
+
+  (deftest eval.6
+    (signals-error
+     (eval '1 (the-environment) #t)
+     match-error)))
+
+(defsection cons
+
+  (deftest cons.1
+    (cons (list 1) (list 2))
+    '((1) . (2)))
+
+  (deftest cons.2
+    (cons (list 1) #nil)
+    '((1)))
+
+  (deftest cons.3
+    (signals-error
+     (cons)
+     match-error))
+
+  (deftest cons.4
+    (signals-error
+     (cons 1)
+     match-error))
+
+  (deftest cons.5
+    (signals-error
+     (cons 1 2 3)
+     match-error)))
+
+(defsection car
+
+  (deftest car.1
+    (car (list 1 2))
+    1)
+
+  (deftest car.2
+    (signals-error
+     (car)
+     match-error))
+
+  (deftest car.3
+    (signals-error
+     (car 1)
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest car.4
+    (signals-error
+     (car 1 2)
+     match-error)))
+
+(defsection cdr
+
+  (deftest cdr.1
+    (cdr (list 1 2))
+    '(2))
+
+  (deftest cdr.2
+    (signals-error
+     (cdr)
+     match-error))
+
+  (deftest cdr.3
+    (signals-error
+     (cdr 1)
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest car.4
+    (signals-error
+     (cdr 1 2)
+     match-error)))
+
+(defsection symbol-name
+
+  (deftest symbol-name.1
+    (= "foo" (symbol-name 'foo)))
+
+  (deftest symbol-name.2
+    (= "foo" (symbol-name '#'foo)))
+
+  (deftest symbol-name.3
+    (= "foo" (symbol-name (class-symbol 'foo))))
+
+  (deftest symbol-name.4
+    (= "foo" (symbol-name :foo)))
+
+  (deftest symbol-name.5
+    (signals-error
+     (symbol-name)
+     match-error))
+
+  (deftest symbol-name.6
+    (signals-error
+     (symbol-name 12)
+     type-error :datum 12 :expected-type 'symbol)))
+
+(defsection variable-symbol
+
+  (deftest variable-symbol.1
+    (variable-symbol '#'foo)
+    'foo)
+
+  (deftest variable-symbol.2
+    (variable-symbol :foo)
+    'foo)
+
+  (deftest variable-symbol.4
+    (variable-symbol (class-symbol 'foo))
+    'foo)
+
+  (deftest variable-symbol.5
+    (signals-error
+     (variable-symbol)
+     match-error))
+
+  (deftest variable-symbol.6
+    (signals-error
+     (variable-symbol 5)
+     type-error :datum 5 :expected-type 'symbol)))
+
+(defsection function-symbol
+
+  (deftest function-symbol.1
+    (function-symbol 'foo)
+    '#'foo)
+
+  (deftest function-symbol.2
+    (function-symbol :foo)
+    '#'foo)
+
+  (deftest function-symbol.4
+    (function-symbol (class-symbol 'foo))
+    '#'foo)
+
+  (deftest function-symbol.5
+    (signals-error
+     (function-symbol)
+     match-error))
+
+  (deftest function-symbol.6
+    (signals-error
+     (function-symbol 5)
+     type-error :datum 5 :expected-type 'symbol)))
+
+(defsection class-symbol
+
+  (deftest class-symbol.1
+    (class-symbol 'foo)
+    (class-symbol 'foo))
+
+  (deftest class-symbol.2
+    (class-symbol :foo)
+    (class-symbol 'foo))
+
+  (deftest class-symbol.3
+    (class-symbol '#'foo)
+    (class-symbol 'foo))
+
+  (deftest class-symbol.5
+    (signals-error
+     (class-symbol)
+     match-error))
+
+  (deftest class-symbol.6
+    (signals-error
+     (class-symbol 5)
+     type-error :datum 5 :expected-type 'symbol)))
+
+(defsection keyword-symbol
+
+  (deftest keyword-symbol.1
+    (keyword-symbol 'foo)
+    :foo)
+
+  (deftest keyword-symbol.2
+    (keyword-symbol '#'foo)
+    :foo)
+
+  (deftest keyword-symbol.3
+    (keyword-symbol (class-symbol 'foo))
+    :foo)
+
+  (deftest keyword-symbol.5
+    (signals-error
+     (keyword-symbol)
+     match-error))
+
+  (deftest keyword-symbol.6
+    (signals-error
+     (keyword-symbol 5)
+     type-error :datum 5 :expected-type 'symbol)))
+
+(defsection wrap
+
+  (deftest wrap.1
+    ((wrap (vau (x) #ignore x)) (list 1 2 3))
+    '(1 2 3))
+
+  (deftest wrap.2
+    (signals-error
+     (wrap)
+     match-error))
+
+  (deftest wrap.3
+    (signals-error
+     (wrap 33)
+     type-error :datum 33 :expected-type 'operator)))
+
+(defsection unwrap
+
+  (deftest unwrap.1
+    ((unwrap (lambda (x) x)) (list 1 2 3))
+    '(list 1 2 3))
+
+  (deftest unwrap.2
+    (signals-error
+     (unwrap)
+     match-error))
+
+  (deftest unwrap.3
+    (signals-error
+     (unwrap 33)
+     type-error :datum 33 :expected-type 'function)))
+
+(defsection if
+
+  (deftest if.1
+    (if #t (= 1 1) (= 1 2))
+    #t)
+
+  (deftest if.2
+    (if #f (= 1 1) (= 1 2))
+    #f)
+
+  (deftest if.3
+    (signals-error
+     (if)
+     match-error))
+
+  (deftest if.4
+    (signals-error
+     (if #t)
+     match-error))
+
+  (deftest if.5
+    (signals-error
+     (if #t #f)
+     match-error))
+
+  (deftest if.6
+    (signals-error
+     (if 1 #f #t)
+     type-error :datum 1 :expected-type 'boolean)))
+
+(defsection cond
+
+  (deftest cond.1
+    (cond)
+    #void)
+
+  (deftest cond.2
+    (cond (#f 1 2 3))
+    #void)
+
+  (deftest cond.3
+    (cond (#f 1 2 3)
+          ((= 1 1) 4 5 (= 1 1)))
+    #t)
+
+  (deftest cond.4
+    (signals-error
+     (cond (1 #t))
+     type-error :datum 1 :expected-type 'boolean)))
+
+(defsection typecase
+
+  (deftest typecase.1
+    (signals-error
+     (typecase)
+     match-error))
+
+  (deftest typecase.2
+    (typecase (+ 2 2))
+    #void)
+
+  (deftest typecase.3
+    (typecase (+ 2 2)
+      (object 1)
+      (number 2))
+    1)
+
+  (deftest typecase.4
+    (typecase (+ 2 2)
+      (number 2)
+      (object 1))
+    2))
+
+(defsection not
+
+  (deftest not.1
+    (not #t)
+    #f)
+
+  (deftest not.2
+    (not #f)
+    #t)
+
+  (deftest not.3
+    (signals-error
+     (not)
+     match-error))
+
+  (deftest not.4
+    (signals-error
+     (not 1)
+     type-error :datum 1 :expected-type 'boolean)))
+
+(defsection eq
+
+  (deftest eq.1
+    (eq 'foo 'foo)
+    #t)
+
+  (deftest eq.2
+    (eq 'foo 'bar)
+    #f)
+
+  (deftest eq.3
+    (eq #t #t)
+    #t)
+
+  (deftest eq.4
+    (eq #f #f)
+    #t)
+
+  (deftest eq.5
+    (eq #void #void)
+    #t)
+
+  (deftest eq.6
+    (eq #ignore #ignore)
+    #t)
+
+  (deftest eq.7
+    (eq #nil #nil)
+    #t)
+
+  (deftest eq.8
+    (eq #nil ())
+    #t)
+
+  (deftest eq.9
+    (eq #nil '())
+    #t)
+
+  (deftest eq.10
+    (signals-error
+     (eq)
+     match-error))
+
+  (deftest eq.11
+    (signals-error
+     (eq 11)
+     match-error)))
+
+(defsection =
+
+  (deftest =.1
+    (= 1 1 1)
+    #t)
+
+  (deftest =.2
+    (= 1 1 2)
+    #f)
+
+  (deftest =.3
+    (= #t #t #t)
+    #t)
+
+  (deftest =.4
+    (= #t #t #f)
+    #f)
+
+  (deftest =.5
+    (= "foo" "foo" "foo")
+    #t)
+
+  (deftest =.6
+    (= (list (list 1)) (list (list 1)))
+    #t)
+
+  (deftest =.7
+    (signals-error
+     (=)
+     match-error))
+
+  (deftest =.8
+    (signals-error
+     (= 1)
+     match-error)))
+
+(defsection /=
+
+  (deftest /=.1
+    (/= 1 1 1)
+    #f)
+
+  (deftest /=.2
+    (/= 1 1 2)
+    #f)
+
+  (deftest /=.3
+    (/= 1 2 3)
+    #t)
+
+  (deftest /=.4
+    (/= #t #t #f)
+    #f)
+
+  (deftest /=.4b
+    (/= #t #f)
+    #t)
+
+  (deftest /=.5
+    (/= "foo" "foo" "foo")
+    #f)
+
+  (deftest /=.5b
+    (/= "foo" "bar" "quux")
+    #t)
+
+  (deftest /=.6
+    (/= (list (list 1)) (list (list 2)))
+    #t)
+
+  (deftest /=.7
+    (signals-error
+     (/=)
+     match-error))
+
+  (deftest /=.8
+    (/= 1)
+    #t)
+
+  (deftest /=.9
+    (/= 1 2 3 3)
+    #f)
+
+  (deftest /=.9b
+    (/= 3 1 2 3)
+    #f)
+
+  (deftest /=.9c
+    (/= 3 1 2 3 4)
+    #f)
+
+  (deftest /=.9d
+    (/= 1 2 3 3 4)
+    #f)
+
+  (deftest /=.9e
+    (/= 3 3 4)
+    #f)
+
+  (deftest /=.10
+    (/= #t "a")
+    #t))
+
+(defsection <
+
+  (deftest <.1
+    (< 1 1 1)
+    #f)
+
+  (deftest <.2
+    (< 1 1 2)
+    #f)
+
+  (deftest <.3
+    (< -3 -2 -1 0 1 2 3)
+    #t)
+
+  (deftest <.4
+    (signals-error
+     (< #t #t #f)
+    error))
+
+  (deftest <.5
+    (signals-error
+     (< "foo" "foo" "foo")
+     error))
+
+  (deftest <.6
+    (signals-error
+     (< (list (list 1)) (list (list 2)))
+     error))
+
+  (deftest <.7
+    (signals-error
+     (<)
+     match-error))
+
+  (deftest <.8
+    (signals-error
+     (< 1)
+     match-error))
+
+  (deftest <.9
+    (< 1 2 3 3)
+    #f)
+
+  (deftest <.different-types
+    (signals-error
+     (< 1 2 3 "foo")
+     type-error :datum "foo" :expected-type 'number)))
+
+(defsection >
+
+  (deftest >.1
+    (> 1 1 1)
+    #f)
+
+  (deftest >.2
+    (> 2 1 1)
+    #f)
+
+  (deftest >.3
+    (> 3 2 1 0 -1 -2 -3)
+    #t)
+
+  (deftest >.4
+    (signals-error
+     (> #t #t #f)
+    error))
+
+  (deftest >.5
+    (signals-error
+     (> "foo" "foo" "foo")
+     error))
+
+  (deftest >.6
+    (signals-error
+     (> (list (list 1)) (list (list 2)))
+     error))
+
+  (deftest >.7
+    (signals-error
+     (>)
+     match-error))
+
+  (deftest >.8
+    (signals-error
+     (> 1)
+     match-error))
+
+  (deftest >.9
+    (> 3 2 1 1)
+    #f)
+
+  (deftest >.different-types
+    (signals-error
+     (> 3 2 1 "foo")
+     type-error :datum "foo" :expected-type 'number)))
+
+(defsection <=
+
+  (deftest <=.1
+    (<= 1 1 1)
+    #t)
+
+  (deftest <=.2
+    (<= 1 1 2)
+    #t)
+
+  (deftest <=.3
+    (<= -3 -2 -1 0 1 2 3)
+    #t)
+
+  (deftest <=.4
+    (signals-error
+     (<= #t #t #f)
+    error))
+
+  (deftest <=.5
+    (signals-error
+     (<= "foo" "foo" "foo")
+     error))
+
+  (deftest <=.6
+    (signals-error
+     (<= (list (list 1)) (list (list 2)))
+     error))
+
+  (deftest <=.7
+    (signals-error
+     (<=)
+     match-error))
+
+  (deftest <=.8
+    (signals-error
+     (<= 1)
+     match-error))
+
+  (deftest <=.9
+    (<= 1 2 3 3)
+    #t)
+
+  (deftest <=.10
+    (<= 1 2 3 3 -1)
+    #f)
+
+  (deftest <=.different-types
+    (signals-error
+     (<= 1 1 3 "foo")
+     type-error :datum "foo" :expected-type 'number)))
+
+(defsection >=
+
+  (deftest >=.1
+    (>= 1 1 1)
+    #t)
+
+  (deftest >=.2
+    (>= 2 1 1)
+    #t)
+
+  (deftest >=.3
+    (>= 3 2 1 1 0 0 -1 -2 -3 -3)
+    #t)
+
+  (deftest >=.4
+    (signals-error
+     (>= #t #t #f)
+    error))
+
+  (deftest >=.5
+    (signals-error
+     (>= "foo" "foo" "foo")
+     error))
+
+  (deftest >=.6
+    (signals-error
+     (>= (list (list 1)) (list (list 2)))
+     error))
+
+  (deftest >=.7
+    (signals-error
+     (>=)
+     match-error))
+
+  (deftest >=.8
+    (signals-error
+     (>= 1)
+     match-error))
+
+  (deftest >=.9
+    (>= 3 3 2 1)
+    #t)
+
+  (deftest >=.10
+    (>= 3 3 2 100)
+    #f)
+
+  (deftest >=.different-types
+    (signals-error
+     (>= 3 3 2 "foo")
+     type-error :datum "foo" :expected-type 'number)))
+
+(defsection +
+
+  (deftest +.1
+    (+)
+    0)
+
+  (deftest +.2
+    (+ 10)
+    10)
+
+  (deftest +.3
+    (+ 10 10 10)
+    30))
+
+(defsection -
+
+  (deftest -.1
+    (signals-error
+     (-)
+     match-error))
+
+  (deftest -.2
+    (- 1)
+    -1)
+
+  (deftest -.3
+    (- -1)
+    1)
+
+  (deftest -.4
+    (- 100 10 1)
+    89))
+
+(defsection *
+
+  (deftest *.1
+    (*)
+    1)
+
+  (deftest *.2
+    (* 10)
+    10)
+
+  (deftest *.3
+    (* 10 -10 10)
+    -1000))
+
+(defsection /
+
+  (deftest /.1
+    (signals-error
+     (/)
+     match-error))
+
+  (deftest /.2
+    (/ 10)
+    0.1)
+
+  (deftest /.3
+    (/ 100 10 2)
+    5)
+
+  (deftest /.4
+    (/ -100 10 2)
+    -5))
+
+(defsection typep
+
+  (deftest typep.1
+    (and
+     (typep #t (class boolean))
+     (typep #f (class boolean))
+     (typep 12 (class number))
+     (typep "foo" (class string))
+     (typep #nil (class nil))
+     (typep (class object) (class class))))
+
+  (deftest typep.2
+    (and
+     (typep (class condition) (class standard-class))
+     (typep (class condition) (class class))
+     (typep (class condition) (class object))))
+
+  (deftest typep.3
+    (signals-error
+     (typep)
+     match-error))
+
+  (deftest typep.3
+    (signals-error
+     (typep "foo")
+     match-error)))
+
+(defsection intern
+
+  (deftest intern.1
+    (eq 'foo (intern "foo")))
+
+  (deftest intern.2
+    (signals-error
+     (intern 12)
+     type-error :datum 12 :expected-type 'string))
+
+  (deftest intern.3
+    (signals-error
+     (intern)
+     match-error)))
+
+(defsection apply
+
+  (deftest apply.1
+    (apply #'list ())
+    '())
+
+  (deftest apply.2
+    (apply #'list '(1))
+    '(1))
+
+  (deftest apply.3
+    (signals-error
+     (apply)
+     match-error))
+
+  (deftest apply.4
+    (signals-error
+     (apply #'list)
+     match-error))
+
+  (deftest apply.5
+    (signals-error
+     (apply 12 '())
+     type-error :datum 12 :expected-type 'function)))
+
+(defsection class
+
+  (deftest class.1
+    (eq (class string) (class-of "foo")))
+
+  (deftest class.2
+    (signals-error
+     (class)
+     match-error))
+
+  (deftest class.3
+    (signals-error
+     (class "string")
+     type-error :datum "string" :expected-type 'symbol))
+
+  (deftest class.4
+    (signals-error
+     (class does-not-exist)
+     unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
+
+(defsection find-class
+
+  (deftest find-class.1
+    (eq (find-class 'string (the-environment))
+        (class-of "foo")))
+
+  (deftest find-class.2a
+    (signals-error
+     (find-class)
+     match-error))
+
+  (deftest find-class.2b
+    (signals-error
+     (find-class 'foo)
+     match-error))
+
+  (deftest find-class.3
+    (signals-error
+     (find-class "string" (the-environment))
+     type-error :datum "string" :expected-type 'symbol))
+
+  (deftest find-class.4
+    (signals-error
+     (find-class 'does-not-exist (the-environment))
+     unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
+
+(defsection make-environment
+
+  (deftest make-environment.1
+    (let ((env (make-environment)))
+      (boundp '#'def env))
+    #f)
+
+  (deftest make-environment.2
+    (let* ((env (make-environment (the-environment)))
+           (child (make-environment env)))
+      (assert (not (boundp 'x env)))
+      (assert (not (boundp 'x child)))
+      (eval '(def x 1) env)
+      (assert (boundp 'x env))
+      (assert (boundp 'x child))
+      (assert (= 1 (eval 'x env)))
+      (assert (= 1 (eval 'x child))))
+    #void)
+
+  (deftest make-environment.3
+    (signals-error
+     (make-environment 12)
+     type-error :datum 12 :expected-type 'environment)))
+
+(defsection cxxr
+
+  (deftest caar.1
+    (caar '((1 2) (3 4) (5 6)))
+    1)
+
+  (deftest caar.2
+    (signals-error
+     (caar)
+     match-error))
+
+  (deftest caar.3
+    (signals-error
+     (caar 1)
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest cadr.1
+    (cadr '((1 2) (3 4) (5 6)))
+    '(3 4))
+
+  (deftest cadr.2
+    (signals-error
+     (cadr)
+     match-error))
+
+  (deftest cadr.3
+    (signals-error
+     (cadr 1)
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest cddr.1
+    (cddr '((1 2) (3 4) (5 6)))
+    '((5 6)))
+
+  (deftest cddr.2
+    (signals-error
+     (cddr)
+     match-error))
+
+  (deftest cddr.3
+    (signals-error
+     (cddr 1)
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest cdar.1
+    (cdar '((1 2) (3 4) (5 6)))
+    '(2))
+
+  (deftest cdar.2
+    (signals-error
+     (cdar)
+     match-error))
+
+  (deftest cdar.3
+    (signals-error
+     (cdar 1)
+     type-error :datum 1 :expected-type 'cons))
+
+(defsection when
+
+  (deftest when.1
+    (when #t)
+    #void)
+
+  (deftest when.2
+    (when #f)
+    #void)
+
+  (deftest when.3
+    (when #t 1 2 (= 1 1))
+    #t)
+
+  (deftest when.4
+    (when #f 1 2 3)
+    #void)
+
+  (deftest when.5
+    (signals-error
+     (when)
+     match-error))
+
+  (deftest when.6
+    (signals-error
+     (when 1)
+     type-error :datum 1 :expected-type 'boolean))))
+
+(defsection unless
+
+  (deftest unless.1
+    (unless #t)
+    #void)
+
+  (deftest unless.2
+    (unless #f)
+    #void)
+
+  (deftest unless.3
+    (unless #f 1 2 (= 1 1))
+    #t)
+
+  (deftest unless.4
+    (unless #t 1 2 3)
+    #void)
+
+  (deftest unless.5
+    (signals-error
+     (unless)
+     match-error))
+
+  (deftest unless.6
+    (signals-error
+     (unless 1)
+     type-error :datum 1 :expected-type 'boolean)))
+
+(defsection null
+
+  (deftest null.1
+    (null #nil)
+    #t)
+
+  (deftest null.2
+    (null '(1))
+    #f)
+
+  (deftest null.3
+    (signals-error
+     (null)
+     match-error))
+
+  (deftest null.4
+    (null 1)
+    #f))
+
+(defsection mapcar
+
+  (deftest mapcar.1
+    (mapcar #'intern ())
+    ())
+
+  (deftest mapcar.2
+    (mapcar #'intern '("foo" "bar"))
+    '(foo bar))
+
+  (deftest mapcar.3
+    (signals-error
+     (mapcar)
+     match-error))
+
+  (deftest mapcar.4
+    (signals-error
+     (mapcar #'intern)
+     match-error))
+
+  (deftest mapcar.5
+    (signals-error
+     (mapcar #'intern 12)
+     type-error :datum 12 :expected-type 'cons))
+
+  (deftest mapcar.6
+    (signals-error
+     (mapcar 12 '(1))
+     type-error :datum 12 :expected-type 'operator)))
+
+(defsection reduce
+
+  (deftest reduce.1
+    (reduce #'%%* (list 1 2 3) :initial-value 10)
+    60)
+
+  (deftest reduce.2
+    (reduce #'%%* (list) :initial-value 10)
+    10)
+
+  (deftest reduce.3
+    (signals-error
+     (reduce)
+     match-error))
+
+  (deftest reduce.4
+    (signals-error
+     (reduce #'%%*)
+     match-error))
+
+  (deftest reduce.5
+    (signals-error
+     (reduce #'%%* (list))
+     match-error))
+
+  (deftest reduce.ansi.3
+    (reduce #'cons '(a b c d e f) :initial-value 'z)
+    '((((((z . a) . b) . c) . d) . e) . f))
+
+  (deftest reduce.clhs.1
+    (reduce #'list '(1 2 3 4) :initial-value 'foo)
+    '((((foo 1) 2) 3) 4)))
+
+(defsection mapc
+
+  (deftest mapc.1
+    (signals-error
+     (mapc)
+     match-error))
+
+  (deftest mapc.2
+    (signals-error
+     (mapc (lambda (x) x))
+     match-error))
+
+  (deftest mapc.3
+    (signals-error
+     (mapc "foo" '(1 2 3))
+     type-error :datum "foo" :expected-type 'operator))
+
+  (deftest mapc.4
+    (signals-error
+     (mapc (lambda (x) x) "foo")
+     type-error :datum "foo" :expected-type 'cons))
+
+  (deftest mapc.5
+    (let ((ct 0))
+      (def env (the-environment))
+      (mapc (lambda (x) (set env ct (+ ct x)))
+            '(1 2 3 4))
+      ct)
+    10)
+
+  (deftest mapc.6
+    (let ((list (list 1 2 3)))
+      (mapc (lambda (x)) list))
+    (list 1 2 3)))
+
+(defsection dolist
+
+  (deftest dolist.1
+    (signals-error
+     (dolist)
+     match-error))
+
+  (deftest dolist.2
+    (signals-error
+     (dolist ())
+     match-error))
+
+  (deftest dolist.3
+    (signals-error
+     (dolist (x))
+     match-error))
+
+  (deftest dolist.4
+    (dolist (x '(1 2 3)))
+    #void)
+
+  (deftest dolist.5
+    (signals-error
+     (dolist (x "not-a-list"))
+     type-error :datum "not-a-list" :expected-type 'cons))
+
+  (deftest dolist.6
+    (signals-error
+     (dolist ("not-a-symbol" '(1 2 3)))
+     type-error
+     :datum "not-a-symbol"
+     :expected-type '(or symbol ignore list)))
+
+  (deftest dolist.7
+    (let ((ct 0))
+      (def env (the-environment))
+      (assert (= #void (dolist (x '(1 2 3 4))
+                         'bla
+                         (set env ct (+ ct x)))))
+      ct)
+    10)
+
+  (deftest dolist.8
+    (let ((ct 0))
+      (def env (the-environment))
+      (dolist (x '(1 2 3 4) (+ ct 100))
+        'bla
+        (set env ct (+ ct x))))
+    110))
+
+(defsection elt
+
+  (deftest elt.1
+    (signals-error
+     (elt)
+     match-error))
+
+  (deftest elt.2
+    (signals-error
+     (elt '())
+     match-error))
+
+  (deftest elt.3
+    (signals-error
+     (elt '(1 2) #t)
+     type-error :datum #t :expected-type 'number))
+
+  (deftest elt.3a
+    (signals-error
+     (elt '() #t)
+     type-error :datum '() :expected-type 'cons))
+
+  (deftest elt.4
+    (signals-error
+     (elt "foo" 0)
+     type-error :datum "foo" :expected-type 'cons))
+
+  (deftest elt.5
+    (elt '(1 2) 0)
+    1)
+
+  (deftest elt.6
+    (elt '(1 2) 1)
+    2)
+
+  (deftest elt.7
+    (signals-error
+     (elt '(1 2) 2)
+     type-error :datum '() :expected-type 'cons)))
+
+(defsection reverse
+
+  (deftest reverse.1
+    (signals-error
+     (reverse)
+     match-error))
+
+  (deftest reverse.2
+    (signals-error
+     (reverse "foo")
+     type-error :datum "foo" :expected-type 'list))
+
+  (deftest reverse.3
+    (signals-error
+     (reverse "foo" "bar")
+     match-error))
+
+  (deftest reverse.4
+    (reverse ())
+    ())
+
+  (deftest reverse.5
+    (reverse '(1))
+    '(1))
+
+  (deftest reverse.6
+    (reverse '(1 2 3))
+    '(3 2 1)))
+
+(defsection append
+
+  (deftest append.1
+    (signals-error
+     (append)
+     match-error))
+
+  (deftest append.2
+    (signals-error
+     (append '())
+     match-error))
+
+  (deftest append.3
+    (signals-error
+     (append 1 '())
+     type-error :datum 1 :expected-type 'list))
+
+  (deftest append.4
+    (append '() '())
+    '())
+
+  (deftest append.5
+    (append '() 12)
+    12)
+
+  (deftest append.6
+    (append '(1) 12)
+    '(1 . 12))
+
+  (deftest append.7
+    (append '(1 2) 12)
+    '(1 2 . 12))
+
+  (deftest append.8
+    (append '(1 2) '(3 4))
+    '(1 2 3 4)))
+
+(defsection memberp
+
+  (deftest memberp.1
+    (signals-error
+     (memberp)
+     match-error))
+
+  (deftest memberp.2
+    (signals-error
+     (memberp 'a)
+     match-error))
+
+  (deftest memberp.3
+    (memberp 'a '() :test #'eq)
+    #f)
+
+  (deftest memberp.4
+    (memberp 'b '(a) :test #'eq)
+    #f)
+
+  (deftest memberp.5
+    (memberp 'b '(a b) :test #'eq)
+    #t)
+
+  (deftest memberp.5b
+    (memberp  'x '(a b) :test #'eq)
+    #f)
+
+  (deftest memberp.6
+    (memberp 'b '(a b c) :test #'eq)
+    #t)
+
+  (deftest memberp.7
+    (memberp "b" '("a" "b" "c") :test #'eq)
+    #f)
+
+  (deftest memberp.8
+    (memberp "b" '("a" "b" "c") :test #'=)
+    #t))
+
+(defsection remove-if
+
+  (deftest remove-if.1
+    (signals-error
+     (remove-if)
+     match-error))
+
+  (deftest remove-if.2
+    (signals-error
+     (remove-if (lambda (item) #t))
+     match-error))
+
+  (deftest remove-if.3
+    (signals-error
+     (remove-if (lambda (item) #t) 12)
+     type-error :datum 12 :expected-type 'cons))
+
+  (deftest remove-if.4
+    (signals-error
+     (remove-if 1 '(1 2))
+     type-error :datum 1 :expected-type 'operator))
+
+  (deftest remove-if.5
+    (remove-if (lambda (item) (= 1 item)) '(1 2 3 1 2 3))
+    '(2 3 2 3))
+
+  (deftest remove-if.6
+    (remove-if (lambda (item) (= 1 item)) '())
+    '()))
+
+(defsection remove-if-not
+
+  (deftest remove-if-not.1
+    (signals-error
+     (remove-if-not)
+     match-error))
+
+  (deftest remove-if-not.2
+    (signals-error
+     (remove-if-not (lambda (item) #t))
+     match-error))
+
+  (deftest remove-if-not.3
+    (signals-error
+     (remove-if-not (lambda (item) #t) 12)
+     type-error :datum 12 :expected-type 'cons))
+
+  (deftest remove-if-not.4
+    (signals-error
+     (remove-if-not 1 '(1 2))
+     type-error :datum 1 :expected-type 'operator))
+
+  (deftest remove-if-not.5
+    (remove-if-not (lambda (item) (= 1 item)) '(1 2 3 1 2 3))
+    '(1 1))
+
+  (deftest remove-if-not.6
+    (remove-if-not (lambda (item) (= 1 item)) '())
+    '()))
+
+(defsection get?
+
+  (deftest get?.1
+    (get? '(:foo 1 :bar 2) :foo)
+    (some 1))
+
+  (deftest get?.2
+    (get? '(:foo 1 :bar 2) :bar)
+    (some 2))
+
+  (deftest get?.3
+    (get? '() :bar)
+    #nil)
+
+  (deftest get?.4
+    (get? '(:foo 1 :bar 2) :quux)
+    #nil)
+
+  (deftest get?.5
+    (signals-error
+     (get?)
+     match-error)
+    #t)
+
+  (deftest get?.6
+    (signals-error
+     (get? '())
+     match-error)
+    #t)
+
+  (deftest get?.7
+    (signals-error
+     (get? 12 :quux)
+     match-error)
+    #t))
+
+(defsection and
+
+  (deftest and.1
+    (and)
+    #t)
+
+  (deftest and.2
+    (and #t #f)
+    #f)
+
+  (deftest and.3
+    (and #t (= 1 1) #t)
+    #t)
+
+  (deftest and.4
+    (signals-error
+     (and #t #t 1)
+     type-error :datum 1 :expected-type 'boolean))
+
+  (deftest and.5
+    (progn
+      (def x 1)
+      (def env (the-environment))
+      (and #f (set env x 2))
+      x)
+    1))
+
+(defsection or
+
+  (deftest or.1
+    (or)
+    #f)
+
+  (deftest or.2
+    (or #t #f)
+    #t)
+
+  (deftest or.3
+    (or #t #t #t)
+    #t)
+
+  (deftest or.4
+    (or #f #f #f)
+    #f)
+
+  (deftest or.5
+    (signals-error
+     (or #f #f 1)
+     type-error :datum 1 :expected-type 'boolean))
+
+  (deftest or.6
+    (progn
+      (def x 1)
+      (def env (the-environment))
+      (or #t (set env x 2))
+      x)
+    1))
+
+(defsection make-instance
+
+  (deftest make-instance.1
+    (progn
+      (def obj (make-instance (class type-error) :datum 1 :expected-type 'string))
+      (assert (= (slot-value obj 'datum) 1))
+      (assert (= (slot-value obj :datum) 1))
+      (assert (= (slot-value obj 'expected-type) 'string))
+      (assert (= (slot-value obj :expected-type) 'string)))
+    #void)
+
+  (deftest make-instance.2
+    (signals-error
+     (make-instance)
+     match-error))
+
+  (deftest make-instance.3
+    (signals-error
+     (make-instance 3)
+     type-error :datum 3 :expected-type 'standard-class))
+
+  (deftest make-instance.4
+    (signals-error
+     (make-instance (class object))
+     type-error :datum (class object) :expected-type 'standard-class))
+
+  (deftest make-instance.5
+    (signals-error
+     (make-instance (class standard-object) :x)
+     assertion-error)))
+
+(defsection slots
+
+  (deftest slots.1
+    (progn
+      (def obj (make-instance (class standard-object)))
+      (assert (not (slot-bound-p obj 'x)))
+      (assert (not (slot-bound-p obj :x)))
+      (set-slot-value obj 'x 1)
+      (assert (slot-bound-p obj 'x))
+      (assert (slot-bound-p obj :x))
+      (assert (= (slot-value obj 'x) 1))
+      (assert (= (slot-value obj :x) 1))
+      (set-slot-value obj 'x 2)
+      (assert (= (slot-value obj 'x) 2))
+      (assert (= (slot-value obj :x) 2)))
+    #void)
+
+  (deftest slot-value.1
+    (signals-error
+     (slot-value "foo" 'x)
+     type-error :datum "foo" :expected-type 'standard-object))
+
+  (deftest slot-value.1a
+    (signals-error
+     (slot-value (make-instance (class standard-object)) "x")
+     type-error :datum "x" :expected-type 'symbol))
+
+  (deftest slot-value.2
+    (signals-error
+     (slot-value (make-instance (class standard-object)))
+     match-error))
+
+  (deftest slot-value.3
+    (signals-error
+     (slot-value)
+     match-error))
+
+  (deftest set-slot-value.1
+    (signals-error
+     (set-slot-value "foo" 'x 1)
+     type-error :datum "foo" :expected-type 'standard-object))
+
+  (deftest set-slot-value.1a
+    (signals-error
+     (set-slot-value (make-instance (class standard-object)) "x" 1)
+     type-error :datum "x" :expected-type 'symbol))
+
+  (deftest set-slot-value.2
+    (signals-error
+     (set-slot-value (make-instance (class standard-object)))
+     match-error))
+
+  (deftest set-slot-value.3
+    (signals-error
+     (set-slot-value (make-instance (class standard-object)) 'x)
+     match-error))
+
+  (deftest slot-bound-p.1
+    (signals-error
+     (slot-bound-p "foo" 'x)
+     type-error :datum "foo" :expected-type 'standard-object))
+
+  (deftest slot-bound-p.1a
+    (signals-error
+     (slot-bound-p (make-instance (class standard-object)) "x")
+     type-error :datum "x" :expected-type 'symbol))
+
+  (deftest slot-bound-p.2
+    (signals-error
+     (slot-bound-p)
+     match-error))
+
+  (deftest slot-bound-p.3
+    (signals-error
+     (slot-bound-p (make-instance (class standard-object)))
+     match-error)))
+
+(defsection let
+
+  (deftest let.1
+    (let ((x 1))
+      x)
+    1)
+
+  (deftest let.2
+    (let ((x 1))
+      (let ((x 2))
+        x))
+    2)
+
+  (deftest let.3
+    (let ((x 1))
+      (let ((x 2)))
+      x)
+    1)
+
+  (deftest let.4
+    (let ((x 1))
+      (let ((x 2)
+            (it x))
+        it))
+    1)
+
+  (deftest let.5
+    (let ())
+    #void)
+
+  (deftest let.6
+    (signals-error
+     (let)
+     match-error))
+
+  (deftest let.7
+    (signals-error
+     (let #t)
+     type-error :datum #t :expected-type 'cons))
+
+  (deftest let.8
+    (signals-error
+     (let ((#t 1)))
+     type-error :datum #t :expected-type '(or symbol ignore list))))
+
+(defsection let*
+
+  (deftest let*.1
+    (let* ((x 1)
+           (y x)
+           (z y))
+      (list x y z))
+    '(1 1 1))
+
+  (deftest let*.2
+    (let* ())
+    #void)
+
+  (deftest let*.3
+    (signals-error
+     (let*)
+     match-error))
+
+  (deftest let*.4
+    (signals-error
+     (let* #t)
+     type-error :datum #t :expected-type 'cons))
+
+  (deftest let*.5
+    (signals-error
+     (let* ((#t 1)))
+     type-error :datum #t :expected-type '(or symbol ignore list))))
+
+(defsection flet
+
+  (deftest flet.1
+    (flet ((f () 1))
+          (flet ((f () 2)
+                 (g () (f)))
+                (g)))
+    1)
+
+  (deftest flet.2
+    (flet ((foo ()))
+          (foo))
+    #void)
+
+  (deftest flet.2
+    (flet ((foo (x) x))
+          (foo 1))
+    1)
+
+  (deftest flet.3
+    (signals-error
+     (flet)
+     match-error))
+
+  (deftest flet.4
+    (signals-error
+     (flet #t)
+     type-error :datum #t :expected-type 'cons))
+
+  (deftest flet.5
+    (flet ())
+    #void))
+
+(defsection labels
+
+  (deftest labels.1
+    (labels ((f () 1))
+            (labels ((f () 2)
+                     (g () (f)))
+                    (g)))
+    2)
+
+  (deftest labels.2
+    (labels ((foo ()))
+            (foo))
+    #void)
+
+  (deftest labels.3
+    (labels ((foo (x) x))
+            (foo 1))
+    1)
+
+  (deftest labels.4
+    (signals-error
+     (labels)
+     match-error))
+
+  (deftest labels.5
+    (signals-error
+     (labels #t)
+     type-error :datum #t :expected-type 'cons))
+
+  (deftest labels.6
+    (labels ())
+    #void))
+
+(defsection rec
+
+  (deftest rec.1
+    (signals-error
+     (rec)
+     match-error))
+
+  (deftest rec.2
+    (signals-error
+     (rec name)
+     match-error))
+
+  (deftest rec.3
+    (rec name ())
+    #void)
+
+  (deftest rec.4
+    (rec sum ((as (list 1 2 3))
+              (bs (list 4 5 6)))
+      (if (null as)
+          #nil
+          (cons (+ (car as) (car bs))
+                (sum (cdr as) (cdr bs)))))
+    '(5 7 9)))
+
+(defsection optional
+
+  (deftest optional.1
+    (optional '())
+    #void)
+
+  (deftest optional.2
+    (optional '() "default")
+    "default")
+
+  (deftest optional.3
+    (optional (some 1))
+    1)
+
+  (deftest optional.4
+    (optional (some 1) "default")
+    1)
+
+  (deftest optional.5
+    (signals-error
+     (optional)
+     match-error))
+
+  (deftest optional.6
+    (signals-error
+     (optional 1)
+     type-error :datum 1 :expected-type 'cons)))
+
+(defsection optionals
+
+  (deftest optionals.1
+    (optionals '())
+    '())
+
+  (deftest optionals.2
+    (optionals '() 1)
+    '(1))
+
+  (deftest optionals.3
+    (optionals '() 1 2)
+    '(1 2))
+
+  (deftest optionals.4
+    (optionals '(4) 1 2)
+    '(4 2))
+
+  (deftest optionals.5
+    (optionals '(4 5) 1 2)
+    '(4 5))
+
+  (deftest optionals.6
+    (optionals '(4 5 6) 1 2)
+    '(4 5 6))
+
+  (deftest optionals.7
+    (optionals '(4 5 6))
+    '(4 5 6)))
+
+(defsection some
+
+  (deftest some.1
+    (some 1)
+    (list 1))
+
+  (deftest some.2
+    (signals-error
+     (some)
+     match-error))
+
+  (deftest some.3
+    (signals-error
+     (some 1 2)
+     match-error)))
+
+(defsection if-option
+
+  (deftest if-option.1
+    (if-option (x (some 12))
+               x
+               14)
+    12)
+
+  (deftest if-option.2
+    (if-option (x #nil)
+               x
+               14)
+    14)
+
+  (deftest if-option.3
+    (signals-error
+     (if-option)
+     match-error))
+
+  (deftest if-option.4
+    (signals-error
+     (if-option (name))
+     match-error))
+
+  (deftest if-option.4.2
+    (signals-error
+     (if-option (name) then)
+     match-error))
+
+  (deftest if-option.5
+    (signals-error
+     (if-option (name option))
+     match-error))
+
+  (deftest if-option.6
+    (signals-error
+     (if-option (name option) then)
+     match-error)))
+
+(defsection when-option
+
+  (deftest when-option.0
+    (when-option (x (some 12)))
+    #void)
+
+  (deftest when-option.1
+    (when-option (x (some 12))
+                 x)
+    12)
+
+  (deftest when-option.2
+    (when-option (x #nil)
+                 x)
+    #nil)
+
+  (deftest when-option.3
+    (signals-error
+     (when-option)
+     match-error))
+
+  (deftest when-option.4
+    (signals-error
+     (when-option (name))
+     match-error)))
+
+(defsection class-of
+
+  (deftest class-of.1
+    (progn
+      (assert (eq (class-of "foo") (class string)))
+      (assert (eq (class-of 12) (class number)))
+      (assert (eq (class-of (class string)) (class built-in-class))))
+    #void)
+
+  (deftest class-of.2
+    (signals-error
+     (class-of)
+     match-error)))
+
+(defsection set
+
+  (deftest set.1
+    (progn
+      (set (the-environment) x 1)
+      x)
+    1)
+
+  (deftest set.2
+    (progn
+      (def x 0)
+      (set (the-environment) x 1)
+      x)
+    1)
+
+  (deftest set.3
+    (progn
+      (set (the-environment) (x y) (list 1 2))
+      (list x y))
+    '(1 2))
+
+  (deftest set.4
+    (signals-error
+     (set)
+     match-error))
+
+  (deftest set.5
+    (signals-error
+     (set (the-environment))
+     match-error))
+
+  (deftest set.6
+    (signals-error
+     (set (the-environment) x)
+     match-error))
+
+  (deftest set.7
+    (signals-error
+     (set 33 x y)
+     type-error :datum 33 :expected-type 'environment)))
+
+(defsection class-name
+
+  (deftest class-name.1
+    (signals-error
+     (class-name)
+     match-error))
+
+  (deftest class-name.2
+    (signals-error
+     (class-name "foo")
+     type-error :datum "foo" :expected-type 'class))
+
+  (deftest class-name.3
+    (class-name (class object))
+    'object))
+
+(defsection subclassp
+
+  (deftest subclassp.1
+    (signals-error
+     (subclassp)
+     match-error))
+
+  (deftest subclassp.2
+    (signals-error
+     (subclassp (class object))
+     match-error))
+
+  (deftest subclassp.3
+    (signals-error
+     (subclassp (class object) "foo")
+     type-error :datum "foo" :expected-type 'class))
+
+  (deftest subclassp.4
+    (signals-error
+     (subclassp "foo" (class object))
+     type-error :datum "foo" :expected-type 'class))
+
+  (deftest subclassp.5
+    (and (subclassp (class object) (class object))
+         (subclassp (class class) (class object))
+         (subclassp (class standard-class) (class class))
+         (subclassp (class standard-class) (class object)))
+    #t))
+
+;; Utility used by `%%make-standard-class' and `defclass' tests.
+
+(defun classes-test (c d p q)
+  (assert (typep c (class standard-class)))
+  (assert (typep c (class class)))
+  (assert (typep c (class object)))
+  (assert (= (class-name c) 'point-2d))
+  (assert (subclassp c (class standard-object)))
+  (assert (subclassp c (class object)))
+
+  (assert (typep p c))
+  (assert (typep p (class standard-object)))
+  (assert (typep p (class object)))
+  (assert (= (slot-value p 'x) 1))
+  (assert (= (slot-value p 'y) 2))
+
+  (assert (typep d (class standard-class)))
+  (assert (typep d (class class)))
+  (assert (typep d (class object)))
+  (assert (= (class-name d) 'point-3d))
+  (assert (subclassp d c))
+  (assert (subclassp d (class standard-object)))
+  (assert (subclassp d (class object)))
+
+  (assert (typep q d))
+  (assert (typep q c))
+  (assert (typep q (class standard-object)))
+  (assert (typep q (class object)))
+  (assert (= (slot-value q 'x) 1))
+  (assert (= (slot-value q 'y) 2))
+  (assert (= (slot-value q 'z) 3)))
+
+(defsection %%make-standard-class
+
+  (deftest %%make-standard-class.1
+    (let* ((c (%%make-standard-class 'point-2d (class standard-object)))
+           (d (%%make-standard-class 'point-3d c))
+           (p (make-instance c :x 1 :y 2))
+           (q (make-instance d :x 1 :y 2 :z 3)))
+      (classes-test c d p q))
+    #void)
+
+  (deftest %%make-standard-class.2
+    (signals-error
+     (%%make-standard-class 'foo (class object))
+     type-error :datum (class object) :expected-type 'standard-class))
+
+  #|
+  (deftest %%make-standard-class.3
+    (signals-error
+     (%%make-standard-class 'foo)
+     match-error))
+
+  (deftest %%make-standard-class.4
+    (signals-error
+     (%%make-standard-class)
+     match-error))
+  |#
+
+  (deftest %%make-standard-class.5
+    (signals-error
+     (%%make-standard-class "foo" (class standard-object))
+     type-error :datum "foo" :expected-type 'symbol)))
+
+(defsection defclass
+
+  (deftest defclass.1
+    (signals-error
+     (defclass foo () ("a"))
+     type-error :datum "a" :expected-type 'symbol))
+
+  (deftest defclass.2
+    (signals-error
+     (defclass)
+     match-error))
+
+  (deftest defclass.3
+    (signals-error
+     (defclass foo)
+     match-error))
+
+  (deftest defclass.4
+    (signals-error
+     (defclass foo ())
+     match-error))
+
+  (deftest defclass.5
+    (defclass c () ())
+    'c)
+
+  (deftest defclass.6
+    (progn
+      (defclass point-2d () (x y))
+      (defclass point-3d (point-2d) (z))
+      (def p (make-instance (class point-2d) :x 1 :y 2))
+      (def q (make-instance (class point-3d) :x 1 :y 2 :z 3))
+      (classes-test (class point-2d) (class point-3d) p q))
+    #void))
+
+(defsection generics
+
+  (deftest generics.1
+    (progn
+      (defclass foo () ())
+      (defclass bar (foo) ())
+      (def foo (make-instance (class foo)))
+      (def bar (make-instance (class bar)))
+
+      (defgeneric g1 (obj param))
+      (assert (typep #'g1 (class function)))
+
+      (assert (signals-error
+               (g1 12 (+ 1 1))
+               unbound-method-error :object 12 :method-name 'g1))
+      (assert (signals-error
+               (g1 foo (+ 1 1))
+               unbound-method-error :object foo :method-name 'g1))
+      (assert (signals-error
+               (g1 bar (+ 1 1))
+               unbound-method-error :object bar :method-name 'g1))
+
+      (defmethod g1 ((obj foo) param)
+        (+ param 100))
+
+      (assert (signals-error
+               (g1 12 (+ 1 1))
+               unbound-method-error :object 12 :method-name 'g1))
+      (assert (= 102 (g1 foo (+ 1 1))))
+      (assert (= 102 (g1 bar (+ 1 1))))
+
+      (defmethod g1 ((obj bar) param)
+        (+ param 1000))
+
+      (assert (signals-error
+               (g1 12 (+ 1 1))
+               unbound-method-error :object 12 :method-name 'g1))
+      (assert (= 102 (g1 foo (+ 1 1))))
+      (assert (= 1002 (g1 bar (+ 1 1))))
+
+      (defmethod g1 ((obj number) param)
+        (+ param 10000))
+
+      (assert (= 10002 (g1 12 (+ 1 1))))
+      (assert (= 102 (g1 foo (+ 1 1))))
+      (assert (= 1002 (g1 bar (+ 1 1))))
+
+      (defmethod g1 ((obj number) param)
+        (+ param 100000))
+
+      (assert (= 100002 (g1 12 (+ 1 1))))
+      (assert (= 102 (g1 foo (+ 1 1))))
+      (assert (= 1002 (g1 bar (+ 1 1))))
+
+      (defmethod g1 ((obj object) param)
+        (- param))
+
+      (assert (= 100002 (g1 12 (+ 1 1))))
+      (assert (= 102 (g1 foo (+ 1 1))))
+      (assert (= 1002 (g1 bar (+ 1 1))))
+      (assert (= -2 (g1 #t (+ 1 1))))
+      (assert (= -2 (g1 #void (+ 1 1))))
+      (assert (= -2 (g1 "hello" (+ 1 1)))))
+    #void))
+
+(defsection handler-bind
+
+  (defclass test-error (error) ())
+
+  (deftest handler-bind.0
+    (signals-error
+     (handler-bind)
+     match-error))
+
+  (deftest handler-bind.0b
+    (handler-bind ())
+    #void)
+
+  (deftest handler-bind.1
+    (handler-bind ()
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-bind.2
+    (handler-bind ((simple-error (lambda (e) 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-bind.3
+    (handler-bind ((simple-error (lambda (e) 'whatever))
+                   (test-error (lambda (e) 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-bind.no-handler
+    (handler-bind ((test-error (lambda (e) 'whatever)))
+      (signal (make-simple-error "foo")))
+    #void)
+
+  (deftest handler-bind.unhandled
+    (handler-bind ((simple-error (lambda (e) 'whatever)))
+      (signal (make-simple-error "foo")))
+    #void)
+
+  (deftest handler-bind.decline
+    (block b
+      (handler-bind ((simple-error (lambda (e) (return-from b 1))))
+        (handler-bind ((simple-error (lambda (e) 'decline)))
+          (signal (make-simple-error "foo")))))
+    1)
+
+  (deftest handler-bind.handled
+    (block b
+      (handler-bind ((simple-error (lambda (e)
+                                     (assert (= "foo" (slot-value e 'message)))
+                                     (return-from b 1))))
+        (signal (make-simple-error "foo"))))
+    1)
+
+  (deftest handler-bind.nested
+    (block b
+      (handler-bind ((simple-error (lambda (e) (return-from b 'outer))))
+        (handler-bind ((simple-error (lambda (e) (return-from b 'inner))))
+          (signal (make-simple-error "foo")))))
+    'inner)
+
+  (deftest handler-bind.resignal
+    (block b
+      (handler-bind ((simple-error (lambda (e) (return-from b 'outer))))
+        (handler-bind ((simple-error (lambda (e) (signal e))))
+          (signal (make-simple-error "foo")))))
+    'outer)
+
+  (deftest handler-bind.firewall
+    (block b
+      (handler-bind ((test-error (lambda (e) (return-from b 'outer))))
+        (handler-bind ((simple-error (lambda (e)
+                                       (signal (make-instance (class test-error))))))
+          (handler-bind ((test-error (lambda (e) (return-from b 'inner))))
+            (signal (make-simple-error "foo"))))))
+    'outer)
+
+  (deftest handler-bind.multiple.1
+    (block b
+      (handler-bind ((test-error (lambda (e) (return-from b 'test)))
+                     (simple-error (lambda (e) (return-from b 'simple))))
+        (signal (make-simple-error "foo"))))
+    'simple)
+
+  (deftest handler-bind.multiple.2
+    (block b
+      (handler-bind ((test-error (lambda (e) (return-from b 'test)))
+                     (simple-error (lambda (e) (return-from b 'simple))))
+        (signal (make-instance (class test-error)))))
+    'test)
+
+  (deftest handler-bind.anything
+    (block b
+      (handler-bind ((object (lambda (e) (return-from b e))))
+        (signal "foo")))
+    "foo"))
+
+(defsection handler-case
+
+  (defclass test-error (error) ())
+
+  (deftest handler-case.0
+    (signals-error
+     (handler-case)
+     match-error))
+
+  (deftest handler-case.0b
+    (handler-case ())
+    #void)
+
+  (deftest handler-case.1
+    (handler-case ()
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-case.2
+    (handler-case ((simple-error (lambda (e) 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-case.3
+    (handler-case ((simple-error (lambda (e) 'whatever))
+                   (test-error (lambda (e) 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest handler-case.no-handler
+    (handler-case ((test-error (lambda (e) 'whatever)))
+      (signal (make-simple-error "foo")))
+    #void)
+
+  (deftest handler-case.handled
+    (handler-case ((simple-error (lambda (e)
+                                   (assert (= "foo" (slot-value e 'message)))
+                                   'whatever)))
+      (signal (make-simple-error "foo")))
+    'whatever)
+
+  (deftest handler-case.nested
+    (handler-case ((simple-error (lambda (e) 'outer)))
+      (handler-case ((simple-error (lambda (e) 'inner)))
+        (signal (make-simple-error "foo"))))
+    'inner)
+
+  (deftest handler-case.resignal
+    (handler-case ((simple-error (lambda (e) 'outer)))
+      (handler-case ((simple-error (lambda (e) (signal e))))
+        (signal (make-simple-error "foo"))))
+    'outer)
+
+  (deftest handler-case.multiple.1
+    (handler-case ((test-error (lambda (e) 'test))
+                   (simple-error (lambda (e) 'simple)))
+      (signal (make-simple-error "foo")))
+    'simple)
+
+  (deftest handler-case.multiple.2
+    (handler-case ((test-error (lambda (e) 'test))
+                   (simple-error (lambda (e) 'simple)))
+      (signal (make-instance (class test-error))))
+    'test)
+
+  (deftest handler-case.anything
+    (handler-case ((object (lambda (e) e)))
+      (signal "foo"))
+    "foo"))
+
+(defsection restart-bind
+
+  (deftest restart-bind.0
+    (signals-error
+     (restart-bind)
+     match-error))
+
+  (deftest restart-bind.0b
+    (restart-bind ())
+    #void)
+
+  (deftest restart-bind.1
+    (restart-bind ()
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-bind.2
+    (restart-bind ((continue (lambda () 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-bind.3
+    (restart-bind ((continue (lambda () 'whatever))
+                   (abort (lambda () 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-bind.no-handler.1
+    (signals-error
+     (invoke-restart 'continue)
+     restart-error :restart-name 'continue))
+
+  (deftest restart-bind.no-handler.2
+    (signals-error
+     (restart-bind ((continue (lambda () 'whatever)))
+       (invoke-restart 'abort))
+     restart-error :restart-name 'abort))
+
+  (deftest restart-bind.no-handler.1a
+    (signals-error
+     (invoke-restart-interactively 'continue)
+     restart-error :restart-name 'continue))
+
+  (deftest restart-bind.no-handler.2a
+    (signals-error
+     (restart-bind ((continue (lambda () 'whatever)))
+       (invoke-restart-interactively 'abort))
+     restart-error :restart-name 'abort))
+
+  (deftest restart-bind.no-exit.1
+    (restart-bind ((continue (lambda () 'whatever)))
+      (invoke-restart 'continue))
+    'whatever)
+
+  (deftest restart-bind.no-exit.2
+    (restart-bind ((continue (lambda () 'whatever)))
+      (if-option (restart-handler (find-restart? 'continue))
+        (invoke-restart restart-handler)
+        (assert #f)))
+    'whatever)
+
+  (deftest restart-bind.handled
+    (block b
+      (restart-bind ((abort (lambda (arg1 arg2)
+                              (assert (= 1 arg1))
+                              (assert (= 2 arg2))
+                              (return-from b 3))))
+        (invoke-restart 'abort (+ 0 1) (+ 1 1))))
+    3)
+
+  (deftest restart-bind.nested
+    (block b
+      (restart-bind ((continue (lambda () (return-from b 'outer))))
+        (restart-bind ((continue (lambda () (return-from b 'inner))))
+          (invoke-restart 'continue))))
+    'inner)
+
+  (deftest restart-bind.reinvoke
+    (block b
+      (restart-bind ((y (lambda (val) (return-from b (+ val 1)))))
+        (restart-bind ((x (lambda (val) (invoke-restart 'y (+ val 1)))))
+          (invoke-restart 'x 1))))
+    3)
+
+  (deftest restart-bind.no-firewall
+    (block b
+      (restart-bind ((r1 (lambda () (return-from b 'outer))))
+        (restart-bind ((r2 (lambda () (invoke-restart 'r1))))
+          (restart-bind ((r1 (lambda () (return-from b 'inner))))
+            (invoke-restart 'r2)))))
+    'inner)
+
+  (deftest restart-bind.multiple.1
+    (block b
+      (restart-bind ((r1 (lambda (arg) (return-from b (- 100 arg))))
+                     (r2 (lambda (arg) (return-from b (+ 100 arg)))))
+        (invoke-restart 'r2 1)))
+    101)
+
+  (deftest restart-bind.multiple.2
+    (block b
+      (restart-bind ((r1 (lambda (arg) (return-from b (- 100 arg))))
+                     (r2 (lambda (arg) (return-from b (+ 100 arg)))))
+        (invoke-restart 'r1 1)))
+    99))
+
+(defsection restart-case
+
+  (deftest restart-case.0
+    (signals-error
+     (restart-case)
+     match-error))
+
+  (deftest restart-case.0b
+    (restart-case ())
+    #void)
+
+  (deftest restart-case.1
+    (restart-case ()
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-case.2
+    (restart-case ((continue (lambda () 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-case.3
+    (restart-case ((continue (lambda () 'whatever))
+                   (abort (lambda () 'whatever)))
+      1 2 (+ 1 2))
+    3)
+
+  (deftest restart-case.no-handler.1
+    (signals-error
+     (invoke-restart 'continue)
+     restart-error :restart-name 'continue))
+
+  (deftest restart-case.no-handler.2
+    (signals-error
+     (restart-case ((continue (lambda () 'whatever)))
+       (invoke-restart 'abort))
+     restart-error :restart-name 'abort))
+
+  (deftest restart-case.no-exit.1
+    (restart-case ((continue (lambda () 'whatever)))
+      (invoke-restart 'continue))
+    'whatever)
+
+  (deftest restart-case.no-exit.2
+    (restart-case ((continue (lambda () 'whatever)))
+      (if-option (restart-handler (find-restart? 'continue))
+        (invoke-restart restart-handler)
+        (assert #f)))
+    'whatever)
+
+  (deftest restart-case.handled
+    (restart-case ((abort (lambda (arg1 arg2)
+                            (assert (= 1 arg1))
+                            (assert (= 2 arg2))
+                            3)))
+      (invoke-restart 'abort (+ 0 1) (+ 1 1)))
+    3)
+
+  (deftest restart-case.nested
+    (restart-case ((continue (lambda () 'outer)))
+      (restart-case ((continue (lambda () 'inner)))
+        (invoke-restart 'continue)))
+    'inner)
+
+  (deftest restart-case.nested2
+    (restart-case ((r1 (lambda () 'outer)))
+      (restart-case ((r1 (lambda ()  (invoke-restart 'r1)))
+                     (r2 (lambda ())))
+        (invoke-restart 'r1)))
+    'outer)
+
+  (deftest restart-case.reinvoke
+    (restart-case ((y (lambda (val) (+ val 1))))
+      (restart-case ((x (lambda (val) (invoke-restart 'y (+ val 1)))))
+        (invoke-restart 'x 1)))
+    3)
+
+  (deftest restart-case.no-firewall
+    (restart-case ((r1 (lambda () 'outer)))
+      (restart-case ((r2 (lambda () (invoke-restart 'r1))))
+        (restart-case ((r1 (lambda () 'inner)))
+          (invoke-restart 'r2))))
+    'outer)
+
+  (deftest restart-case.parallel
+    (restart-case ((r1 (lambda () 'outer)))
+      (restart-case ((r1 (lambda () 'inner))
+                     (r2 (lambda () (invoke-restart 'r1))))
+        (invoke-restart 'r2)))
+    'outer)
+
+  (deftest restart-case.multiple.1
+    (restart-case ((r1 (lambda (arg) (- 100 arg)))
+                   (r2 (lambda (arg) (+ 100 arg))))
+      (invoke-restart 'r2 1))
+    101)
+
+  (deftest restart-case.multiple.2
+    (restart-case ((r1 (lambda (arg) (- 100 arg)))
+                   (r2 (lambda (arg) (+ 100 arg))))
+      (invoke-restart 'r1 1))
+    99))
+
+(defsection find-restart?
+
+  (deftest find-restart?.0
+    (signals-error
+     (find-restart?)
+     match-error))
+
+  (deftest find-restart?.1
+    (find-restart? 'foo)
+    #nil)
+
+  (deftest find-restart?.1b
+    (restart-bind ((bar (lambda ())))
+      (find-restart? 'foo))
+    #nil)
+
+  (deftest find-restart?.2
+    (find-restart? 'foo (make-simple-error "foo"))
+    #nil)
+
+  (deftest find-restart?.3
+    (block exit
+      (restart-bind ((x (lambda (arg) (return-from exit (+ 1000 arg)))))
+        (if-option (r (find-restart? 'x))
+          (progn
+            (assert (= (slot-value r 'restart-name) 'x))
+            (assert (= (slot-value r 'associated-conditions) '()))
+            (invoke-restart r 1))
+          (assert #f))))
+    1001)
+
+  (deftest find-restart?.3b
+    (restart-case ((x (lambda (arg) (+ 1000 arg))))
+      (if-option (r (find-restart? 'x))
+        (progn
+          (assert (= (slot-value r 'restart-name) 'x))
+          (assert (= (slot-value r 'associated-conditions) '()))
+          (invoke-restart r 1))
+        (assert #f)))
+    1001)
+
+  (deftest find-restart?.4
+    (block exit
+      (def c (make-simple-error "foo"))
+      (restart-bind ((x (lambda (arg) (return-from exit (+ 1000 arg)))
+                        :associated-conditions (list c)))
+        (if-option (r (find-restart? 'x c))
+          (progn
+            (assert (= (slot-value r 'restart-name) 'x))
+            (assert (= (slot-value r 'associated-conditions) (list c)))
+            (invoke-restart r 1))
+          (assert #f))))
+    1001)
+
+  (deftest find-restart?.4b
+    (progn
+      (def c (make-simple-error "foo"))
+      (restart-bind ((x (lambda (arg) (+ 1000 arg))
+                        :associated-conditions (list c)))
+        (if-option (r (find-restart? 'x c))
+          (progn
+            (assert (= (slot-value r 'restart-name) 'x))
+            (assert (= (slot-value r 'associated-conditions) (list c)))
+            (invoke-restart r 1))
+          (assert #f))))
+    1001)
+
+  (deftest find-restart?.5
+    (block exit
+      (def c (make-simple-error "foo"))
+      (restart-bind ((x (lambda (arg) (return-from exit (+ 1000 arg)))
+                        :associated-conditions (list c)))
+        (restart-bind ((x (lambda (arg) (return-from exit (- 1000 arg)))))
+          (if-option (r (find-restart? 'x c))
+            (invoke-restart r 1)
+            (assert #f)))))
+    999)
+
+  (deftest find-restart?.5b
+    (progn
+      (def c (make-simple-error "foo"))
+      (restart-case ((x (lambda (arg) (+ 1000 arg))
+                        :associated-conditions (list c)))
+        (restart-case ((x (lambda (arg) (- 1000 arg))))
+          (if-option (r (find-restart? 'x c))
+            (invoke-restart r 1)
+            (assert #f)))))
+    999)
+
+  (deftest find-restart?.6
+    (block exit
+      (def c (make-simple-error "foo"))
+      (def d (make-simple-error "bar"))
+      (restart-bind ((x (lambda (arg) (return-from exit (+ 1000 arg)))
+                        :associated-conditions (list c)))
+        (restart-bind ((x (lambda (arg) (return-from exit (- 1000 arg)))
+                          :associated-conditions (list d)))
+          (if-option (r (find-restart? 'x c))
+            (invoke-restart r 1)
+            (assert #f)))))
+    1001)
+
+  (deftest find-restart?.6b
+    (progn
+      (def c (make-simple-error "foo"))
+      (def d (make-simple-error "bar"))
+      (restart-case ((x (lambda (arg) (+ 1000 arg))
+                        :associated-conditions (list c)))
+        (restart-case ((x (lambda (arg) (- 1000 arg))
+                          :associated-conditions (list d)))
+          (if-option (r (find-restart? 'x c))
+            (invoke-restart r 1)
+            (assert #f)))))
+    1001))
+
+(defsection compute-restarts
+
+  (deftest compute-restarts.1
+    (compute-restarts)
+    '())
+
+  (defun restart-names condition?
+    (let ((restarts (apply #'compute-restarts condition?)))
+      (mapcar (lambda (restart)
+                (slot-value restart 'restart-name))
+              restarts)))
+
+  (deftest compute-restarts.1
+    (restart-case ((outer1 (lambda ()))
+                   (outer2 (lambda ())))
+      (restart-case ((middle1 (lambda ()))
+                     (middle2 (lambda ())))
+        (restart-case ((inner1 (lambda ()))
+                       (inner2 (lambda ())))
+          (assert (= (restart-names)
+                     '(inner1
+                       inner2
+                       middle1
+                       middle2
+                       outer1
+                       outer2)))
+          #t))))
+
+  (deftest compute-restarts.2
+    (progn
+      (def c (make-simple-error "foo"))
+      (def d (make-simple-error "bar"))
+      (restart-case ((outer1 (lambda ()))
+                     (outer2 (lambda ()) :associated-conditions (list c)))
+        (restart-case ((middle1 (lambda ()) :associated-conditions (list c))
+                       (middle2 (lambda ())))
+          (restart-case ((inner1 (lambda ()) :associated-conditions (list c d))
+                         (inner2 (lambda ())))
+            (assert (= (restart-names)
+                       '(inner1
+                         inner2
+                         middle1
+                         middle2
+                         outer1
+                         outer2)))
+            (assert (= (restart-names c)
+                       '(inner1
+                         inner2
+                         middle1
+                         middle2
+                         outer1
+                         outer2)))
+            (assert (= (restart-names d)
+                       '(inner1
+                         inner2
+                         middle2
+                         outer1)))
+            #t))))))
+
+(defsection signal
+
+  (deftest signal.0
+    (signals-error
+     (signal)
+     match-error))
+
+  (deftest signal.1
+    (signal (make-simple-error "foo"))
+    #void)
+
+  (deftest signal.2
+    (signals-error
+     (signal (make-instance (class standard-object) :x 1 :y 2))
+     standard-object :x 1 :y 2))
+
+  (deftest signal.3
+    (handler-bind ((simple-error (lambda (e)
+                                   (invoke-restart 'continue 12))))
+      (signal (make-simple-error "Foo!")
+        (abort (lambda (value) (* value 10)))
+        (continue (lambda (value) (* value 2)))))
+    24)
+
+  (deftest signal.3b
+    (handler-bind ((simple-error (lambda (e)
+                                   (invoke-restart 'abort 12))))
+      (signal (make-simple-error "Foo!")
+        (abort (lambda (value) (* value 10)))
+        (continue (lambda (value) (* value 2)))))
+    120)
+
+  (deftest signal.4
+    (restart-case ((abort (lambda (value) (* 1000 value))))
+      (handler-bind ((simple-error (lambda (e)
+                                     (invoke-restart 'abort 12))))
+        ;; Silly?  Yeah, probably.
+        (signal (signal (make-simple-error "Foo!"))
+          (abort (lambda (value) (* value 10)))
+          (continue (lambda (value) (* value 2))))))
+    12000)
+
+  (deftest signal.4b
+    (block b
+      (restart-case ((abort (lambda (value) (* 1000 value))))
+        (handler-bind ((simple-error (lambda (e)
+                                       (invoke-restart 'abort 12))))
+          (signal (signal (make-simple-error "Foo!")
+                    (abort (lambda (value) (return-from b (* 10000 value)))))
+            (abort (lambda (value) (* value 10)))
+            (continue (lambda (value) (* value 2)))))))
+    120000)
+
+  ;;; Test that `signal' (and `error' likewise) associates the
+  ;;; restarts it binds with the signalled error.
+  (deftest signal.associations
+    (dolist (#'signal-operator (list #'signal #'error) #t)
+      (block ok ; so that the test doesn't fail when testing `error'.
+        (handler-bind ((simple-error
+                        (lambda (e)
+                          (let* ((handler (optional (find-restart? 'r e)))
+                                 (a-cs (slot-value handler 'associated-conditions)))
+                            (assert (memberp e a-cs :test #'eq))
+                            (return-from ok)))))
+          (signal-operator (make-simple-error "error!")
+            (r (lambda () 1))))))))
+
+(defsection invoke-restart
+
+  (deftest invoke-restart.0
+    (signals-error
+     (invoke-restart)
+     match-error))
+
+  (deftest invoke-restart.1
+    (signals-error
+     (invoke-restart "foo")
+     type-error :datum "foo" :expected-type '(or symbol restart-handler))))
+
+(defsection invoke-restart-interactively
+
+  (deftest invoke-restart-interactively.1
+    (restart-bind ((r1 (lambda (arg1 arg2) (+ arg1 arg2))
+                       :interactive-function (lambda () (list 1 2))))
+      (invoke-restart-interactively 'r1))
+    3)
+
+  (deftest invoke-restart-interactively.1a
+    (restart-bind ((r1 (lambda (arg1 arg2) (+ arg1 arg2))
+                       :interactive-function (lambda () (list 1 2))))
+      (invoke-restart-interactively (optional (find-restart? 'r1))))
+    3)
+
+  (deftest invoke-restart-interactively.1b
+    (restart-bind ((r1 (lambda () (+ 1 2))))
+      (invoke-restart-interactively 'r1))
+    3)
+
+  (deftest invoke-restart-interactively.1c
+    (restart-bind ((r1 (lambda () (+ 1 2))))
+      (invoke-restart-interactively (optional (find-restart?'r1))))
+    3)
+
+  (deftest invoke-restart-interactively.2
+    (signals-error
+     (restart-bind ((r1 (lambda (arg1 arg2) (+ arg1 arg2))
+                        :interactive-function (lambda () '())))
+       (invoke-restart-interactively 'r1))
+     match-error))
+
+  (deftest invoke-restart-interactively.3
+    (signals-error
+     (restart-bind ((r1 (lambda (arg1) arg1)
+                        :interactive-function (lambda () '(1 2 3))))
+       (invoke-restart-interactively 'r1))
+     match-error)))

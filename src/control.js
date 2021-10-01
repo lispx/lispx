@@ -1,0 +1,760 @@
+/*
+ * LispX Delimited Control
+ * Copyright (c) 2021 Manuel Simoni
+ */
+
+/*
+ * Adds delimited control, delimited dynamic binding, and continuation
+ * barriers to a virtual machine.
+ *
+ * The API follows the delimcc library
+ * `http://okmij.org/ftp/continuations/caml-shift-journal.pdf'
+ * and the paper
+ * `http://okmij.org/ftp/papers/DDBinding.pdf'.
+ *
+ * Also implements continuation-aware first-order effects: sequencing,
+ * looping, nonlocal escape functions, and unwind protection.
+ *
+ * ---
+ *
+ * The main idea of the implementation is to run directly on the
+ * JavaScript stack most of the time, and only create on-heap
+ * continuations when they are captured.  In the regular case, Lisp
+ * operators return their result as their normal JS return value.  But
+ * when a capture is triggered, a suspension helper object is returned
+ * instead.  This suspension contains the desired prompt to which the
+ * capture should abort to, as well as a handler function that gets
+ * called with the captured continuation once the prompt is reached.
+ * The suspension also contains the continuation frames captured so
+ * far.  Every Lisp operator must detect when one of its inner
+ * sub-expressions returns a suspension.  In this case, the operator
+ * must suspend itself also by adding any required continuation frames
+ * to the suspension, and passing on the suspension outwards to its
+ * caller.
+ *
+ * To reinstate a continuation, a resumption helper object is created.
+ * Analogous to how a suspension gets passed outwards from the point
+ * of continuation capture to the prompt, a resumption gets passed
+ * inwards.  A resumption contains the continuation frames that must
+ * be put back from the heap on to the JS stack, as well as a handler
+ * function that is called when all frames have been reinstated.
+ */
+export function init_control(vm)
+{
+    /*** Continuations ***/
+
+    /*
+     * A continuation is organized as a stack of continuation frames.
+     * The innermost frame corresponds to the %%TAKE-SUBCONT
+     * expression that triggered continuation capture.  The outermost
+     * frame corresponds to the expression that appeared directly
+     * within the prompt-pushing expression (%%PUSH-PROMPT or
+     * %%PUSH-DELIM-SUBCONT).  The prompt-pushing expression itself
+     * is never included in the continuation.
+     *
+     * Every continuation frame contains a work function (a JavaScript
+     * closure) that knows how to resume that particular frame when
+     * the continuation is reinstated.  Every built-in Lisp operator
+     * creates different kinds of work functions for the continuation
+     * frames it creates.
+     */
+    vm.Continuation = class Lisp_continuation extends vm.Object
+    {
+        /*
+         * Constructs a continuation frame with the operator-specific
+         * work function and an inner continuation frame.
+         *
+         * The inner continuation frame is null for the innermost
+         * frame created by the %%TAKE-SUBCONT expression that triggered
+         * continuation capture.
+         */
+        constructor(work_fun, inner)
+        {
+            super();
+            vm.assert_type(work_fun, "function");
+            vm.assert_type(inner, vm.type_or(vm.TYPE_NULL, vm.Continuation));
+            this.work_fun = work_fun;
+            this.inner = inner;
+        }
+    };
+
+    /*
+     * A suspension is a helper object created during the capture
+     * (creation) of a continuation.
+     *
+     * It gets passed outwards from the %%TAKE-SUBCONT expression that
+     * triggers the capture until a %%PUSH-PROMPT or
+     * %%PUSH-DELIM-SUBCONT with a matching prompt is reached.  Every
+     * intervening expression adds one or more continuation frames to
+     * the suspension on the way out.  Once the %%PUSH-PROMPT or
+     * %%PUSH-DELIM-SUBCONT is reached, the suspension's handler gets
+     * called with the captured continuation.
+     *
+     * Suspensions are implementation-level objects, and are never
+     * visible to Lisp.
+     */
+    vm.Suspension = class Suspension
+    {
+        /*
+         * Constructs a new suspension.
+         *
+         * The continuation will be captured outwards to the prompt.
+         *
+         * The user-defined suspension handler will get called with
+         * the captured continuation.
+         */
+        constructor(prompt, handler)
+        {
+            vm.assert_type(prompt, vm.TYPE_ANY);
+            vm.assert_type(handler, vm.Function);
+            this.prompt = prompt;
+            this.handler = handler;
+            this.continuation = null;
+        }
+
+        /*
+         * Adds a new outer continuation frame with the given work
+         * function as we move outwards during continuation creation.
+         */
+        suspend(work_fun)
+        {
+            vm.assert_type(work_fun, "function");
+            this.continuation = new vm.Continuation(work_fun, this.continuation);
+            return this;
+        }
+    };
+
+    /*
+     * A resumption is a helper object created during the composition
+     * (reinstatement) of a continuation.
+     *
+     * It gets passed inwards until the innermost continuation frame
+     * is reached.  At each step, the operator-specific work function
+     * of intervening frames is called.  Once the innermost frame is
+     * reached, the user-defined resumption handler function gets
+     * called and takes over control.
+     *
+     * Resumptions are implementation-level objects, and are never
+     * visible to Lisp.
+     */
+    vm.Resumption = class Resumption
+    {
+        /*
+         * Creates a new resumption.
+         *
+         * The continuation will get composed with the current stack,
+         * frame by frame, as we move inwards.
+         *
+         * The user-defined resumption handler will get called after
+         * the continuation has been reinstated.
+         */
+        constructor(continuation, handler)
+        {
+            vm.assert_type(continuation, vm.Continuation);
+            vm.assert_type(handler, vm.Function);
+            this.continuation = continuation;
+            this.handler = handler;
+        }
+
+        /*
+         * Removes the outer frame of a continuation and calls its
+         * work function as we move inwards during continuation
+         * reinstatement.
+         */
+        resume()
+        {
+            const continuation = this.continuation;
+            this.continuation = continuation.inner;
+            return continuation.work_fun(this);
+        }
+    };
+
+    /*** Bind ***/
+
+    /*
+     * Sequences a zero-argument thunk and a one-argument function in
+     * a continuation-aware manner: the (second) function receives as
+     * argument the result of the (first) thunk.
+     *
+     * This is used in eval.js for all operators whose semantics are
+     * straightforward and only require sequential execution.
+     */
+    vm.bind = (first, second) =>
+    {
+        vm.assert_type(first, "function");
+        vm.assert_type(second, "function");
+        return do_bind(first, second);
+    };
+
+    /*
+     * Work function for bind().
+     *
+     * Note the resumption parameter. Do_bind(), like all work functions,
+     * is written so that it can be called in two ways:
+     *
+     * - Directly from bind(), with a null resumption.  In this case it
+     *   will evaluate the first thunk.
+     *
+     * - As a work function of a suspended continuation frame.  This happens
+     *   if the first thunk earlier captured a continuation.  In this case,
+     *   we resume into the continuation with resume().
+     */
+    function do_bind(first, second, resumption = null)
+    {
+        /*
+         * Evaluate first thunk.
+         */
+        let val;
+        if (resumption instanceof vm.Resumption)
+            /*
+             * First thunk previously captured a continuation.  Resume
+             * into it.
+             */
+            val = resumption.resume();
+        else
+            /*
+             * We are evaluating the first thunk for the first time.
+             */
+            val = first();
+        /*
+         * Check result of first thunk.
+         */
+        if (val instanceof vm.Suspension)
+            /*
+             * The first thunk captured a continuation.
+             *
+             * We need to suspend now, too.  We do this by pushing a
+             * work function closure onto the continuation,
+             * that will restart later where we left off.
+             */
+            return val.suspend((resumption) =>
+                do_bind(first, second, resumption));
+        else
+            /*
+             * The first thunk returned normally.
+             * Pass its result to the second function.
+             */
+            return second(val);
+    }
+
+    /*** Delimited Control Operators ***/
+
+    /*
+     * (%%take-subcont prompt handler) => |
+     *
+     * Built-in function that initiates continuation capture.  It
+     * aborts outwards to the given prompt and calls the suspension
+     * handler with the captured continuation.
+     */
+    vm.TAKE_SUBCONT = (args, env) =>
+    {
+        var prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        var handler = vm.assert_type(vm.elt(args, 1), vm.Function);
+
+        /*
+         * Create the suspension.
+         *
+         * This is the first event of continuation capture.
+         */
+        const suspension = new vm.Suspension(prompt, handler);
+
+        /*
+         * Push the innermost continuation frame onto the
+         * suspension.
+         *
+         * Its work function will call the user-defined
+         * resumption handler when resumed.
+         */
+        return suspension.suspend((resumption) =>
+            /*
+             * This is the final event of continuation composition.
+             *
+             * The resumption handler passed in from the outside takes
+             * over control in the place where the continuation
+             * was originally captured.
+             */
+            vm.operate(resumption.handler, vm.nil(), env)
+        );
+    };
+
+    /*
+     * (%%push-prompt prompt thunk) => result
+     *
+     * Built-in function that pushes a prompt.  A user-supplied thunk
+     * is then called inside the newly delimited continuation.
+     * Returns the thunk's result.
+     */
+    vm.PUSH_PROMPT = (args, env) =>
+    {
+        const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
+        const action = () => vm.operate(thunk, vm.nil(), env);
+        return do_push_action(prompt, action, env);
+    };
+
+    /*
+     * (%%push-delim-subcont prompt continuation thunk) => result
+     *
+     * Built-in function that pushes a prompt and reinstates a
+     * previously captured continuation inside it.  A user-supplied
+     * thunk is then called inside the newly composed continuation.
+     * Returns the thunk's result.
+     *
+     * (Note: this operator is basically `push_delim_subcont' from
+     * delimcc, except that the prompt must be manually supplied,
+     * since our continuations don't include prompts.)
+     */
+    vm.PUSH_DELIM_SUBCONT = (args, env) =>
+    {
+        const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const continuation = vm.assert_type(vm.elt(args, 1), vm.Continuation);
+        const thunk = vm.assert_type(vm.elt(args, 2), vm.Function);
+        /*
+         * Resume into the user-supplied continuation with the thunk
+         * as resumption handler.
+         *
+         * This is the first event of continuation composition.
+         */
+        const action = () => new vm.Resumption(continuation, thunk).resume();
+        return do_push_action(prompt, action, env);
+    };
+
+    /*
+     * Work function for PUSH_PROMPT and PUSH_DELIM_SUBCONT
+     * whose difference is factored out into the action parameter.
+     */
+    function do_push_action(prompt, action, env, resumption = null)
+    {
+        /*
+         * Do the action.
+         */
+        let result;
+        if (resumption instanceof vm.Resumption)
+            result = resumption.resume();
+        else
+            result = action();
+
+        if (result instanceof vm.Suspension) {
+            /*
+             * Action captured a continuation.
+             */
+            if (vm.equal(prompt, result.prompt)) {
+                /*
+                 * It's looking for our prompt, i.e. the capture ends here.
+                 *
+                 * This is the final event of continuation capture.
+                 *
+                 * The user-supplied suspension handler takes over
+                 * control where the prompt was originally pushed.
+                 * It receives the captured continuation as argument.
+                 */
+                return vm.operate(result.handler, vm.list(result.continuation), env);
+            } else {
+                /*
+                 * It's looking for an outer prompt, we need to
+                 * suspend, ourselves.
+                 */
+                return result.suspend((resumption) =>
+                    do_push_action(prompt, action, env, resumption));
+            }
+        } else {
+            /*
+             * Action evaluated normally.
+             */
+            return result;
+        }
+    }
+
+    /*
+     * (%%push-subcont-barrier thunk) => result
+     *
+     * Built-in function that calls a thunk and prevents it from
+     * capturing continuations to the outside.
+     *
+     * This is easily the hairiest part of the whole program.
+     */
+    vm.PUSH_SUBCONT_BARRIER = (args, env) =>
+    {
+        const thunk = vm.assert_type(vm.elt(args, 0), vm.Function);
+        return do_push_subcont_barrier(thunk, env);
+    };
+
+    function do_push_subcont_barrier(thunk, env, resumption = null)
+    {
+        /*
+         * How can it be that this work function must handle
+         * resumption, you ask?  Isn't the whole idea behind a
+         * continuation barrier that continuations cannot escape it,
+         * and therefore obviously cannot reenter it either?  The
+         * answer can be found in the next comment.
+         */
+        let result;
+        if (resumption instanceof vm.Resumption)
+            result = resumption.resume();
+        else
+            result = vm.operate(thunk, vm.nil(), env);
+
+        if (result instanceof vm.Suspension) {
+            /*
+             * Thunk attempted to capture.
+             *
+             * Add ourselves to the continuation.  Note that this
+             * built-in is different from all others.  We do not
+             * return the suspension back to the caller -- that is
+             * after all exactly what we want to prevent.  But we must
+             * still suspend ourselves in this way: if we didn't, the
+             * barrier would be missing from the continuation.
+             */
+            result.suspend((resumption) =>
+                do_push_subcont_barrier(thunk, env, resumption));
+
+            /*
+             * Here comes the klever part: resume back into the
+             * continuation and throw an error from the inside.
+             *
+             * This means the user will be able to see a useful stack
+             * trace that shows where the ill-fated continuation
+             * capture occurred.  (This bold claim is yet to be
+             * verified.)
+             */
+            const handler = vm.alien_function(() => {
+                throw new vm.Prompt_not_found_error(result.prompt); });
+
+            return new vm.Resumption(result.continuation, handler).resume();
+        } else {
+            return result;
+        }
+    };
+
+    /*
+     * Signalled on continuation barrier breach.
+     */
+    vm.Prompt_not_found_error = class Lisp_prompt_not_found_error extends vm.Error
+    {
+        constructor(prompt)
+        {
+            super("Prompt not found");
+            this.lisp_slot_prompt = prompt;
+        }
+    };
+
+    /*** Delimited Dynamic Binding ***/
+
+    /*
+     * A dynamic variable is a cell holding a value.
+     */
+    vm.Dynamic = class Lisp_dynamic extends vm.Standard_object
+    {
+        constructor(value = vm.void())
+        {
+            super();
+            this.lisp_slot_value = value;
+        }
+
+        get_value() { return this.lisp_slot_value; }
+        set_value(value) { this.lisp_slot_value = value; }
+    };
+
+    /*
+     * Create a new dynamic variable with the given default value.
+     */
+    vm.make_dynamic = (value = vm.void()) =>
+    {
+        return new vm.Dynamic(value);
+    };
+
+    /*
+     * (%%progv dynamics values thunk) => result
+     *
+     * Built-in function that evaluates a thunk with dynamic variables
+     * temporarily bound to new values.
+     */
+    vm.PROGV = (args, env) =>
+    {
+        const dynamics = vm.list_to_array(vm.elt(args, 0));
+        const values = vm.list_to_array(vm.elt(args, 1));
+        const thunk = vm.assert_type(vm.elt(args, 2), vm.Function);
+        return do_progv(dynamics, values, thunk, env);
+    };
+
+    function do_progv(dynamics, values, thunk, env, resumption = null)
+    {
+        return vm.progv(dynamics, values, () => {
+            let result;
+            if (resumption instanceof vm.Resumption) {
+                result = resumption.resume();
+            } else {
+                result = vm.operate(thunk, vm.nil(), env);
+            }
+            if (result instanceof vm.Suspension) {
+                return result.suspend((resumption) =>
+                    do_progv(dynamics, values, thunk, env, resumption));
+            } else {
+                return result;
+            }
+        });
+    }
+
+    /*
+     * Utility to bind dynamic variables during a JS thunk.
+     *
+     * This can also be used outside of the %%PROGV primitive.
+     */
+    vm.progv = (dynamics, values, thunk) =>
+    {
+        vm.assert(dynamics.length === values.length);
+        /*
+         * Save old values and apply new ones.
+         */
+        const old_values = [];
+        for (let i = 0; i < dynamics.length; i++) {
+            const dynamic = vm.assert_type(dynamics[i], vm.Dynamic);
+            old_values[i] = dynamic.get_value();
+            dynamic.set_value(values[i]);
+        }
+        try {
+            /*
+             * Call the thunk.
+             */
+            return thunk();
+        } finally {
+            /*
+             * Restore old values.
+             */
+            for (let i = 0; i < dynamics.length; i++) {
+                dynamics[i].set_value(old_values[i]);
+            }
+        }
+    };
+
+    /*** Simple Control ***/
+
+    /*
+     * (%%loop expr) => |
+     *
+     * Built-in operator that repeatedly evaluates an expression.
+     */
+    vm.LOOP = (operands, env) =>
+    {
+        const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
+        return do_loop(expr, env);
+    };
+
+    function do_loop(expr, env, resumption = null)
+    {
+        let first = true; // Only resume once.
+        while (true) {
+            let result;
+            if (first && (resumption instanceof vm.Resumption)) {
+                first = false;
+                result = resumption.resume();
+            } else {
+                result = vm.eval(expr, env);
+            }
+            if (result instanceof vm.Suspension) {
+                return result.suspend((resumption) =>
+                    do_loop(expr, env, resumption));
+            } else {
+                continue;
+            }
+        }
+    }
+
+    /*
+     * (%%call-with-escape fun) => result
+     *
+     * Built-in function that calls a function with a one-argument
+     * escape function.
+     *
+     * If the escape function is called, evaluation is immediately
+     * aborted and the argument passed to the escape function
+     * is returned.  This is called a nonlocal exit.
+     *
+     * If the escape function is not called, returns the normal
+     * result of the body function.
+     *
+     * It is an error to call the escape function after the body
+     * function has returned.
+     */
+    vm.CALL_WITH_ESCAPE = (args, env) =>
+    {
+        const fun = vm.assert_type(vm.elt(args, 0), vm.Function);
+        /*
+         * Create a unique tag.  We remember it in our closure and
+         * later check for it when an exception is thrown.
+         */
+        const tag = new vm.Tag();
+        const escape = vm.alien_function((value) => {
+            tag.value = value;
+            throw tag;
+        });
+        return do_call_with_escape(fun, tag, escape, env);
+    };
+
+    function do_call_with_escape(fun, tag, escape, env, resumption = null)
+    {
+        try {
+            let result;
+            if (resumption instanceof vm.Resumption) {
+                result = resumption.resume();
+            } else {
+                result = vm.operate(fun, vm.list(escape), env);
+            }
+            if (result instanceof vm.Suspension) {
+                return result.suspend((resumption) =>
+                    do_call_with_escape(fun, tag, escape, env, resumption));
+            } else {
+                return result;
+            }
+        } catch (e) {
+            /*
+             * Check if the exception we caught is our unique tag.
+             *
+             * If so, return its value.  Otherwise rethrow it.
+             */
+            if (e === tag) {
+                return tag.value;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /*
+     * Instances of this class are thrown by escape functions.
+     */
+    vm.Tag = class Tag // Does not extend Error because no stack trace is desired.
+    {
+        constructor()
+        {
+            this.value = null;
+        }
+    };
+
+    /*
+     * (%%unwind-protect protected-expr cleanup-expr) => result
+     *
+     * Built-in operator that evaluates the protected expression and
+     * returns its result.
+     *
+     * Regardless of whether the protected expression returns
+     * normally, or via a nonlocal exit (cf. %%CALL-WITH-ESCAPE), the
+     * cleanup expression is evaluated (and its result discarded)
+     * after the protected expression.
+     *
+     * The cleanup expression is not evaluated when the protected
+     * expression exits via a continuation capture or panic.  (A panic
+     * is a special kind of exception whose purpose is to
+     * unconditionally break out of Lisp and back into JS.)
+     */
+    vm.UNWIND_PROTECT = (operands, env) =>
+    {
+        const protected_expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
+        const cleanup_expr = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
+        return do_unwind_protect_1(protected_expr, cleanup_expr, env);
+    };
+
+    /*
+     * This must be implemented in two steps, with two work functions.
+     *
+     * The first one evaluates the protected expression, which may (a)
+     * return normally, or (b) exit nonlocally with an exception, or (c)
+     * capture a continuation, or (d) exit with a panic.
+     *
+     * If it does capture, we'll have to restart at step 1 later.  If
+     * it does not capture, we can go to step 2, but have to remember
+     * whether step 1 returned successfully or threw an exception.  If
+     * it panics, we just call it quits, too.
+     *
+     * The second work function, step 2, evaluates the cleanup
+     * expression and afterwards either returns the result produced by
+     * the protected expression, or (re)throws the exception
+     * thrown by it.
+     */
+    function do_unwind_protect_1(protected_expr, cleanup_expr, env, resumption = null)
+    {
+        try {
+            let result;
+            if (resumption instanceof vm.Resumption)
+                result = resumption.resume();
+            else
+                result = vm.eval(protected_expr, env);
+            if (result instanceof vm.Suspension)
+                /*
+                 * (c) Protected expression captured - stay at step 1.
+                 */
+                return result.suspend((resumption) =>
+                    do_unwind_protect_1(protected_expr, cleanup_expr, env, resumption));
+            else
+                /*
+                 * (a) Protected expression returned normally - go to step 2,
+                 * remembering that step 1 was successful.
+                 */
+                return do_unwind_protect_2(cleanup_expr, result, true, env);
+        } catch (exception) {
+            /*
+             * (d) Protected expression panicked.  Let the panic through.
+             */
+            if (exception instanceof vm.Panic)
+                throw exception;
+            else
+                /*
+                 * (b) Protected expression threw - go to step 2,
+                 * remembering that step 1 failed.
+                 */
+                return do_unwind_protect_2(cleanup_expr, exception, false, env);
+        }
+    }
+
+    function do_unwind_protect_2(cleanup_expr, value, success, env, resumption = null)
+    {
+        let result;
+        if (resumption instanceof vm.Resumption)
+            result = resumption.resume();
+        else
+            result = vm.eval(cleanup_expr, env);
+        if (result instanceof vm.Suspension) {
+            return result.suspend((resumption) =>
+                do_unwind_protect_2(cleanup_expr, value, success, env, resumption));
+        } else {
+            /*
+             * After the cleanup expression has been evaluated:
+             *
+             * If the protected expression returned normally (a),
+             * return its result now.
+             *
+             * If it threw an exception (b), rethrow the exception
+             * now.
+             */
+            if (success)
+                return value;
+            else
+                throw value;
+        }
+    }
+
+    /*** Lisp API ***/
+
+    vm.define_class("continuation", vm.Continuation, vm.Object);
+
+    vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
+
+    vm.define_class("prompt-not-found-error", vm.Prompt_not_found_error,
+                    vm.Error, vm.Standard_class);
+
+    vm.define_built_in_function("%%take-subcont", vm.TAKE_SUBCONT);
+
+    vm.define_built_in_function("%%push-prompt", vm.PUSH_PROMPT);
+
+    vm.define_built_in_function("%%push-delim-subcont", vm.PUSH_DELIM_SUBCONT);
+
+    vm.define_built_in_function("%%push-subcont-barrier", vm.PUSH_SUBCONT_BARRIER);
+
+    vm.define_built_in_function("%%progv", vm.PROGV);
+
+    vm.define_built_in_operator("%%loop", vm.LOOP);
+
+    vm.define_built_in_function("%%call-with-escape", vm.CALL_WITH_ESCAPE);
+
+    vm.define_built_in_operator("%%unwind-protect", vm.UNWIND_PROTECT);
+}

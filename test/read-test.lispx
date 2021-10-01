@@ -1,0 +1,63 @@
+;;; LispX Reader Tests
+
+(defsection read
+
+  (deftest read.1
+    (with-standard-input-from-string "foo" (read))
+    'foo)
+
+  (deftest read.1a
+    (with-standard-input-from-string "foo" (read (dynamic *standard-input*)))
+    'foo)
+
+  (deftest read.2
+    (signals-error
+     (with-standard-input-from-string "(foo" (read))
+    end-of-file))
+
+  (deftest read.2a
+    (signals-error
+     (with-standard-input-from-string "(foo" (read (dynamic *standard-input*)))
+    end-of-file))
+
+  ;; Incomplete objects always cause `end-of-file', even if EOF-ERROR-P is false.
+  (deftest read.2b
+    (signals-error
+     (with-standard-input-from-string "(foo" (read (dynamic *standard-input*) #f))
+     end-of-file))
+
+  (deftest read.2c1
+    (signals-error
+     (with-standard-input-from-string "" (read))
+     end-of-file))
+
+  (deftest read.2c2
+    (signals-error
+     (with-standard-input-from-string "" (read (dynamic *standard-input*)))
+     end-of-file))
+
+  (deftest read.2d
+    (with-standard-input-from-string "" (read (dynamic *standard-input*) #f))
+    #void)
+
+  (deftest read.2e
+    (with-standard-input-from-string "" (read (dynamic *standard-input*) #f 44))
+    44)
+
+  (deftest read.3a
+    (signals-error
+     (with-standard-input-from-string "" (read 'not-a-stream))
+     unbound-method-error :object 'not-a-stream :method-name 'stream-read))
+
+  (deftest read.3b
+    (signals-error
+     (with-standard-input-from-string "" (read (dynamic *standard-input*) 12))
+     type-error :datum 12 :expected-type 'boolean))
+
+  (deftest read.4
+    (with-standard-input-from-string "1 2 3"
+      (assert (= 1 (read)))
+      (assert (= 2 (read)))
+      (assert (= 3 (read)))
+      (assert (= 4 (read (dynamic *standard-input*) #f 4)))
+      #t)))

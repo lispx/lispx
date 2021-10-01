@@ -1,0 +1,5 @@
+We probably want some mechanism for Lisp to plug into the built-in
+equality and comparison operators = and <.
+
+Alternatively, we could just define a separate generic equality method
+EGAL or similar, and let users add methods to that.

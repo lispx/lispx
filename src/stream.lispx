@@ -1,0 +1,26 @@
+;;; LispX Streams
+
+;; Copyright (c) 2021 Manuel Simoni
+
+;;; String Input Streams
+
+(defun make-string-input-stream (string)
+  "Create a string input stream that reads from STRING."
+  (%%make-string-input-stream string))
+
+;;; String Output Streams
+
+(defun make-string-output-stream ()
+  "Construct an empty string output stream."
+  (%%make-string-output-stream))
+
+(defun get-output-stream-string (stream)
+  "Return the contents of the string output STREAM."
+  (%%get-output-stream-string stream))
+
+;;; Miscellaneous
+
+(defun fresh-line stream?
+  "Ensure that the following output appears on a new line by itself.
+The optional STREAM defaults to `*standard-output*'."
+  (%%fresh-line (optional stream? (dynamic *standard-output*))))

@@ -1,0 +1,21 @@
+The interaction of conditions and continuations is not completely
+satisfactory.  Specifically, when a continuation is reinstated, the
+handler chains (of condition and restart handlers) are now the full
+handler chains that were active when the continuation was captured.
+
+This current solution is fine for use cases which are coroutine-like
+but might be inadequate for more advanced uses of delimited
+continuations.
+
+To be fully satisfactory and aligned with delimited dynamic binding,
+the handler chains captured by the delimited continuation should
+supplement/extend the chains that are active when the continuation is
+reinstated.  (As discussed in the DDB paper.)
+
+The difficulty in implementing this proper solution this lies with the
+condition firewall: when a condition handler is called, the condition
+handler chain is temporarily rebound to the handler chain that was
+active at the time the handler was installed with HANDLER-BIND.  The
+interaction of this rebinding with handlers performing control effects
+themselves, as well as the needed data structures for handler chain
+supplementation are currently over my head.

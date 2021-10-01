@@ -1,0 +1,863 @@
+;;; Control-related Tests
+
+;;; Delimited Control
+
+;; The following tests are adapted from the file `testd0.ml' of the
+;; caml-shift distribution, available at the URL
+;; `http://okmij.org/ftp/continuations/implementations.html'
+
+(defun abort-subcont (prompt value)
+  "Utility that captures the continuation but just ignores it."
+  (take-subcont prompt #ignore value))
+
+(defmacro push-subcont (k . forms)
+  "We don't have `push-subcont' but for these tests we can emulate it
+with a `push-delim-subcont' that pushes an unused prompt."
+  (list* #'push-delim-subcont ''unused-prompt k forms))
+
+(defun shift (p #'f)
+  "The `shift' operator, adapted from the file `delimcc.ml'."
+  (take-subcont p sk
+    (push-prompt p
+      (f (lambda (#'c)
+           (push-delim-subcont p sk (c)))))))
+
+(defun prompt-set-p (prompt)
+  "Return true if a prompt is set, false otherwise.
+(Note that this leads to stack growth, i.e. leaks.)"
+  (handler-case ((prompt-not-found-error (lambda #ignore #f)))
+    (take-subcont prompt k (push-delim-subcont prompt k #t))))
+
+(defsection caml-shift
+
+  (deftest test1
+    (progn
+      (assert (not (prompt-set-p 'p)))
+      (push-prompt 'p
+        (assert (prompt-set-p 'p))
+        1))
+    1)
+
+  (deftest test2
+    (+ (push-prompt 'p (push-prompt 'p 5))
+       4)
+    9)
+
+  (deftest test3
+    (+ (push-prompt 'p (+ 6 (abort-subcont 'p 5)))
+       4)
+    9)
+
+  (deftest |test3'|
+    (+ (push-prompt 'p
+         (push-prompt 'p (+ 6 (abort-subcont 'p 5))))
+       4)
+    9)
+
+  (deftest |test3''|
+    (+ (push-prompt 'p
+         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))
+         (+ (abort-subcont 'p 7)
+            10))
+       20)
+    27)
+
+  (deftest |test3'''|
+    (signals-error
+     (progn
+       (push-prompt 'p
+         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))
+         (+ (abort-subcont 'p 7)
+            10))
+       (abort-subcont 'p 9))
+     prompt-not-found-error :prompt 'p))
+
+  (deftest test4
+    (+ (push-prompt 'p
+         (+ (take-subcont 'p sk
+              (push-prompt 'p
+                (push-subcont sk 5)))
+            10))
+       20)
+    35)
+
+  (deftest test5
+    (+ (push-prompt 'p0
+         (+ (shift 'p0 (lambda (#'sk)
+                         (+ 100 (sk (lambda () (sk (lambda () 3)))))))
+            2))
+       10)
+    117)
+
+  (deftest |test5'|
+    (+ 10 (push-prompt 'p0
+            (+ 2 (shift 'p0 (lambda (#'sk)
+                              (sk (lambda () (+ 3 100))))))))
+    115)
+
+  (deftest |test5''|
+    (+ (push-prompt 'p0
+         (+ (shift 'p0 (lambda (#'sk)
+                         (+ (sk (lambda ()
+                                  (push-prompt 'p1
+                                    (+ 9 (sk (lambda () (abort-subcont 'p1 3)))))))
+                            100)))
+            2))
+       10)
+    115)
+
+  (deftest |test5'''|
+    (+ (push-prompt 'p0
+         (let ((v (shift 'p0 (lambda (#'sk)
+                               (+ (sk (lambda ()
+                                        (push-prompt 'p1
+                                          (+ 9 (sk (lambda ()
+                                                     (abort-subcont 'p1 3)))))))
+                                  100)))))
+           (+ v 2)))
+       10)
+    115)
+
+  (deftest test54
+    (+ (push-prompt 'p0
+         (let ((v (shift 'p0 (lambda (#'sk)
+                               (+ (sk (lambda ()
+                                        (push-prompt 'p1
+                                          (+ 9 (sk (lambda ()
+                                                     (abort-subcont 'p0 3)))))))
+                                  100)))))
+           (+ v 2)))
+       10)
+    124)
+
+  (deftest test6
+    (+ (flet ((push-twice (sk)
+                (push-subcont sk (push-subcont sk 3))))
+         (push-prompt 'p1
+           (push-prompt 'p2
+             (+ (take-subcont 'p1 sk
+                  (push-twice sk))
+                1))))
+       10)
+    15)
+
+  (deftest test7
+    (+ (flet ((push-twice (sk)
+                (push-subcont sk
+                  (push-subcont sk
+                    (take-subcont 'p2 sk2
+                      (push-subcont sk2
+                        (push-subcont sk2 3)))))))
+         (push-prompt 'p1
+           (+ (push-prompt 'p2
+                (+ 10 (push-prompt 'p3
+                        (take-subcont 'p1 sk (push-twice sk)))))
+              1)))
+       100)
+    135)
+
+  (deftest |test7'|
+    (+ (flet ((push-twice (#'sk)
+                (sk (lambda ()
+                      (sk (lambda ()
+                            (shift 'p2 (lambda (#'sk2)
+                                         (sk2 (lambda ()
+                                                (sk2 (lambda () 3))))))))))))
+         (push-prompt 'p1
+           (+ (push-prompt 'p2
+                (+ 10 (push-prompt 'p3
+                        (shift 'p1 (lambda (#'sk) (push-twice #'sk))))))
+              1)))
+       100)
+    135))
+
+;;; Delimited Dynamic Binding
+
+;; The following tests are adapted from the files `caml-dynvar.ml' and
+;; `dynvar-scheme48-problem.scm' of the DBplusDC distribution, available
+;; at the URL `http://okmij.org/ftp/Computation/dynamic-binding.html'
+
+(defun set-dynamic (dynamic value)
+  "Set the value of a dynamic variable and return the old value."
+  (prog1 (slot-value dynamic 'value)
+    (set-slot-value dynamic 'value value)))
+
+(defsection dbplusdc
+
+  (deftest testc
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 0))
+        (flet ((f () (dynamic *p*)))
+          (let ((x (f))
+                (y (dynamic-let ((*p* 1)) (f)))
+                (z (f)))
+            (list x y z)))))
+    '(0 1 0))
+
+  (deftest test1
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 1))
+        (list (dynamic *p*) (dynamic *p*))))
+    '(1 1))
+
+  (deftest test11
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 1))
+        (list (dynamic *p*)
+              (dynamic *p*)
+              (dynamic-let ((*p* 2))
+                (dynamic *p*)))))
+    '(1 1 2))
+
+  ;; It's probably a happy accident that this test works, since
+  ;; `set-dynamic' is pretty different from DBplusDC's `dset'.
+  (deftest test12
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 1))
+        (let* ((v1 (dynamic *p*))
+               (v2 (dynamic-let ((*p* 2))
+                     (let ((v3 (set-dynamic *p* 12))
+                           (v4 (dynamic *p*)))
+                       (list v3 v4)))))
+          (let ((v5 (dynamic *p*)))
+            (list v1 v2 v5)))))
+    '(1 (2 12) 1))
+
+  (deftest test_eq4
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 1))
+        (push-prompt 'p0
+          (dynamic *p*))))
+    1)
+
+  (deftest test_eq5
+    (progn
+      (defdynamic *p* #void)
+      (dynamic-let ((*p* 1))
+        (push-prompt 'p0
+          (dynamic-let ((*p* 2))
+            (take-subcont 'p0 #ignore
+              (dynamic *p*))))))
+    1)
+
+  (deftest test_eq6
+    (progn
+      (defdynamic *p* #void)
+      (defdynamic *q* #void)
+      ((lambda (#'f)
+         (dynamic-let ((*p* 2) (*q* 20))
+           (#'f (lambda () 0))))
+       (dynamic-let ((*p* 1))
+         (push-prompt 'p
+           (dynamic-let ((*q* 10))
+             ((lambda (x) (+ (dynamic *p*) (dynamic *q*)))
+              (shift 'p (lambda (f) f))))))))
+    12))
+
+;;; Coroutines
+
+;; The following implementation of coroutines follows the one at URL
+;; `http://okmij.org/ftp/continuations/implementations.html#dynamic-wind'
+;;
+;; We use it for testing that built-in operators properly suspend and
+;; resume.
+
+(defconstant +coroutine-prompt+ 'coroutine-prompt
+  "The prompt used for delimiting coroutines.")
+
+(defclass yield-record ()
+  (value continuation)
+  (:documentation "Instances of this class are yielded."))
+
+(defun make-yield-record (v k)
+  "Create a new yield record with the given yielded value and resume continuation."
+  (make-instance (class yield-record) :value v :continuation k))
+
+(defun yield v?
+  "Yield a value (which defaults to void)."
+  (take-subcont +coroutine-prompt+ k
+    (make-yield-record (optional v?) k)))
+
+(defun resume (yield-record . v?)
+  "Resume a suspended coroutine with a value (which defaults to void)."
+  (push-delim-subcont +coroutine-prompt+ (slot-value yield-record 'continuation)
+    (optional v?)))
+
+(defmacro coroutine body
+  "Evaluate the body expressions as a coroutine."
+  (list* #'push-prompt '+coroutine-prompt+ body))
+
+(defun run-coroutine (#'thunk)
+  "Get all values yielded by a coroutine, and its final result, and
+collect them in a list."
+  (rec run-loop ((result (coroutine (thunk))))
+    (if (typep result (class yield-record))
+        (cons (slot-value result 'value) (run-loop (resume result)))
+        (list result))))
+
+(defun run-coroutine-with-values (#'thunk values)
+  "Like `run-coroutine' but uses a list of values that are sent to the
+coroutine with `resume'."
+  (rec run-loop ((result (coroutine (thunk))) (values values))
+    (if (typep result (class yield-record))
+        (cons (slot-value result 'value)
+              (run-loop (resume result (car values)) (cdr values)))
+        (list result))))
+
+(defsection coroutines
+
+  (deftest coroutine.1
+    (coroutine 1 2 (= 1 1))
+    #t)
+
+  (deftest coroutine.2
+    (progn
+      (def yield-record (coroutine 1 2 (+ (yield (= 1 1)) 3)))
+      (assert (typep yield-record (class yield-record)))
+      (assert (= #t (slot-value yield-record 'value)))
+      (assert (= 33 (resume yield-record 30))))
+    #void)
+
+  (deftest coroutine.progn.1
+    (run-coroutine
+     (lambda ()
+       (progn
+         (yield 1)
+         (yield 2)
+         3)))
+    '(1 2 3))
+
+  (deftest coroutine.progn.2
+    (run-coroutine-with-values
+     (lambda ()
+       (progn
+         (yield 1)
+         (yield 2)))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.vau.1
+    (run-coroutine
+     (lambda ()
+       ((vau () #ignore
+          (yield 1)
+          (yield 2)
+          3))))
+    '(1 2 3))
+
+  (deftest coroutine.vau.2
+    (run-coroutine-with-values
+     (lambda ()
+       ((vau () #ignore
+          (yield 1)
+          (yield 2))))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.lambda.1
+    (run-coroutine
+     (lambda ()
+       ((lambda ()
+          (yield 1)
+          (yield 2)
+          3))))
+    '(1 2 3))
+
+  (deftest coroutine.lambda.2
+    (run-coroutine-with-values
+     (lambda ()
+       ((lambda ()
+          (yield 1)
+          (yield 2))))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.def.1
+    (run-coroutine
+     (lambda ()
+       (def (x y) (list (yield 1) (yield 2)))
+       (list x y)))
+    '(1 2 (#void #void)))
+
+  (deftest coroutine.def.2
+    (run-coroutine-with-values
+     (lambda ()
+       (def (x y) (list (yield 1) (yield 2)))
+       (list x y))
+     '(3 4))
+    '(1 2 (3 4)))
+
+  (deftest coroutine.if.1
+    (run-coroutine
+     (lambda ()
+       (if #t (yield 1) (yield 2))))
+    '(1 #void))
+
+  (deftest coroutine.if.2
+    (run-coroutine-with-values
+     (lambda ()
+       (if #t (yield 1) (yield 2)))
+     '(3))
+    '(1 3))
+
+  (deftest coroutine.if.3
+    (run-coroutine
+     (lambda ()
+       (if #f (yield 1) (yield 2))))
+    '(2 #void))
+
+  (deftest coroutine.if.4
+    (run-coroutine-with-values
+     (lambda ()
+       (if #f (yield 1) (yield 2)))
+     '(3))
+    '(2 3))
+
+  (deftest coroutine.if.5
+    (run-coroutine-with-values
+     (lambda ()
+       (if (yield 1) (yield 2) (yield 3)))
+     '(#t 4))
+    '(1 2 4))
+
+  (deftest coroutine.if.6
+    (run-coroutine-with-values
+     (lambda ()
+       (if (yield 1) (yield 2) (yield 3)))
+     '(#f 4))
+    '(1 3 4))
+
+  (deftest coroutine.if.7
+    (run-coroutine-with-values
+     (lambda ()
+       (if (progn (yield 1) (yield 2))
+           (progn (yield 3) (yield 3.5))
+           (progn (yield 4) (yield 4.5))))
+     '(#void #t #void 5))
+    '(1 2 3 3.5 5))
+
+  (deftest coroutine.if.8
+    (run-coroutine-with-values
+     (lambda ()
+       (if (progn (yield 1) (yield 2))
+           (progn (yield 3) (yield 3.5))
+           (progn (yield 4) (yield 4.5))))
+     '(#void #f #void 5))
+    '(1 2 4 4.5 5))
+
+  (deftest coroutine.loop.1
+    (run-coroutine
+     (lambda ()
+       (def ct 1)
+       (def env (the-environment))
+       (block exit
+         (loop
+          (if (= ct 5)
+              (return-from exit ct)
+              (progn
+                (yield ct)
+                (yield (- ct))
+                (set env ct (+ ct 1))))))))
+    '(1 -1 2 -2 3 -3 4 -4 5))
+
+  (deftest coroutine.block.1
+    (run-coroutine
+     (lambda ()
+       (block b
+         (yield 1)
+         (yield 2)
+         3)))
+    '(1 2 3))
+
+  (deftest coroutine.block.2
+    (run-coroutine-with-values
+     (lambda ()
+       (block b
+         (yield 1)
+         (yield 2)))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.block.3
+    (run-coroutine
+     (lambda ()
+       (block b
+         (yield 1)
+         (yield 2)
+         (return-from b 3))))
+    '(1 2 3))
+
+  (deftest coroutine.block.4
+    (run-coroutine-with-values
+     (lambda ()
+       (block b
+         (yield 1)
+         (return-from b (yield 2))))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.unwind-protect.1
+    (run-coroutine-with-values
+     (lambda ()
+       (unwind-protect (yield 1)
+         (yield 2)
+         (yield 2.5)
+         3))
+     '(4 #void #void))
+    '(1 2 2.5 4))
+
+  (deftest coroutine.unwind-protect.2
+    (run-coroutine-with-values
+     (lambda ()
+       (block exit
+         (unwind-protect (return-from exit (yield 1))
+           (yield 2)
+           (yield 2.5)
+           3)))
+     '(4 #void #void))
+    '(1 2 2.5 4))
+
+  (deftest coroutine.unwind-protect.3
+    (run-coroutine-with-values
+     (lambda ()
+       (block exit
+         (unwind-protect (return-from exit 4)
+           (yield 2)
+           (yield 2.5)
+           3)))
+     '(#void #void))
+    '(2 2.5 4))
+
+  (deftest coroutine.unwind-protect.4
+    (run-coroutine-with-values
+     (lambda ()
+       (block exit
+         (unwind-protect (progn (yield 1) (yield 1.5))
+           (yield 2)
+           (yield 2.5)
+           3)))
+     '(#void 4 #void #void))
+    '(1 1.5 2 2.5 4))
+
+  (deftest coroutine.progv.1
+    (run-coroutine
+     (lambda ()
+       (defdynamic *x* #void)
+       (progv (list *x*) (list 1)
+         (yield (dynamic *x*))
+         (yield (dynamic *x*))
+         (progv (list *x*) (list 2)
+           (yield (dynamic *x*))
+           (yield (dynamic *x*))
+           3))))
+    '(1 1 2 2 3))
+
+  (deftest coroutine.progv.2
+    (run-coroutine-with-values
+     (lambda ()
+       (defdynamic *x* #void)
+       (progv (list *x*) (list 1)
+         (yield (dynamic *x*))
+         (yield (dynamic *x*))
+         (progv (list *x*) (list 2)
+           (yield (dynamic *x*))
+           (yield (dynamic *x*)))))
+     '(#void #void #void 3))
+    '(1 1 2 2 3))
+
+  (deftest coroutine.fun.1
+    (run-coroutine
+     (lambda ()
+       (list (yield 1) (yield 2))))
+    '(1 2 (#void #void)))
+
+  (deftest coroutine.fun.2
+    (run-coroutine-with-values
+     (lambda () (list (yield 1) (yield 2)))
+     '(3 4))
+    '(1 2 (3 4))))
+
+;;; Basic Operator Tests
+
+(defsection push-prompt
+
+  (deftest push-prompt.1
+    (signals-error
+     (push-prompt)
+     match-error))
+
+  (deftest push-prompt.2
+    (push-prompt 'p)
+    #void)
+
+  (deftest push-prompt.3
+    (push-prompt 'p 1 2 (= 1 1))
+    #t)
+
+  (deftest push-prompt.4
+    (progn
+      (block ret
+        (push-prompt 'p
+          (assert (prompt-set-p 'p))
+          (return-from ret)))
+      (assert (not (prompt-set-p 'p))))
+    #void)
+
+  (deftest push-prompt.5
+    (progn
+      (assert (not (prompt-set-p 'p)))
+      (assert (not (prompt-set-p 'q)))
+      (push-prompt 'p
+        (assert (prompt-set-p 'p))
+        (assert (not (prompt-set-p 'q)))
+        (push-prompt 'q
+          (assert (prompt-set-p 'p))
+          (assert (prompt-set-p 'q)))
+        (assert (prompt-set-p 'p))
+        (assert (not (prompt-set-p 'q))))
+      (assert (not (prompt-set-p 'p)))
+      (assert (not (prompt-set-p 'q))))
+    #void))
+
+(defsection take-subcont
+
+  (deftest take-subcont.1
+    (signals-error
+     (take-subcont)
+     match-error))
+
+  (deftest take-subcont.2
+    (signals-error
+     (take-subcont 'p)
+     match-error))
+
+  (deftest take-subcont.3
+    (signals-error
+     (take-subcont 'p #ignore)
+     prompt-not-found-error :prompt 'p))
+
+  (deftest take-subcont.4
+    (signals-error
+     (push-prompt 'p (take-subcont 'q #ignore))
+     prompt-not-found-error :prompt 'q))
+
+  (deftest take-subcont.5
+    (push-prompt 'p (take-subcont 'p #ignore))
+    #void)
+
+  (deftest take-subcont.6
+    (push-prompt 'p (take-subcont 'p #ignore (= 1 1)))
+    #t)
+
+  (deftest take-subcont.7
+    (push-prompt 'p (take-subcont 'p k (push-delim-subcont 'p k (= 1 1))))
+    #t))
+
+(defsection push-delim-subcont
+
+  (deftest push-delim-subcont.1
+    (signals-error
+     (push-delim-subcont)
+     match-error))
+
+  (deftest push-delim-subcont.2
+    (signals-error
+     (push-delim-subcont 'p)
+     match-error))
+
+  (deftest push-delim-subcont.3
+    (signals-error
+     (push-delim-subcont 'p 12)
+     type-error :datum 12))
+
+  (deftest push-delim-subcont.4
+    (let ((k (push-prompt 'p (+ 100 (take-subcont 'p k k)))))
+      (assert (= 102 (push-delim-subcont 'p k (+ 1 1))))
+      (assert (= 120 (push-delim-subcont 'p k (+ 10 10)))))
+    #void)
+
+  (deftest push-delim-subcont.5
+    (let ((k (push-prompt 'p (push-prompt 'q (take-subcont 'p k k)))))
+      (push-delim-subcont 'p k
+        (assert (prompt-set-p 'q))
+        (assert (prompt-set-p 'p))))
+    #void))
+
+(defsection prompt-set-p
+
+  (deftest prompt-set-p.1
+    (signals-error
+     (prompt-set-p)
+     match-error))
+
+  (deftest prompt-set-p.2
+    (prompt-set-p 'p)
+    #f)
+
+  (deftest prompt-set-p.3
+    (push-prompt 'p (progn (prompt-set-p 'p)))
+    #t))
+
+(defsection push-subcont-barrier
+
+  (deftest push-subcont-barrier.1
+    (signals-error
+     (push-subcont-barrier
+      (take-subcont 'p1 sk))
+     prompt-not-found-error :prompt 'p1))
+
+  (deftest push-subcont-barrier.2
+    (signals-error
+     (push-prompt 'p1
+       (push-subcont-barrier
+         (take-subcont 'p1 sk)))
+     prompt-not-found-error :prompt 'p1)))
+
+(defsection dynamics
+
+  (deftest defdynamic.1
+    (progn
+      (defdynamic *x* 1)
+      (defdynamic *y* 2)
+      (assert (= (dynamic *x*) 1))
+      (assert (= (dynamic *y*) 2))
+      (dynamic-let ((*x* 3))
+        (assert (= (dynamic *x*) 3))
+        (assert (= (dynamic *y*) 2))
+        (dynamic-let ((*y* 4))
+          (assert (= (dynamic *x*) 3))
+          (assert (= (dynamic *y*) 4)))
+        (assert (= (dynamic *x*) 3))
+        (assert (= (dynamic *y*) 2)))
+      (assert (= (dynamic *x*) 1))
+      (assert (= (dynamic *y*) 2)))
+    #void)
+
+  (deftest progv.1
+    (progn
+      (defdynamic *x* 1)
+      (defdynamic *y* 2)
+      (assert (= (dynamic *x*) 1))
+      (assert (= (dynamic *y*) 2))
+      (progv (list *x*) (list 3)
+        (assert (= (dynamic *x*) 3))
+        (assert (= (dynamic *y*) 2))
+        (progv (list *y*) (list 4)
+          (assert (= (dynamic *x*) 3))
+          (assert (= (dynamic *y*) 4)))
+        (assert (= (dynamic *x*) 3))
+        (assert (= (dynamic *y*) 2)))
+      (assert (= (dynamic *x*) 1))
+      (assert (= (dynamic *y*) 2)))
+    #void)
+
+  (deftest dynamic.1
+    (progn
+      (defdynamic *foo* #void)
+      (assert (= (dynamic *foo*) #void))
+      (assert (= (slot-value *foo* 'value) #void))
+      (assert (typep *foo* (class dynamic)))
+      (assert (typep *foo* (class standard-object)))
+      (assert (typep *foo* (class object)))
+      (assert (subclassp (class dynamic) (class standard-object)))
+      (assert (subclassp (class dynamic) (class object))))
+    #void))
+
+(defsection default-prompt
+
+  (deftest |Default prompt exists|
+    (boundp '+default-prompt+ (the-environment))))
+
+;;; Simple Control Operators
+
+(defsection loop
+
+  (deftest loop.1
+    (let ((ct 0))
+      (def env (the-environment))
+      (block exit
+        (loop 'just-a-symbol-to-test-implicit-progn
+              (if (= ct 10)
+                  (return-from exit ct)
+                  (set env ct (+ ct 1))))))
+    10))
+
+(defsection block
+
+  (deftest block.1
+    (signals-error
+     (block)
+     match-error))
+
+  (deftest block.2
+    (block x)
+    #void)
+
+  (deftest block.3
+    (block x 1 2 3 (= 1 1))
+    #t)
+
+  (deftest block.4
+    (block x 1 (return-from x (= 1 2)) 3 (= 1 1))
+    #f)
+
+  (deftest block.5
+    (block x 1 (return-from x) 3 (= 1 1))
+    #void)
+
+  (deftest block.6
+    (block x 1 (block y (return-from x (= 1 2))) 3 (= 1 1))
+    #f)
+
+  (deftest block.7
+    (block x 1 (block y (return-from y 2)) 3 (= 1 1))
+    #t)
+
+  (deftest block.8
+    (block x 1 (block y (return-from y 2)))
+    2)
+
+  (deftest block.9
+    (block x 1 (block y (return-from y)))
+    #void))
+
+(defsection unwind-protect
+
+  (deftest unwind-protect.1
+    (signals-error
+     (unwind-protect)
+     match-error))
+
+  (deftest unwind-protect.2
+    (unwind-protect (= 1 1))
+    #t)
+
+  (deftest unwind-protect.3
+    (progn
+      (def env (the-environment))
+      (+ (unwind-protect 1 2 3 (set env x 10))
+         x))
+    11)
+
+  (deftest unwind-protect.4
+    (progn
+      (def env (the-environment))
+      (+ (block exit
+           (unwind-protect (return-from exit 1) 2 3 (set env x 10)))
+         x))
+    11)
+
+  (deftest unwind-protect.5
+    (block exit
+      (unwind-protect 1 2 3 (return-from exit 4)))
+    4)
+
+  (deftest unwind-protect.6
+    (block exit
+      (unwind-protect (return-from exit 1) 2 3 (return-from exit 4)))
+    4))

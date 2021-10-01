@@ -1,0 +1,2 @@
+The built-in reader functions for things like QUOTE are not
+implemented in terms of macro characters, but hardcoded in JS.

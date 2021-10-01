@@ -1,0 +1,23 @@
+Currently, a Lisp object is defined as any object that inherits from
+vm.Object (See vm.is_lisp_object()).
+
+However, a more expansive definition might be possible: see if the
+object has a lisp_class property.  This would make it possible to
+retroactively bless JS classes as Lisp classes (with
+vm.bless_class()).  So e.g. a library could be developed in pure JS,
+with no mention of Lisp at all, but for Lisp users there could be an
+additional utility that blesses all classes in the lib as Lisp
+classes.
+
+I don't think any code depends on Lisp objects actually inheriting
+from vm.Object.
+
+However, the classes would need to implement vm.Object methods like
+equal_same_type() and compare_same_type().  So these would either need
+to be filled in by the aforementioned utility; or the VM could be
+changed to be able to deal with those methods missing.
+
+Alternatively, the __proto__ of the library classes could be set to
+vm.Object.
+
+Also, the whole scheme would only work for one Lisp VM per program.

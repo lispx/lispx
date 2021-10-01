@@ -1,0 +1,2 @@
+Testing currently only exercises the UMD build of the interpreter.  It
+should also test the ESM build.
