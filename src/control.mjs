@@ -176,7 +176,7 @@ export function init_control(vm)
      * a continuation-aware manner: the (second) function receives as
      * argument the result of the (first) thunk.
      *
-     * This is used in eval.js for all operators whose semantics are
+     * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
      */
     vm.bind = (first, second) =>

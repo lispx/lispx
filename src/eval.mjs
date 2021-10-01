@@ -51,7 +51,7 @@ export function init_eval(vm)
      */
     function evaluate_cons(cons, env)
     {
-        // (See control.js for the definition of vm.bind().)
+        // (See control.mjs for the definition of vm.bind().)
         return vm.bind(() => evaluate_operator(cons.car(), env),
                        (operator) => vm.operate(operator, cons.cdr(), env));
     }
@@ -506,7 +506,7 @@ export function init_eval(vm)
     /*** Exception Trapping and Panicking ***/
 
     /*
-     * All exceptions - except tags (see control.js) and panics (see
+     * All exceptions - except tags (see control.mjs) and panics (see
      * below) - that happen during evaluation are caught by this
      * function.
      *
