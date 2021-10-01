@@ -5,7 +5,7 @@ module.exports = function(config)
 {
     config.set({
         frameworks: ["mocha", "chai"],
-        files: ["./dist/lispx-vm.js", "./dist/test/lispx-test-browser.js"],
+        files: ["./dist/lispx-vm.umd.js", "./dist/test/lispx-test-browser.js"],
         reporters: ["progress"],
         port: 9876,  // karma web server port
         colors: true,

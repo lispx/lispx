@@ -1,6 +1,6 @@
 {
     "name": "lispx-vm",
-    "main": "dist/lispx-vm.js",
+    "main": "dist/lispx-vm.umd.js",
     "scripts": {
         "build": "./scripts/build",
         "test": "./scripts/browser-test"

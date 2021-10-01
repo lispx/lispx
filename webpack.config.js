@@ -15,8 +15,8 @@ module.exports = [
     /*
      * Build unminimized main outputs.
      */
-    make_entry_umd("lispx-vm", false),
-    make_entry_esm("lispx-vm-esm", false),
+    make_entry_umd(false),
+    make_entry_esm(false),
     /*
      * Build test outputs.
      */
@@ -31,13 +31,13 @@ module.exports = [
  * The entry is not complete, the functions make_entry_umd() and
  * make_entry_esm() fill in some missing fields for each target type.
  */
-function make_entry(name, libraryTarget, minimize)
+function make_entry(filename, libraryTarget, minimize)
 {
     return {
         entry: "./src/vm.js",
         output: {
             libraryTarget: libraryTarget,
-            filename: name + ".js",
+            filename: filename,
             globalObject: "this"
         },
         module: {
@@ -62,16 +62,16 @@ function make_entry(name, libraryTarget, minimize)
     }
 }
 
-function make_entry_umd(name, minimize)
+function make_entry_umd(minimize)
 {
-    const entry = make_entry(name, "umd", minimize);
-    entry.output.library = name;
+    const entry = make_entry("lispx-vm.umd.js", "umd", minimize);
+    entry.output.library = "lispx-vm";
     return entry;
 }
 
-function make_entry_esm(name, minimize)
+function make_entry_esm(minimize)
 {
-    const entry = make_entry(name, "module", minimize);
+    const entry = make_entry("lispx-vm.mjs", "module", minimize);
     entry.experiments = {
         outputModule: true
     };
@@ -129,7 +129,7 @@ function make_test_entry_node()
     const entry = make_test_entry("lispx-test-node",
                                   "test/lispx-test-node.js");
     entry.externals = {
-        "lispx-vm": "../lispx-vm.js"
+        "lispx-vm": "../lispx-vm.umd.js"
     };
     return entry;
 }
