@@ -115,7 +115,7 @@ function make_test_entry(library, filename)
 function make_test_entry_browser()
 {
     const entry = make_test_entry("lispx-test-browser",
-                                  "test/lispx-test-browser.js");
+                                  "test/lispx-test-browser.umd.js");
     /*
      * For some reason, the externals declaration here has to be
      * different from the one in the Node output.
@@ -127,7 +127,7 @@ function make_test_entry_browser()
 function make_test_entry_node()
 {
     const entry = make_test_entry("lispx-test-node",
-                                  "test/lispx-test-node.js");
+                                  "test/lispx-test-node.umd.js");
     entry.externals = {
         "lispx-vm": "../lispx-vm.umd.js"
     };
