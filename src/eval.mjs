@@ -735,4 +735,5 @@ export function init_eval(vm)
         vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
 
     vm.define_alien_function("%%panic", (exception) => vm.panic(exception));
-}
+
+};

@@ -1434,4 +1434,5 @@ function init_vm(vm)
 
     vm.define_class("assertion-error", vm.Assertion_error,
                     vm.Error, vm.Standard_class);
-}
+
+};

@@ -597,7 +597,8 @@ export function init_read(vm)
         vm.assert_type(eof_error_p, vm.Boolean);
         return vm.read(stream, eof_error_p.to_js_boolean(), eof_value);
     });
-}
+
+};
 
 /*
  * Notes

@@ -111,4 +111,5 @@ export function init_js(vm)
     vm.define_alien_function("%%apply-js-method", vm.apply_js_method);
 
     vm.define_alien_function("%%js-log", (...objects) => console.log(...objects));
-}
+
+};

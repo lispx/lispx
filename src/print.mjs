@@ -254,4 +254,5 @@ export function init_print(vm)
     vm.define_variable("*print-level*", vm.PRINT_LEVEL);
 
     vm.define_alien_function("%%write", (object, stream) => vm.write(object, stream));
-}
+
+};

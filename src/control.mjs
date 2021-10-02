@@ -757,4 +757,5 @@ export function init_control(vm)
     vm.define_built_in_function("%%call-with-escape", vm.CALL_WITH_ESCAPE);
 
     vm.define_built_in_operator("%%unwind-protect", vm.UNWIND_PROTECT);
-}
+
+};
