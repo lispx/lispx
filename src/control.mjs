@@ -19,25 +19,29 @@
  *
  * The main idea of the implementation is to run directly on the
  * JavaScript stack most of the time, and only create on-heap
- * continuations when they are captured.  In the regular case, Lisp
- * operators return their result as their normal JS return value.  But
- * when a capture is triggered, a suspension helper object is returned
- * instead.  This suspension contains the desired prompt to which the
- * capture should abort to, as well as a handler function that gets
- * called with the captured continuation once the prompt is reached.
- * The suspension also contains the continuation frames captured so
- * far.  Every Lisp operator must detect when one of its inner
- * sub-expressions returns a suspension.  In this case, the operator
- * must suspend itself also by adding any required continuation frames
- * to the suspension, and passing on the suspension outwards to its
- * caller.
+ * continuations when they are captured.
+ *
+ * In the regular case, Lisp operators return their result as their
+ * normal JS return value.  But when a capture is triggered, a
+ * suspension helper object is returned instead.  This suspension
+ * contains the desired prompt to which the capture should abort to,
+ * as well as a Lisp handler function that gets called with the
+ * captured continuation once the prompt is reached.  The suspension
+ * also contains the continuation frames captured so far.  Every
+ * built-in Lisp operator must detect when one of its inner
+ * sub-expressions returns a suspension instead of a regular result.
+ * In this case, the operator must suspend itself also by adding any
+ * required continuation frames to the suspension, and passing on the
+ * suspension outwards to its caller.
  *
  * To reinstate a continuation, a resumption helper object is created.
  * Analogous to how a suspension gets passed outwards from the point
  * of continuation capture to the prompt, a resumption gets passed
- * inwards.  A resumption contains the continuation frames that must
- * be put back from the heap on to the JS stack, as well as a handler
- * function that is called when all frames have been reinstated.
+ * inwards from the point where continuation composition is triggered.
+ * A resumption contains the continuation frames that must be put back
+ * from the heap on to the JS stack, as well as a Lisp handler
+ * function that is called inside the newly composed context when all
+ * frames have been reinstated.
  */
 export function init_control(vm)
 {
