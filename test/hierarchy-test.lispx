@@ -4,7 +4,7 @@
 
   (defun test-hierarchy (classes)
     (let ((env (the-environment)))
-      (rec test-classes-loop ((classes classes) (root-class (class object)))
+      (loop-let test-classes-loop ((classes classes) (root-class (class object)))
         (dolist (c classes #t)
           (typecase c
             (symbol

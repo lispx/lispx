@@ -36,7 +36,7 @@
 (defun run-coroutine (#'thunk)
   "Get all values yielded by a coroutine, and its final result, and
 collect them in a list."
-  (rec run-loop ((result (coroutine (thunk))))
+  (loop-let run-loop ((result (coroutine (thunk))))
     (if (typep result (class yield-record))
         (cons (slot-value result 'value) (run-loop (resume result)))
         (list result))))
@@ -44,7 +44,7 @@ collect them in a list."
 (defun run-coroutine-with-values (#'thunk values)
   "Like `run-coroutine' but uses a list of values that are sent to the
 coroutine with `resume'."
-  (rec run-loop ((result (coroutine (thunk))) (values values))
+  (loop-let run-loop ((result (coroutine (thunk))) (values values))
     (if (typep result (class yield-record))
         (cons (slot-value result 'value)
               (run-loop (resume result (car values)) (cdr values)))

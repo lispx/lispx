@@ -308,7 +308,7 @@ evaluated.  If there are no operands, return true."
   "Evaluate the FORMS in an infinite loop."
   (list #'%%loop (list* #'progn forms)))
 
-(defmacro rec (name initializers . forms)
+(defmacro loop-let (name initializers . forms)
   "Labelled recursive loop, analogous to Scheme's named `let'.
 
 Lexically bind a function named NAME with one PARAMETER for every
@@ -368,7 +368,7 @@ clause, or return void if there are no more clauses.
 
 $(syntax clause (class-name . forms))"
   (let ((key (eval keyform env)))
-    (rec typecase-loop ((clauses clauses))
+    (loop-let typecase-loop ((clauses clauses))
       (unless (null clauses)
         (let ((((class-name . forms) . rest-clauses) clauses))
           (if (typep key (find-class class-name env))
@@ -711,7 +711,7 @@ nil.  The default itself defaults to void."
 (defun optionals (list . defaults)
   "Similar to `optional', but provides DEFAULTS for any number of
 elements of LIST."
-  (rec optionals ((list list) (defaults defaults))
+  (loop-let optionals ((list list) (defaults defaults))
     (if (null list)
         (if (null defaults)
             #nil
@@ -966,7 +966,7 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
 (defun %signal (condition)
   "Utility to signal the CONDITION.  If the signal is unhandled,
 return void.  See `signal'."
-  (rec signal-loop ((handler-frame? (dynamic *condition-handler-frame?*)))
+  (loop-let signal-loop ((handler-frame? (dynamic *condition-handler-frame?*)))
     ;; Payload to `%find-handler?' is always nil for condition handlers.
     (if-option ((handler frame) (%find-handler? condition handler-frame? #nil))
       (progn
@@ -1136,8 +1136,8 @@ of its condition class."
 established ones first, optionally limited to those that are
 explicitly associated with the supplied CONDITION or not associated
 with any condition."
-  (rec compute ((handlers ())
-                (handler-frame? (dynamic *restart-handler-frame?*)))
+  (loop-let compute ((handlers ())
+                     (handler-frame? (dynamic *restart-handler-frame?*)))
     (if-option (handler-frame handler-frame?)
       (compute (append handlers
                        (remove-if-not

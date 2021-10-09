@@ -46,7 +46,7 @@ slots of the signalled condition."
       (handler-bind ((object (lambda (c)
                                (if (typep c class)
                                    (progn
-                                     (rec check-slots ((slot-specs slot-specs))
+                                     (loop-let check-slots ((slot-specs slot-specs))
                                        (when (not (null slot-specs))
                                          (let (((name value . rest-slot-specs) slot-specs))
                                            (unless (= (slot-value c name) (eval value env))

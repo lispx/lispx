@@ -2330,25 +2330,25 @@
     (labels ())
     #void))
 
-(defsection rec
+(defsection loop-let
 
-  (deftest rec.1
+  (deftest loop-let.1
     (signals-error
-     (rec)
+     (loop-let)
      match-error))
 
-  (deftest rec.2
+  (deftest loop-let.2
     (signals-error
-     (rec name)
+     (loop-let name)
      match-error))
 
-  (deftest rec.3
-    (rec name ())
+  (deftest loop-let.3
+    (loop-let name ())
     #void)
 
-  (deftest rec.4
-    (rec sum ((as (list 1 2 3))
-              (bs (list 4 5 6)))
+  (deftest loop-let.4
+    (loop-let sum ((as (list 1 2 3))
+                   (bs (list 4 5 6)))
       (if (null as)
           #nil
           (cons (+ (car as) (car bs))
