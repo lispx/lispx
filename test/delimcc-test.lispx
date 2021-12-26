@@ -4,6 +4,8 @@
 ;; caml-shift distribution, available at the URL
 ;; `http://okmij.org/ftp/continuations/implementations.html'
 
+;; First, some preliminary definitions.
+
 (defun abort-subcont (prompt value)
   "Utility that captures the continuation but just ignores it."
   (take-subcont prompt #ignore value))
@@ -25,6 +27,8 @@ with a `push-delim-subcont' that pushes an unused prompt."
 (Note that this leads to stack growth, i.e. leaks.)"
   (handler-case ((prompt-not-found-error (lambda #ignore #f)))
     (take-subcont prompt k (push-delim-subcont prompt k #t))))
+
+;; The actual tests.
 
 (defsection caml-shift
 
