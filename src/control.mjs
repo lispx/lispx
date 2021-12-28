@@ -217,6 +217,11 @@ export function init_control(vm)
      * - As a work function of a suspended continuation frame.  This happens
      *   if the first thunk earlier captured a continuation.  In this case,
      *   we resume into the continuation with resume().
+     *
+     * Due to its simplicity, do_bind() is a good example to learn
+     * about the protocol that continuation frames / work functions
+     * must support.  The work functions of the more complicated
+     * operators, below, follow this same protocol.
      */
     function do_bind(first, second, resumption = null)
     {
@@ -367,7 +372,9 @@ export function init_control(vm)
                  * control where the prompt was originally pushed.
                  * It receives the captured continuation as argument.
                  */
-                return vm.operate(result.handler, vm.list(result.continuation), env);
+                return vm.operate(result.handler,
+                                  vm.list(result.continuation),
+                                  env);
             } else {
                 /*
                  * It's looking for an outer prompt, we need to
@@ -580,6 +587,65 @@ export function init_control(vm)
     }
 
     /*
+     * (%%call-with-catch-tag tag thunk) => result
+     */
+    vm.CALL_WITH_CATCH_TAG = (args, env) => {
+        const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
+        return do_call_with_catch_tag(tag, thunk, env);
+    };
+
+    function do_call_with_catch_tag(tag, thunk, env, resumption = null)
+    {
+        try {
+            let result;
+            if (resumption instanceof vm.Resumption) {
+                result = resumption.resume();
+            } else {
+                result = vm.operate(thunk, vm.nil(), env);
+            }
+            if (result instanceof vm.Suspension) {
+                return result.suspend((resumption) =>
+                    do_call_with_catch_tag(tag, thunk, env, resumption));
+            } else {
+                return result;
+            }
+        } catch (e) {
+            /*
+             * Check if the exception we caught is our catch tag.
+             *
+             * If so, return its value.  Otherwise rethrow it.
+             */
+            if ((e instanceof vm.Catch_tag) && (e.tag === tag)) {
+                return e.value;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /*
+     * (%%throw tag value) => |
+     */
+    vm.THROW = (args, env) => {
+        const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const value = vm.assert_type(vm.elt(args, 1), vm.TYPE_ANY);
+        throw new vm.Catch_tag(tag, value);
+    };
+
+    /*
+     * Instances of this class are thrown by %%THROW.
+     */
+    vm.Catch_tag = class Catch_tag
+    {
+        constructor(tag, value)
+        {
+            this.tag = tag;
+            this.value = value;
+        }
+    };
+
+    /*
      * (%%call-with-escape fun) => result
      *
      * Built-in function that calls a function with a one-argument
@@ -774,6 +840,10 @@ export function init_control(vm)
     vm.define_built_in_operator("%%loop", vm.LOOP);
 
     vm.define_built_in_function("%%call-with-escape", vm.CALL_WITH_ESCAPE);
+
+    vm.define_built_in_function("%%call-with-catch-tag", vm.CALL_WITH_CATCH_TAG);
+
+    vm.define_built_in_function("%%throw", vm.THROW);
 
     vm.define_built_in_operator("%%unwind-protect", vm.UNWIND_PROTECT);
 

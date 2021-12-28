@@ -338,6 +338,12 @@ a block whose dynamic extent has ended.
 $(fn (block-name . value?))"
   (block-name (optional value?)))
 
+(defmacro catch (tag . forms)
+  (list #'%%call-with-catch-tag tag (list* #'lambda () forms)))
+
+(defun throw (tag . result?)
+  (%%throw tag (optional result?)))
+
 (defmacro unwind-protect (protected-form . cleanup-forms)
   "Evaluate the PROTECTED-FORM and return its result.  Regardless of
 whether the protected form returns normally, or via a nonlocal exit,

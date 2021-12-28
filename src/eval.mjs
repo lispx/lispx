@@ -524,7 +524,7 @@ export function init_eval(vm)
         try {
             return thunk();
         } catch (e) {
-            if ((e instanceof vm.Tag) || (e instanceof vm.Panic))
+            if ((e instanceof vm.Catch_tag) || (e instanceof vm.Tag) || (e instanceof vm.Panic))
                 throw e;
             else
                 return vm.call_user_error_handler(e);

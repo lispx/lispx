@@ -242,6 +242,42 @@ coroutine with `resume'."
      '(#void 3))
     '(1 2 3))
 
+  (deftest coroutine.catch.1
+    (run-coroutine
+     (lambda ()
+       (catch 'b
+         (yield 1)
+         (yield 2)
+         3)))
+    '(1 2 3))
+
+  (deftest coroutine.catch.2
+    (run-coroutine-with-values
+     (lambda ()
+       (catch 'b
+         (yield 1)
+         (yield 2)))
+     '(#void 3))
+    '(1 2 3))
+
+  (deftest coroutine.catch.3
+    (run-coroutine
+     (lambda ()
+       (catch 'b
+         (yield 1)
+         (yield 2)
+         (throw 'b 3))))
+    '(1 2 3))
+
+  (deftest coroutine.catch.4
+    (run-coroutine-with-values
+     (lambda ()
+       (catch 'b
+         (yield 1)
+         (throw 'b (yield 2))))
+     '(#void 3))
+    '(1 2 3))
+
   (deftest coroutine.unwind-protect.1
     (run-coroutine-with-values
      (lambda ()
@@ -528,7 +564,46 @@ coroutine with `resume'."
                   (set env ct (+ ct 1))))))
     10))
 
-(defsection block
+(defsection catch/throw
+
+  (deftest catch.1
+    (signals-error
+     (catch)
+     match-error))
+
+  (deftest catch.2
+    (catch 'x)
+    #void)
+
+  (deftest catch.3
+    (catch 'x 1 2 3 (= 1 1))
+    #t)
+
+  (deftest catch.4
+    (catch 'x 1 (throw 'x (= 1 2)) 3 (= 1 1))
+    #f)
+
+  (deftest catch.5
+    (catch 'x 1 (throw 'x) 3 (= 1 1))
+    #void)
+
+  (deftest catch.6
+    (catch 'x 1 (catch 'y (throw 'x 44)) 3 (= 1 1))
+    44)
+
+  (deftest catch.7
+    (catch 'x 1 (catch 'y (throw 'y 2)) 3 55)
+    55)
+
+  (deftest catch.8
+    (catch 'x 1 (catch 'y (throw 'y 2)))
+    2)
+
+  (deftest catch.9
+    (catch 'x 1 (catch 'y (throw 'y)))
+    #void))
+
+(defsection block/return-from
 
   (deftest block.1
     (signals-error
