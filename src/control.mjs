@@ -7,9 +7,9 @@
  * Adds delimited control, delimited dynamic binding, and continuation
  * barriers to a virtual machine.
  *
- * The API follows the delimcc library
+ * The API follows the delimcc library:
  * `http://okmij.org/ftp/continuations/caml-shift-journal.pdf'
- * and the paper
+ * and the paper Delimited Dynamic Binding:
  * `http://okmij.org/ftp/papers/DDBinding.pdf'.
  *
  * Also implements continuation-aware first-order effects: sequencing,
@@ -17,31 +17,46 @@
  *
  * ---
  *
- * The main idea of the implementation is to run directly on the
- * JavaScript stack most of the time, and only create on-heap
- * continuations when they are captured.
+ * We are implementing delimited continuations in the context of a
+ * tree-walking interpreter.  The main idea of the implementation is
+ * to run directly on the JavaScript stack most of the time, and only
+ * create on-heap continuations when they are captured.
  *
  * In the regular case, Lisp operators return their result as their
  * normal JS return value.  But when a capture is triggered, a
  * suspension helper object is returned instead.  This suspension
  * contains the desired prompt to which the capture should abort to,
- * as well as a Lisp handler function that gets called with the
- * captured continuation once the prompt is reached.  The suspension
- * also contains the continuation frames captured so far.  Every
- * built-in Lisp operator must detect when one of its inner
+ * as well as a user-supplied Lisp handler function that gets called
+ * with the captured continuation once the prompt is reached.  The
+ * suspension also contains the continuation frames captured so far.
+ *
+ * Every built-in Lisp operator must detect when one of its inner
  * sub-expressions returns a suspension instead of a regular result.
  * In this case, the operator must suspend itself also by adding any
  * required continuation frames to the suspension, and passing on the
- * suspension outwards to its caller.
+ * suspension outwards to its caller.  This process ends when the
+ * desired prompt is reached, at which point the user-supplied handler
+ * is called.
  *
  * To reinstate a continuation, a resumption helper object is created.
  * Analogous to how a suspension gets passed outwards from the point
  * of continuation capture to the prompt, a resumption gets passed
  * inwards from the point where continuation composition is triggered.
  * A resumption contains the continuation frames that must be put back
- * from the heap on to the JS stack, as well as a Lisp handler
- * function that is called inside the newly composed context when all
- * frames have been reinstated.
+ * from the heap onto the JS stack, as well as a user-supplied Lisp
+ * handler function that is called inside the newly composed context
+ * when all frames have been reinstated.
+ *
+ * Every built-in Lisp operator is written in such a way that it can
+ * either be called normally, or during continuation resumption.  If
+ * called normally, the operator will do its regular business.  If
+ * called during resumption however, it will receive a resumption
+ * helper object.  The operator will tell the resumption object to put
+ * the remaining on-heap continuation frames stored in it back onto
+ * the JS stack before proceeding.  This process ends when the
+ * innermost continuation frame that originally triggered continuation
+ * capture is reached, at which point the user-supplied handler is
+ * called.
  */
 export function init_control(vm)
 {
