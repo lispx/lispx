@@ -587,32 +587,32 @@ export function init_control(vm)
     }
 
     /*
-     * (%%catch tag thunk) => result
+     * (%%catch tag form) => result
      *
-     * Built-in function that evaluates thunk with a catch tag.
+     * Built-in operator that evaluates a form with a catch tag.
      * Dynamically nested forms may nonlocally exit to the catch tag
      * with %%THROW.
      *
      * Cf. Common Lisp's CATCH.
      */
-    vm.CATCH = (args, env) => {
-        const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
-        const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
-        return do_catch(tag, thunk, env);
+    vm.CATCH = (operands, env) => {
+        const tag = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
+        const form = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
+        return do_catch(tag, form, env);
     };
 
-    function do_catch(tag, thunk, env, resumption = null)
+    function do_catch(tag, form, env, resumption = null)
     {
         try {
             let result;
             if (resumption instanceof vm.Resumption) {
                 result = resumption.resume();
             } else {
-                result = vm.operate(thunk, vm.nil(), env);
+                result = vm.eval(form, env);
             }
             if (result instanceof vm.Suspension) {
                 return result.suspend((resumption) =>
-                    do_catch(tag, thunk, env, resumption));
+                    do_catch(tag, form, env, resumption));
             } else {
                 return result;
             }
@@ -780,7 +780,7 @@ export function init_control(vm)
 
     vm.define_built_in_operator("%%loop", vm.LOOP);
 
-    vm.define_built_in_function("%%catch", vm.CATCH);
+    vm.define_built_in_operator("%%catch", vm.CATCH);
 
     vm.define_built_in_function("%%throw", vm.THROW);
 

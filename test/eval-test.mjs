@@ -47,6 +47,7 @@ describe("Evaluation & Operation", () => {
             "%%progn",
             "%%if",
             "%%loop",
+            "%%catch",
             "%%unwind-protect",
         ];
 
@@ -103,7 +104,6 @@ describe("Evaluation & Operation", () => {
             "%%push-delim-subcont",
             "%%push-subcont-barrier",
             "%%progv",
-            "%%catch",
             "%%throw",
         ];
 
