@@ -667,10 +667,9 @@ export function init_control(vm)
      * Built-in operator that evaluates the protected expression and
      * returns its result.
      *
-     * Regardless of whether the protected expression returns
-     * normally, or via a nonlocal exit (cf. %%CALL-WITH-ESCAPE), the
-     * cleanup expression is evaluated (and its result discarded)
-     * after the protected expression.
+     * Regardless of whether the protected expression returns normally
+     * or via a nonlocal exit, the cleanup expression is evaluated
+     * (and its result discarded) after the protected expression.
      *
      * The cleanup expression is not evaluated when the protected
      * expression exits via a continuation capture or panic.  (A panic
