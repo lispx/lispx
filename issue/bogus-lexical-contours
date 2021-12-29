@@ -1,0 +1,2 @@
+Some operators like CATCH use lambdas in their implementation, so they
+add lexical contours where there shouldn't be any.
