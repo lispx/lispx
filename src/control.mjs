@@ -208,8 +208,8 @@ export function init_control(vm)
     /*
      * Work function for bind().
      *
-     * Note the resumption parameter. Do_bind(), like all work functions,
-     * is written so that it can be called in two ways:
+     * Note the resumption parameter.  Do_bind(), like all work
+     * functions, is written so that it can be called in two ways:
      *
      * - Directly from bind(), with a null resumption.  In this case it
      *   will evaluate the first thunk.
@@ -494,6 +494,8 @@ export function init_control(vm)
      *
      * Built-in function that evaluates a thunk with dynamic variables
      * temporarily bound to new values.
+     *
+     * Cf. Common Lisp's PROGV.
      */
     vm.PROGV = (args, env) =>
     {
@@ -558,7 +560,9 @@ export function init_control(vm)
     /*
      * (%%loop expr) => |
      *
-     * Built-in operator that repeatedly evaluates an expression.
+     * Built-in operator that evaluates an expression in a never-ending cycle.
+     *
+     * Cf. Common Lisp's "simple" LOOP, NOT the Loop Facility.
      */
     vm.LOOP = (operands, env) =>
     {
@@ -672,6 +676,8 @@ export function init_control(vm)
      * expression exits via a continuation capture or panic.  (A panic
      * is a special kind of exception whose purpose is to
      * unconditionally break out of Lisp and back into JS.)
+     *
+     * Cf. Common Lisp's UNWIND-PROTECT.
      */
     vm.UNWIND_PROTECT = (operands, env) =>
     {
