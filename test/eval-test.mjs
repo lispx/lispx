@@ -103,7 +103,8 @@ describe("Evaluation & Operation", () => {
             "%%push-delim-subcont",
             "%%push-subcont-barrier",
             "%%progv",
-            "%%call-with-escape",
+            "%%catch",
+            "%%throw",
         ];
 
         for (const name of functions) {

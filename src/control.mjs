@@ -13,7 +13,7 @@
  * `http://okmij.org/ftp/papers/DDBinding.pdf'.
  *
  * Also implements continuation-aware first-order effects: sequencing,
- * looping, nonlocal escape functions, and unwind protection.
+ * looping, nonlocal exits, and unwind protection.
  *
  * ---
  *
@@ -587,15 +587,17 @@ export function init_control(vm)
     }
 
     /*
-     * (%%call-with-catch-tag tag thunk) => result
+     * (%%catch tag thunk) => result
+     *
+     * Cf. Common Lisp's CATCH.
      */
-    vm.CALL_WITH_CATCH_TAG = (args, env) => {
+    vm.CATCH = (args, env) => {
         const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
-        return do_call_with_catch_tag(tag, thunk, env);
+        return do_catch(tag, thunk, env);
     };
 
-    function do_call_with_catch_tag(tag, thunk, env, resumption = null)
+    function do_catch(tag, thunk, env, resumption = null)
     {
         try {
             let result;
@@ -606,17 +608,18 @@ export function init_control(vm)
             }
             if (result instanceof vm.Suspension) {
                 return result.suspend((resumption) =>
-                    do_call_with_catch_tag(tag, thunk, env, resumption));
+                    do_catch(tag, thunk, env, resumption));
             } else {
                 return result;
             }
         } catch (e) {
             /*
-             * Check if the exception we caught is our catch tag.
+             * Check if the exception we caught is a nonlocal exit
+             * with our catch tag.
              *
              * If so, return its value.  Otherwise rethrow it.
              */
-            if ((e instanceof vm.Catch_tag) && (e.tag === tag)) {
+            if ((e instanceof vm.Nonlocal_exit) && (e.tag === tag)) {
                 return e.value;
             } else {
                 throw e;
@@ -626,93 +629,24 @@ export function init_control(vm)
 
     /*
      * (%%throw tag value) => |
+     *
+     * Cf. Common Lisp's THROW.
      */
     vm.THROW = (args, env) => {
         const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const value = vm.assert_type(vm.elt(args, 1), vm.TYPE_ANY);
-        throw new vm.Catch_tag(tag, value);
+        throw new vm.Nonlocal_exit(tag, value);
     };
 
     /*
      * Instances of this class are thrown by %%THROW.
      */
-    vm.Catch_tag = class Catch_tag
+    vm.Nonlocal_exit = class Nonlocal_exit
     {
         constructor(tag, value)
         {
             this.tag = tag;
             this.value = value;
-        }
-    };
-
-    /*
-     * (%%call-with-escape fun) => result
-     *
-     * Built-in function that calls a function with a one-argument
-     * escape function.
-     *
-     * If the escape function is called, evaluation is immediately
-     * aborted and the argument passed to the escape function
-     * is returned.  This is called a nonlocal exit.
-     *
-     * If the escape function is not called, returns the normal
-     * result of the body function.
-     *
-     * It is an error to call the escape function after the body
-     * function has returned.
-     */
-    vm.CALL_WITH_ESCAPE = (args, env) =>
-    {
-        const fun = vm.assert_type(vm.elt(args, 0), vm.Function);
-        /*
-         * Create a unique tag.  We remember it in our closure and
-         * later check for it when an exception is thrown.
-         */
-        const tag = new vm.Tag();
-        const escape = vm.alien_function((value) => {
-            tag.value = value;
-            throw tag;
-        });
-        return do_call_with_escape(fun, tag, escape, env);
-    };
-
-    function do_call_with_escape(fun, tag, escape, env, resumption = null)
-    {
-        try {
-            let result;
-            if (resumption instanceof vm.Resumption) {
-                result = resumption.resume();
-            } else {
-                result = vm.operate(fun, vm.list(escape), env);
-            }
-            if (result instanceof vm.Suspension) {
-                return result.suspend((resumption) =>
-                    do_call_with_escape(fun, tag, escape, env, resumption));
-            } else {
-                return result;
-            }
-        } catch (e) {
-            /*
-             * Check if the exception we caught is our unique tag.
-             *
-             * If so, return its value.  Otherwise rethrow it.
-             */
-            if (e === tag) {
-                return tag.value;
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    /*
-     * Instances of this class are thrown by escape functions.
-     */
-    vm.Tag = class Tag // Does not extend Error because no stack trace is desired.
-    {
-        constructor()
-        {
-            this.value = null;
         }
     };
 
@@ -839,9 +773,7 @@ export function init_control(vm)
 
     vm.define_built_in_operator("%%loop", vm.LOOP);
 
-    vm.define_built_in_function("%%call-with-escape", vm.CALL_WITH_ESCAPE);
-
-    vm.define_built_in_function("%%call-with-catch-tag", vm.CALL_WITH_CATCH_TAG);
+    vm.define_built_in_function("%%catch", vm.CATCH);
 
     vm.define_built_in_function("%%throw", vm.THROW);
 

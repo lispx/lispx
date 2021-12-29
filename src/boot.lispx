@@ -321,14 +321,30 @@ $(syntax initializer (parameter value))"
   (list #'labels (list (list* name (mapcar #'car initializers) forms))
         (list* name (mapcar #'cadr initializers))))
 
-(defmacro block (block-name . forms)
+(defmacro catch (tag . forms)
+  "Establish a catch tag and evaluate FORMS as an implicit `progn'
+inside it.  The forms may use `throw' to nonlocally exit from the
+tag.  Usually, `block' should be preferred."
+  (list #'%%catch tag (list* #'lambda () forms)))
+
+(defun throw (tag . result?)
+  "Abort to a nesting catch tag established by `catch' and pass the
+RESULT to it."
+  (%%throw tag (optional result?)))
+
+(defexpr block (block-name . forms) env
   "Establish a block named BLOCK-NAME and evaluate the FORMS as an
 implicit `progn' inside it.  The forms may use `return-from' to
 nonlocally exit from the block.
 
 Note that unlike in Common Lisp, there is no separate namespace for
 block names; a block is named in the normal variable namespace."
-  (list #'%%call-with-escape (list* #'lambda (list block-name) forms)))
+  (let ((tag (list 'block-name))) ; cons up a fresh object as tag
+    (flet ((escape (value) (throw tag value)))
+      (catch tag
+        (eval (list (list* #'lambda (list block-name) forms)
+                    #'escape)
+              env)))))
 
 (defun return-from (#'block-name . value?)
   "Abort evaluation and return the optional VALUE (which defaults to
@@ -337,12 +353,6 @@ a block whose dynamic extent has ended.
 
 $(fn (block-name . value?))"
   (block-name (optional value?)))
-
-(defmacro catch (tag . forms)
-  (list #'%%call-with-catch-tag tag (list* #'lambda () forms)))
-
-(defun throw (tag . result?)
-  (%%throw tag (optional result?)))
 
 (defmacro unwind-protect (protected-form . cleanup-forms)
   "Evaluate the PROTECTED-FORM and return its result.  Regardless of

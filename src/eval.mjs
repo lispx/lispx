@@ -506,9 +506,9 @@ export function init_eval(vm)
     /*** Exception Trapping and Panicking ***/
 
     /*
-     * All exceptions - except tags (see control.mjs) and panics (see
-     * below) - that happen during evaluation are caught by this
-     * function.
+     * All exceptions - except nonlocal exits (see control.mjs) and
+     * panics (see below) - that happen during evaluation are caught
+     * by this function.
      *
      * If the user defined error handler, ERROR, is defined in the
      * VM's root environment, it is called with the exception as
@@ -524,7 +524,7 @@ export function init_eval(vm)
         try {
             return thunk();
         } catch (e) {
-            if ((e instanceof vm.Catch_tag) || (e instanceof vm.Tag) || (e instanceof vm.Panic))
+            if ((e instanceof vm.Nonlocal_exit) || (e instanceof vm.Panic))
                 throw e;
             else
                 return vm.call_user_error_handler(e);
