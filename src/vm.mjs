@@ -1109,7 +1109,15 @@ function init_vm(vm)
         throw new vm.Error("You called an abstract method. Congratulations!");
     };
 
-    /*** Type Checking ***/
+    /*** Type Specs ***/
+
+    /*
+     * We use a system of type specifiers to check the types of
+     * arguments passed to JS functions.
+     *
+     * Type specs can also be translated to symbolic Lisp data
+     * for error reporting.
+     */
 
     /*
      * Returns true if a datum matches a type spec, false otherwise.
@@ -1133,35 +1141,6 @@ function init_vm(vm)
             return datum instanceof type_spec;
         } else if (type_spec && type_spec.custom_check) {
             return type_spec.custom_check(datum);
-        } else {
-            throw new vm.Error("Unknown type spec");
-        }
-    };
-
-    /*
-     * Transforms a type spec into a symbolic representation used on
-     * the Lisp side.
-     *
-     * A symbolic Lisp type specifier is one of:
-     *
-     * - (Lisp) String: in this case the type specifier describes
-     *   a JavaScript typeof check.  As a special case, "null" stands
-     *   for the JS null value.
-     *
-     * - Symbol: the type specifier describes a Lisp class by name.
-     *
-     * - List: compound type specifier.  Currently supported are
-     *   OR type specifiers of the form
-     *   (or <type-spec-1> ... <type-spec-N>).
-     */
-    vm.to_lisp_type_spec = (type_spec) =>
-    {
-        if (typeof(type_spec) === "string") {
-            return vm.str(type_spec);
-        } else if (typeof(type_spec) === "function") {
-            return vm.lisp_class(type_spec).get_name();
-        } else if (type_spec && type_spec.to_lisp_type_spec) {
-            return type_spec.to_lisp_type_spec();
         } else {
             throw new vm.Error("Unknown type spec");
         }
@@ -1227,6 +1206,35 @@ function init_vm(vm)
             return datum;
         } else {
             throw vm.make_type_error(datum, type_spec);
+        }
+    };
+
+    /*
+     * Transforms a type spec into a symbolic representation used on
+     * the Lisp side.
+     *
+     * A symbolic Lisp type specifier is one of:
+     *
+     * - (Lisp) String: in this case the type specifier describes
+     *   a JavaScript typeof check.  As a special case, "null" stands
+     *   for the JS null value.
+     *
+     * - Symbol: the type specifier describes a Lisp class by name.
+     *
+     * - List: compound type specifier.  Currently supported are
+     *   OR type specifiers of the form
+     *   (or <type-spec-1> ... <type-spec-N>).
+     */
+    vm.to_lisp_type_spec = (type_spec) =>
+    {
+        if (typeof(type_spec) === "string") {
+            return vm.str(type_spec);
+        } else if (typeof(type_spec) === "function") {
+            return vm.lisp_class(type_spec).get_name();
+        } else if (type_spec && type_spec.to_lisp_type_spec) {
+            return type_spec.to_lisp_type_spec();
+        } else {
+            throw new vm.Error("Unknown type spec");
         }
     };
 
