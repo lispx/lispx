@@ -589,6 +589,10 @@ export function init_control(vm)
     /*
      * (%%catch tag thunk) => result
      *
+     * Built-in function that evaluates thunk with a catch tag.
+     * Dynamically nested forms may nonlocally exit to the catch tag
+     * with %%THROW.
+     *
      * Cf. Common Lisp's CATCH.
      */
     vm.CATCH = (args, env) => {
@@ -629,6 +633,9 @@ export function init_control(vm)
 
     /*
      * (%%throw tag value) => |
+     *
+     * Built-in function that nonlocally exits to the dynamically
+     * nesting catch tag and passes the value to it.
      *
      * Cf. Common Lisp's THROW.
      */
