@@ -1,6 +1,6 @@
 /*
  * LispX Input and Output Streams
- * Copyright (c) 2021 Manuel Simoni
+ * Copyright (c) 2021 Manuel J. Simoni
  */
 
 /*

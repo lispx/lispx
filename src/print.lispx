@@ -1,6 +1,6 @@
 ;;; LispX Printer
 
-;; Copyright (c) 2021 Manuel Simoni
+;; Copyright (c) 2021 Manuel J. Simoni
 
 (defun write (object . keywords)
   "Write OBJECT to STREAM (defaults to `*standard-output*').  Main
