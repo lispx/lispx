@@ -325,8 +325,6 @@ export function init_read(vm)
             switch (b) {
             case "'":
                 return read_namespaced_symbol(stream, vm.FUNCTION_NAMESPACE);
-            case "$":
-                return read_namespaced_symbol(stream, vm.CLASS_NAMESPACE);
             default:
                 throw new vm.Reader_error(`Illegal dispatching character ${b}`);
             }
