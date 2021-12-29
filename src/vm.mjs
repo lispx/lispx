@@ -12,8 +12,8 @@ import Big from "big.js";
  * Import VM modules.
  *
  * Currently, all modules are always loaded, but in the future it will
- * be possible to make them optional, so that one can obtain e.g. an
- * even smaller VM without IO support.
+ * be possible to make them optional, so that one can obtain e.g. a
+ * smaller VM without IO support.
  */
 import { init_eval } from "./eval.mjs";
 import { init_control } from "./control.mjs";
