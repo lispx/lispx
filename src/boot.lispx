@@ -339,7 +339,7 @@ nonlocally exit from the block.
 
 Note that unlike in Common Lisp, there is no separate namespace for
 block names; a block is named in the normal variable namespace."
-  (let ((tag (list 'block-name))) ; cons up a fresh object as tag
+  (let ((tag (list block-name))) ; cons up a fresh object as tag
     (flet ((escape (value) (throw tag value)))
       (catch tag
         (eval (list (list* #'lambda (list block-name) forms)
