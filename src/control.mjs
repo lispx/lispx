@@ -19,8 +19,8 @@
  *
  * We are implementing delimited continuations in the context of a
  * tree-walking interpreter.  The main idea of the implementation is
- * to run directly on the JavaScript stack most of the time, and only
- * create on-heap continuations when they are captured.
+ * to run directly on the host language stack most of the time, and
+ * only create on-heap Lisp continuations when they are captured.
  *
  * In the regular case, Lisp operators return their result as their
  * normal JS return value.  But when a capture is triggered, a
@@ -69,7 +69,7 @@ export function init_control(vm)
      * frame corresponds to the expression that appeared directly
      * within the prompt-pushing expression (%%PUSH-PROMPT or
      * %%PUSH-DELIM-SUBCONT).  The prompt-pushing expression itself
-     * is never included in the continuation.
+     * is not included in the continuation.
      *
      * Every continuation frame contains a work function (a JavaScript
      * closure) that knows how to resume that particular frame when
@@ -104,10 +104,11 @@ export function init_control(vm)
      * It gets passed outwards from the %%TAKE-SUBCONT expression that
      * triggers the capture until a %%PUSH-PROMPT or
      * %%PUSH-DELIM-SUBCONT with a matching prompt is reached.  Every
-     * intervening expression adds one or more continuation frames to
-     * the suspension on the way out.  Once the %%PUSH-PROMPT or
-     * %%PUSH-DELIM-SUBCONT is reached, the suspension's handler gets
-     * called with the captured continuation.
+     * intervening Lisp expression adds one or more continuation
+     * frames to the suspension on the way out.  Once the
+     * %%PUSH-PROMPT or %%PUSH-DELIM-SUBCONT is reached, the
+     * suspension's handler gets called with the captured
+     * continuation.
      *
      * Suspensions are implementation-level objects, and are never
      * visible to Lisp.
@@ -132,8 +133,9 @@ export function init_control(vm)
         }
 
         /*
-         * Adds a new outer continuation frame with the given work
-         * function as we move outwards during continuation creation.
+         * Destructively adds a new outer continuation frame with the
+         * given work function to the suspension as we move outwards
+         * during continuation creation.
          */
         suspend(work_fun)
         {
@@ -176,9 +178,9 @@ export function init_control(vm)
         }
 
         /*
-         * Removes the outer frame of a continuation and calls its
-         * work function as we move inwards during continuation
-         * reinstatement.
+         * Destructively removes the outer frame of a continuation
+         * from the resumption and calls its work function as we move
+         * inwards during continuation reinstatement.
          */
         resume()
         {
@@ -191,9 +193,9 @@ export function init_control(vm)
     /*** Bind ***/
 
     /*
-     * Sequences a zero-argument thunk and a one-argument function in
-     * a continuation-aware manner: the (second) function receives as
-     * argument the result of the (first) thunk.
+     * Sequences a thunk and a function in a continuation-aware
+     * manner: the function receives the result of the thunk as its
+     * argument.
      *
      * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
