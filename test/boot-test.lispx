@@ -2339,20 +2339,20 @@
 
   (deftest loop-let.2
     (signals-error
-     (loop-let name)
+     (loop-let -name-)
      match-error))
 
   (deftest loop-let.3
-    (loop-let name ())
+    (loop-let -name- ())
     #void)
 
   (deftest loop-let.4
-    (loop-let sum ((as (list 1 2 3))
-                   (bs (list 4 5 6)))
+    (loop-let -sum- ((as (list 1 2 3))
+                     (bs (list 4 5 6)))
       (if (null as)
           #nil
           (cons (+ (car as) (car bs))
-                (sum (cdr as) (cdr bs)))))
+                (-sum- (cdr as) (cdr bs)))))
     '(5 7 9)))
 
 (defsection optional

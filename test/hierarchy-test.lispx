@@ -4,7 +4,7 @@
 
   (defun test-hierarchy (classes)
     (let ((env (the-environment)))
-      (loop-let test-classes-loop ((classes classes) (superclass (class object)))
+      (loop-let -test-classes- ((classes classes) (superclass (class object)))
         (dolist (c classes #t)
           (typecase c
             (symbol
@@ -13,7 +13,7 @@
             (cons
              (let ((class (find-class (car c) env)))
                (assert (subclassp class superclass))
-               (test-classes-loop (cdr c) class)))
+               (-test-classes- (cdr c) class)))
             (object
              (assert #f)))))))
 

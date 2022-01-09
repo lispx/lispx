@@ -384,12 +384,12 @@ clause, or return void if there are no more clauses.
 
 $(syntax clause (class-name . forms))"
   (let ((key (eval keyform env)))
-    (loop-let typecase-loop ((clauses clauses))
+    (loop-let -typecase- ((clauses clauses))
       (unless (null clauses)
         (let ((((class-name . forms) . rest-clauses) clauses))
           (if (typep key (find-class class-name env))
               (eval (cons #'progn forms) env)
-              (typecase-loop rest-clauses)))))))
+              (-typecase- rest-clauses)))))))
 
 (defun assert (boolean)
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
@@ -727,14 +727,14 @@ nil.  The default itself defaults to void."
 (defun optionals (list . defaults)
   "Similar to `optional', but provides DEFAULTS for any number of
 elements of LIST."
-  (loop-let optionals ((list list) (defaults defaults))
+  (loop-let -optionals- ((list list) (defaults defaults))
     (if (null list)
         (if (null defaults)
             #nil
-            (cons (car defaults) (optionals #nil (cdr defaults))))
+            (cons (car defaults) (-optionals- #nil (cdr defaults))))
         (if (null defaults)
-            (cons (car list) (optionals (cdr list) #nil))
-            (cons (car list) (optionals (cdr list) (cdr defaults)))))))
+            (cons (car list) (-optionals- (cdr list) #nil))
+            (cons (car list) (-optionals- (cdr list) (cdr defaults)))))))
 
 ;;; Dynamic Binding
 
@@ -982,14 +982,14 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
 (defun %signal (condition)
   "Utility to signal the CONDITION.  If the signal is unhandled,
 return void.  See `signal'."
-  (loop-let signal-loop ((handler-frame? (dynamic *condition-handler-frame?*)))
+  (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))
     ;; Payload to `%find-handler?' is always nil for condition handlers.
     (if-option ((handler frame) (%find-handler? condition handler-frame? #nil))
       (progn
         ;; Handler found; call it, passing along frame.
         (%call-condition-handler handler frame condition)
         ;; Signal unhandled: continue search for handlers.
-        (signal-loop (slot-value frame 'parent-frame?)))
+        (-signal- (slot-value frame 'parent-frame?)))
       ;; No handler found, return void.
       #void)))
 
@@ -1152,15 +1152,15 @@ of its condition class."
 established ones first, optionally limited to those that are
 explicitly associated with the supplied CONDITION or not associated
 with any condition."
-  (loop-let compute ((handlers ())
-                     (handler-frame? (dynamic *restart-handler-frame?*)))
+  (loop-let -compute- ((handlers ())
+                       (handler-frame? (dynamic *restart-handler-frame?*)))
     (if-option (handler-frame handler-frame?)
-      (compute (append handlers
-                       (remove-if-not
-                        (lambda (handler)
-                          (%restart-handler-applicable-to-condition-p handler condition?))
-                        (slot-value handler-frame 'handlers)))
-               (slot-value handler-frame 'parent-frame?))
+      (-compute- (append handlers
+                         (remove-if-not
+                          (lambda (handler)
+                            (%restart-handler-applicable-to-condition-p handler condition?))
+                          (slot-value handler-frame 'handlers)))
+                 (slot-value handler-frame 'parent-frame?))
       handlers)))
 
 (defclass restart-error (error)
