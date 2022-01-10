@@ -1959,36 +1959,6 @@
     (remove-if (lambda (item) (= 1 item)) '())
     '()))
 
-(defsection remove-if-not
-
-  (deftest remove-if-not.1
-    (signals-error
-     (remove-if-not)
-     match-error))
-
-  (deftest remove-if-not.2
-    (signals-error
-     (remove-if-not (lambda (item) #t))
-     match-error))
-
-  (deftest remove-if-not.3
-    (signals-error
-     (remove-if-not (lambda (item) #t) 12)
-     type-error :datum 12 :expected-type 'cons))
-
-  (deftest remove-if-not.4
-    (signals-error
-     (remove-if-not 1 '(1 2))
-     type-error :datum 1 :expected-type 'operator))
-
-  (deftest remove-if-not.5
-    (remove-if-not (lambda (item) (= 1 item)) '(1 2 3 1 2 3))
-    '(1 1))
-
-  (deftest remove-if-not.6
-    (remove-if-not (lambda (item) (= 1 item)) '())
-    '()))
-
 (defsection get?
 
   (deftest get?.1

@@ -468,11 +468,6 @@ have been removed."
           (remove-if #'test (cdr list))
           (cons (car list) (remove-if #'test (cdr list))))))
 
-(defun remove-if-not (#'test list)
-  "Return a new list from which the elements that don't satisfy the
-TEST have been removed."
-  (remove-if (lambda (item) (not (test item))) list))
-
 (defun get? (plist indicator)
   "Search for the INDICATOR keyword in the property list PLIST (a list
 of alternating keywords and values) and return the found value as an
@@ -1152,15 +1147,16 @@ of its condition class."
 established ones first, optionally limited to those that are
 explicitly associated with the supplied CONDITION or not associated
 with any condition."
-  (loop-let -compute-restarts- ((handler-frame? (dynamic *restart-handler-frame?*))
-                                (handlers ()))
+  (loop-let -compute-restarts- ((handlers '())
+                                (handler-frame? (dynamic *restart-handler-frame?*)))
     (if-option (handler-frame handler-frame?)
-      (-compute-restarts- (slot-value handler-frame 'parent-frame?)
-                          (append handlers
-                                  (remove-if-not
+      (-compute-restarts- (append handlers
+                                  (remove-if
                                    (lambda (handler)
-                                     (%restart-handler-applicable-to-condition-p handler condition?))
-                                   (slot-value handler-frame 'handlers))))
+                                     (not (%restart-handler-applicable-to-condition-p handler
+                                                                                      condition?)))
+                                   (slot-value handler-frame 'handlers)))
+                          (slot-value handler-frame 'parent-frame?))
       handlers)))
 
 (defclass restart-error (error)
