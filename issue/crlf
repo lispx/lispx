@@ -1,2 +1,0 @@
-The reader code completely ignores carriage returns and line feeds so
-users of the OS from the Evil Northwest will probably face issues.
