@@ -30,8 +30,11 @@ setup and teardown functions for the whole section in the future."
   (mocha:describe
    (to-js-string (symbol-name name))
    (js-lambda ()
-     (push-prompt +default-prompt+
-       (eval (list* #'progn forms) env)))))
+     ;; We don't push a prompt here.  The reason is that Mocha
+     ;; describe() doesn't support promises anyway.  So any Lisp code
+     ;; that tries to capture a continuation directly inside a section
+     ;; will get a "prompt not found" error.
+     (eval (list* #'progn forms) env))))
 
 (defexpr signals-error (form condition-class . slot-specs) env
   "Evaluate the FORM and assert that it signals a condition of the
