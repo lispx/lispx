@@ -179,10 +179,10 @@ with a `push-delim-subcont' that pushes an unused prompt."
 ;; `dynvar-scheme48-problem.scm' of the DBplusDC distribution, available
 ;; at the URL `http://okmij.org/ftp/Computation/dynamic-binding.html'
 
-(defun set-dynamic (dynamic value)
+(defun dset (dynvar value)
   "Set the value of a dynamic variable and return the old value."
-  (prog1 (slot-value dynamic 'value)
-    (set-slot-value dynamic 'value value)))
+  (prog1 (dynamic dynvar)
+    (set-dynamic dynvar value)))
 
 (defsection dbplusdc
 
@@ -215,14 +215,14 @@ with a `push-delim-subcont' that pushes an unused prompt."
     '(1 1 2))
 
   ;; It's probably a happy accident that this test works, since
-  ;; `set-dynamic' is pretty different from DBplusDC's `dset'.
+  ;; our `dset' is pretty different from DBplusDC's.
   (deftest test12
     (progn
       (defdynamic *p* #void)
       (dynamic-let ((*p* 1))
         (let* ((v1 (dynamic *p*))
                (v2 (dynamic-let ((*p* 2))
-                     (let ((v3 (set-dynamic *p* 12))
+                     (let ((v3 (dset *p* 12))
                            (v4 (dynamic *p*)))
                        (list v3 v4)))))
           (let ((v5 (dynamic *p*)))

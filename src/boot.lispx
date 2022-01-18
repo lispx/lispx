@@ -742,6 +742,10 @@ The optional DOCSTRING is currently ignored."
   "Return the current value of the DYNAMIC-VARIABLE."
   (slot-value dynamic-variable 'value))
 
+(defun set-dynamic (dynamic-variable value)
+  "Set the current value of the DYNAMIC-VARIABLE."
+  (set-slot-value dynamic-variable 'value value))
+
 (defexpr dynamic-let (bindings . forms) env
   "Evaluate the FORMS with the dynamic variables specified by BINDINGS
 temporarily bound to new values.
