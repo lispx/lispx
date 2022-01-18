@@ -10,22 +10,18 @@ result to an EXPECTED value (which defaults to true)."
   (mocha:it
    (to-js-string (symbol-name name))
    (js-lambda ()
-     ;; We push this barrier so that tests that check for non-existing
-     ;; prompts get a `prompt-not-found-error' here, and can't escape
-     ;; outwards.
-     (push-subcont-barrier
-       ;; Push the default prompt for asynchronous tests.
-       ;;
-       ;; Note that this is quite subtle: when an asynchronous test
-       ;; captures to this prompt, it returns a promise here.  This
-       ;; promise is returned to Mocha, which does the right thing
-       ;; (wait for it to resolve).
-       (push-prompt +default-prompt+
-         ;; Test and expected expressions are evaluated in fresh child
-         ;; environments of the current environment, so that bindings they
-         ;; create don't affect other tests.
-         (assert (= (eval expression (make-environment env))
-                    (eval (optional expected? #t) (make-environment env)))))))))
+     ;; Push the default prompt for asynchronous tests.
+     ;;
+     ;; Note that this is quite subtle: when an asynchronous test
+     ;; captures to this prompt, it returns a promise here.  This
+     ;; promise is returned to Mocha, which does the right thing (wait
+     ;; for it to resolve).
+     (push-prompt +default-prompt+
+       ;; Test and expected expressions are evaluated in fresh child
+       ;; environments of the current environment, so that bindings
+       ;; they create don't affect other tests.
+       (assert (= (eval expression (make-environment env))
+                  (eval (optional expected? #t) (make-environment env))))))))
 
 (defexpr defsection (name . forms) env
   "Evaluate FORMS as a group of tests identified by NAME.  Currently
@@ -34,7 +30,8 @@ setup and teardown functions for the whole section in the future."
   (mocha:describe
    (to-js-string (symbol-name name))
    (js-lambda ()
-     (eval (list* #'progn forms) env))))
+     (push-prompt +default-prompt+
+       (eval (list* #'progn forms) env)))))
 
 (defexpr signals-error (form condition-class . slot-specs) env
   "Evaluate the FORM and assert that it signals a condition of the
