@@ -43,7 +43,7 @@ function make_entry(filename, libraryTarget, minimize)
         module: {
             rules: [
                 {
-                    test: /\.lispx$/i,
+                    test: /\.lispx$/,
                     type: "asset/source"
                 }
             ]
@@ -99,7 +99,7 @@ function make_test_entry(library, filename)
         module: {
             rules: [
                 {
-                    test: /\.lispx$/i,
+                    test: /\.lispx$/,
                     type: "asset/source"
                 }
             ]
