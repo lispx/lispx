@@ -3,6 +3,8 @@
 ;; Import Mocha test framework functions from the global scope.
 (def #'mocha:describe (to-lisp-function (js-global "describe")))
 (def #'mocha:it (to-lisp-function (js-global "it")))
+(def #'mocha:before (to-lisp-function (js-global "before")))
+(def #'mocha:after (to-lisp-function (js-global "after")))
 
 (defexpr deftest (name expression . expected?) env
   "Run the EXPRESSION as a test identified by NAME and compare its
@@ -35,6 +37,18 @@ setup and teardown functions for the whole section in the future."
      ;; that tries to capture a continuation directly inside a section
      ;; will get a "prompt not found" error.
      (eval (list* #'progn forms) env))))
+
+(defexpr before forms env
+  (mocha:before
+   (js-lambda ()
+     (push-prompt 'default-prompt
+       (eval (list* #'progn forms) env)))))
+
+(defexpr after forms env
+  (mocha:after
+   (js-lambda ()
+     (push-prompt 'default-prompt
+       (eval (list* #'progn forms) env)))))
 
 (defexpr signals-error (form condition-class . slot-specs) env
   "Evaluate the FORM and assert that it signals a condition of the
