@@ -41,6 +41,9 @@ export function init_js(vm)
 
     /*
      * Calls a JS constructor with arguments.
+     *
+     * Note that this is not a fat arrow function because we need
+     * access to the arguments object.
      */
     vm.js_new = function(constructor /* , arg1, ..., argN */)
     {
