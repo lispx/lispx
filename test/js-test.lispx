@@ -281,7 +281,22 @@
   (deftest js-get.1
     (let ((Math (js-global "Math")))
       (to-lisp-string (call-js-method (js-get Math "PI") "toString")))
-    "3.141592653589793"))
+    "3.141592653589793")
+
+  (deftest js-get.2
+    (signals-error
+     (js-get)
+     match-error))
+
+  (deftest js-get.3
+    (signals-error
+     (js-get 12)
+     match-error))
+
+  (deftest js-get.4
+    (signals-error
+     (js-get 12 'bar)
+     type-error :datum 'bar :expected-type 'string)))
 
 (defsuite apply-js-method
 
