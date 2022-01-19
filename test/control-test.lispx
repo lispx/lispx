@@ -543,7 +543,21 @@ coroutine with `resume'."
       (assert (typep *foo* (class object)))
       (assert (subclassp (class dynamic) (class standard-object)))
       (assert (subclassp (class dynamic) (class object))))
-    #void))
+    #void)
+
+  (deftest set-dynamic.1
+    (progn
+      (defdynamic *bar* #void)
+      (dynamic-let ((*bar* 1))
+                   (set-dynamic *bar* 2)
+                   (assert (= 2 (dynamic *bar*)))
+                   (dynamic-let ((*bar* 3))
+                                (assert (= 3 (dynamic *bar*))))
+                   (assert (= 2 (dynamic *bar*)))
+                   (set-dynamic *bar* 4)
+                   (assert (= 4 (dynamic *bar*))))
+      (assert (= #void (dynamic *bar*)))
+      #t)))
 
 (defsection default-prompt
 

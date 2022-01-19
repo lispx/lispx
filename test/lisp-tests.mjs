@@ -1,6 +1,7 @@
 import { VM } from "lispx-vm";
 
 import test_util_code from "./test-util.lispx";
+import test_util_test_code from "./test-util-test.lispx";
 import boot_test_code from "./boot-test.lispx";
 import control_test_code from "./control-test.lispx";
 import delimcc_test_code from "./delimcc-test.lispx";
@@ -14,6 +15,7 @@ describe("Lisp Tests", () => {
 
     const vm = new VM();
     vm.eval_js_string(test_util_code);
+    vm.eval_js_string(test_util_test_code);
     vm.eval_js_string(boot_test_code);
     vm.eval_js_string(control_test_code);
     vm.eval_js_string(delimcc_test_code);

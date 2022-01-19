@@ -8,7 +8,8 @@
 
 (defexpr deftest (name expression . expected?) env
   "Run the EXPRESSION as a test identified by NAME and compare its
-result to an EXPECTED value (which defaults to true)."
+result to an EXPECTED value (which defaults to true).  Tests may
+capture a continuation to the default prompt."
   (mocha:it
    (to-js-string (symbol-name name))
    (js-lambda ()
@@ -28,7 +29,8 @@ result to an EXPECTED value (which defaults to true)."
 (defexpr defsection (name . forms) env
   "Evaluate FORMS as a group of tests identified by NAME.  Currently
 just sequential execution, but might get other functionality like
-setup and teardown functions for the whole section in the future."
+setup and teardown functions for the whole section in the future.  The
+forms must not capure any continuations."
   (mocha:describe
    (to-js-string (symbol-name name))
    (js-lambda ()
@@ -39,12 +41,16 @@ setup and teardown functions for the whole section in the future."
      (eval (list* #'progn forms) env))))
 
 (defexpr before forms env
+  "Evaluate forms before all tests in the suite.  The forms may
+capture a continuation to the default prompt."
   (mocha:before
    (js-lambda ()
      (push-prompt 'default-prompt
        (eval (list* #'progn forms) env)))))
 
 (defexpr after forms env
+  "Evaluate forms after all tests in the suite.  The forms may
+capture a continuation to the default prompt."
   (mocha:after
    (js-lambda ()
      (push-prompt 'default-prompt
