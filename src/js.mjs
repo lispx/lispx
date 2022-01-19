@@ -56,6 +56,15 @@ export function init_js(vm)
     };
 
     /*
+     * Returns a named property of an object.
+     */
+    vm.js_get = (object, prop_name) =>
+    {
+        vm.assert_type(prop_name, vm.String);
+        return object[prop_name.to_js_string()];
+    }
+
+    /*
      * Makes a JS function callable as a Lisp one.
      */
     vm.to_lisp_function = (js_fun) =>
@@ -110,6 +119,8 @@ export function init_js(vm)
     vm.define_alien_function("%%js-global", vm.js_global);
 
     vm.define_alien_function("%%js-new", vm.js_new);
+
+    vm.define_alien_function("%%js-get", vm.js_get);
 
     vm.define_alien_function("%%apply-js-method", vm.apply_js_method);
 

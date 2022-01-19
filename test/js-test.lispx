@@ -276,6 +276,13 @@
      (js-new "foo")
      type-error :datum "foo" :expected-type "function")))
 
+(defsuite js-get
+
+  (deftest js-get.1
+    (let ((Math (js-global "Math")))
+      (to-lisp-string (call-js-method (js-get Math "PI") "toString")))
+    "3.141592653589793"))
+
 (defsuite apply-js-method
 
   (deftest apply-js-method.1

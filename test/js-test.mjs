@@ -28,7 +28,7 @@ describe("JavaScript Interface", () => {
 
     });
 
-    it("Test js_new().", () => {
+    it("Test js_new() and js_get().", () => {
 
         class Point
         {
@@ -43,6 +43,9 @@ describe("JavaScript Interface", () => {
 
         assert.equal(pt.x, 1);
         assert.equal(pt.y, 2);
+
+        assert.equal(vm.js_get(pt, vm.str("x")), 1);
+        assert.equal(vm.js_get(pt, vm.str("y")), 2);
 
     });
 

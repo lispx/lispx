@@ -66,6 +66,10 @@ global doesn't exist."
   "Call the JS CONSTRUCTOR function with ARGUMENTS."
   (apply #'%%js-new (cons constructor arguments)))
 
+(defun js-get (object name)
+  "Access a property of a JS object by NAME (a string)."
+  (%%js-get object name))
+
 (defun apply-js-method (receiver name arguments)
   "Invoke a JS method by NAME (a string) on the RECEIVER object,
 passing along the list of ARGUMENTS."
