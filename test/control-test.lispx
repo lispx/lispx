@@ -50,7 +50,7 @@ coroutine with `resume'."
               (-run- (resume result (car values)) (cdr values)))
         (list result))))
 
-(defsection coroutines
+(defsuite coroutines
 
   (deftest coroutine.1
     (coroutine 1 2 (= 1 1))
@@ -361,7 +361,7 @@ coroutine with `resume'."
 
 ;;; Basic Operator Tests
 
-(defsection push-prompt
+(defsuite push-prompt
 
   (deftest push-prompt.1
     (signals-error
@@ -401,7 +401,7 @@ coroutine with `resume'."
       (assert (not (prompt-set-p 'q))))
     #void))
 
-(defsection take-subcont
+(defsuite take-subcont
 
   (deftest take-subcont.1
     (signals-error
@@ -435,7 +435,7 @@ coroutine with `resume'."
     (push-prompt 'p (take-subcont 'p k (push-delim-subcont 'p k (= 1 1))))
     #t))
 
-(defsection push-delim-subcont
+(defsuite push-delim-subcont
 
   (deftest push-delim-subcont.1
     (signals-error
@@ -465,7 +465,7 @@ coroutine with `resume'."
         (assert (prompt-set-p 'p))))
     #void))
 
-(defsection prompt-set-p
+(defsuite prompt-set-p
 
   (deftest prompt-set-p.1
     (signals-error
@@ -480,7 +480,7 @@ coroutine with `resume'."
     (push-prompt 'p (progn (prompt-set-p 'p)))
     #t))
 
-(defsection push-subcont-barrier
+(defsuite push-subcont-barrier
 
   (deftest push-subcont-barrier.1
     (signals-error
@@ -495,7 +495,7 @@ coroutine with `resume'."
          (take-subcont 'p1 sk)))
      prompt-not-found-error :prompt 'p1)))
 
-(defsection dynamics
+(defsuite dynamics
 
   (deftest defdynamic.1
     (progn
@@ -559,14 +559,14 @@ coroutine with `resume'."
       (assert (= #void (dynamic *bar*)))
       #t)))
 
-(defsection default-prompt
+(defsuite default-prompt
 
   (deftest |Default prompt exists|
     (boundp '+default-prompt+ (the-environment))))
 
 ;;; Simple Control Operators
 
-(defsection loop
+(defsuite loop
 
   (deftest loop.1
     (let ((ct 0))
@@ -578,7 +578,7 @@ coroutine with `resume'."
                   (set env ct (+ ct 1))))))
     10))
 
-(defsection catch/throw
+(defsuite catch/throw
 
   (deftest catch.1
     (signals-error
@@ -617,7 +617,7 @@ coroutine with `resume'."
     (catch 'x 1 (catch 'y (throw 'y)))
     #void))
 
-(defsection block/return-from
+(defsuite block/return-from
 
   (deftest block.1
     (signals-error
@@ -656,7 +656,7 @@ coroutine with `resume'."
     (block x 1 (block y (return-from y)))
     #void))
 
-(defsection unwind-protect
+(defsuite unwind-protect
 
   (deftest unwind-protect.1
     (signals-error

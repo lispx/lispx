@@ -30,7 +30,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
 ;; The actual tests.
 
-(defsection caml-shift
+(defsuite caml-shift
 
   (deftest test1
     (progn
@@ -184,7 +184,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
   (prog1 (dynamic dynvar)
     (set-dynamic dynvar value)))
 
-(defsection dbplusdc
+(defsuite dbplusdc
 
   (deftest testc
     (progn

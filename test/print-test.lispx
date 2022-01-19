@@ -1,12 +1,12 @@
 ;;; LispX Printer Tests
 
-(defsection *print-escape*
+(defsuite *print-escape*
 
   (deftest *print-escape*.defined
     (and (typep *print-escape* (class dynamic))
          (typep (dynamic *print-escape*) (class boolean)))))
 
-(defsection *print-level*
+(defsuite *print-level*
 
   (deftest *print-level*.defined
     (typep *print-level* (class dynamic)))
@@ -39,7 +39,7 @@
       (assert (= "#<a :slot #<a :slot #<a :slot 12>>>" (write-with-level a 4)))
       #t)))
 
-(defsection write
+(defsuite write
 
   (deftest write.1
     (with-standard-output-to-string (write 1) (write 2))
@@ -73,7 +73,7 @@
      (write "foo" :stream 12)
      type-error :datum 12 :expected-type 'output-stream)))
 
-(defsection print
+(defsuite print
 
   (deftest print.1
     (with-standard-output-to-string (print "foo"))

@@ -1,12 +1,12 @@
 ;;; Stream Tests
 
-(defsection stream-tests
+(defsuite stream-tests
 
   (deftest standard-streams-defined
     (and (typep *standard-input* (class dynamic))
          (typep *standard-output* (class dynamic)))))
 
-(defsection string-input-streams
+(defsuite string-input-streams
 
   (deftest make-string-input-stream.1
     (typep (make-string-input-stream "foo") (class string-input-stream)))
@@ -33,7 +33,7 @@
     (with-standard-input-from-string "12 #t" (read) (read))
     #t))
 
-(defsection string-output-streams
+(defsuite string-output-streams
 
   (deftest make-string-output-stream.1
     (typep (make-string-output-stream) (class string-output-stream)))
@@ -61,7 +61,7 @@
      (get-output-stream-string 1)
      type-error :datum 1 :expected-type 'string-output-stream)))
 
-(defsection fresh-line
+(defsuite fresh-line
 
   (deftest fresh-line.1
     (with-standard-output-to-string (fresh-line) (uprint1 "a") (fresh-line))

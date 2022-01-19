@@ -1,6 +1,6 @@
 ;;; LispX Reader Tests
 
-(defsection read
+(defsuite read
 
   (deftest read.1
     (with-standard-input-from-string "foo" (read))

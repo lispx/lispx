@@ -1,6 +1,6 @@
 ;;; JavaScript Interface Tests
 
-(defsection js-eq
+(defsuite js-eq
 
   (deftest js-eq.1
     (and (js-eq +js-true+ +js-true+)
@@ -21,7 +21,7 @@
      (js-eq)
      match-error)))
 
-(defsection null-and-undefined
+(defsuite null-and-undefined
 
   (deftest null-and-undefined-exist
     (and (eq (class-of +js-null+) (class object))
@@ -30,7 +30,7 @@
   (deftest null-and-undefined-distinguishable
     (not (js-eq +js-null+ +js-undefined+))))
 
-(defsection js-booleans
+(defsuite js-booleans
 
   (deftest js-booleans-exist
     (and
@@ -72,7 +72,7 @@
      (to-js-boolean)
      match-error)))
 
-(defsection js-numbers
+(defsuite js-numbers
 
   (deftest to-lisp-number.1
     (and
@@ -110,7 +110,7 @@
      (to-js-number)
      match-error)))
 
-(defsection js-strings
+(defsuite js-strings
 
   (deftest to-lisp-string.1
     (= "a" (to-lisp-string (to-js-string "a"))))
@@ -145,7 +145,7 @@
      (to-js-string)
      match-error)))
 
-(defsection to-lisp-function
+(defsuite to-lisp-function
 
   (deftest to-lisp-function.1
     (let ((#'parseInt (to-lisp-function (js-global "parseInt"))))
@@ -161,7 +161,7 @@
      (to-lisp-function 12)
      type-error :datum 12 :expected-type "function")))
 
-(defsection to-js-function
+(defsuite to-js-function
 
   (deftest to-js-function.1
     (let ((x 0))
@@ -175,7 +175,7 @@
      (to-js-function 12)
      type-error :datum 12 :expected-type 'operator)))
 
-(defsection apply-js-function
+(defsuite apply-js-function
 
   (deftest apply-js-function.1
     (js-eq (apply-js-function (js-global "parseInt") (list (to-js-string "12")))
@@ -196,7 +196,7 @@
      (apply-js-function)
      match-error)))
 
-(defsection call-js-function
+(defsuite call-js-function
 
   (deftest call-js-function.1
     (js-eq (call-js-function (js-global "parseInt") (to-js-string "12"))
@@ -212,7 +212,7 @@
      (call-js-function)
      match-error)))
 
-(defsection js-lambda
+(defsuite js-lambda
 
   (deftest js-lambda.1
     (let ((x 0))
@@ -240,7 +240,7 @@
        (call-js-function (js-lambda () (take-subcont 'foo k))))
      prompt-not-found-error :prompt 'foo)))
 
-(defsection js-global
+(defsuite js-global
 
   (deftest js-global.1
     (let ((Math (js-global "Math")))
@@ -259,7 +259,7 @@
      (js-global 12)
      type-error :datum 12 :expected-type 'string)))
 
-(defsection js-new
+(defsuite js-new
 
   (deftest js-new.1
     (let ((re (js-new (js-global "RegExp") (to-js-string "abc"))))
@@ -276,7 +276,7 @@
      (js-new "foo")
      type-error :datum "foo" :expected-type "function")))
 
-(defsection apply-js-method
+(defsuite apply-js-method
 
   (deftest apply-js-method.1
     (js-eq
@@ -313,7 +313,7 @@
      (apply-js-method "foo" 12 (list))
      type-error :datum 12 :expected-type 'string)))
 
-(defsection call-js-method
+(defsuite call-js-method
 
   (deftest call-js-method.1
     (js-eq
@@ -345,7 +345,7 @@
      (call-js-method "foo" 12)
      type-error :datum 12 :expected-type 'string)))
 
-(defsection define-js-method
+(defsuite define-js-method
 
   (deftest define-js-method.1
     (progn
@@ -369,7 +369,7 @@
      (define-js-method symbol)
      match-error)))
 
-(defsection await
+(defsuite await
 
   (def Promise (js-global "Promise"))
   (define-js-method resolve "resolve")
@@ -394,7 +394,7 @@
      (await)
      match-error)))
 
-(defsection js-misc
+(defsuite js-misc
 
   (deftest can-define-lisp-methods-on-js-objects
     (progn

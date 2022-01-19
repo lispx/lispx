@@ -26,17 +26,15 @@ capture a continuation to the default prompt."
        (assert (= (eval expression (make-environment env))
                   (eval (optional expected? #t) (make-environment env))))))))
 
-(defexpr defsection (name . forms) env
-  "Evaluate FORMS as a group of tests identified by NAME.  Currently
-just sequential execution, but might get other functionality like
-setup and teardown functions for the whole section in the future.  The
-forms must not capure any continuations."
+(defexpr defsuite (name . forms) env
+  "Evaluate FORMS as a group of tests identified by NAME.  The forms
+must not capure any continuations."
   (mocha:describe
    (to-js-string (symbol-name name))
    (js-lambda ()
      ;; We don't push a prompt here.  The reason is that Mocha
      ;; describe() doesn't support promises anyway.  So any Lisp code
-     ;; that tries to capture a continuation directly inside a section
+     ;; that tries to capture a continuation directly inside a suite
      ;; will get a "prompt not found" error.
      (eval (list* #'progn forms) env))))
 

@@ -3,7 +3,7 @@
 ;; The order of the tests is haphazard.  It should be brought in line
 ;; with how the operators appear in boot.lispx.
 
-(defsection signals-error
+(defsuite signals-error
 
   (deftest |SIGNALS-ERROR returns true if the expression signals.|
     (signals-error
@@ -43,7 +43,7 @@
      match-error)
     #f))
 
-(defsection assert
+(defsuite assert
 
   (deftest assert.1
     (assert (= 1 1))
@@ -69,7 +69,7 @@
      (assert #t #t)
      match-error)))
 
-(defsection error
+(defsuite error
 
   (deftest error.1
     (signals-error
@@ -117,7 +117,7 @@
             (continue (lambda (value) (* value 2)))))))
     120000))
 
-(defsection assert-type
+(defsuite assert-type
 
   (deftest assert-type.1
     (assert-type #t (class boolean)))
@@ -142,7 +142,7 @@
      (assert-type #t)
      match-error)))
 
-(defsection the
+(defsuite the
 
   (deftest the.1
     (the boolean (= 1 1))
@@ -168,7 +168,7 @@
      (the #t)
      match-error)))
 
-(defsection make-type-error
+(defsuite make-type-error
 
   (deftest make-type-error.1
     (let ((e (make-type-error "foo" 'number)))
@@ -179,7 +179,7 @@
       (assert (= 'number (slot-value e 'expected-type))))
     #void))
 
-(defsection make-simple-error
+(defsuite make-simple-error
 
   (deftest make-simple-error.1
     (let ((e (make-simple-error "foo")))
@@ -189,7 +189,7 @@
       (assert (= "foo" (slot-value e 'message))))
     #void))
 
-(defsection make-restart-error
+(defsuite make-restart-error
 
   (deftest make-restart-error.1
     (let ((e (make-restart-error 'continue)))
@@ -199,7 +199,7 @@
       (assert (= 'continue (slot-value e 'restart-name))))
     #void))
 
-(defsection vau
+(defsuite vau
 
   (deftest |A fexpr without body expression results in #VOID.|
     ((vau #ignore #ignore))
@@ -240,7 +240,7 @@
      (vau x)
      match-error)))
 
-(defsection quote
+(defsuite quote
 
   (deftest |Quoted symbols are pointer identical.|
     (and
@@ -273,7 +273,7 @@
      (quote 1 2 3)
      match-error)))
 
-(defsection list
+(defsuite list
 
   (deftest list.1
     (eq #nil (list)))
@@ -284,7 +284,7 @@
   (deftest list.3
     (= '((1) (2)) (list (list 1) (list 2)))))
 
-(defsection list*
+(defsuite list*
 
   (deftest list*.1
     (list*)
@@ -306,7 +306,7 @@
     (list* 2)
     '2))
 
-(defsection the-environment
+(defsuite the-environment
 
   (deftest the-environment.1
     (let ((x 1))
@@ -330,7 +330,7 @@
      (the-environment #t)
      match-error)))
 
-(defsection boundp
+(defsuite boundp
 
   (deftest boundp.1
     (boundp 'nope (the-environment))
@@ -367,7 +367,7 @@
      (boundp 12 (the-environment) #t)
      match-error)))
 
-(defsection macro
+(defsuite macro
 
   (deftest macro.0
     ((macro ()))
@@ -388,7 +388,7 @@
      match-error)
     #t))
 
-(defsection defmacro
+(defsuite defmacro
 
   (deftest defmacro.1
     (progn
@@ -413,7 +413,7 @@
       (foo))
     #void))
 
-(defsection defexpr
+(defsuite defexpr
 
   (deftest defexpr.1
     (progn
@@ -443,7 +443,7 @@
       (foo))
     #void))
 
-(defsection def
+(defsuite def
 
   (deftest def.1
     (progn
@@ -493,7 +493,7 @@
     (def x 1 "docstring")
     1))
 
-(defsection defconstant
+(defsuite defconstant
 
   (deftest defconstant.1
     (progn
@@ -517,7 +517,7 @@
       x)
     1))
 
-(defsection lambda
+(defsuite lambda
 
   (deftest lambda.1
     ((lambda ()))
@@ -537,7 +537,7 @@
      ((lambda #t))
      type-error :datum #t :expected-type '(or symbol ignore list))))
 
-(defsection defun
+(defsuite defun
 
   (deftest defun.1
     (progn
@@ -567,7 +567,7 @@
      (defun #t ())
      type-error :datum #t :expected-type 'symbol)))
 
-(defsection progn
+(defsuite progn
 
   (deftest progn.1
     (progn)
@@ -583,7 +583,7 @@
       (progn (set env x 1) (set env x 2) x))
     2))
 
-(defsection prog1
+(defsuite prog1
 
   (deftest prog1.1
     (prog1 1)
@@ -605,7 +605,7 @@
       x)
     2))
 
-(defsection eval
+(defsuite eval
 
   (deftest eval.1
     (eval #nil (the-environment))
@@ -636,7 +636,7 @@
      (eval '1 (the-environment) #t)
      match-error)))
 
-(defsection cons
+(defsuite cons
 
   (deftest cons.1
     (cons (list 1) (list 2))
@@ -661,7 +661,7 @@
      (cons 1 2 3)
      match-error)))
 
-(defsection car
+(defsuite car
 
   (deftest car.1
     (car (list 1 2))
@@ -682,7 +682,7 @@
      (car 1 2)
      match-error)))
 
-(defsection cdr
+(defsuite cdr
 
   (deftest cdr.1
     (cdr (list 1 2))
@@ -703,7 +703,7 @@
      (cdr 1 2)
      match-error)))
 
-(defsection symbol-name
+(defsuite symbol-name
 
   (deftest symbol-name.1
     (= "foo" (symbol-name 'foo)))
@@ -727,7 +727,7 @@
      (symbol-name 12)
      type-error :datum 12 :expected-type 'symbol)))
 
-(defsection variable-symbol
+(defsuite variable-symbol
 
   (deftest variable-symbol.1
     (variable-symbol '#'foo)
@@ -751,7 +751,7 @@
      (variable-symbol 5)
      type-error :datum 5 :expected-type 'symbol)))
 
-(defsection function-symbol
+(defsuite function-symbol
 
   (deftest function-symbol.1
     (function-symbol 'foo)
@@ -775,7 +775,7 @@
      (function-symbol 5)
      type-error :datum 5 :expected-type 'symbol)))
 
-(defsection class-symbol
+(defsuite class-symbol
 
   (deftest class-symbol.1
     (class-symbol 'foo)
@@ -799,7 +799,7 @@
      (class-symbol 5)
      type-error :datum 5 :expected-type 'symbol)))
 
-(defsection keyword-symbol
+(defsuite keyword-symbol
 
   (deftest keyword-symbol.1
     (keyword-symbol 'foo)
@@ -823,7 +823,7 @@
      (keyword-symbol 5)
      type-error :datum 5 :expected-type 'symbol)))
 
-(defsection wrap
+(defsuite wrap
 
   (deftest wrap.1
     ((wrap (vau (x) #ignore x)) (list 1 2 3))
@@ -839,7 +839,7 @@
      (wrap 33)
      type-error :datum 33 :expected-type 'operator)))
 
-(defsection unwrap
+(defsuite unwrap
 
   (deftest unwrap.1
     ((unwrap (lambda (x) x)) (list 1 2 3))
@@ -855,7 +855,7 @@
      (unwrap 33)
      type-error :datum 33 :expected-type 'function)))
 
-(defsection if
+(defsuite if
 
   (deftest if.1
     (if #t (= 1 1) (= 1 2))
@@ -885,7 +885,7 @@
      (if 1 #f #t)
      type-error :datum 1 :expected-type 'boolean)))
 
-(defsection cond
+(defsuite cond
 
   (deftest cond.1
     (cond)
@@ -905,7 +905,7 @@
      (cond (1 #t))
      type-error :datum 1 :expected-type 'boolean)))
 
-(defsection typecase
+(defsuite typecase
 
   (deftest typecase.1
     (signals-error
@@ -928,7 +928,7 @@
       (object 1))
     2))
 
-(defsection not
+(defsuite not
 
   (deftest not.1
     (not #t)
@@ -948,7 +948,7 @@
      (not 1)
      type-error :datum 1 :expected-type 'boolean)))
 
-(defsection eq
+(defsuite eq
 
   (deftest eq.1
     (eq 'foo 'foo)
@@ -996,7 +996,7 @@
      (eq 11)
      match-error)))
 
-(defsection =
+(defsuite =
 
   (deftest =.1
     (= 1 1 1)
@@ -1032,7 +1032,7 @@
      (= 1)
      match-error)))
 
-(defsection /=
+(defsuite /=
 
   (deftest /=.1
     (/= 1 1 1)
@@ -1099,7 +1099,7 @@
     (/= #t "a")
     #t))
 
-(defsection <
+(defsuite <
 
   (deftest <.1
     (< 1 1 1)
@@ -1147,7 +1147,7 @@
      (< 1 2 3 "foo")
      type-error :datum "foo" :expected-type 'number)))
 
-(defsection >
+(defsuite >
 
   (deftest >.1
     (> 1 1 1)
@@ -1195,7 +1195,7 @@
      (> 3 2 1 "foo")
      type-error :datum "foo" :expected-type 'number)))
 
-(defsection <=
+(defsuite <=
 
   (deftest <=.1
     (<= 1 1 1)
@@ -1247,7 +1247,7 @@
      (<= 1 1 3 "foo")
      type-error :datum "foo" :expected-type 'number)))
 
-(defsection >=
+(defsuite >=
 
   (deftest >=.1
     (>= 1 1 1)
@@ -1299,7 +1299,7 @@
      (>= 3 3 2 "foo")
      type-error :datum "foo" :expected-type 'number)))
 
-(defsection +
+(defsuite +
 
   (deftest +.1
     (+)
@@ -1313,7 +1313,7 @@
     (+ 10 10 10)
     30))
 
-(defsection -
+(defsuite -
 
   (deftest -.1
     (signals-error
@@ -1332,7 +1332,7 @@
     (- 100 10 1)
     89))
 
-(defsection *
+(defsuite *
 
   (deftest *.1
     (*)
@@ -1346,7 +1346,7 @@
     (* 10 -10 10)
     -1000))
 
-(defsection /
+(defsuite /
 
   (deftest /.1
     (signals-error
@@ -1365,7 +1365,7 @@
     (/ -100 10 2)
     -5))
 
-(defsection typep
+(defsuite typep
 
   (deftest typep.1
     (and
@@ -1392,7 +1392,7 @@
      (typep "foo")
      match-error)))
 
-(defsection intern
+(defsuite intern
 
   (deftest intern.1
     (eq 'foo (intern "foo")))
@@ -1407,7 +1407,7 @@
      (intern)
      match-error)))
 
-(defsection apply
+(defsuite apply
 
   (deftest apply.1
     (apply #'list ())
@@ -1432,7 +1432,7 @@
      (apply 12 '())
      type-error :datum 12 :expected-type 'function)))
 
-(defsection class
+(defsuite class
 
   (deftest class.1
     (eq (class string) (class-of "foo")))
@@ -1452,7 +1452,7 @@
      (class does-not-exist)
      unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
 
-(defsection find-class
+(defsuite find-class
 
   (deftest find-class.1
     (eq (find-class 'string (the-environment))
@@ -1478,7 +1478,7 @@
      (find-class 'does-not-exist (the-environment))
      unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
 
-(defsection make-environment
+(defsuite make-environment
 
   (deftest make-environment.1
     (let ((env (make-environment)))
@@ -1502,7 +1502,7 @@
      (make-environment 12)
      type-error :datum 12 :expected-type 'environment)))
 
-(defsection cxxr
+(defsuite cxxr
 
   (deftest caar.1
     (caar '((1 2) (3 4) (5 6)))
@@ -1560,7 +1560,7 @@
      (cdar 1)
      type-error :datum 1 :expected-type 'cons))
 
-(defsection when
+(defsuite when
 
   (deftest when.1
     (when #t)
@@ -1588,7 +1588,7 @@
      (when 1)
      type-error :datum 1 :expected-type 'boolean))))
 
-(defsection unless
+(defsuite unless
 
   (deftest unless.1
     (unless #t)
@@ -1616,7 +1616,7 @@
      (unless 1)
      type-error :datum 1 :expected-type 'boolean)))
 
-(defsection null
+(defsuite null
 
   (deftest null.1
     (null #nil)
@@ -1635,7 +1635,7 @@
     (null 1)
     #f))
 
-(defsection mapcar
+(defsuite mapcar
 
   (deftest mapcar.1
     (mapcar #'intern ())
@@ -1665,7 +1665,7 @@
      (mapcar 12 '(1))
      type-error :datum 12 :expected-type 'operator)))
 
-(defsection reduce
+(defsuite reduce
 
   (deftest reduce.1
     (reduce #'%%* (list 1 2 3) :initial-value 10)
@@ -1698,7 +1698,7 @@
     (reduce #'list '(1 2 3 4) :initial-value 'foo)
     '((((foo 1) 2) 3) 4)))
 
-(defsection mapc
+(defsuite mapc
 
   (deftest mapc.1
     (signals-error
@@ -1733,7 +1733,7 @@
       (mapc (lambda (x)) list))
     (list 1 2 3)))
 
-(defsection dolist
+(defsuite dolist
 
   (deftest dolist.1
     (signals-error
@@ -1783,7 +1783,7 @@
         (set env ct (+ ct x))))
     110))
 
-(defsection elt
+(defsuite elt
 
   (deftest elt.1
     (signals-error
@@ -1823,7 +1823,7 @@
      (elt '(1 2) 2)
      type-error :datum '() :expected-type 'cons)))
 
-(defsection reverse
+(defsuite reverse
 
   (deftest reverse.1
     (signals-error
@@ -1852,7 +1852,7 @@
     (reverse '(1 2 3))
     '(3 2 1)))
 
-(defsection append
+(defsuite append
 
   (deftest append.1
     (signals-error
@@ -1889,7 +1889,7 @@
     (append '(1 2) '(3 4))
     '(1 2 3 4)))
 
-(defsection memberp
+(defsuite memberp
 
   (deftest memberp.1
     (signals-error
@@ -1929,7 +1929,7 @@
     (memberp "b" '("a" "b" "c") :test #'=)
     #t))
 
-(defsection remove-if
+(defsuite remove-if
 
   (deftest remove-if.1
     (signals-error
@@ -1959,7 +1959,7 @@
     (remove-if (lambda (item) (= 1 item)) '())
     '()))
 
-(defsection get?
+(defsuite get?
 
   (deftest get?.1
     (get? '(:foo 1 :bar 2) :foo)
@@ -1995,7 +1995,7 @@
      match-error)
     #t))
 
-(defsection and
+(defsuite and
 
   (deftest and.1
     (and)
@@ -2022,7 +2022,7 @@
       x)
     1))
 
-(defsection or
+(defsuite or
 
   (deftest or.1
     (or)
@@ -2053,7 +2053,7 @@
       x)
     1))
 
-(defsection make-instance
+(defsuite make-instance
 
   (deftest make-instance.1
     (progn
@@ -2084,7 +2084,7 @@
      (make-instance (class standard-object) :x)
      assertion-error)))
 
-(defsection slots
+(defsuite slots
 
   (deftest slots.1
     (progn
@@ -2161,7 +2161,7 @@
      (slot-bound-p (make-instance (class standard-object)))
      match-error)))
 
-(defsection let
+(defsuite let
 
   (deftest let.1
     (let ((x 1))
@@ -2206,7 +2206,7 @@
      (let ((#t 1)))
      type-error :datum #t :expected-type '(or symbol ignore list))))
 
-(defsection let*
+(defsuite let*
 
   (deftest let*.1
     (let* ((x 1)
@@ -2234,7 +2234,7 @@
      (let* ((#t 1)))
      type-error :datum #t :expected-type '(or symbol ignore list))))
 
-(defsection flet
+(defsuite flet
 
   (deftest flet.1
     (flet ((f () 1))
@@ -2267,7 +2267,7 @@
     (flet ())
     #void))
 
-(defsection labels
+(defsuite labels
 
   (deftest labels.1
     (labels ((f () 1))
@@ -2300,7 +2300,7 @@
     (labels ())
     #void))
 
-(defsection loop-let
+(defsuite loop-let
 
   (deftest loop-let.1
     (signals-error
@@ -2325,7 +2325,7 @@
                 (-sum- (cdr as) (cdr bs)))))
     '(5 7 9)))
 
-(defsection optional
+(defsuite optional
 
   (deftest optional.1
     (optional '())
@@ -2353,7 +2353,7 @@
      (optional 1)
      type-error :datum 1 :expected-type 'cons)))
 
-(defsection optionals
+(defsuite optionals
 
   (deftest optionals.1
     (optionals '())
@@ -2383,7 +2383,7 @@
     (optionals '(4 5 6))
     '(4 5 6)))
 
-(defsection some
+(defsuite some
 
   (deftest some.1
     (some 1)
@@ -2399,7 +2399,7 @@
      (some 1 2)
      match-error)))
 
-(defsection if-option
+(defsuite if-option
 
   (deftest if-option.1
     (if-option (x (some 12))
@@ -2438,7 +2438,7 @@
      (if-option (name option) then)
      match-error)))
 
-(defsection when-option
+(defsuite when-option
 
   (deftest when-option.0
     (when-option (x (some 12)))
@@ -2464,7 +2464,7 @@
      (when-option (name))
      match-error)))
 
-(defsection class-of
+(defsuite class-of
 
   (deftest class-of.1
     (progn
@@ -2478,7 +2478,7 @@
      (class-of)
      match-error)))
 
-(defsection set
+(defsuite set
 
   (deftest set.1
     (progn
@@ -2519,7 +2519,7 @@
      (set 33 x y)
      type-error :datum 33 :expected-type 'environment)))
 
-(defsection class-name
+(defsuite class-name
 
   (deftest class-name.1
     (signals-error
@@ -2535,7 +2535,7 @@
     (class-name (class object))
     'object))
 
-(defsection subclassp
+(defsuite subclassp
 
   (deftest subclassp.1
     (signals-error
@@ -2596,7 +2596,7 @@
   (assert (= (slot-value q 'y) 2))
   (assert (= (slot-value q 'z) 3)))
 
-(defsection %%make-standard-class
+(defsuite %%make-standard-class
 
   (deftest %%make-standard-class.1
     (let* ((c (%%make-standard-class 'point-2d (class standard-object)))
@@ -2628,7 +2628,7 @@
      (%%make-standard-class "foo" (class standard-object))
      type-error :datum "foo" :expected-type 'symbol)))
 
-(defsection defclass
+(defsuite defclass
 
   (deftest defclass.1
     (signals-error
@@ -2663,7 +2663,7 @@
       (classes-test (class point-2d) (class point-3d) p q))
     #void))
 
-(defsection generics
+(defsuite generics
 
   (deftest generics.1
     (progn
@@ -2728,7 +2728,7 @@
       (assert (= -2 (g1 "hello" (+ 1 1)))))
     #void))
 
-(defsection handler-bind
+(defsuite handler-bind
 
   (defclass test-error (error) ())
 
@@ -2825,7 +2825,7 @@
         (signal "foo")))
     "foo"))
 
-(defsection handler-case
+(defsuite handler-case
 
   (defclass test-error (error) ())
 
@@ -2895,7 +2895,7 @@
       (signal "foo"))
     "foo"))
 
-(defsection restart-bind
+(defsuite restart-bind
 
   (deftest restart-bind.0
     (signals-error
@@ -3001,7 +3001,7 @@
         (invoke-restart 'r1 1)))
     99))
 
-(defsection restart-case
+(defsuite restart-case
 
   (deftest restart-case.0
     (signals-error
@@ -3104,7 +3104,7 @@
       (invoke-restart 'r1 1))
     99))
 
-(defsection find-restart?
+(defsuite find-restart?
 
   (deftest find-restart?.0
     (signals-error
@@ -3219,7 +3219,7 @@
             (assert #f)))))
     1001))
 
-(defsection compute-restarts
+(defsuite compute-restarts
 
   (deftest compute-restarts.1
     (compute-restarts)
@@ -3278,7 +3278,7 @@
                          outer1)))
             #t))))))
 
-(defsection signal
+(defsuite signal
 
   (deftest signal.0
     (signals-error
@@ -3345,7 +3345,7 @@
           (signal-operator (make-simple-error "error!")
             (r (lambda () 1))))))))
 
-(defsection invoke-restart
+(defsuite invoke-restart
 
   (deftest invoke-restart.0
     (signals-error
@@ -3357,7 +3357,7 @@
      (invoke-restart "foo")
      type-error :datum "foo" :expected-type '(or symbol restart-handler))))
 
-(defsection invoke-restart-interactively
+(defsuite invoke-restart-interactively
 
   (deftest invoke-restart-interactively.1
     (restart-bind ((r1 (lambda (arg1 arg2) (+ arg1 arg2))

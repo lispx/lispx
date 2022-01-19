@@ -1,6 +1,6 @@
 ;;; Class Hierarchy Integrity Test
 
-(defsection class-hierarchy
+(defsuite class-hierarchy
 
   (defun test-hierarchy (classes)
     (let ((env (the-environment)))

@@ -1,7 +1,7 @@
 (def test-util-test:x 1)
 (def test-util-test:environment (the-environment))
 
-(defsection test-util-test:1
+(defsuite test-util-test:1
   (before
     (set test-util-test:environment test-util-test:x 2))
   (after
@@ -9,6 +9,6 @@
   (deftest check-it
     (= test-util-test:x 2)))
 
-(defsection test-util-test:2
+(defsuite test-util-test:2
   (deftest check-it-again-afterwards
     (= test-util-test:x 3)))
