@@ -561,7 +561,7 @@ export function init_read(vm)
                  * so we error out here.
                  */
                 if (result instanceof vm.Suspension)
-                    throw new vm.Error("Suspension during eval().");
+                    throw new vm.Prompt_not_found_error(result.prompt);
             }
         }
         return result;

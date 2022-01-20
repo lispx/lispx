@@ -459,7 +459,7 @@ describe("eval_{stream,string,js_string}", () => {
              * Test that suspensions are not swallowed.
              */
             assert.throws(() => eval_x_fun("1 (take-subcont 'p k k) 2"),
-                          "Suspension during eval().");
+                          "Prompt not found");
 
         }
 
