@@ -48,6 +48,7 @@ function make_entry(filename, libraryTarget, minimize)
                 }
             ]
         },
+        devtool: false,
         optimization: {
             minimize: minimize,
             minimizer: [
