@@ -728,8 +728,8 @@ elements of LIST."
             #nil
             (cons (car defaults) (-optionals- #nil (cdr defaults))))
         (if (null defaults)
-            (cons (car list) (-optionals- (cdr list) #nil))
-            (cons (car list) (-optionals- (cdr list) (cdr defaults)))))))
+            (cons (car list)     (-optionals- (cdr list) #nil))
+            (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))
 
 ;;; Dynamic Binding
 
