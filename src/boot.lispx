@@ -1151,17 +1151,17 @@ of its condition class."
 established ones first, optionally limited to those that are
 explicitly associated with the supplied CONDITION or not associated
 with any condition."
-  (loop-let -compute-restarts- ((handlers '())
+  (loop-let -compute-restarts- ((restarts '())
                                 (handler-frame? (dynamic *restart-handler-frame?*)))
     (if-option (handler-frame handler-frame?)
-      (-compute-restarts- (append handlers
+      (-compute-restarts- (append restarts
                                   (remove-if
-                                   (lambda (handler)
-                                     (not (%restart-handler-applicable-to-condition-p handler
-                                                                                      condition?)))
+                                   (lambda (restart)
+                                     (not (%restart-handler-applicable-to-condition-p
+                                           restart condition?)))
                                    (slot-value handler-frame 'handlers)))
                           (slot-value handler-frame 'parent-frame?))
-      handlers)))
+      restarts)))
 
 (defclass restart-error (error)
   (restart-name)
