@@ -135,7 +135,8 @@ describe("Evaluation & Operation", () => {
         ];
 
         for (const ex of examples)
-            assert.equal(vm.eval(ex), ex);
+            for (const eval_fun of [vm.eval, vm.eval_form])
+                assert.equal(eval_fun(ex), ex);
 
     });
 
@@ -147,18 +148,21 @@ describe("Evaluation & Operation", () => {
         ];
 
         for (const [symbol, value] of examples)
-            assert.equal(vm.eval(symbol), value);
+            for (const eval_fun of [vm.eval, vm.eval_form])
+                assert.equal(eval_fun(symbol), value);
 
     });
 
     it("Evaluating an unbound symbol causes an error.", () => {
 
-        assert.throws(() => vm.eval(vm.sym("this-is-not-bound")),
-                      "Unbound variable: this-is-not-bound");
-        assert.throws(() => vm.eval(vm.fsym("this-is-not-bound")),
-                      "Unbound function: this-is-not-bound");
-        assert.throws(() => vm.eval(vm.csym("this-is-not-bound")),
-                      "Unbound class: this-is-not-bound");
+        for (const eval_fun of [vm.eval, vm.eval_form]) {
+            assert.throws(() => eval_fun(vm.sym("this-is-not-bound")),
+                          "Unbound variable: this-is-not-bound");
+            assert.throws(() => eval_fun(vm.fsym("this-is-not-bound")),
+                          "Unbound function: this-is-not-bound");
+            assert.throws(() => eval_fun(vm.csym("this-is-not-bound")),
+                          "Unbound class: this-is-not-bound");
+        }
 
     });
 
@@ -167,8 +171,9 @@ describe("Evaluation & Operation", () => {
         const examples = [ vm.nil(), undefined, "foo", vm.str("foo"), vm.num(1) ];
 
         for (const ex of examples)
-            assert.throws(() => vm.eval(vm.list(ex)),
-                          "Type assertion failed");
+            for (const eval_fun of [vm.eval, vm.eval_form])
+                assert.throws(() => eval_fun(vm.list(ex)),
+                              "Type assertion failed");
 
     });
 
@@ -176,8 +181,17 @@ describe("Evaluation & Operation", () => {
 
         const env = make_child_environment();
         env.put(vm.sym("foo"), vm.num(12));
-        assert(vm.equal(vm.eval(vm.sym("foo"), env),
-                        vm.num(12)));
+        for (const eval_fun of [vm.eval, vm.eval_form])
+            assert(vm.equal(eval_fun(vm.sym("foo"), env),
+                            vm.num(12)));
+
+    });
+
+    it("vm.eval_form() doesn't swallow suspensions.", () => {
+
+        const form = vm.list(vm.sym("take-subcont"), vm.str("prompt"), vm.sym("k"));
+        assert.throws(() => vm.eval_form(form), "Prompt not found");
+        assert.instanceOf(vm.eval(form), vm.Suspension);
 
     });
 

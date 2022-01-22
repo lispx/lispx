@@ -17,6 +17,9 @@ export function init_eval(vm)
      * itself.
      *
      * The environment defaults to the VM's root environment.
+     *
+     * Prefer vm.eval_form() unless you are prepared to handle
+     * suspensions.
      */
     vm.eval = (form, env = vm.get_environment()) =>
     {
@@ -29,6 +32,20 @@ export function init_eval(vm)
             else
                 return form;
         });
+    };
+
+    /*
+     * Evaluate a form, like vm.eval(), but throw an error if the
+     * code captures a continuation.  This should usually be used
+     * when calling Lisp from JavaScript.
+     */
+    vm.eval_form = (form, env = vm.get_environment()) =>
+    {
+        const result = vm.eval(form, env);
+        if (result instanceof vm.Suspension)
+            throw new vm.Prompt_not_found_error(result.prompt);
+        else
+            return result;
     };
 
     /*

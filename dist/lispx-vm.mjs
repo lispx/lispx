@@ -1926,6 +1926,9 @@ function init_eval(vm)
      * itself.
      *
      * The environment defaults to the VM's root environment.
+     *
+     * Prefer vm.eval_form() unless you are prepared to handle
+     * suspensions.
      */
     vm.eval = (form, env = vm.get_environment()) =>
     {
@@ -1938,6 +1941,20 @@ function init_eval(vm)
             else
                 return form;
         });
+    };
+
+    /*
+     * Evaluate a form, like vm.eval(), but throw an error if the
+     * code captures a continuation.  This should usually be used
+     * when calling Lisp from JavaScript.
+     */
+    vm.eval_form = (form, env = vm.get_environment()) =>
+    {
+        const result = vm.eval(form, env);
+        if (result instanceof vm.Suspension)
+            throw new vm.Prompt_not_found_error(result.prompt);
+        else
+            return result;
     };
 
     /*
@@ -3638,17 +3655,11 @@ function init_read(vm)
             if (form === unique_eof) {
                 break;
             } else {
-                result = vm.eval(form, env);
                 /*
-                 * Eval can return a suspension if the form
-                 * captures a continuation.
-                 *
-                 * Eval_stream is used for things like loading the
-                 * bootstrap code and can't deal with suspensions,
-                 * so we error out here.
+                 * Note that we are using vm.eval_form() instead of
+                 * vm.eval() here so that suspensions cause an error.
                  */
-                if (result instanceof vm.Suspension)
-                    throw new vm.Prompt_not_found_error(result.prompt);
+                result = vm.eval_form(form, env);
             }
         }
         return result;
