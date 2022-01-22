@@ -62,6 +62,14 @@ export function init_js(vm)
     {
         vm.assert_type(prop_name, vm.String);
         return object[prop_name.to_js_string()];
+    };
+
+    /*
+     * Creates a new array.
+     */
+    vm.js_array = () =>
+    {
+        return [];
     }
 
     /*
@@ -121,6 +129,8 @@ export function init_js(vm)
     vm.define_alien_function("%%js-new", vm.js_new);
 
     vm.define_alien_function("%%js-get", vm.js_get);
+
+    vm.define_alien_function("%%js-array", vm.js_array);
 
     vm.define_alien_function("%%apply-js-method", vm.apply_js_method);
 

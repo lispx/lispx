@@ -298,6 +298,24 @@
      (js-get 12 'bar)
      type-error :datum 'bar :expected-type 'string)))
 
+(defsuite js-array
+
+  (define-js-method array-push "push")
+  (define-js-method array-pop "pop")
+
+  (deftest js-array.1
+    (let ((arr (js-array)))
+      (assert (= (to-js-number 0) (js-get arr "length")))
+      (array-push arr "a")
+      (assert (= (to-js-number 1) (js-get arr "length")))
+      (array-push arr "b")
+      (assert (= (to-js-number 2) (js-get arr "length")))
+      (assert (= "b" (array-pop arr)))
+      (assert (= (to-js-number 1) (js-get arr "length")))
+      (assert (= "a" (array-pop arr)))
+      (assert (= (to-js-number 0) (js-get arr "length")))
+      #t)))
+
 (defsuite apply-js-method
 
   (deftest apply-js-method.1

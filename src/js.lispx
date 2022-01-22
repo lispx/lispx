@@ -70,6 +70,10 @@ global doesn't exist."
   "Access a property of a JS object by NAME (a string)."
   (%%js-get object name))
 
+(defun js-array ()
+  "Creates a new JS array."
+  (%%js-array))
+
 (defun apply-js-method (receiver name arguments)
   "Invoke a JS method by NAME (a string) on the RECEIVER object,
 passing along the list of ARGUMENTS."
