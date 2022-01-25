@@ -3099,6 +3099,20 @@ function init_print(vm)
         }
     }
 
+    /*** Utilities ***/
+
+    vm.write_to_string = (object) =>
+    {
+        const st = new vm.String_output_stream();
+        vm.write(object, st);
+        return st.get_string();
+    };
+
+    vm.write_to_js_string = (object) =>
+    {
+        return vm.write_to_string(object).to_js_string();
+    };
+
     /*** Lisp API ***/
 
     vm.define_variable("*print-escape*", vm.PRINT_ESCAPE);

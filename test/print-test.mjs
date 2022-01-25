@@ -9,18 +9,6 @@ function string_output_stream()
     return new vm.String_output_stream();
 }
 
-function write_to_string(object)
-{
-    const st = new vm.String_output_stream();
-    vm.write(object, st);
-    return st.get_string();
-}
-
-function write_to_js_string(object)
-{
-    return write_to_string(object).to_js_string();
-}
-
 describe("Printer", () => {
 
     it("Test writing objects.", () => {
@@ -77,7 +65,7 @@ describe("Printer", () => {
         };
 
         for (const [string, object] of Object.entries(examples)) {
-            assert(vm.equal(string, write_to_js_string(object)));
+            assert(vm.equal(string, vm.write_to_js_string(object)));
         }
 
     });
@@ -113,10 +101,10 @@ describe("Printer", () => {
 
         for (const [object, escaped, not_escaped] of examples) {
             const escaped_result = vm.progv([vm.PRINT_ESCAPE], [vm.t()],
-                                            () => write_to_js_string(object));
+                                            () => vm.write_to_js_string(object));
             assert.strictEqual(escaped, escaped_result);
             const not_escaped_result = vm.progv([vm.PRINT_ESCAPE], [vm.f()],
-                                                () => write_to_js_string(object));
+                                                () => vm.write_to_js_string(object));
             assert.strictEqual(not_escaped, not_escaped_result);
         }
 
