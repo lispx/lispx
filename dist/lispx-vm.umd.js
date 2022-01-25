@@ -2871,6 +2871,8 @@ function init_print(vm)
 
     /*
      * How many levels should be printed before abbreviating with "#"?
+     *
+     * If false, do not abbreviate.
      */
     vm.PRINT_LEVEL = vm.make_dynamic(vm.f());
 
