@@ -1065,7 +1065,9 @@ describe("has_type()", () => {
 
 describe("assert_type()", () => {
 
-    it("It supports simple type specs and returns the datum.", () => {
+    it("It supports type specs and returns the datum.", () => {
+        assert.equal(vm.assert_type(vm.t(), vm.Boolean), vm.t());
+        assert.equal(vm.assert_type(vm.sym("foo"), vm.Symbol), vm.sym("foo"));
         assert.equal(vm.assert_type("foo", "string"), "foo");
         assert.equal(vm.assert_type(12, "number"), 12);
         assert.deepEqual(vm.assert_type({}, "object"), {});
@@ -1083,6 +1085,10 @@ describe("assert_type()", () => {
         assert(false);
     });
 
+    it("Error messages contain the type spec.", () => {
+        assert.throws(() => vm.assert_type(vm.nil(), vm.Cons),
+                      "Type assertion failed: expected cons");
+    });
 });
 
 /***** UTF-8 *****/
