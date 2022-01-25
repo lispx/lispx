@@ -1075,7 +1075,7 @@ describe("assert_type()", () => {
         try {
             vm.assert_type(12, "string");
         } catch(e) {
-            assert.equal(e.message, "Type assertion failed");
+            assert.equal(e.message, "Type assertion failed: expected \"string\"");
             assert.equal(e.lisp_slot_datum, 12);
             assert(vm.equal(e["lisp_slot_expected-type"], vm.str("string")));
             return;
