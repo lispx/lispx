@@ -5,6 +5,40 @@
 import { assert } from "chai";
 
 /*
+ * Verify that a class is properly set up.
+ */
+export function check_class(vm, name, js_class, js_superclass, js_metaclass)
+{
+    check_class_name(vm, js_class, name);
+    check_superclass(vm, js_class, js_superclass);
+    check_metaclass(vm, js_class, js_metaclass);
+    check_class_linkage(vm, js_class);
+};
+
+/*
+ * Verify that a class is properly named and registered in the root environment.
+ */
+export function check_class_name(vm, js_class, name)
+{
+    const lisp_class = vm.lisp_class(js_class);
+    const name_sym = vm.sym(name);
+
+    // The name is an ordinary symbol in the variable namespace.
+    assert.equal(lisp_class.get_name(), name_sym);
+
+    // The symbol it's registered under in the environment is a
+    // symbol in the class namespace.
+    assert.equal(vm.get_environment().lookup(name_sym.to_class_symbol()),
+                 lisp_class);
+
+    /*
+     * Check that the JS constructor function has a proper name.
+     */
+    const js_name = "Lisp_" + name.replace(/-/g, "_");
+    assert.equal(js_class.name, js_name);
+};
+
+/*
  * Verify that a class is properly connected with its superclass.
  */
 export function check_superclass(vm, js_class, js_superclass)
@@ -13,7 +47,7 @@ export function check_superclass(vm, js_class, js_superclass)
                  vm.lisp_class(js_superclass));
 
     assert(js_class.prototype instanceof js_superclass);
-}
+};
 
 /*
  * Verify that a class is properly connected with its metaclass.
@@ -38,4 +72,13 @@ export function check_metaclass(vm, js_class, js_metaclass)
                       vm.Class);
     assert.instanceOf(vm.lisp_class(js_class),
                       vm.Object);
-}
+};
+
+/*
+ * Verify that a JS class is properly linked to its class metaobject.
+ */
+export function check_class_linkage(vm, js_class)
+{
+    assert.equal(vm.lisp_class(js_class).get_js_class(),
+                 js_class);
+};

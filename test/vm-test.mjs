@@ -1,6 +1,7 @@
 import { assert } from "chai";
 
-import { check_superclass, check_metaclass } from "./test-util.mjs";
+import { check_class_name, check_superclass, check_metaclass, check_class_linkage }
+from "./test-util.mjs";
 
 import { VM } from "lispx-vm";
 
@@ -70,64 +71,44 @@ describe("Classes", () => {
 
     it("Classes are named and registered in the root environment.", () => {
 
-        function check_name(cls, name)
-        {
-            const lisp_class = vm.lisp_class(cls);
-            const name_sym = vm.sym(name);
+        check_class_name(vm, vm.Object, "object");
+        check_class_name(vm, vm.String, "string");
+        check_class_name(vm, vm.Symbol, "symbol");
+        check_class_name(vm, vm.Number, "number");
+        check_class_name(vm, vm.Boolean, "boolean");
+        check_class_name(vm, vm.List, "list");
+        check_class_name(vm, vm.Cons, "cons");
+        check_class_name(vm, vm.Nil, "nil");
+        check_class_name(vm, vm.Void, "void");
+        check_class_name(vm, vm.Ignore, "ignore");
+        check_class_name(vm, vm.Environment, "environment");
+        check_class_name(vm, vm.Class, "class");
+        check_class_name(vm, vm.Built_in_class, "built-in-class");
+        check_class_name(vm, vm.Standard_class, "standard-class");
+        check_class_name(vm, vm.Operator, "operator");
+        check_class_name(vm, vm.Built_in_operator, "built-in-operator");
+        check_class_name(vm, vm.Fexpr, "fexpr");
+        check_class_name(vm, vm.Function, "function");
+        check_class_name(vm, vm.Continuation, "continuation");
+        check_class_name(vm, vm.Dynamic, "dynamic");
+        check_class_name(vm, vm.Input_stream, "input-stream");
+        check_class_name(vm, vm.String_input_stream, "string-input-stream");
+        check_class_name(vm, vm.Output_stream, "output-stream");
+        check_class_name(vm, vm.String_output_stream, "string-output-stream");
 
-            // The name is an ordinary symbol in the variable namespace.
-            assert.equal(lisp_class.get_name(), name_sym);
-
-            // The symbol it's registered under in the environment is a
-            // symbol in the class namespace.
-            assert.equal(vm.get_environment().lookup(name_sym.to_class_symbol()),
-                         lisp_class);
-
-            /*
-             * Check that the JS constructor function has a proper name.
-             */
-            const js_name = "Lisp_" + name.replace(/-/g, "_");
-            assert.equal(cls.name, js_name);
-        }
-
-        check_name(vm.Object, "object");
-        check_name(vm.String, "string");
-        check_name(vm.Symbol, "symbol");
-        check_name(vm.Number, "number");
-        check_name(vm.Boolean, "boolean");
-        check_name(vm.List, "list");
-        check_name(vm.Cons, "cons");
-        check_name(vm.Nil, "nil");
-        check_name(vm.Void, "void");
-        check_name(vm.Ignore, "ignore");
-        check_name(vm.Environment, "environment");
-        check_name(vm.Class, "class");
-        check_name(vm.Built_in_class, "built-in-class");
-        check_name(vm.Standard_class, "standard-class");
-        check_name(vm.Operator, "operator");
-        check_name(vm.Built_in_operator, "built-in-operator");
-        check_name(vm.Fexpr, "fexpr");
-        check_name(vm.Function, "function");
-        check_name(vm.Continuation, "continuation");
-        check_name(vm.Dynamic, "dynamic");
-        check_name(vm.Input_stream, "input-stream");
-        check_name(vm.String_input_stream, "string-input-stream");
-        check_name(vm.Output_stream, "output-stream");
-        check_name(vm.String_output_stream, "string-output-stream");
-
-        check_name(vm.Standard_object, "standard-object");
-        check_name(vm.Condition, "condition");
-        check_name(vm.Error, "error");
-        check_name(vm.Type_error, "type-error");
-        check_name(vm.Unbound_symbol_error, "unbound-symbol-error");
-        check_name(vm.Unbound_slot_error, "unbound-slot-error");
-        check_name(vm.Unbound_method_error, "unbound-method-error");
-        check_name(vm.Assertion_error, "assertion-error");
-        check_name(vm.Match_error, "match-error");
-        check_name(vm.Stream_error, "stream-error");
-        check_name(vm.End_of_file, "end-of-file");
-        check_name(vm.Reader_error, "reader-error");
-        check_name(vm.Prompt_not_found_error, "prompt-not-found-error");
+        check_class_name(vm, vm.Standard_object, "standard-object");
+        check_class_name(vm, vm.Condition, "condition");
+        check_class_name(vm, vm.Error, "error");
+        check_class_name(vm, vm.Type_error, "type-error");
+        check_class_name(vm, vm.Unbound_symbol_error, "unbound-symbol-error");
+        check_class_name(vm, vm.Unbound_slot_error, "unbound-slot-error");
+        check_class_name(vm, vm.Unbound_method_error, "unbound-method-error");
+        check_class_name(vm, vm.Assertion_error, "assertion-error");
+        check_class_name(vm, vm.Match_error, "match-error");
+        check_class_name(vm, vm.Stream_error, "stream-error");
+        check_class_name(vm, vm.End_of_file, "end-of-file");
+        check_class_name(vm, vm.Reader_error, "reader-error");
+        check_class_name(vm, vm.Prompt_not_found_error, "prompt-not-found-error");
 
     });
 
@@ -219,48 +200,42 @@ describe("Classes", () => {
 
     it("JS classes are linked to their class metaobjects and vice versa.", () => {
 
-        function check_linkage(js_class)
-        {
-            assert.equal(vm.lisp_class(js_class).get_js_class(),
-                         js_class);
-        }
+        check_class_linkage(vm, vm.Object);
+        check_class_linkage(vm, vm.String);
+        check_class_linkage(vm, vm.Symbol);
+        check_class_linkage(vm, vm.Number);
+        check_class_linkage(vm, vm.Boolean);
+        check_class_linkage(vm, vm.List);
+        check_class_linkage(vm, vm.Cons);
+        check_class_linkage(vm, vm.Nil);
+        check_class_linkage(vm, vm.Void);
+        check_class_linkage(vm, vm.Ignore);
+        check_class_linkage(vm, vm.Environment);
+        check_class_linkage(vm, vm.Class);
+        check_class_linkage(vm, vm.Built_in_class);
+        check_class_linkage(vm, vm.Standard_class);
+        check_class_linkage(vm, vm.Operator);
+        check_class_linkage(vm, vm.Built_in_operator);
+        check_class_linkage(vm, vm.Fexpr);
+        check_class_linkage(vm, vm.Function);
+        check_class_linkage(vm, vm.Continuation);
+        check_class_linkage(vm, vm.Dynamic);
+        check_class_linkage(vm, vm.Input_stream);
+        check_class_linkage(vm, vm.String_input_stream);
+        check_class_linkage(vm, vm.Output_stream);
+        check_class_linkage(vm, vm.String_output_stream);
 
-        check_linkage(vm.Object);
-        check_linkage(vm.String);
-        check_linkage(vm.Symbol);
-        check_linkage(vm.Number);
-        check_linkage(vm.Boolean);
-        check_linkage(vm.List);
-        check_linkage(vm.Cons);
-        check_linkage(vm.Nil);
-        check_linkage(vm.Void);
-        check_linkage(vm.Ignore);
-        check_linkage(vm.Environment);
-        check_linkage(vm.Class);
-        check_linkage(vm.Built_in_class);
-        check_linkage(vm.Standard_class);
-        check_linkage(vm.Operator);
-        check_linkage(vm.Built_in_operator);
-        check_linkage(vm.Fexpr);
-        check_linkage(vm.Function);
-        check_linkage(vm.Continuation);
-        check_linkage(vm.Dynamic);
-        check_linkage(vm.Input_stream);
-        check_linkage(vm.String_input_stream);
-        check_linkage(vm.Output_stream);
-        check_linkage(vm.String_output_stream);
-
-        check_linkage(vm.Standard_object);
-        check_linkage(vm.Condition);
-        check_linkage(vm.Error);
-        check_linkage(vm.Type_error);
-        check_linkage(vm.Unbound_symbol_error);
-        check_linkage(vm.Unbound_slot_error);
-        check_linkage(vm.Assertion_error);
-        check_linkage(vm.Match_error);
-        check_linkage(vm.Stream_error);
-        check_linkage(vm.End_of_file);
-        check_linkage(vm.Reader_error);
+        check_class_linkage(vm, vm.Standard_object);
+        check_class_linkage(vm, vm.Condition);
+        check_class_linkage(vm, vm.Error);
+        check_class_linkage(vm, vm.Type_error);
+        check_class_linkage(vm, vm.Unbound_symbol_error);
+        check_class_linkage(vm, vm.Unbound_slot_error);
+        check_class_linkage(vm, vm.Assertion_error);
+        check_class_linkage(vm, vm.Match_error);
+        check_class_linkage(vm, vm.Stream_error);
+        check_class_linkage(vm, vm.End_of_file);
+        check_class_linkage(vm, vm.Reader_error);
 
     });
 
