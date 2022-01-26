@@ -1,5 +1,7 @@
 import { assert } from "chai";
 
+import { check_superclass, check_metaclass } from "./test-util.mjs";
+
 import { VM } from "lispx-vm";
 
 const vm = new VM();
@@ -131,117 +133,87 @@ describe("Classes", () => {
 
     it("Classes have correct superclasses set.", () => {
 
-        function check_superclass(js_class, js_superclass)
-        {
-            assert.equal(vm.lisp_class(js_class).get_superclass(),
-                         vm.lisp_class(js_superclass));
-
-            assert(js_class.prototype instanceof js_superclass);
-        }
-
         assert.isNull(vm.lisp_class(vm.Object).get_superclass());
-        check_superclass(vm.String, vm.Object);
-        check_superclass(vm.Symbol, vm.Object);
-        check_superclass(vm.Number, vm.Object);
-        check_superclass(vm.Boolean, vm.Object);
-        check_superclass(vm.List, vm.Object);
-        check_superclass(vm.Cons, vm.List);
-        check_superclass(vm.Nil, vm.List);
-        check_superclass(vm.Void, vm.Object);
-        check_superclass(vm.Ignore, vm.Object);
-        check_superclass(vm.Environment, vm.Object);
-        check_superclass(vm.Class, vm.Object);
-        check_superclass(vm.Built_in_class, vm.Class);
-        check_superclass(vm.Standard_class, vm.Class);
-        check_superclass(vm.Operator, vm.Object);
-        check_superclass(vm.Built_in_operator, vm.Operator);
-        check_superclass(vm.Fexpr, vm.Operator);
-        check_superclass(vm.Function, vm.Operator);
-        check_superclass(vm.Continuation, vm.Object);
-        check_superclass(vm.Input_stream, vm.Object);
-        check_superclass(vm.String_input_stream, vm.Input_stream);
-        check_superclass(vm.Output_stream, vm.Object);
-        check_superclass(vm.String_output_stream, vm.Output_stream);
+        check_superclass(vm, vm.String, vm.Object);
+        check_superclass(vm, vm.Symbol, vm.Object);
+        check_superclass(vm, vm.Number, vm.Object);
+        check_superclass(vm, vm.Boolean, vm.Object);
+        check_superclass(vm, vm.List, vm.Object);
+        check_superclass(vm, vm.Cons, vm.List);
+        check_superclass(vm, vm.Nil, vm.List);
+        check_superclass(vm, vm.Void, vm.Object);
+        check_superclass(vm, vm.Ignore, vm.Object);
+        check_superclass(vm, vm.Environment, vm.Object);
+        check_superclass(vm, vm.Class, vm.Object);
+        check_superclass(vm, vm.Built_in_class, vm.Class);
+        check_superclass(vm, vm.Standard_class, vm.Class);
+        check_superclass(vm, vm.Operator, vm.Object);
+        check_superclass(vm, vm.Built_in_operator, vm.Operator);
+        check_superclass(vm, vm.Fexpr, vm.Operator);
+        check_superclass(vm, vm.Function, vm.Operator);
+        check_superclass(vm, vm.Continuation, vm.Object);
+        check_superclass(vm, vm.Input_stream, vm.Object);
+        check_superclass(vm, vm.String_input_stream, vm.Input_stream);
+        check_superclass(vm, vm.Output_stream, vm.Object);
+        check_superclass(vm, vm.String_output_stream, vm.Output_stream);
 
-        check_superclass(vm.Standard_object, vm.Object);
-        check_superclass(vm.Dynamic, vm.Standard_object);
-        check_superclass(vm.Condition, vm.Standard_object);
-        check_superclass(vm.Error, vm.Condition);
-        check_superclass(vm.Type_error, vm.Error);
-        check_superclass(vm.Unbound_symbol_error, vm.Error);
-        check_superclass(vm.Unbound_slot_error, vm.Error);
-        check_superclass(vm.Unbound_method_error, vm.Error);
-        check_superclass(vm.Assertion_error, vm.Error);
-        check_superclass(vm.Match_error, vm.Error);
-        check_superclass(vm.Stream_error, vm.Error);
-        check_superclass(vm.End_of_file, vm.Stream_error);
-        check_superclass(vm.Reader_error, vm.Error);
-        check_superclass(vm.Prompt_not_found_error, vm.Error);
+        check_superclass(vm, vm.Standard_object, vm.Object);
+        check_superclass(vm, vm.Dynamic, vm.Standard_object);
+        check_superclass(vm, vm.Condition, vm.Standard_object);
+        check_superclass(vm, vm.Error, vm.Condition);
+        check_superclass(vm, vm.Type_error, vm.Error);
+        check_superclass(vm, vm.Unbound_symbol_error, vm.Error);
+        check_superclass(vm, vm.Unbound_slot_error, vm.Error);
+        check_superclass(vm, vm.Unbound_method_error, vm.Error);
+        check_superclass(vm, vm.Assertion_error, vm.Error);
+        check_superclass(vm, vm.Match_error, vm.Error);
+        check_superclass(vm, vm.Stream_error, vm.Error);
+        check_superclass(vm, vm.End_of_file, vm.Stream_error);
+        check_superclass(vm, vm.Reader_error, vm.Error);
+        check_superclass(vm, vm.Prompt_not_found_error, vm.Error);
 
     });
 
     it("Classes have correct metaclasses set.", () => {
 
-        function check_metaclass(js_class, js_metaclass)
-        {
-            // Thanks to our nice object system, the following things
-            // are both true:
+        check_metaclass(vm, vm.Object, vm.Built_in_class);
+        check_metaclass(vm, vm.String, vm.Built_in_class);
+        check_metaclass(vm, vm.Symbol, vm.Built_in_class);
+        check_metaclass(vm, vm.Number, vm.Built_in_class);
+        check_metaclass(vm, vm.Boolean, vm.Built_in_class);
+        check_metaclass(vm, vm.List, vm.Built_in_class);
+        check_metaclass(vm, vm.Cons, vm.Built_in_class);
+        check_metaclass(vm, vm.Nil, vm.Built_in_class);
+        check_metaclass(vm, vm.Void, vm.Built_in_class);
+        check_metaclass(vm, vm.Ignore, vm.Built_in_class);
+        check_metaclass(vm, vm.Environment, vm.Built_in_class);
+        check_metaclass(vm, vm.Class, vm.Built_in_class);
+        check_metaclass(vm, vm.Built_in_class, vm.Built_in_class);
+        check_metaclass(vm, vm.Standard_class, vm.Built_in_class);
+        check_metaclass(vm, vm.Operator, vm.Built_in_class);
+        check_metaclass(vm, vm.Built_in_operator, vm.Built_in_class);
+        check_metaclass(vm, vm.Fexpr, vm.Built_in_class);
+        check_metaclass(vm, vm.Function, vm.Built_in_class);
+        check_metaclass(vm, vm.Continuation, vm.Built_in_class);
+        check_metaclass(vm, vm.Input_stream, vm.Built_in_class);
+        check_metaclass(vm, vm.String_input_stream, vm.Built_in_class);
+        check_metaclass(vm, vm.Output_stream, vm.Built_in_class);
+        check_metaclass(vm, vm.String_output_stream, vm.Built_in_class);
 
-            // 1) The Lisp class metaobject points to the Lisp
-            // metaclass metaobject.
-            assert.equal(vm.class_of(vm.lisp_class(js_class)),
-                         vm.lisp_class(js_metaclass));
-
-            // 2) The Lisp class metaobject is also an instance of the
-            // JS metaclass.
-            assert.instanceOf(vm.lisp_class(js_class),
-                              js_metaclass);
-
-            // (and of course of CLASS and OBJECT, too)
-            assert.instanceOf(vm.lisp_class(js_class),
-                              vm.Class);
-            assert.instanceOf(vm.lisp_class(js_class),
-                              vm.Object);
-        }
-
-        check_metaclass(vm.Object, vm.Built_in_class);
-        check_metaclass(vm.String, vm.Built_in_class);
-        check_metaclass(vm.Symbol, vm.Built_in_class);
-        check_metaclass(vm.Number, vm.Built_in_class);
-        check_metaclass(vm.Boolean, vm.Built_in_class);
-        check_metaclass(vm.List, vm.Built_in_class);
-        check_metaclass(vm.Cons, vm.Built_in_class);
-        check_metaclass(vm.Nil, vm.Built_in_class);
-        check_metaclass(vm.Void, vm.Built_in_class);
-        check_metaclass(vm.Ignore, vm.Built_in_class);
-        check_metaclass(vm.Environment, vm.Built_in_class);
-        check_metaclass(vm.Class, vm.Built_in_class);
-        check_metaclass(vm.Built_in_class, vm.Built_in_class);
-        check_metaclass(vm.Standard_class, vm.Built_in_class);
-        check_metaclass(vm.Operator, vm.Built_in_class);
-        check_metaclass(vm.Built_in_operator, vm.Built_in_class);
-        check_metaclass(vm.Fexpr, vm.Built_in_class);
-        check_metaclass(vm.Function, vm.Built_in_class);
-        check_metaclass(vm.Continuation, vm.Built_in_class);
-        check_metaclass(vm.Input_stream, vm.Built_in_class);
-        check_metaclass(vm.String_input_stream, vm.Built_in_class);
-        check_metaclass(vm.Output_stream, vm.Built_in_class);
-        check_metaclass(vm.String_output_stream, vm.Built_in_class);
-
-        check_metaclass(vm.Standard_object, vm.Standard_class);
-        check_metaclass(vm.Dynamic, vm.Standard_class);
-        check_metaclass(vm.Condition, vm.Standard_class);
-        check_metaclass(vm.Error, vm.Standard_class);
-        check_metaclass(vm.Type_error, vm.Standard_class);
-        check_metaclass(vm.Unbound_symbol_error, vm.Standard_class);
-        check_metaclass(vm.Unbound_slot_error, vm.Standard_class);
-        check_metaclass(vm.Unbound_method_error, vm.Standard_class);
-        check_metaclass(vm.Assertion_error, vm.Standard_class);
-        check_metaclass(vm.Match_error, vm.Standard_class);
-        check_metaclass(vm.Stream_error, vm.Standard_class);
-        check_metaclass(vm.End_of_file, vm.Standard_class);
-        check_metaclass(vm.Reader_error, vm.Standard_class);
-        check_metaclass(vm.Prompt_not_found_error, vm.Standard_class);
+        check_metaclass(vm, vm.Standard_object, vm.Standard_class);
+        check_metaclass(vm, vm.Dynamic, vm.Standard_class);
+        check_metaclass(vm, vm.Condition, vm.Standard_class);
+        check_metaclass(vm, vm.Error, vm.Standard_class);
+        check_metaclass(vm, vm.Type_error, vm.Standard_class);
+        check_metaclass(vm, vm.Unbound_symbol_error, vm.Standard_class);
+        check_metaclass(vm, vm.Unbound_slot_error, vm.Standard_class);
+        check_metaclass(vm, vm.Unbound_method_error, vm.Standard_class);
+        check_metaclass(vm, vm.Assertion_error, vm.Standard_class);
+        check_metaclass(vm, vm.Match_error, vm.Standard_class);
+        check_metaclass(vm, vm.Stream_error, vm.Standard_class);
+        check_metaclass(vm, vm.End_of_file, vm.Standard_class);
+        check_metaclass(vm, vm.Reader_error, vm.Standard_class);
+        check_metaclass(vm, vm.Prompt_not_found_error, vm.Standard_class);
 
     });
 
