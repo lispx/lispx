@@ -1038,6 +1038,27 @@ describe("assert_type()", () => {
     });
 });
 
+describe("assert_instanceof()", () => {
+
+    it("It supports JS classes and returns the datum.", () => {
+        const arr = new Uint8Array(0);
+        assert.equal(vm.assert_instanceof(arr, Uint8Array), arr);
+        const str = new String("foo");
+        assert.equal(vm.assert_instanceof(str, String), str);
+    });
+
+    it("It throws if the datum doesn't match the type spec.", () => {
+        try {
+            vm.assert_instanceof(12, String);
+        } catch(e) {
+            assert.equal(e.message, "Expected String");
+            return;
+        }
+        assert(false);
+    });
+
+});
+
 /***** UTF-8 *****/
 
 describe("utf8_encode()", () => {

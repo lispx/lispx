@@ -5318,6 +5318,18 @@ function init_vm(vm)
     };
 
     /*
+     * Similar to assert_type(), but for non-Lisp, normal JavaScript
+     * classes.  Ideally, we wouldn't need this, and could use
+     * assert_type(), but at the moment we don't have type specs for
+     * JavaScript classes, so we can't throw a TYPE-ERROR.
+     */
+    vm.assert_instanceof = (datum, js_class) =>
+    {
+        vm.assert(datum instanceof js_class, "Expected " + js_class.name);
+        return datum;
+    };
+
+    /*
      * Transforms a type spec into a symbolic representation used on
      * the Lisp side.
      *
