@@ -34,7 +34,7 @@ export function check_class_name(vm, js_class, name)
     /*
      * Check that the JS constructor function has a proper name.
      */
-    const js_name = "Lisp_" + name.replace(/-/g, "_");
+    const js_name = "Lisp_" + name.replace(/[-:]/g, "_");
     assert.equal(js_class.name, js_name);
 };
 

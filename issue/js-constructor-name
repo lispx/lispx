@@ -1,0 +1,2 @@
+The requirement of a Lisp class FOO's constructor function to be named
+Lisp_foo (induced by test-util's check_class_name()) is controversial.
