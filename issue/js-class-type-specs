@@ -1,0 +1,2 @@
+We should have type specs for non-Lisp JS classes, so that
+we don't need vm.assert_instanceof().
