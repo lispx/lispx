@@ -1,0 +1,2 @@
+We probably want to push a root prompt (for stack traces)
+in vm.eval_form() as well as inside the barrier in JS-LAMBDA.
