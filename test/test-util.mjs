@@ -30,12 +30,6 @@ export function check_class_name(vm, js_class, name)
     // symbol in the class namespace.
     assert.equal(vm.get_environment().lookup(name_sym.to_class_symbol()),
                  lisp_class);
-
-    /*
-     * Check that the JS constructor function has a proper name.
-     */
-    const js_name = "Lisp_" + name.replace(/[-:]/g, "_");
-    assert.equal(js_class.name, js_name);
 };
 
 /*

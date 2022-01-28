@@ -71,44 +71,59 @@ describe("Classes", () => {
 
     it("Classes are named and registered in the root environment.", () => {
 
-        check_class_name(vm, vm.Object, "object");
-        check_class_name(vm, vm.String, "string");
-        check_class_name(vm, vm.Symbol, "symbol");
-        check_class_name(vm, vm.Number, "number");
-        check_class_name(vm, vm.Boolean, "boolean");
-        check_class_name(vm, vm.List, "list");
-        check_class_name(vm, vm.Cons, "cons");
-        check_class_name(vm, vm.Nil, "nil");
-        check_class_name(vm, vm.Void, "void");
-        check_class_name(vm, vm.Ignore, "ignore");
-        check_class_name(vm, vm.Environment, "environment");
-        check_class_name(vm, vm.Class, "class");
-        check_class_name(vm, vm.Built_in_class, "built-in-class");
-        check_class_name(vm, vm.Standard_class, "standard-class");
-        check_class_name(vm, vm.Operator, "operator");
-        check_class_name(vm, vm.Built_in_operator, "built-in-operator");
-        check_class_name(vm, vm.Fexpr, "fexpr");
-        check_class_name(vm, vm.Function, "function");
-        check_class_name(vm, vm.Continuation, "continuation");
-        check_class_name(vm, vm.Dynamic, "dynamic");
-        check_class_name(vm, vm.Input_stream, "input-stream");
-        check_class_name(vm, vm.String_input_stream, "string-input-stream");
-        check_class_name(vm, vm.Output_stream, "output-stream");
-        check_class_name(vm, vm.String_output_stream, "string-output-stream");
+        function check_vm_class_name(vm, js_class, name)
+        {
+            /*
+             * Use check from utility.
+             */
+            check_class_name(vm, js_class, name);
 
-        check_class_name(vm, vm.Standard_object, "standard-object");
-        check_class_name(vm, vm.Condition, "condition");
-        check_class_name(vm, vm.Error, "error");
-        check_class_name(vm, vm.Type_error, "type-error");
-        check_class_name(vm, vm.Unbound_symbol_error, "unbound-symbol-error");
-        check_class_name(vm, vm.Unbound_slot_error, "unbound-slot-error");
-        check_class_name(vm, vm.Unbound_method_error, "unbound-method-error");
-        check_class_name(vm, vm.Assertion_error, "assertion-error");
-        check_class_name(vm, vm.Match_error, "match-error");
-        check_class_name(vm, vm.Stream_error, "stream-error");
-        check_class_name(vm, vm.End_of_file, "end-of-file");
-        check_class_name(vm, vm.Reader_error, "reader-error");
-        check_class_name(vm, vm.Prompt_not_found_error, "prompt-not-found-error");
+            /*
+             * Add additional check that the JS constructor functions
+             * of VM classes have a proper name starting with "Lisp_".
+             */
+            const js_name = "Lisp_" + name.replace(/-/g, "_");
+            assert.equal(js_class.name, js_name);
+        }
+
+        check_vm_class_name(vm, vm.Object, "object");
+        check_vm_class_name(vm, vm.String, "string");
+        check_vm_class_name(vm, vm.Symbol, "symbol");
+        check_vm_class_name(vm, vm.Number, "number");
+        check_vm_class_name(vm, vm.Boolean, "boolean");
+        check_vm_class_name(vm, vm.List, "list");
+        check_vm_class_name(vm, vm.Cons, "cons");
+        check_vm_class_name(vm, vm.Nil, "nil");
+        check_vm_class_name(vm, vm.Void, "void");
+        check_vm_class_name(vm, vm.Ignore, "ignore");
+        check_vm_class_name(vm, vm.Environment, "environment");
+        check_vm_class_name(vm, vm.Class, "class");
+        check_vm_class_name(vm, vm.Built_in_class, "built-in-class");
+        check_vm_class_name(vm, vm.Standard_class, "standard-class");
+        check_vm_class_name(vm, vm.Operator, "operator");
+        check_vm_class_name(vm, vm.Built_in_operator, "built-in-operator");
+        check_vm_class_name(vm, vm.Fexpr, "fexpr");
+        check_vm_class_name(vm, vm.Function, "function");
+        check_vm_class_name(vm, vm.Continuation, "continuation");
+        check_vm_class_name(vm, vm.Dynamic, "dynamic");
+        check_vm_class_name(vm, vm.Input_stream, "input-stream");
+        check_vm_class_name(vm, vm.String_input_stream, "string-input-stream");
+        check_vm_class_name(vm, vm.Output_stream, "output-stream");
+        check_vm_class_name(vm, vm.String_output_stream, "string-output-stream");
+
+        check_vm_class_name(vm, vm.Standard_object, "standard-object");
+        check_vm_class_name(vm, vm.Condition, "condition");
+        check_vm_class_name(vm, vm.Error, "error");
+        check_vm_class_name(vm, vm.Type_error, "type-error");
+        check_vm_class_name(vm, vm.Unbound_symbol_error, "unbound-symbol-error");
+        check_vm_class_name(vm, vm.Unbound_slot_error, "unbound-slot-error");
+        check_vm_class_name(vm, vm.Unbound_method_error, "unbound-method-error");
+        check_vm_class_name(vm, vm.Assertion_error, "assertion-error");
+        check_vm_class_name(vm, vm.Match_error, "match-error");
+        check_vm_class_name(vm, vm.Stream_error, "stream-error");
+        check_vm_class_name(vm, vm.End_of_file, "end-of-file");
+        check_vm_class_name(vm, vm.Reader_error, "reader-error");
+        check_vm_class_name(vm, vm.Prompt_not_found_error, "prompt-not-found-error");
 
     });
 
