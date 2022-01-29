@@ -1383,7 +1383,7 @@ function init_vm(vm)
      * We could have used the class namespace for both, but it's
      * more readable if class names are just ordinary symbols.
      */
-    vm.define_class = (name, js_class, js_super = null, js_meta = vm.Built_in_class) =>
+    vm.define_class = (name, js_class, js_super = vm.Object, js_meta = vm.Built_in_class) =>
     {
         const name_sym = vm.sym(name);
         const lisp_class = vm.bless_class(name_sym, js_class, js_super, js_meta);
@@ -1416,29 +1416,29 @@ function init_vm(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("object", vm.Object);
+    vm.define_class("object", vm.Object, null);
 
-    vm.define_class("string", vm.String, vm.Object);
+    vm.define_class("string", vm.String);
 
-    vm.define_class("symbol", vm.Symbol, vm.Object);
+    vm.define_class("symbol", vm.Symbol);
 
-    vm.define_class("number", vm.Number, vm.Object);
+    vm.define_class("number", vm.Number);
 
-    vm.define_class("boolean", vm.Boolean, vm.Object);
+    vm.define_class("boolean", vm.Boolean);
 
-    vm.define_class("list", vm.List, vm.Object);
+    vm.define_class("list", vm.List);
 
     vm.define_class("cons", vm.Cons, vm.List);
 
     vm.define_class("nil", vm.Nil, vm.List);
 
-    vm.define_class("void", vm.Void, vm.Object);
+    vm.define_class("void", vm.Void);
 
-    vm.define_class("ignore", vm.Ignore, vm.Object);
+    vm.define_class("ignore", vm.Ignore);
 
-    vm.define_class("environment", vm.Environment, vm.Object);
+    vm.define_class("environment", vm.Environment);
 
-    vm.define_class("class", vm.Class, vm.Object);
+    vm.define_class("class", vm.Class);
 
     vm.define_class("built-in-class", vm.Built_in_class, vm.Class);
 

@@ -768,7 +768,7 @@ export function init_control(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("continuation", vm.Continuation, vm.Object);
+    vm.define_class("continuation", vm.Continuation);
 
     vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
 

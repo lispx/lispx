@@ -237,11 +237,11 @@ export function init_stream(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("input-stream", vm.Input_stream, vm.Object);
+    vm.define_class("input-stream", vm.Input_stream);
 
     vm.define_class("string-input-stream", vm.String_input_stream, vm.Input_stream);
 
-    vm.define_class("output-stream", vm.Output_stream, vm.Object);
+    vm.define_class("output-stream", vm.Output_stream);
 
     vm.define_class("string-output-stream", vm.String_output_stream, vm.Output_stream);
 

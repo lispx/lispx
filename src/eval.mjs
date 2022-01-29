@@ -641,7 +641,7 @@ export function init_eval(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("operator", vm.Operator, vm.Object);
+    vm.define_class("operator", vm.Operator);
 
     vm.define_class("built-in-operator", vm.Built_in_operator, vm.Operator);
 
