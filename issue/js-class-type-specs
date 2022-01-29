@@ -1,2 +1,3 @@
-We should have type specs for non-Lisp JS classes, so that
-we don't need vm.assert_instanceof().
+We should have type specs for non-Lisp JS classes.
+
+As a temporary measure, we use the JS class itself as its type spec.

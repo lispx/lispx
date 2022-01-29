@@ -236,7 +236,8 @@ export class VM
 
     /*
      * Returns true if a JS class has a Lisp class metaobject, false
-     * otherwise.
+     * otherwise.  This can be used to discover whether the class
+     * belongs to the VM or is an unrelated JS class.
      */
     has_lisp_class(js_class)
     {
@@ -494,7 +495,7 @@ function init_vm(vm)
         constructor(big)
         {
             super();
-            vm.assert(big instanceof Big);
+            vm.assert_type(big, Big);
             this.big = big;
         }
 
@@ -1220,18 +1221,6 @@ function init_vm(vm)
     };
 
     /*
-     * Similar to assert_type(), but for non-Lisp, normal JavaScript
-     * classes.  Ideally, we wouldn't need this, and could use
-     * assert_type(), but at the moment we don't have type specs for
-     * JavaScript classes, so we can't throw a TYPE-ERROR.
-     */
-    vm.assert_instanceof = (datum, js_class) =>
-    {
-        vm.assert(datum instanceof js_class, "Expected " + js_class.name);
-        return datum;
-    };
-
-    /*
      * Transforms a type spec into a symbolic representation used on
      * the Lisp side.
      *
@@ -1252,7 +1241,15 @@ function init_vm(vm)
         if (typeof(type_spec) === "string") {
             return vm.str(type_spec);
         } else if (typeof(type_spec) === "function") {
-            return vm.lisp_class(type_spec).get_name();
+            if (vm.has_lisp_class(type_spec))
+                return vm.lisp_class(type_spec).get_name();
+            else
+                /*
+                 * Temporary hack: we don't have a symbolic type spec
+                 * format for non-VM, ordinary JS classes yet.  For
+                 * now, we just use the class itself as its type spec.
+                 */
+                return type_spec;
         } else if (type_spec && type_spec.to_lisp_type_spec) {
             return type_spec.to_lisp_type_spec();
         } else {
