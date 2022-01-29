@@ -649,7 +649,7 @@ export function init_eval(vm)
 
     vm.define_class("function", vm.Function, vm.Operator);
 
-    vm.define_class("match-error", vm.Match_error, vm.Error, vm.Standard_class);
+    vm.define_condition("match-error", vm.Match_error, vm.Error);
 
     vm.define_built_in_operator("%%vau", vm.VAU);
 

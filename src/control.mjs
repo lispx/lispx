@@ -772,8 +772,7 @@ export function init_control(vm)
 
     vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
 
-    vm.define_class("prompt-not-found-error", vm.Prompt_not_found_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
 
     vm.define_built_in_function("%%take-subcont", vm.TAKE_SUBCONT);
 

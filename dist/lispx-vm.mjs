@@ -1871,8 +1871,7 @@ function init_control(vm)
 
     vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
 
-    vm.define_class("prompt-not-found-error", vm.Prompt_not_found_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
 
     vm.define_built_in_function("%%take-subcont", vm.TAKE_SUBCONT);
 
@@ -2558,7 +2557,7 @@ function init_eval(vm)
 
     vm.define_class("function", vm.Function, vm.Operator);
 
-    vm.define_class("match-error", vm.Match_error, vm.Error, vm.Standard_class);
+    vm.define_condition("match-error", vm.Match_error, vm.Error);
 
     vm.define_built_in_operator("%%vau", vm.VAU);
 
@@ -3703,7 +3702,7 @@ function init_read(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("reader-error", vm.Reader_error, vm.Error, vm.Standard_class);
+    vm.define_condition("reader-error", vm.Reader_error, vm.Error);
 
     vm.define_alien_function("%%read", (stream, eof_error_p, eof_value) => {
         vm.assert_type(eof_error_p, vm.Boolean);
@@ -3980,9 +3979,9 @@ function init_stream(vm)
 
     vm.define_class("string-output-stream", vm.String_output_stream, vm.Output_stream);
 
-    vm.define_class("stream-error", vm.Stream_error, vm.Error, vm.Standard_class);
+    vm.define_condition("stream-error", vm.Stream_error, vm.Error);
 
-    vm.define_class("end-of-file", vm.End_of_file, vm.Stream_error, vm.Standard_class);
+    vm.define_condition("end-of-file", vm.End_of_file, vm.Stream_error);
 
     vm.define_variable("*standard-input*", vm.STANDARD_INPUT);
 
@@ -5490,6 +5489,15 @@ function init_vm(vm)
         return lisp_class;
     };
 
+    /*
+     * Defines a condition class.  Used so that STANDARD-CLASS doesn't
+     * have to be specified explicitly as metaclass.
+     */
+    vm.define_condition = (name, js_class, js_super) =>
+    {
+        vm.define_class(name, js_class, js_super, vm.Standard_class);
+    };
+
     /*** Lisp API ***/
 
     vm.define_class("object", vm.Object);
@@ -5522,23 +5530,19 @@ function init_vm(vm)
 
     vm.define_class("standard-object", vm.Standard_object, vm.Object, vm.Standard_class);
 
-    vm.define_class("condition", vm.Condition, vm.Standard_object, vm.Standard_class);
+    vm.define_condition("condition", vm.Condition, vm.Standard_object);
 
-    vm.define_class("error", vm.Error, vm.Condition, vm.Standard_class);
+    vm.define_condition("error", vm.Error, vm.Condition);
 
-    vm.define_class("type-error", vm.Type_error, vm.Error, vm.Standard_class);
+    vm.define_condition("type-error", vm.Type_error, vm.Error);
 
-    vm.define_class("unbound-symbol-error", vm.Unbound_symbol_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-symbol-error", vm.Unbound_symbol_error, vm.Error);
 
-    vm.define_class("unbound-slot-error", vm.Unbound_slot_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-slot-error", vm.Unbound_slot_error, vm.Error);
 
-    vm.define_class("unbound-method-error", vm.Unbound_method_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-method-error", vm.Unbound_method_error, vm.Error);
 
-    vm.define_class("assertion-error", vm.Assertion_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("assertion-error", vm.Assertion_error, vm.Error);
 
 };
 

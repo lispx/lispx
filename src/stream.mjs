@@ -245,9 +245,9 @@ export function init_stream(vm)
 
     vm.define_class("string-output-stream", vm.String_output_stream, vm.Output_stream);
 
-    vm.define_class("stream-error", vm.Stream_error, vm.Error, vm.Standard_class);
+    vm.define_condition("stream-error", vm.Stream_error, vm.Error);
 
-    vm.define_class("end-of-file", vm.End_of_file, vm.Stream_error, vm.Standard_class);
+    vm.define_condition("end-of-file", vm.End_of_file, vm.Stream_error);
 
     vm.define_variable("*standard-input*", vm.STANDARD_INPUT);
 

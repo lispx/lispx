@@ -1405,6 +1405,15 @@ function init_vm(vm)
         return lisp_class;
     };
 
+    /*
+     * Defines a condition class.  Used so that STANDARD-CLASS doesn't
+     * have to be specified explicitly as metaclass.
+     */
+    vm.define_condition = (name, js_class, js_super) =>
+    {
+        vm.define_class(name, js_class, js_super, vm.Standard_class);
+    };
+
     /*** Lisp API ***/
 
     vm.define_class("object", vm.Object);
@@ -1437,22 +1446,18 @@ function init_vm(vm)
 
     vm.define_class("standard-object", vm.Standard_object, vm.Object, vm.Standard_class);
 
-    vm.define_class("condition", vm.Condition, vm.Standard_object, vm.Standard_class);
+    vm.define_condition("condition", vm.Condition, vm.Standard_object);
 
-    vm.define_class("error", vm.Error, vm.Condition, vm.Standard_class);
+    vm.define_condition("error", vm.Error, vm.Condition);
 
-    vm.define_class("type-error", vm.Type_error, vm.Error, vm.Standard_class);
+    vm.define_condition("type-error", vm.Type_error, vm.Error);
 
-    vm.define_class("unbound-symbol-error", vm.Unbound_symbol_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-symbol-error", vm.Unbound_symbol_error, vm.Error);
 
-    vm.define_class("unbound-slot-error", vm.Unbound_slot_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-slot-error", vm.Unbound_slot_error, vm.Error);
 
-    vm.define_class("unbound-method-error", vm.Unbound_method_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("unbound-method-error", vm.Unbound_method_error, vm.Error);
 
-    vm.define_class("assertion-error", vm.Assertion_error,
-                    vm.Error, vm.Standard_class);
+    vm.define_condition("assertion-error", vm.Assertion_error, vm.Error);
 
 };

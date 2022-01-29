@@ -583,7 +583,7 @@ export function init_read(vm)
 
     /*** Lisp API ***/
 
-    vm.define_class("reader-error", vm.Reader_error, vm.Error, vm.Standard_class);
+    vm.define_condition("reader-error", vm.Reader_error, vm.Error);
 
     vm.define_alien_function("%%read", (stream, eof_error_p, eof_value) => {
         vm.assert_type(eof_error_p, vm.Boolean);
