@@ -316,6 +316,16 @@ describe("Classes", () => {
 
     });
 
+    it("has_lisp_class() can be used to distinguish Lisp classes from other classes.", () => {
+
+        assert(vm.has_lisp_class(vm.Object));
+        assert(vm.has_lisp_class(vm.Class));
+
+        assert(!vm.has_lisp_class(Object));
+        assert(!vm.has_lisp_class(String));
+
+    });
+
 });
 
 describe("Strings", () => {

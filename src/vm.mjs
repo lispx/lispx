@@ -230,7 +230,17 @@ export class VM
     lisp_class(js_class)
     {
         this.assert_type(js_class, "function");
-        return this.assert_type(js_class.prototype.lisp_class, this.Class);
+        this.assert(this.has_lisp_class(js_class));
+        return js_class.prototype.lisp_class;
+    }
+
+    /*
+     * Returns true if a JS class has a Lisp class metaobject, false
+     * otherwise.
+     */
+    has_lisp_class(js_class)
+    {
+        return this.has_type(js_class.prototype.lisp_class, this.Class);
     }
 
     /*
