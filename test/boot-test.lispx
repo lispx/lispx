@@ -1964,7 +1964,12 @@
 
   (deftest nthcdr.12
     (nthcdr 3 '(1 2 3))
-    '()))
+    '())
+
+  (deftest nthcdr.13
+    (signals-error
+     (nthcdr 4 '(1 2 3))
+     out-of-bounds-error)))
 
 (defsuite subseq
 
@@ -2029,7 +2034,16 @@
 
   (deftest subseq.14
     (subseq '(0 1 2 3 4 5) 3 5)
-    '(3 4)))
+    '(3 4))
+
+  (deftest subseq.15
+    (subseq '(0 1 2 3 4 5) 0 6)
+    '(0 1 2 3 4 5))
+
+  (deftest subseq.16
+    (signals-error
+     (subseq '(0 1 2 3 4 5) 0 7)
+     out-of-bounds-error)))
 
 (defsuite memberp
 
