@@ -1966,7 +1966,7 @@
     (nthcdr 3 '(1 2 3))
     '()))
 
-(defsuite nthcdr
+(defsuite subseq
 
   (deftest subseq.1
     (signals-error
