@@ -410,16 +410,16 @@ $(syntax clause (class-name . forms))"
   "Return the `cdr' of the `cdr' of the CONS."
   (cdr (cdr cons)))
 
+(defun length (list)
+  "Return the length of a proper LIST."
+  (%%length list))
+
 (defun append (list1 list2)
   "Append two lists.  The first one must be proper and is copied.  The
 second one is not copied (and doesn't even have to be a list). It
 becomes the `cdr' of the final cons of the first list, or is returned
 directly if the first list is empty."
   (%%append list1 list2))
-
-(defun length (list)
-  "Return the length of a proper LIST."
-  (%%length list))
 
 (defun nthcdr (n list)
   "Returns the tail of LIST that would be obtained by calling `cdr' N

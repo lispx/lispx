@@ -325,6 +325,30 @@
 
     (deftest list-to-js-array.1
       (js-array-to-list (list-to-js-array '(1 2 3)))
+      '(1 2 3))
+
+    (deftest list-to-js-array.2
+      (signals-error
+       (list-to-js-array)
+       match-error))
+
+    (deftest list-to-js-array.3
+      (signals-error
+       (list-to-js-array 12)
+       type-error :datum 12 :expected-type 'list))
+
+    (deftest js-array-to-list.1
+      (signals-error
+       (js-array-to-list)
+       match-error))
+
+    (deftest js-array-to-list.2
+      (signals-error
+       (js-array-to-list 12)
+       assertion-error))
+
+    (deftest js-array-to-list.3
+      (js-array-to-list (js-array 1 2 3))
       '(1 2 3)))
 
 (defsuite apply-js-method

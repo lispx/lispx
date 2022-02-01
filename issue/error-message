@@ -1,0 +1,2 @@
+The message of a vm.Error should probably be exposed as
+.lisp_slot_message so it can be accessed with SLOT-VALUE.
