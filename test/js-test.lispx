@@ -298,7 +298,7 @@
      (js-get 12 'bar)
      type-error :datum 'bar :expected-type 'string)))
 
-(defsuite js-array
+(defsuite js-arrays
 
   (define-js-method array-push "push")
   (define-js-method array-pop "pop")
@@ -314,7 +314,18 @@
       (assert (= (to-js-number 1) (js-get arr "length")))
       (assert (= "a" (array-pop arr)))
       (assert (= (to-js-number 0) (js-get arr "length")))
-      #t)))
+      #t))
+
+    (deftest js-array.2
+      (let ((arr (js-array (+ 1 1) (+ 2 2))))
+        (assert (= (to-js-number 2) (js-get arr "length")))
+        (assert (= 4 (array-pop arr)))
+        (assert (= 2 (array-pop arr)))
+        #t))
+
+    (deftest list-to-js-array.1
+      (js-array-to-list (list-to-js-array '(1 2 3)))
+      '(1 2 3)))
 
 (defsuite apply-js-method
 

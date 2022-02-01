@@ -65,14 +65,6 @@ export function init_js(vm)
     };
 
     /*
-     * Creates a new array.
-     */
-    vm.js_array = () =>
-    {
-        return [];
-    }
-
-    /*
      * Makes a JS function callable as a Lisp one.
      */
     vm.to_lisp_function = (js_fun) =>
@@ -130,7 +122,9 @@ export function init_js(vm)
 
     vm.define_alien_function("%%js-get", vm.js_get);
 
-    vm.define_alien_function("%%js-array", vm.js_array);
+    vm.define_alien_function("%%list-to-js-array", vm.list_to_array);
+
+    vm.define_alien_function("%%js-array-to-list", vm.array_to_list);
 
     vm.define_alien_function("%%apply-js-method", vm.apply_js_method);
 
