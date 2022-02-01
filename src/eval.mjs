@@ -691,21 +691,7 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
 
-    vm.define_alien_function("%%list*", (...objects) => vm.list_star(...objects));
-
     vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
-
-    vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
-
-    vm.define_alien_function("%%length", (list) => vm.num(vm.list_length(list)));
-
-    vm.define_alien_function("%%nthcdr", (num, list) =>
-        vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
-
-    vm.define_alien_function("%%subseq", (list, start, end) =>
-        vm.list_subseq(list,
-                       vm.assert_type(start, vm.Number).to_js_number(),
-                       vm.assert_type(end, vm.Number).to_js_number()));
 
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 

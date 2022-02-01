@@ -158,28 +158,6 @@ the `cdr' of the list."
   "Reverse the LIST."
   (%%reverse list))
 
-(defun append (list1 list2)
-  "Append two lists.  The first one must be proper and is copied.  The
-second one is not copied (and doesn't even have to be a list). It
-becomes the `cdr' of the final cons of the first list, or is returned
-directly if the first list is empty."
-  (%%append list1 list2))
-
-(defun length (list)
-  "Return the length of a proper LIST."
-  (%%length list))
-
-(defun nthcdr (n list)
-  "Returns the tail of LIST that would be obtained by calling `cdr' N
-times in succession."
-  (%%nthcdr n list))
-
-(defun subseq (list start . end?)
-  "Creates a list that is a copy of the subsequence of the LIST
-bounded by START and optional END?.  If END? is not supplied or -1,
-the subsequence stretches until the end of the list."
-  (%%subseq list start (optional end? -1)))
-
 (defun wrap (operator)
   "Create a new function that wraps around an underlying OPERATOR, and
 induces argument evaluation around it."
@@ -431,6 +409,28 @@ $(syntax clause (class-name . forms))"
 (defun cddr (cons)
   "Return the `cdr' of the `cdr' of the CONS."
   (cdr (cdr cons)))
+
+(defun append (list1 list2)
+  "Append two lists.  The first one must be proper and is copied.  The
+second one is not copied (and doesn't even have to be a list). It
+becomes the `cdr' of the final cons of the first list, or is returned
+directly if the first list is empty."
+  (%%append list1 list2))
+
+(defun length (list)
+  "Return the length of a proper LIST."
+  (%%length list))
+
+(defun nthcdr (n list)
+  "Returns the tail of LIST that would be obtained by calling `cdr' N
+times in succession."
+  (%%nthcdr n list))
+
+(defun subseq (list start . end?)
+  "Creates a list that is a copy of the subsequence of the LIST
+bounded by START and optional END?.  If END? is not supplied or -1,
+the subsequence stretches until the end of the list."
+  (%%subseq list start (optional end? -1)))
 
 (defun mapcar (#'function list)
   "Create a new list by applying the FUNCTION to every element of the LIST."
