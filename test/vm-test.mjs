@@ -119,6 +119,7 @@ describe("Classes", () => {
         check_vm_class_name(vm, vm.Unbound_slot_error, "unbound-slot-error");
         check_vm_class_name(vm, vm.Unbound_method_error, "unbound-method-error");
         check_vm_class_name(vm, vm.Assertion_error, "assertion-error");
+        check_vm_class_name(vm, vm.Out_of_bounds_error, "out-of-bounds-error");
         check_vm_class_name(vm, vm.Match_error, "match-error");
         check_vm_class_name(vm, vm.Stream_error, "stream-error");
         check_vm_class_name(vm, vm.End_of_file, "end-of-file");
@@ -162,6 +163,7 @@ describe("Classes", () => {
         check_superclass(vm, vm.Unbound_slot_error, vm.Error);
         check_superclass(vm, vm.Unbound_method_error, vm.Error);
         check_superclass(vm, vm.Assertion_error, vm.Error);
+        check_superclass(vm, vm.Out_of_bounds_error, vm.Error);
         check_superclass(vm, vm.Match_error, vm.Error);
         check_superclass(vm, vm.Stream_error, vm.Error);
         check_superclass(vm, vm.End_of_file, vm.Stream_error);
@@ -205,6 +207,7 @@ describe("Classes", () => {
         check_metaclass(vm, vm.Unbound_slot_error, vm.Standard_class);
         check_metaclass(vm, vm.Unbound_method_error, vm.Standard_class);
         check_metaclass(vm, vm.Assertion_error, vm.Standard_class);
+        check_metaclass(vm, vm.Out_of_bounds_error, vm.Standard_class);
         check_metaclass(vm, vm.Match_error, vm.Standard_class);
         check_metaclass(vm, vm.Stream_error, vm.Standard_class);
         check_metaclass(vm, vm.End_of_file, vm.Standard_class);

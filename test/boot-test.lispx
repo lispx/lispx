@@ -1905,9 +1905,66 @@
     (length '())
     0)
 
-  (deftest length.3
+  (deftest length.4
     (length '(1 2 3))
     3))
+
+(defsuite nthcdr
+
+  (deftest nthcdr.1
+    (signals-error
+     (nthcdr)
+     match-error))
+
+  (deftest nthcdr.2
+    (signals-error
+     (nthcdr 1)
+     match-error))
+
+  (deftest nthcdr.3
+    (signals-error
+     (nthcdr "foo" '())
+     type-error :datum "foo" :expected-type 'number))
+
+  (deftest nthcdr.4
+    (signals-error
+     (nthcdr 12 "foo")
+     type-error :datum "foo" :expected-type 'list))
+
+  (deftest nthcdr.5
+    (nthcdr 0 '())
+    '())
+
+  (deftest nthcdr.6
+    (signals-error
+     (nthcdr 1 '())
+     out-of-bounds-error))
+
+  (deftest nthcdr.7
+    (signals-error
+     (nthcdr 2 '(1))
+     out-of-bounds-error))
+
+  (deftest nthcdr.8
+    (signals-error
+     (nthcdr 3 '(1))
+     out-of-bounds-error))
+
+  (deftest nthcdr.9
+    (nthcdr 0 '(1 2 3))
+    '(1 2 3))
+
+  (deftest nthcdr.10
+    (nthcdr 1 '(1 2 3))
+    '(2 3))
+
+  (deftest nthcdr.11
+    (nthcdr 2 '(1 2 3))
+    '(3))
+
+  (deftest nthcdr.12
+    (nthcdr 3 '(1 2 3))
+    '()))
 
 (defsuite memberp
 

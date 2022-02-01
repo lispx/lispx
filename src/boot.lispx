@@ -166,8 +166,13 @@ directly if the first list is empty."
   (%%append list1 list2))
 
 (defun length (list)
-  "Return the length of a proper list."
+  "Return the length of a proper LIST."
   (%%length list))
+
+(defun nthcdr (n list)
+  "Returns the tail of LIST that would be obtained by calling `cdr' N
+times in succession."
+  (%%nthcdr n list))
 
 (defun wrap (operator)
   "Create a new function that wraps around an underlying OPERATOR, and

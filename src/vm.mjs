@@ -1353,6 +1353,44 @@ function init_vm(vm)
     };
 
     /*
+     * Returns the tail of list that would be obtained by calling cdr
+     * n times in succession.
+     */
+    vm.nthcdr = (n, list) =>
+    {
+        vm.assert_type(list, vm.List);
+        if (n === 0) {
+            return list;
+        } else {
+            if (list === vm.nil())
+                throw new vm.Out_of_bounds_error();
+            else
+                return vm.nthcdr(n - 1, list.cdr());
+        }
+    };
+
+    /*
+     * Signalled when an indexing operation is out of bounds.
+     */
+    vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error
+    {
+        constructor()
+        {
+            super("Out of bounds");
+        }
+    };
+
+    /*
+     * Creates a list that is a copy of the subsequence of the list
+     * bounded by start and end.
+     */
+    vm.list_subseq = (list, start, end = -1) =>
+    {
+//        rest = nthcdr(list, start)
+//        ret firstcars(rest, end - start)
+    };
+
+    /*
      * Produces an option (one-element list) holding the object.
      */
     vm.some = (object) =>
@@ -1478,5 +1516,7 @@ function init_vm(vm)
     vm.define_condition("unbound-method-error", vm.Unbound_method_error, vm.Error);
 
     vm.define_condition("assertion-error", vm.Assertion_error, vm.Error);
+
+    vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
 
 };

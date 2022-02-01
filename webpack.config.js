@@ -106,6 +106,14 @@ function make_test_entry(library, filename)
             ]
         },
         externalsType: "umd",
+        /*
+         * https://stackoverflow.com/questions/64402821/module-not-found-error-cant-resolve-util-in-webpack
+         */
+        resolve: {
+            fallback: {
+                util: require.resolve("util/")
+            }
+        },
         optimization: {
             minimize: false
         }

@@ -699,6 +699,9 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%length", (list) => vm.num(vm.list_length(list)));
 
+    vm.define_alien_function("%%nthcdr", (num, list) =>
+        vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
+
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 
     vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
