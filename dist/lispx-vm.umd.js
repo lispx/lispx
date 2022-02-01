@@ -5436,9 +5436,8 @@ function init_vm(vm)
     /*
      * A type spec that matches any of its constituent type specs.
      */
-    vm.type_or = function()
+    vm.type_or = (...elements) =>
     {
-        const elements = Array.prototype.slice.call(arguments);
         return {
             custom_check(datum)
             {
