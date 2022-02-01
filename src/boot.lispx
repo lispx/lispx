@@ -706,7 +706,7 @@ is not an instance of the class named by CLASS-NAME."
 
 (defun some (value)
   "Create a one-element list from the VALUE."
-  (list value))
+  (%%some value))
 
 (defexpr if-option ((name option?) then else) env
   "Destructure the OPTION.  If it's non-nil, evaluate the THEN form

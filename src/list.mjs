@@ -42,13 +42,13 @@ export function init_list(vm)
     /*
      * Returns the length of a list.
      */
-    vm.list_length = (list) =>
+    vm.length = (list) =>
     {
         vm.assert_type(list, vm.List);
         if (list === vm.nil())
             return 0;
         else
-            return 1 + vm.list_length(list.cdr());
+            return 1 + vm.length(list.cdr());
     };
 
     /*
@@ -72,7 +72,7 @@ export function init_list(vm)
      * Creates a list that is a copy of the subsequence of the list
      * bounded by start and end.
      */
-    vm.list_subseq = (list, start, end = -1) =>
+    vm.subseq = (list, start, end = -1) =>
     {
         const tail = vm.nthcdr(start, list);
         if (end === -1)
@@ -116,15 +116,17 @@ export function init_list(vm)
 
     vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
 
-    vm.define_alien_function("%%length", (list) => vm.num(vm.list_length(list)));
+    vm.define_alien_function("%%length", (list) => vm.num(vm.length(list)));
 
     vm.define_alien_function("%%nthcdr", (num, list) =>
         vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
 
     vm.define_alien_function("%%subseq", (list, start, end) =>
-        vm.list_subseq(list,
-                       vm.assert_type(start, vm.Number).to_js_number(),
-                       vm.assert_type(end, vm.Number).to_js_number()));
+        vm.subseq(list,
+                  vm.assert_type(start, vm.Number).to_js_number(),
+                  vm.assert_type(end, vm.Number).to_js_number()));
+
+    vm.define_alien_function("%%some", (value) => vm.some(value));
 
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
 
