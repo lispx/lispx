@@ -1370,24 +1370,28 @@ function init_vm(vm)
     };
 
     /*
-     * Signalled when an indexing operation is out of bounds.
-     */
-    vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error
-    {
-        constructor()
-        {
-            super("Out of bounds");
-        }
-    };
-
-    /*
      * Creates a list that is a copy of the subsequence of the list
      * bounded by start and end.
      */
     vm.list_subseq = (list, start, end = -1) =>
     {
-//        rest = nthcdr(list, start)
-//        ret firstcars(rest, end - start)
+        const tail = vm.nthcdr(start, list);
+        if (end === -1)
+            return tail;
+        else
+            return take_n(tail, end - start);
+
+        function take_n(list, n)
+        {
+            if (n === 0) {
+                return vm.nil();
+            } else {
+                if (list === vm.nil())
+                    throw new vm.Out_of_bounds_error();
+                else
+                    return vm.cons(list.car(), take_n(list.cdr(), n - 1));
+            }
+        }
     };
 
     /*
@@ -1396,6 +1400,17 @@ function init_vm(vm)
     vm.some = (object) =>
     {
         return vm.list(object);
+    };
+
+    /*
+     * Signalled when an indexing operation is out of bounds.
+     */
+    vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error
+    {
+        constructor()
+        {
+            super("Out of bounds");
+        }
     };
 
     /*** Internal VM Data Structures ***/

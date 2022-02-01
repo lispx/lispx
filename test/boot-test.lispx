@@ -1966,6 +1966,71 @@
     (nthcdr 3 '(1 2 3))
     '()))
 
+(defsuite nthcdr
+
+  (deftest subseq.1
+    (signals-error
+     (subseq)
+     match-error))
+
+  (deftest subseq.2
+    (signals-error
+     (subseq '())
+     match-error))
+
+  (deftest subseq.3
+    (signals-error
+     (subseq "foo" 1 2)
+     type-error :datum "foo" :expected-type 'list))
+
+  (deftest subseq.4
+    (signals-error
+     (subseq '() "a" 2)
+     type-error :datum "a" :expected-type 'number))
+
+  (deftest subseq.5
+    (signals-error
+     (subseq '() 1 "b")
+     type-error :datum "b" :expected-type 'number))
+
+  (deftest subseq.6
+    (signals-error
+     (subseq '() 1)
+     out-of-bounds-error))
+
+  (deftest subseq.7
+    (signals-error
+     (subseq '() 0 1)
+     out-of-bounds-error))
+
+  (deftest subseq.8
+    (subseq '() 0)
+    '())
+
+  (deftest subseq.9
+    (subseq '() 0 0)
+    '())
+
+  (deftest subseq.10
+    (subseq '() 0 -1)
+    '())
+
+  (deftest subseq.11
+    (subseq '(1 2 3) 0)
+    '(1 2 3))
+
+  (deftest subseq.12
+    (subseq '(1 2 3) 0 -1)
+    '(1 2 3))
+
+  (deftest subseq.13
+    (subseq '(0 1 2 3 4 5) 2)
+    '(2 3 4 5))
+
+  (deftest subseq.14
+    (subseq '(0 1 2 3 4 5) 3 5)
+    '(3 4)))
+
 (defsuite memberp
 
   (deftest memberp.1
