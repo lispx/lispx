@@ -1889,6 +1889,26 @@
     (append '(1 2) '(3 4))
     '(1 2 3 4)))
 
+(defsuite length
+
+  (deftest length.1
+    (signals-error
+     (length)
+     match-error))
+
+  (deftest length.2
+    (signals-error
+     (length "foo")
+     type-error :datum "foo" :expected-type 'list))
+
+  (deftest length.3
+    (length '())
+    0)
+
+  (deftest length.3
+    (length '(1 2 3))
+    3))
+
 (defsuite memberp
 
   (deftest memberp.1

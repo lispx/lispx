@@ -165,6 +165,10 @@ becomes the `cdr' of the final cons of the first list, or is returned
 directly if the first list is empty."
   (%%append list1 list2))
 
+(defun length (list)
+  "Return the length of a proper list."
+  (%%length list))
+
 (defun wrap (operator)
   "Create a new function that wraps around an underlying OPERATOR, and
 induces argument evaluation around it."

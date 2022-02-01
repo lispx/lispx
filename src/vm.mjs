@@ -1341,6 +1341,18 @@ function init_vm(vm)
     };
 
     /*
+     * Returns the length of a list.
+     */
+    vm.list_length = (list) =>
+    {
+        vm.assert_type(list, vm.List);
+        if (list === vm.nil())
+            return 0;
+        else
+            return 1 + vm.list_length(list.cdr());
+    };
+
+    /*
      * Produces an option (one-element list) holding the object.
      */
     vm.some = (object) =>

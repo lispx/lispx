@@ -697,6 +697,8 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
 
+    vm.define_alien_function("%%length", (list) => vm.num(vm.list_length(list)));
+
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 
     vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
