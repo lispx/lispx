@@ -2481,6 +2481,60 @@
                 (-sum- (cdr as) (cdr bs)))))
     '(5 7 9)))
 
+(defsuite while
+
+  (deftest while.1
+    (signals-error
+     (while)
+     match-error))
+
+  (deftest while.2
+    (while (= 1 2))
+    #void)
+
+  (deftest while.3
+    (signals-error
+     (while 12)
+     type-error :datum 12 :expected-type 'boolean))
+
+  (deftest while.4
+    (progn
+      (def x 0)
+      (def y 0)
+      (def env (the-environment))
+      (while (< x 5)
+        (set env x (+ x 1))
+        (set env y (+ y 1)))
+      (list x y))
+    '(5 5)))
+
+(defsuite until
+
+  (deftest until.1
+    (signals-error
+     (until)
+     match-error))
+
+  (deftest until.2
+    (until (/= 1 2))
+    #void)
+
+  (deftest until.3
+    (signals-error
+     (until 12)
+     type-error :datum 12 :expected-type 'boolean))
+
+  (deftest until.4
+    (progn
+      (def x 0)
+      (def y 0)
+      (def env (the-environment))
+      (until (> x 4)
+        (set env x (+ x 1))
+        (set env y (+ y 1)))
+      (list x y))
+    '(5 5)))
+
 (defsuite optional
 
   (deftest optional.1

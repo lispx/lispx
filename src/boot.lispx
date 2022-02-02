@@ -301,6 +301,19 @@ evaluated.  If there are no operands, return true."
   "Evaluate the FORMS in an infinite loop."
   (list #'%%loop (list* #'progn forms)))
 
+(defexpr while (test-form . forms) env
+  "Evaluate FORMS while TEST-FORM evaluates to true."
+  (let ((forms (list* #'progn forms)))
+    (block exit
+      (loop
+        (if (eval test-form env)
+            (eval forms env)
+            (return-from exit))))))
+
+(defmacro until (test-form . forms)
+  "Evaluate FORMS until TEST-FORM evaluates to true."
+  (list* #'while (list #'not test-form) forms))
+
 (defmacro loop-let (name initializers . forms)
   "Labelled recursive loop, analogous to Scheme's named `let'.
 
