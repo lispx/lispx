@@ -340,11 +340,11 @@ $(syntax initializer (parameter value))"
   (list #'labels (list (list* name (mapcar #'car initializers) forms))
         (list* name (mapcar #'cadr initializers))))
 
-(defexpr catch (tag . forms) env
+(defmacro catch (tag . forms)
   "Establish a catch tag and evaluate FORMS as an implicit `progn'
 inside it.  The forms may use `throw' to nonlocally exit from the
 tag.  Usually, `block' should be preferred."
-  (eval (list #'%%catch (eval tag env) (list* #'progn forms)) env))
+  (list #'%%catch tag (list* #'lambda () forms)))
 
 (defun throw (tag . result?)
   "Abort to a nesting catch tag established by `catch' and pass the

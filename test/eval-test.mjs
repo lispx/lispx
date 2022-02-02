@@ -47,7 +47,6 @@ describe("Evaluation & Operation", () => {
             "%%progn",
             "%%if",
             "%%loop",
-            "%%catch",
             "%%unwind-protect",
         ];
 
@@ -73,6 +72,7 @@ describe("Evaluation & Operation", () => {
             "%%>=",
             "%%boundp",
             "%%car",
+            "%%catch",
             "%%cdr",
             "%%class-name",
             "%%class-of",
