@@ -1787,44 +1787,44 @@
     (dolist (x '(1 2 3) x))
     '()))
 
-(defsuite elt
+(defsuite nth
 
-  (deftest elt.1
+  (deftest nth.1
     (signals-error
-     (elt)
+     (nth)
      match-error))
 
-  (deftest elt.2
+  (deftest nth.2
     (signals-error
-     (elt '())
+     (nth '())
      match-error))
 
-  (deftest elt.3
+  (deftest nth.3
     (signals-error
-     (elt '(1 2) #t)
+     (nth #t '(1 2))
      type-error :datum #t :expected-type 'number))
 
-  (deftest elt.3a
+  (deftest nth.3a
     (signals-error
-     (elt '() #t)
+     (nth 1 '())
      type-error :datum '() :expected-type 'cons))
 
-  (deftest elt.4
+  (deftest nth.4
     (signals-error
-     (elt "foo" 0)
+     (nth 0 "foo")
      type-error :datum "foo" :expected-type 'cons))
 
-  (deftest elt.5
-    (elt '(1 2) 0)
+  (deftest nth.5
+    (nth 0 '(1 2))
     1)
 
-  (deftest elt.6
-    (elt '(1 2) 1)
+  (deftest nth.6
+    (nth 1 '(1 2))
     2)
 
-  (deftest elt.7
+  (deftest nth.7
     (signals-error
-     (elt '(1 2) 2)
+     (nth 2 '(1 2))
      type-error :datum '() :expected-type 'cons)))
 
 (defsuite reverse

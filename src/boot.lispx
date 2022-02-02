@@ -484,11 +484,11 @@ the subsequence stretches until the end of the list."
           (list* #'lambda (list var) body-forms)
           (list* #'lambda (list var) result-form?))))
 
-(defun elt (list n)
+(defun nth (n list)
   "Return element number N of LIST, where the `car' is element zero."
   (if (= 0 n)
       (car list)
-      (elt (cdr list) (- n 1))))
+      (nth (- n 1) (cdr list))))
 
 (defun reduce (#'function list :initial-value initial-value)
   "Use the binary FUNCTION to combine the elements of the LIST.  The
