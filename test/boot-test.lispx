@@ -2535,6 +2535,57 @@
       (list x y))
     '(5 5)))
 
+(defsuite dotimes
+
+  (deftest dotimes.1
+    (dotimes (temp-one 10 temp-one))
+    10)
+
+  (deftest dotimes.2
+    (progn
+      (def temp-two 0)
+      (def env (the-environment))
+      (dotimes (temp-one 10 #t) (set env temp-two (+ temp-two 1)))
+      temp-two)
+    10)
+
+  (deftest dotimes.3
+    (signals-error
+     (dotimes)
+     match-error))
+
+  (deftest dotimes.4
+    (signals-error
+     (dotimes (x))
+     match-error))
+
+  (deftest dotimes.5
+    (dotimes (x 0))
+    #void)
+
+  (deftest dotimes.6
+    (dotimes (x 1))
+    #void)
+
+  (deftest dotimes.7
+    (dotimes (x 1) 1 2 3)
+    #void)
+
+  (deftest dotimes.8
+    (signals-error
+     (dotimes (x "foo") 1 2 3)
+     type-error :datum "foo" :expected-type 'number))
+
+  (deftest dotimes.9
+    (progn
+      (def x 0)
+      (def y 0)
+      (def env (the-environment))
+      (dotimes (i 5 (list x y))
+        (set env x (+ x 1))
+        (set env y (+ y 1))))
+    '(5 5)))
+
 (defsuite optional
 
   (deftest optional.1
