@@ -98,6 +98,19 @@ export function init_seq(vm)
     };
 
     /*
+     * Creates a string that is a copy of the subsequence of the
+     * string bounded by start and end.
+     */
+    vm.string_subseq = (string, start, end) =>
+    {
+        vm.assert_type(string, vm.String);
+        vm.assert_type(start, "number");
+        vm.assert_type(end, vm.type_or("number", vm.Void));
+
+
+    }
+
+    /*
      * Produces an option (one-element list) holding the object.
      */
     vm.some = (object) =>
@@ -140,6 +153,11 @@ export function init_seq(vm)
         vm.list_subseq(list,
                        vm.assert_type(start, vm.Number).to_js_number(),
                        canonicalize_end(end)));
+
+    vm.define_alien_function("%%string-subseq", (string, start, end) =>
+        vm.string_subseq(string,
+                         vm.assert_type(start, vm.Number).to_js_number(),
+                         canonicalize_end(end)));
 
     vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
 

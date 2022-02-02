@@ -518,14 +518,6 @@ option."
             (some v)
             (get? plist indicator)))))
 
-;;; Sequences
-
-(defun subseq (list start . end?)
-  "Creates a list that is a copy of the subsequence of the LIST
-bounded by START and optional END?.  If END? is not supplied or void,
-the subsequence stretches until the end of the list."
-  (%%list-subseq list start (optional end?)))
-
 ;;; Relational Operators
 
 ;; Note that unlike in Common Lisp, these operators currently require
@@ -676,10 +668,6 @@ $(syntax property (:documentation docstring))"
 PARAMETERS, and PROPERTIES are currently ignored.
 
 $(syntax property (:documentation docstring))"
-  ;; Parameters are ignored for now, but check them nevertheless.
-  (the symbol receiver)
-  (dolist (param parameters)
-    (the symbol param))
   (def generic (lambda args (%%invoke-method name args)))
   (eval (list #'def (function-symbol name) generic) env)
   name)
@@ -730,6 +718,17 @@ names (symbols, typically keywords) and values."
   "Shorthand for `assert-type'.  Signal a `type-error' if the OBJECT
 is not an instance of the class named by CLASS-NAME."
   (assert-type (eval object env) (find-class class-name env)))
+
+;;; Sequences
+
+(defgeneric subseq (sequence start . end?)
+  (:documentation "Creates a sequence that is a copy of the
+subsequence of the SEQUENCE bounded by START and optional END?.  If
+END?  is not supplied or void, the subsequence stretches until the end
+of the list."))
+
+(defmethod subseq ((list list) start . end?)
+  (%%list-subseq list start (optional end?)))
 
 ;;; Options
 

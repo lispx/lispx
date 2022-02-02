@@ -1975,76 +1975,71 @@
      (nthcdr 4 '(1 2 3))
      out-of-bounds-error)))
 
-(defsuite subseq
+(defsuite list-subseq
 
-  (deftest subseq.1
+  (deftest list-subseq.1
     (signals-error
      (subseq)
-     match-error))
+     error))
 
-  (deftest subseq.2
+  (deftest list-subseq.2
     (signals-error
      (subseq '())
      match-error))
 
-  (deftest subseq.3
-    (signals-error
-     (subseq "foo" 1 2)
-     type-error :datum "foo" :expected-type 'list))
-
-  (deftest subseq.4
+  (deftest list-subseq.4
     (signals-error
      (subseq '() "a" 2)
      type-error :datum "a" :expected-type 'number))
 
-  (deftest subseq.5
+  (deftest list-subseq.5
     (signals-error
      (subseq '() 1 "b")
      type-error :datum "b" :expected-type 'number))
 
-  (deftest subseq.6
+  (deftest list-subseq.6
     (signals-error
      (subseq '() 1)
      out-of-bounds-error))
 
-  (deftest subseq.7
+  (deftest list-subseq.7
     (signals-error
      (subseq '() 0 1)
      out-of-bounds-error))
 
-  (deftest subseq.8
+  (deftest list-subseq.8
     (subseq '() 0)
     '())
 
-  (deftest subseq.9
+  (deftest list-subseq.9
     (subseq '() 0 0)
     '())
 
-  (deftest subseq.10
+  (deftest list-subseq.10
     (subseq '() 0 #void)
     '())
 
-  (deftest subseq.11
+  (deftest list-subseq.11
     (subseq '(1 2 3) 0)
     '(1 2 3))
 
-  (deftest subseq.12
+  (deftest list-subseq.12
     (subseq '(1 2 3) 0 #void)
     '(1 2 3))
 
-  (deftest subseq.13
+  (deftest list-subseq.13
     (subseq '(0 1 2 3 4 5) 2)
     '(2 3 4 5))
 
-  (deftest subseq.14
+  (deftest list-subseq.14
     (subseq '(0 1 2 3 4 5) 3 5)
     '(3 4))
 
-  (deftest subseq.15
+  (deftest list-subseq.15
     (subseq '(0 1 2 3 4 5) 0 6)
     '(0 1 2 3 4 5))
 
-  (deftest subseq.16
+  (deftest list-subseq.16
     (signals-error
      (subseq '(0 1 2 3 4 5) 0 7)
      out-of-bounds-error)))
