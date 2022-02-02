@@ -1,0 +1,3 @@
+Dynamic variables should probably be functions.
+
+Then we could use (*standard-input*) instead of (dynamic *standard-input*).
