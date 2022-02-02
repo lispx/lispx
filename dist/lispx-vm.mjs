@@ -2599,8 +2599,6 @@ function init_eval(vm)
 
     vm.define_alien_function("%%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
 
-    vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
-
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 
     vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
@@ -2949,6 +2947,8 @@ function init_list(vm)
         vm.subseq(list,
                   vm.assert_type(start, vm.Number).to_js_number(),
                   vm.assert_type(end, vm.Number).to_js_number()));
+
+    vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
 
     vm.define_alien_function("%%some", (value) => vm.some(value));
 

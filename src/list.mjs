@@ -129,6 +129,8 @@ export function init_list(vm)
                   vm.assert_type(start, vm.Number).to_js_number(),
                   vm.assert_type(end, vm.Number).to_js_number()));
 
+    vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
+
     vm.define_alien_function("%%some", (value) => vm.some(value));
 
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);

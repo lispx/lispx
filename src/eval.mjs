@@ -691,8 +691,6 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
 
-    vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
-
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 
     vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
