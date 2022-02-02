@@ -1,0 +1,2 @@
+{HANDLER,RESTART}-{BIND,CASE} should probably not take lambdas as
+operands, but follow CL's {HANDLER,RESTART}-CASE.
