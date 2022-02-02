@@ -447,6 +447,10 @@ becomes the `cdr' of the final cons of the first list, or is returned
 directly if the first list is empty."
   (%%append list1 list2))
 
+(defun nth (n list)
+  "Return element number N of LIST, where the `car' is element zero."
+  (%%nth n list))
+
 (defun nthcdr (n list)
   "Returns the tail of LIST that would be obtained by calling `cdr' N
 times in succession."
@@ -483,12 +487,6 @@ the subsequence stretches until the end of the list."
           list-form
           (list* #'lambda (list var) body-forms)
           (list* #'lambda (list var) result-form?))))
-
-(defun nth (n list)
-  "Return element number N of LIST, where the `car' is element zero."
-  (if (= 0 n)
-      (car list)
-      (nth (- n 1) (cdr list))))
 
 (defun reduce (#'function list :initial-value initial-value)
   "Use the binary FUNCTION to combine the elements of the LIST.  The

@@ -118,6 +118,9 @@ export function init_list(vm)
 
     vm.define_alien_function("%%length", (list) => vm.num(vm.length(list)));
 
+    vm.define_alien_function("%%nth", (num, list) =>
+        vm.elt(list, vm.assert_type(num, vm.Number).to_js_number()));
+
     vm.define_alien_function("%%nthcdr", (num, list) =>
         vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
 
