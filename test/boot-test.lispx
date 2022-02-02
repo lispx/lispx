@@ -3659,3 +3659,23 @@
                         :interactive-function (lambda () '(1 2 3))))
        (invoke-restart-interactively 'r1))
      match-error)))
+
+(defsuite cell
+
+  (deftest cell.1
+    (let ((#'c (cell)))
+      (c))
+    #void)
+
+  (deftest cell.2
+    (let ((#'c (cell (+ 1 1))))
+      (c))
+    2)
+
+  (deftest cell.3
+    (let ((#'c (cell (+ 1 1))))
+      (c (+ 2 2))
+      (assert (= (c) 4))
+      (c (+ 4 4))
+      (c))
+    8))

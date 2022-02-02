@@ -317,12 +317,11 @@ evaluated.  If there are no operands, return true."
 (defmacro dotimes ((var count-form . result-form?) . body-forms)
   "Cf. Common Lisp's DOTIMES."
   (flet ((dotimes* (n #'body #'result)
-           (def i 0)
-           (def env (the-environment))
-           (while (< i n)
-             (body i)
-             (set env i (+ i 1)))
-           (result i)))
+           (let ((#'i (cell 0)))
+             (while (< (i) n)
+               (body (i))
+               (i (+ (i) 1)))
+             (result (i)))))
     (list #'dotimes*
           count-form
           (list* #'lambda (list var) body-forms)
@@ -778,6 +777,21 @@ elements of LIST."
         (if (null defaults)
             (cons (car list)     (-optionals- (cdr list) #nil))
             (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))
+
+;;; Cells
+
+;; A cell is a function that encapsulates a mutable value.
+
+(defun cell initial-value?
+  "Create a new cell with the optional initial value.  Calling the
+cell without arguments returns the value.  Calling the cell with an
+argument sets the value."
+  (def value (optional initial-value?))
+  (def env (the-environment))
+  (lambda new-value?
+    (if-option (new-value new-value?)
+      (set env value new-value)
+      value)))
 
 ;;; Dynamic Binding
 
