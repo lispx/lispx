@@ -472,12 +472,18 @@ the subsequence stretches until the end of the list."
     (mapc #'function (cdr list)))
   list)
 
-(defmacro dolist ((element list . result?) . forms)
-  "For every element of the LIST, evaluate the FORMS with ELEMENT
-bound to that element.  Return the optional RESULT or void."
-  (list #'progn
-        (list #'mapc (list* #'lambda (list element) forms) list)
-        (optional result?)))
+(defmacro dolist ((var list-form . result-form?) . body-forms)
+  "Cf. Common Lisp's DOLIST."
+  (labels ((dolist* (list #'body #'result)
+             (if (null list)
+                 (result list)
+                 (progn
+                   (body (car list))
+                   (dolist* (cdr list) #'body #'result)))))
+    (list #'dolist*
+          list-form
+          (list* #'lambda (list var) body-forms)
+          (list* #'lambda (list var) result-form?))))
 
 (defun elt (list n)
   "Return element number N of LIST, where the `car' is element zero."

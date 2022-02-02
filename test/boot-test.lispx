@@ -1781,7 +1781,11 @@
       (dolist (x '(1 2 3 4) (+ ct 100))
         'bla
         (set env ct (+ ct x))))
-    110))
+    110)
+
+  (deftest dolist.9
+    (dolist (x '(1 2 3) x))
+    '()))
 
 (defsuite elt
 
