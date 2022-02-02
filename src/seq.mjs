@@ -69,8 +69,11 @@ export function init_seq(vm)
     };
 
     /*
-     * Creates a list that is a copy of the subsequence of the list
-     * bounded by start and end.
+     * Common Lisp's SUBSEQ
+     */
+
+    /*
+     * SUBSEQ for lists.
      */
     vm.list_subseq = (list, start, end) =>
     {
@@ -98,17 +101,33 @@ export function init_seq(vm)
     };
 
     /*
-     * Creates a string that is a copy of the subsequence of the
-     * string bounded by start and end.
+     * SUBSEQ for strings.
      */
     vm.string_subseq = (string, start, end) =>
     {
         vm.assert_type(string, vm.String);
+        const bytes = string.get_utf8_bytes();
+        return new vm.String(vm.slice_subseq(bytes, start, end));
+    };
+
+    /*
+     * Implements SUBSEQ for objects that have a .length property and
+     * a slice() method, like JS strings and TypedArrays.
+     */
+    vm.slice_subseq = (sliceable, start, end) =>
+    {
         vm.assert_type(start, "number");
         vm.assert_type(end, vm.type_or("number", vm.Void));
 
+        if (start > sliceable.length) throw new vm.Out_of_bounds_error();
 
-    }
+        if (end === vm.void()) {
+            return sliceable.slice(start);
+        } else {
+            if (end > sliceable.length) throw new vm.Out_of_bounds_error();
+            return sliceable.slice(start, end);
+        }
+    };
 
     /*
      * Produces an option (one-element list) holding the object.

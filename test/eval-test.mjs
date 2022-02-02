@@ -103,6 +103,7 @@ describe("Evaluation & Operation", () => {
             "%%slot-bound-p",
             "%%slot-value",
             "%%some",
+            "%%string-subseq",
             "%%subclassp",
             "%%take-subcont",
             "%%throw",

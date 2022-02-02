@@ -727,8 +727,11 @@ subsequence of the SEQUENCE bounded by START and optional END?.  If
 END?  is not supplied or void, the subsequence stretches until the end
 of the list."))
 
-(defmethod subseq ((list list) start . end?)
-  (%%list-subseq list start (optional end?)))
+(defmethod subseq ((seq list) start . end?)
+  (%%list-subseq seq start (optional end?)))
+
+(defmethod subseq ((seq string) start . end?)
+  (%%string-subseq seq start (optional end?)))
 
 ;;; Options
 

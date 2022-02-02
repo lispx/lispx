@@ -1975,17 +1975,24 @@
      (nthcdr 4 '(1 2 3))
      out-of-bounds-error)))
 
-(defsuite list-subseq
+(defsuite subseq
 
-  (deftest list-subseq.1
+  (deftest subseq.1
     (signals-error
      (subseq)
      error))
 
-  (deftest list-subseq.2
+  (deftest subseq.2
     (signals-error
      (subseq '())
      match-error))
+
+  (deftest subseq.3
+    (signals-error
+     (subseq 12 1 2)
+     unbound-method-error :object 12 :method-name 'subseq)))
+
+(defsuite list-subseq
 
   (deftest list-subseq.4
     (signals-error
@@ -2042,7 +2049,94 @@
   (deftest list-subseq.16
     (signals-error
      (subseq '(0 1 2 3 4 5) 0 7)
-     out-of-bounds-error)))
+     out-of-bounds-error))
+
+  (deftest list-subseq.17
+    (signals-error
+     (subseq '(0 1 2 3 4 5) 7 10)
+     out-of-bounds-error))
+
+  (deftest list-subseq.18
+    (subseq '(0 1 2 3 4 5) 6)
+    '()))
+
+(defsuite string-subseq
+
+  (deftest string-subseq.2
+    (signals-error
+     (subseq "")
+     match-error))
+
+  (deftest string-subseq.4
+    (signals-error
+     (subseq "" "a" 2)
+     type-error :datum "a" :expected-type 'number))
+
+  (deftest string-subseq.5
+    (signals-error
+     (subseq "foo" 1 "b")
+     type-error :datum "b" :expected-type 'number))
+
+  (deftest string-subseq.6
+    (signals-error
+     (subseq "" 1)
+     out-of-bounds-error))
+
+  (deftest string-subseq.7
+    (signals-error
+     (subseq "" 0 1)
+     out-of-bounds-error))
+
+  (deftest string-subseq.8
+    (subseq "" 0)
+    "")
+
+  (deftest string-subseq.9
+    (subseq "" 0 0)
+    "")
+
+  (deftest string-subseq.10
+    (subseq "" 0 #void)
+    "")
+
+  (deftest string-subseq.10.1
+    (signals-error
+     (subseq "" 1 #void)
+     out-of-bounds-error))
+
+  (deftest string-subseq.11
+    (subseq "123" 0)
+    "123")
+
+  (deftest string-subseq.12
+    (subseq "123" 0 #void)
+    "123")
+
+  (deftest string-subseq.13
+    (subseq "012345" 2)
+    "2345")
+
+  (deftest string-subseq.14
+    (subseq "012345" 3 5)
+    "34")
+
+  (deftest string-subseq.15
+    (subseq "012345" 0 6)
+    "012345")
+
+  (deftest string-subseq.16
+    (signals-error
+     (subseq "012345" 0 7)
+     out-of-bounds-error))
+
+  (deftest string-subseq.17
+    (signals-error
+     (subseq "012345" 7 10)
+     out-of-bounds-error))
+
+  (deftest string-subseq.18
+    (subseq "012345" 6)
+     ""))
 
 (defsuite memberp
 
