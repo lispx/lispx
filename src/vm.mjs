@@ -17,7 +17,7 @@ import Big from "big.js";
  */
 import { init_eval } from "./eval.mjs";
 import { init_control } from "./control.mjs";
-import { init_list } from "./list.mjs";
+import { init_seq } from "./seq.mjs";
 import { init_stream } from "./stream.mjs";
 import { init_read } from "./read.mjs";
 import { init_print } from "./print.mjs";
@@ -56,7 +56,7 @@ export class VM
          */
         init_eval(this);
         init_control(this);
-        init_list(this);
+        init_seq(this);
         init_stream(this);
         init_read(this);
         init_print(this);

@@ -1,15 +1,15 @@
 /*
- * LispX List Processing Utilities
+ * LispX Sequence and List Processing Utilities
  * Copyright (c) 2021 Manuel J. Simoni
  */
 
 /*
- * Adds list processing utilities to a VM.
+ * Adds sequence and list processing utilities to a VM.
  *
  * These are not needed for the internal functioning of the VM, and
  * could be implemented in Lisp, so they reside in their own module.
  */
-export function init_list(vm)
+export function init_seq(vm)
 {
     /*
      * Creates a list from its arguments so that the last argument
@@ -72,10 +72,14 @@ export function init_list(vm)
      * Creates a list that is a copy of the subsequence of the list
      * bounded by start and end.
      */
-    vm.subseq = (list, start, end = -1) =>
+    vm.list_subseq = (list, start, end) =>
     {
+        vm.assert_type(list, vm.List);
+        vm.assert_type(start, "number");
+        vm.assert_type(end, vm.type_or("number", vm.Void));
+
         const tail = vm.nthcdr(start, list);
-        if (end === -1)
+        if (end === vm.void())
             return tail;
         else
             return take_n(tail, end - start);
@@ -112,6 +116,14 @@ export function init_list(vm)
         }
     };
 
+    /*
+     * Utility for turning the end argument to SUBSEQ into a JS number.
+     */
+    function canonicalize_end(end) {
+        if (end === vm.void()) return vm.void();
+        else return vm.assert_type(end, vm.Number).to_js_number();
+    }
+
     vm.define_alien_function("%%list*", (...objects) => vm.list_star(...objects));
 
     vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
@@ -124,10 +136,10 @@ export function init_list(vm)
     vm.define_alien_function("%%nthcdr", (num, list) =>
         vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
 
-    vm.define_alien_function("%%subseq", (list, start, end) =>
-        vm.subseq(list,
-                  vm.assert_type(start, vm.Number).to_js_number(),
-                  vm.assert_type(end, vm.Number).to_js_number()));
+    vm.define_alien_function("%%list-subseq", (list, start, end) =>
+        vm.list_subseq(list,
+                       vm.assert_type(start, vm.Number).to_js_number(),
+                       canonicalize_end(end)));
 
     vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
 

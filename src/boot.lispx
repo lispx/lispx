@@ -456,12 +456,6 @@ directly if the first list is empty."
 times in succession."
   (%%nthcdr n list))
 
-(defun subseq (list start . end?)
-  "Creates a list that is a copy of the subsequence of the LIST
-bounded by START and optional END?.  If END? is not supplied or -1,
-the subsequence stretches until the end of the list."
-  (%%subseq list start (optional end? -1)))
-
 (defun mapcar (#'function list)
   "Create a new list by applying the FUNCTION to every element of the LIST."
   (if (null list)
@@ -523,6 +517,14 @@ option."
         (if (eq i indicator)
             (some v)
             (get? plist indicator)))))
+
+;;; Sequences
+
+(defun subseq (list start . end?)
+  "Creates a list that is a copy of the subsequence of the LIST
+bounded by START and optional END?.  If END? is not supplied or void,
+the subsequence stretches until the end of the list."
+  (%%list-subseq list start (optional end?)))
 
 ;;; Relational Operators
 

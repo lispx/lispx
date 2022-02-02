@@ -2021,7 +2021,7 @@
     '())
 
   (deftest subseq.10
-    (subseq '() 0 -1)
+    (subseq '() 0 #void)
     '())
 
   (deftest subseq.11
@@ -2029,7 +2029,7 @@
     '(1 2 3))
 
   (deftest subseq.12
-    (subseq '(1 2 3) 0 -1)
+    (subseq '(1 2 3) 0 #void)
     '(1 2 3))
 
   (deftest subseq.13
