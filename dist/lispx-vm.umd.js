@@ -3863,9 +3863,7 @@ function init_seq(vm)
     {
         vm.assert_type(start, "number");
         vm.assert_type(end, vm.type_or("number", vm.Void));
-
         if (start > sliceable.length) throw new vm.Out_of_bounds_error();
-
         if (end === vm.void()) {
             return sliceable.slice(start);
         } else {
