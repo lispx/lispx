@@ -3851,8 +3851,8 @@ function init_seq(vm)
     vm.string_subseq = (string, start, end) =>
     {
         vm.assert_type(string, vm.String);
-        const bytes = string.get_utf8_bytes();
-        return new vm.String(vm.slice_subseq(bytes, start, end));
+        const utf8_bytes = string.get_utf8_bytes();
+        return new vm.String(vm.slice_subseq(utf8_bytes, start, end));
     };
 
     /*
