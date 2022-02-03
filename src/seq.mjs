@@ -42,13 +42,13 @@ export function init_seq(vm)
     /*
      * Returns the length of a list.
      */
-    vm.length = (list) =>
+    vm.list_length = (list) =>
     {
         vm.assert_type(list, vm.List);
         if (list === vm.nil())
             return 0;
         else
-            return 1 + vm.length(list.cdr());
+            return 1 + vm.list_length(list.cdr());
     };
 
     /*
@@ -68,21 +68,18 @@ export function init_seq(vm)
         }
     };
 
-    /*
-     * Common Lisp's SUBSEQ
-     */
+    /*** Common Lisp's SUBSEQ ***/
 
     /*
      * SUBSEQ for lists.
      */
-    vm.list_subseq = (list, start, end) =>
+    vm.list_subseq = (list, start, end = undefined) =>
     {
         vm.assert_type(list, vm.List);
         vm.assert_type(start, "number");
-        vm.assert_type(end, vm.type_or("number", vm.Void));
 
         const tail = vm.nthcdr(start, list);
-        if (end === vm.void())
+        if (end === undefined)
             return tail;
         else
             return take_n(tail, end - start);
@@ -103,7 +100,7 @@ export function init_seq(vm)
     /*
      * SUBSEQ for strings.
      */
-    vm.string_subseq = (string, start, end) =>
+    vm.string_subseq = (string, start, end = undefined) =>
     {
         vm.assert_type(string, vm.String);
         const utf8_bytes = string.get_utf8_bytes();
@@ -114,12 +111,11 @@ export function init_seq(vm)
      * Implements SUBSEQ for objects that have a .length property and
      * a slice() method, like JS strings and TypedArrays.
      */
-    vm.slice_subseq = (sliceable, start, end) =>
+    vm.slice_subseq = (sliceable, start, end = undefined) =>
     {
         vm.assert_type(start, "number");
-        vm.assert_type(end, vm.type_or("number", vm.Void));
         if (start > sliceable.length) throw new vm.Out_of_bounds_error();
-        if (end === vm.void()) {
+        if (end === undefined) {
             return sliceable.slice(start);
         } else {
             if (end > sliceable.length) throw new vm.Out_of_bounds_error();
@@ -150,7 +146,7 @@ export function init_seq(vm)
      * Utility for turning the end argument to SUBSEQ into a JS number.
      */
     function canonicalize_end(end) {
-        if (end === vm.void()) return vm.void();
+        if (end === vm.void()) return undefined;
         else return vm.assert_type(end, vm.Number).to_js_number();
     }
 
@@ -158,7 +154,7 @@ export function init_seq(vm)
 
     vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
 
-    vm.define_alien_function("%%length", (list) => vm.num(vm.length(list)));
+    vm.define_alien_function("%%list-length", (list) => vm.num(vm.list_length(list)));
 
     vm.define_alien_function("%%nth", (num, list) =>
         vm.elt(list, vm.assert_type(num, vm.Number).to_js_number()));

@@ -436,9 +436,9 @@ $(syntax clause (class-name . forms))"
   "Return the `cdr' of the `cdr' of the CONS."
   (cdr (cdr cons)))
 
-(defun length (list)
+(defun list-length (list)
   "Return the length of a proper LIST."
-  (%%length list))
+  (%%list-length list))
 
 (defun append (list1 list2)
   "Append two lists.  The first one must be proper and is copied.  The

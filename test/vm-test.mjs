@@ -655,41 +655,10 @@ describe("Lists", () => {
 
     });
 
-    it("Test list_star().", () => {
-
-        assert(vm.equal(vm.list_star(),
-                        vm.nil()));
-        assert(vm.equal(vm.list_star(vm.num(1)),
-                        vm.num(1)));
-        assert(vm.equal(vm.list_star(vm.num(1), vm.num(2)),
-                        vm.cons(vm.num(1), vm.num(2))));
-        assert(vm.equal(vm.list_star(vm.num(1), vm.num(2), vm.num(3)),
-                        vm.cons(vm.num(1), vm.cons(vm.num(2), vm.num(3)))));
-
-    });
-
     it("Test reverse().", () => {
 
         assert(vm.equal(vm.reverse(vm.nil()), vm.nil()));
         assert(vm.equal(vm.reverse(vm.list(1, 2, 3)), vm.list(3, 2, 1)));
-
-    });
-
-    it("Test append().", () => {
-
-        assert(vm.equal(vm.append(vm.nil(), vm.nil()), vm.nil()));
-        assert(vm.equal(vm.append(vm.list(1), vm.nil()), vm.list(1)));
-        assert(vm.equal(vm.append(vm.nil(), vm.list(1)), vm.list(1)));
-        assert(vm.equal(vm.append(vm.nil(), vm.list(1, 2, 3)), vm.list(1, 2, 3)));
-        assert(vm.equal(vm.append(vm.list(1, 2, 3), vm.nil()), vm.list(1, 2, 3)));
-        assert(vm.equal(vm.append(vm.list(1, 2), vm.list(3, 4, 5)), vm.list(1, 2, 3, 4, 5)));
-        assert(vm.equal(vm.append(vm.list(1, 2, 3), 4), vm.list_star(1, 2, 3, 4)));
-
-    });
-
-    it("Test some().", () => {
-
-        assert(vm.equal(vm.some(vm.num(12)), vm.list(vm.num(12))));
 
     });
 
