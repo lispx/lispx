@@ -390,6 +390,12 @@ describe("Symbols", () => {
 
     });
 
+    it("Can get the name of a symbol as a JS string.", () => {
+
+        assert.equal("foo", vm.sym("foo").to_js_string());
+
+    });
+
     it("Symbols have namespaces.", () => {
 
         assert(vm.equal(vm.sym("foo").get_namespace(),
