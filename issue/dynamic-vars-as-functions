@@ -1,3 +1,11 @@
 Dynamic variables should probably be functions.
 
 Then we could use (*standard-input*) instead of (dynamic *standard-input*).
+
+Implementation strategy:
+- vm.Dynamic becomes subclass of vm.Operator
+  - has .value slot
+  - calling with 0 arguments: return .value
+  - calling with 1 argument: set .value
+- Dynamics become wrapped
+- PROGV unwraps and sets value
