@@ -3888,7 +3888,8 @@ function init_seq(vm)
     };
 
     /*
-     * Utility for turning the end argument to SUBSEQ into a JS number.
+     * Utility for turning the end argument to Lisp SUBSEQ into a JS
+     * number or undefined.
      */
     function canonicalize_end(end) {
         if (end === vm.void()) return undefined;
