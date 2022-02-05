@@ -101,6 +101,21 @@ the CONSEQUENT or ALTERNATIVE depending on whether the TEST yielded
 true or false."
   (list #'%%if test consequent alternative))
 
+(defmacro catch (tag . forms)
+  "Establish a catch tag and evaluate FORMS as an implicit `progn'
+inside it.  The forms may use `throw' to nonlocally exit from the
+tag.  Usually, `block' should be preferred."
+  (list #'%%catch tag (list* #'lambda () forms)))
+
+(defun throw (tag . result?)
+  "Abort to a nesting catch tag established by `catch' and pass the
+RESULT to it."
+  (%%throw tag (optional result?)))
+
+(defmacro loop forms
+  "Evaluate the FORMS in an infinite loop."
+  (list #'%%loop (list* #'progn forms)))
+
 (defun eq (a b)
   "Return true if the values A and B are pointer-identical, false otherwise."
   (%%eq a b))
@@ -297,10 +312,6 @@ evaluated.  If there are no operands, return true."
         ((eval (car operands) env) #t)
         (#t                        (eval (cons #'or (cdr operands)) env))))
 
-(defmacro loop forms
-  "Evaluate the FORMS in an infinite loop."
-  (list #'%%loop (list* #'progn forms)))
-
 (defexpr while (test-form . forms) env
   "Evaluate FORMS while TEST-FORM evaluates to true."
   (let ((forms (list* #'progn forms)))
@@ -339,17 +350,6 @@ recursively refer to itself.
 $(syntax initializer (parameter value))"
   (list #'labels (list (list* name (mapcar #'car initializers) forms))
         (list* name (mapcar #'cadr initializers))))
-
-(defmacro catch (tag . forms)
-  "Establish a catch tag and evaluate FORMS as an implicit `progn'
-inside it.  The forms may use `throw' to nonlocally exit from the
-tag.  Usually, `block' should be preferred."
-  (list #'%%catch tag (list* #'lambda () forms)))
-
-(defun throw (tag . result?)
-  "Abort to a nesting catch tag established by `catch' and pass the
-RESULT to it."
-  (%%throw tag (optional result?)))
 
 (defexpr block (block-name . forms) env
   "Establish a block named BLOCK-NAME and evaluate the FORMS as an
