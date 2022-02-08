@@ -407,14 +407,6 @@ function init_vm(vm)
         }
 
         /*
-         * Returns the name of the symbol as a JS string.
-         */
-        to_js_string()
-        {
-            return this.get_string().to_js_string();
-        }
-
-        /*
          * Returns the namespace of the symbol.
          */
         get_namespace()
