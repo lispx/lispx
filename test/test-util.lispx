@@ -35,7 +35,8 @@ must not capure any continuations."
      ;; We don't push a prompt here.  The reason is that Mocha
      ;; describe() doesn't support promises anyway.  So any Lisp code
      ;; that tries to capture a continuation directly inside a suite
-     ;; will get a "prompt not found" error.
+     ;; will get a "prompt not found" error (due to the barrier inside
+     ;; `js-lambda').
      (eval (list* #'progn forms) env))))
 
 (defexpr before forms env
