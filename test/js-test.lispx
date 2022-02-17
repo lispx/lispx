@@ -527,12 +527,19 @@
 
 (defsuite define-js-method/sync
 
+  (def Promise (js-global "Promise"))
+
   (deftest define-js-method/sync.1
     (progn
-      (def Promise (js-global "Promise"))
       (define-js-method/sync resolve-sync "resolve")
-      ;; Note: calling static Promise.resolve() here, sync'ly
-      (= (resolve-sync Promise 12) 12))))
+      (= (resolve-sync Promise 12) 12)))
+
+  (deftest define-js-method/sync.2
+    (progn
+      (define-js-method/sync reject-sync "reject")
+      (signals-error
+       (reject-sync Promise (make-simple-error "foo"))
+       simple-error :message "foo"))))
 
 (defsuite js-misc
 
