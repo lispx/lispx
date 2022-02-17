@@ -420,6 +420,18 @@
      (call-js-method "foo" 12)
      type-error :datum 12 :expected-type 'string)))
 
+(defsuite js-method
+
+  (deftest js-method.1
+    (progn
+      (def #'to-string (js-method "toString"))
+      (js-eq (to-string (to-js-number 12)) (to-js-string "12"))))
+
+  (deftest js-method.2
+    (signals-error
+     (js-method)
+     match-error)))
+
 (defsuite define-js-method
 
   (deftest define-js-method.1
@@ -483,6 +495,17 @@
     (signals-error
      (sleep "foo")
      type-error :datum "foo" :expected-type 'number)))
+
+(defsuite sync
+
+  (deftest sync.1
+    (signals-error
+     (sync)
+     match-error))
+
+  (deftest sync.2
+    (prog1 #t
+      ((sync #'%%sleep) 1))))
 
 (defsuite js-misc
 
