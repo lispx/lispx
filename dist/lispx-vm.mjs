@@ -2803,8 +2803,10 @@ function init_js(vm)
 
     vm.define_alien_function("%%js-log", (...objects) => console.log(...objects));
 
-    vm.define_alien_function("%%sleep", (ms) =>
-        new Promise(resolve => setTimeout(resolve, ms.to_js_number())));
+    vm.define_alien_function("%%sleep", (ms) => {
+        vm.assert_type(ms, vm.Number);
+        return new Promise(resolve => setTimeout(resolve, ms.to_js_number()));
+    });
 
 };
 

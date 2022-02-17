@@ -469,6 +469,21 @@
      (await)
      match-error)))
 
+(defsuite sleep
+
+  (deftest sleep.1
+    (progn (sleep 1) #t))
+
+  (deftest sleep.2
+    (signals-error
+     (sleep)
+     match-error))
+
+  (deftest sleep.3
+    (signals-error
+     (sleep "foo")
+     type-error :datum "foo" :expected-type 'number)))
+
 (defsuite js-misc
 
   (deftest can-define-lisp-methods-on-js-objects
