@@ -1,6 +1,6 @@
 ;;; LispX JavaScript Interface
 
-;; Copyright (c) 2021 Manuel J. Simoni
+;; Copyright (c) 2021, 2022 Manuel J. Simoni
 
 (defun js-eq (a b)
   "Return true if the values A and B are equal per JavaScript's strict
@@ -92,18 +92,17 @@ passing along the list of ARGUMENTS."
 passing along the rest ARGUMENTS."
   (apply #'apply-js-method (list receiver name arguments)))
 
+(defun js-method (method-name)
+  "Create a function that when called will call the specified method."
+  (lambda (receiver . arguments)
+    (apply-js-method receiver method-name arguments)))
+
 (defmacro define-js-method (name method-name)
   "Define a new function with the given NAME (a symbol) that invokes a
 JS method named METHOD-NAME (a string).  The function takes one or
 more arguments.  The first argument is the receiver of the method
 call (\"this\"), the rest are the normal method arguments."
-  (flet ((method (receiver . arguments)
-           (apply-js-method receiver method-name arguments)))
-    (list #'def (function-symbol name) #'method)))
-
-(defun js-log arguments
-  "Log the ARGUMENTS to the JS console."
-  (apply #'%%js-log arguments))
+  (list #'def (function-symbol name) (js-method method-name)))
 
 (defun await (promise)
   "Wait for the PROMISE to become fulfilled or rejected."
@@ -125,6 +124,18 @@ call (\"this\"), the rest are the normal method arguments."
                       ;; error where `await' was called.
                       (push-delim-subcont +default-prompt+ k (error error))))))
 
+(defun sync (#'fun)
+  "Create a function that will await an underlying function."
+  (lambda args (await (apply #'fun args))))
+
+(defmacro define-js-method/sync (name method-name)
+  "Like `define-js-method', but awaits the method result."
+  (list #'def (function-symbol name) (sync (js-method method-name))))
+
 (defun sleep (ms)
   "Sleep for some milliseconds."
   (await (%%sleep ms)))
+
+(defun js-log arguments
+  "Log the ARGUMENTS to the JS console."
+  (apply #'%%js-log arguments))
