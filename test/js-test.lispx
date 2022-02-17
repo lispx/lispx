@@ -505,7 +505,25 @@
 
   (deftest sync.2
     (prog1 #t
-      ((sync #'%%sleep) 1))))
+      ((sync #'%%sleep) 1)))
+
+  (def Promise (js-global "Promise"))
+  (define-js-method resolve "resolve")
+  (define-js-method reject "reject")
+
+  (deftest sync.3
+    (progn
+      (assert (= 1 ((sync (lambda () (resolve Promise 1))))))
+      (assert (= 2 ((sync (lambda () (resolve Promise 2))))))
+      3)
+    3)
+
+  (deftest sync.4
+    (signals-error
+     (progn
+       (assert (= 1 ((sync (lambda () (resolve Promise 1))))))
+       ((sync (lambda () (reject Promise (make-simple-error "foo"))))))
+     simple-error :message "foo")))
 
 (defsuite js-misc
 
