@@ -525,6 +525,15 @@
        ((sync (lambda () (reject Promise (make-simple-error "foo"))))))
      simple-error :message "foo")))
 
+(defsuite define-js-method/sync
+
+  (deftest define-js-method/sync.1
+    (progn
+      (def Promise (js-global "Promise"))
+      (define-js-method/sync resolve-sync "resolve")
+      ;; Note: calling static Promise.resolve() here, sync'ly
+      (= (resolve-sync Promise 12) 12))))
+
 (defsuite js-misc
 
   (deftest can-define-lisp-methods-on-js-objects
