@@ -130,4 +130,7 @@ export function init_js(vm)
 
     vm.define_alien_function("%%js-log", (...objects) => console.log(...objects));
 
+    vm.define_alien_function("%%sleep", (ms) =>
+        new Promise(resolve => setTimeout(resolve, ms.to_js_number())));
+
 };

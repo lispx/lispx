@@ -124,3 +124,7 @@ call (\"this\"), the rest are the normal method arguments."
                       ;; reinstate the continuation, signalling an
                       ;; error where `await' was called.
                       (push-delim-subcont +default-prompt+ k (error error))))))
+
+(defun sleep (ms)
+  "Sleep for some milliseconds."
+  (await (%%sleep ms)))

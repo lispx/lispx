@@ -4,7 +4,9 @@
 (def #'mocha:describe (to-lisp-function (js-global "describe")))
 (def #'mocha:it (to-lisp-function (js-global "it")))
 (def #'mocha:before (to-lisp-function (js-global "before")))
+(def #'mocha:before-each (to-lisp-function (js-global "beforeEach")))
 (def #'mocha:after (to-lisp-function (js-global "after")))
+(def #'mocha:after-each (to-lisp-function (js-global "afterEach")))
 
 (defexpr deftest (name expression . expected?) env
   "Run the EXPRESSION as a test identified by NAME and compare its
@@ -39,21 +41,18 @@ must not capure any continuations."
      ;; `js-lambda').
      (eval (list* #'progn forms) env))))
 
-(defexpr before forms env
-  "Evaluate forms before all tests in the suite.  The forms may
-capture a continuation to the default prompt."
-  (mocha:before
-   (js-lambda ()
-     (push-prompt 'default-prompt
-       (eval (list* #'progn forms) env)))))
+(defun %make-mocha-hook (#'mocha-hook-fun)
+  "Metaprogramming utility to create Mocha hooks.  Hooks may capture."
+  (vau forms env
+    (mocha-hook-fun
+     (js-lambda ()
+       (push-prompt 'default-prompt
+         (eval (list* #'progn forms) env))))))
 
-(defexpr after forms env
-  "Evaluate forms after all tests in the suite.  The forms may
-capture a continuation to the default prompt."
-  (mocha:after
-   (js-lambda ()
-     (push-prompt 'default-prompt
-       (eval (list* #'progn forms) env)))))
+(def #'before (%make-mocha-hook #'mocha:before))
+(def #'before-each (%make-mocha-hook #'mocha:before-each))
+(def #'after (%make-mocha-hook #'mocha:after))
+(def #'after-each (%make-mocha-hook #'mocha:after-each))
 
 (defexpr signals-error (form condition-class . slot-specs) env
   "Evaluate the FORM and assert that it signals a condition of the
