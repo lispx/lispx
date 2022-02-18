@@ -693,6 +693,27 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%intern", (string) => vm.intern(string));
 
+    vm.define_alien_function("%%symbol-name", (sym) =>
+        vm.assert_type(sym, vm.Symbol).get_string());
+
+    vm.define_alien_function("%%variable-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_variable_symbol());
+
+    vm.define_alien_function("%%function-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_function_symbol());
+
+    vm.define_alien_function("%%class-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_class_symbol());
+
+    vm.define_alien_function("%%keyword-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
+
+    vm.define_alien_function("%%make-environment", (parent = null) =>
+        vm.make_environment(parent));
+
+    vm.define_alien_function("%%boundp", (sym, env) =>
+        vm.to_lisp_boolean(vm.assert_type(env, vm.Environment).is_bound(sym)));
+
     vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
 
     vm.define_alien_function("%%typep", (obj, cls) =>
@@ -723,27 +744,6 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%subclassp", (sub_cls, super_cls) =>
         vm.to_lisp_boolean(vm.is_subclass(sub_cls, super_cls)));
-
-    vm.define_alien_function("%%make-environment", (parent = null) =>
-        vm.make_environment(parent));
-
-    vm.define_alien_function("%%boundp", (sym, env) =>
-        vm.to_lisp_boolean(vm.assert_type(env, vm.Environment).is_bound(sym)));
-
-    vm.define_alien_function("%%symbol-name", (sym) =>
-        vm.assert_type(sym, vm.Symbol).get_string());
-
-    vm.define_alien_function("%%variable-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_variable_symbol());
-
-    vm.define_alien_function("%%function-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_function_symbol());
-
-    vm.define_alien_function("%%class-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_class_symbol());
-
-    vm.define_alien_function("%%keyword-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
 
     vm.define_alien_function("%%panic", (exception) => vm.panic(exception));
 
