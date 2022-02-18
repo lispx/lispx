@@ -1333,6 +1333,8 @@ function init_vm(vm)
     const NIL = new vm.Nil();
     const VOID = new vm.Void();
     const IGNORE = new vm.Ignore();
+    const ZERO = vm.num(0);
+    const ONE = vm.num(1);
 
     /*
      * Wrap them in functions so typos cause an error, and don't
@@ -1343,6 +1345,8 @@ function init_vm(vm)
     vm.nil = () => NIL;
     vm.void = () => VOID;
     vm.ignore = () => IGNORE;
+    vm.zero = () => ZERO;
+    vm.one = () => ONE;
 
     /*** Class Metaobjects ***/
 

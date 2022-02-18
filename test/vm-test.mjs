@@ -468,6 +468,13 @@ describe("Symbols", () => {
 
 describe("Numbers", () => {
 
+    it("Zero and one are defined.", () => {
+
+        assert(vm.equal(vm.zero(), vm.num(0)));
+        assert(vm.equal(vm.one(), vm.num(1)));
+
+    });
+
     it("Lisp numbers can be created from JS strings and numbers.", () => {
 
         const n1 = vm.num(1);
