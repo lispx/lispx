@@ -759,18 +759,22 @@ evaluate the ELSE form."
 the NAME bound to the contents of the option.  If it's nil, return nil."
   (list #'if-option (list name option?) (list* #'progn forms) #nil))
 
-(defun optional (option? . default?)
-  "Return the contents of the OPTION, or the DEFAULT if the option is
-nil.  The default itself defaults to void."
-  (if-option (value option?)
+(defexpr optional (option? . default?) env
+  "Return the contents of the OPTION?, or the DEFAULT? if the option
+is nil.  The default itself defaults to void.  The DEFAULT? is
+evaluated lazily, only when the OPTION? is nil."
+  (if-option (value (eval option? env))
     value
     (if-option (default default?)
-      default
+      (eval default env)
       #void)))
 
 (defun optionals (list . defaults)
   "Similar to `optional', but provides DEFAULTS for any number of
-elements of LIST."
+elements of LIST.
+
+Currently, the DEFAULTS are always evaluated, but in the future, they
+might be evaluated lazily, so they should not be used for effect."
   (loop-let -optionals- ((list list) (defaults defaults))
     (if (null list)
         (if (null defaults)

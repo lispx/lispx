@@ -2705,7 +2705,16 @@
   (deftest optional.6
     (signals-error
      (optional 1)
-     type-error :datum 1 :expected-type 'cons)))
+     type-error :datum 1 :expected-type 'cons))
+
+  (deftest optional.lazy.1
+    (optional (some 1) (error (make-simple-error "foo")))
+    1)
+
+  (deftest optional.lazy.2
+    (signals-error
+     (optional #nil (error (make-simple-error "foo")))
+     simple-error :message "foo")))
 
 (defsuite optionals
 
