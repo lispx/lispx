@@ -1,3 +1,5 @@
 We should have type specs for non-Lisp JS classes.
 
 As a temporary measure, we use the JS class itself as its type spec.
+
+See also ./typep-type-specs
