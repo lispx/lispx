@@ -179,7 +179,7 @@
       (assert (= 'number (slot-value e 'expected-type))))
     #void))
 
-(defsuite make-simple-error
+(defsuite simple-error
 
   (deftest make-simple-error.1
     (let ((e (make-simple-error "foo")))
@@ -187,7 +187,17 @@
       (assert (typep e (class error)))
       (assert (typep e (class condition)))
       (assert (= "foo" (slot-value e 'message))))
-    #void))
+    #void)
+
+  (deftest simple-error.1
+    (signals-error
+     (simple-error)
+     match-error))
+
+  (deftest simple-error.2
+    (signals-error
+     (simple-error "foo")
+     simple-error :message "foo")))
 
 (defsuite make-restart-error
 

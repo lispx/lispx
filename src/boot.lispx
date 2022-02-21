@@ -1251,3 +1251,7 @@ with any condition."
 (defun make-simple-error (message)
   "Create a new simple error with a MESSAGE."
   (make-instance (class simple-error) :message message))
+
+(defun simple-error (message)
+  "Signal a simple error with a MESSAGE."
+  (error (make-simple-error message)))
