@@ -3796,6 +3796,18 @@ function init_seq(vm)
         }
     };
 
+    /*
+     * Calls a function on every list element for effect.
+     */
+    vm.mapc = (fun, list) =>
+    {
+        if (list !== vm.nil()) {
+            fun(list.car());
+            vm.mapc(fun, list.cdr());
+        }
+        return list;
+    };
+
     /*** Common Lisp's SUBSEQ ***/
 
     /*

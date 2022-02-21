@@ -45,6 +45,15 @@ describe("Sequence & List Utilities", () => {
 
     });
 
+    it("Test mapc().", () => {
+
+        assert(vm.equal(vm.nil(), vm.mapc((elt) => false, vm.nil())));
+        let array = [];
+        vm.mapc((elt) => array.push(elt), vm.list(vm.num(1), vm.num(2), vm.num(3)));
+        assert.deepEqual(array, [vm.num(1), vm.num(2), vm.num(3)]);
+
+    });
+
     it("Test list_subseq().", () => {
 
         assert(vm.equal(vm.list_subseq(vm.list(1, 2, 3), 0),
