@@ -2756,6 +2756,22 @@
     (optionals '(4 5 6))
     '(4 5 6)))
 
+(defsuite get-option
+
+  (deftest get-option.1
+    (signals-error
+     (get-option)
+     match-error))
+
+  (deftest get-option.2
+    (get-option (some 2))
+    2)
+
+  (deftest get-option.3
+    (signals-error
+     (get-option #nil)
+     simple-error :message "Option is nil")))
+
 (defsuite some
 
   (deftest some.1

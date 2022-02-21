@@ -789,6 +789,11 @@ might be evaluated lazily, so they should not be used for effect."
             (cons (car list)     (-optionals- (cdr list) #nil))
             (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))
 
+(defun get-option (option?)
+  "Returns the contents of the option or signals an error if the
+option is nil."
+  (optional option? (simple-error "Option is nil")))
+
 ;;; Cells
 
 ;; A cell is a function that encapsulates a mutable value.
