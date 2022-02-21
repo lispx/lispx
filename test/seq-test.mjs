@@ -49,7 +49,8 @@ describe("Sequence & List Utilities", () => {
 
         assert(vm.equal(vm.nil(), vm.mapc((elt) => false, vm.nil())));
         let array = [];
-        vm.mapc((elt) => array.push(elt), vm.list(vm.num(1), vm.num(2), vm.num(3)));
+        const list = vm.list(vm.num(1), vm.num(2), vm.num(3));
+        assert(list === vm.mapc((elt) => array.push(elt), list));
         assert.deepEqual(array, [vm.num(1), vm.num(2), vm.num(3)]);
 
     });
