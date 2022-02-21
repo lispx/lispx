@@ -2827,6 +2827,25 @@
      (when-option (name))
      match-error)))
 
+(defsuite unless-option
+
+  (deftest unless-option.0
+    (unless-option (some 12) 2 3 (+ 2 2))
+    #nil)
+
+  (deftest unless-option.1
+    (unless-option #nil 2 3 (+ 2 2))
+    4)
+
+  (deftest unless-option.2
+    (unless-option #nil)
+    #void)
+
+  (deftest unless-option.3
+    (signals-error
+     (unless-option)
+     match-error)))
+
 (defsuite class-of
 
   (deftest class-of.1

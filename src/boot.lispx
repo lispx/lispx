@@ -759,6 +759,11 @@ evaluate the ELSE form."
 the NAME bound to the contents of the option.  If it's nil, return nil."
   (list #'if-option (list name option?) (list* #'progn forms) #nil))
 
+(defmacro unless-option (option? . forms)
+  "Destructure the OPTION.  If it's nil, evaluate the FORMS.  If it's
+non-nil, return nil."
+  (list #'if-option (list #ignore option?) #nil (list* #'progn forms)))
+
 (defexpr optional (option? . default?) env
   "Return the contents of the OPTION?, or the DEFAULT? if the option
 is nil.  The default itself defaults to void.  The DEFAULT? is
