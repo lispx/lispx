@@ -28,6 +28,13 @@ capture a continuation to the default prompt."
        (assert (= (eval expression (make-environment env))
                   (eval (optional expected? #t) (make-environment env))))))))
 
+(defmacro deftest* (name . forms)
+  "Run the FORMS as a test identified by NAME, but unlike `deftest',
+simply ignore their result.  The test only fails when the forms signal
+an error.  Use this instead of `deftest' if you just want to run some
+forms, and don't need to compare their result to an expected value."
+  (list #'deftest name (list* #'prog1 #t forms)))
+
 (defexpr defsuite (name . forms) env
   "Evaluate FORMS as a group of tests identified by NAME.  The forms
 must not capure any continuations."

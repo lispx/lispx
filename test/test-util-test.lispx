@@ -14,24 +14,21 @@
     (assert (= (test-util-test:x) 3))
     (test-util-test:x 4)
     (sleep 1))
-  (deftest check-it
-    (prog1 #t
-      (sleep 1)
-      (sleep 1)
-      (assert (= (test-util-test:x) 2))
-      (test-util-test:x 3)
-      (sleep 1)))
-  (deftest check-it-again
-    (prog1 #t
-      (sleep 1)
-      (sleep 1)
-      (assert (= (test-util-test:x) 3))
-      (sleep 1))))
+  (deftest* check-it
+    (sleep 1)
+    (sleep 1)
+    (assert (= (test-util-test:x) 2))
+    (test-util-test:x 3)
+    (sleep 1))
+  (deftest* check-it-again
+    (sleep 1)
+    (sleep 1)
+    (assert (= (test-util-test:x) 3))
+    (sleep 1)))
 
 (defsuite test-util-test:2
-  (deftest check-it-again-afterwards
-    (prog1 #t
-      (assert (= (test-util-test:x) 4)))))
+  (deftest* check-it-again-afterwards
+    (assert (= (test-util-test:x) 4))))
 
 ;; Test before-each and after-each
 
@@ -49,23 +46,20 @@
     (sleep 1)
     (test-util-test:z (- (test-util-test:z) 1))
     (sleep 1))
-  (deftest t1
-    (prog1 #t
-      (sleep 1)
-      (sleep 1)
-      (assert (= (test-util-test:y) 2))
-      (assert (= (test-util-test:z) 10))
-      (sleep 1)))
-  (deftest t2
-    (prog1 #t
-      (sleep 1)
-      (sleep 1)
-      (assert (= (test-util-test:y) 3))
-      (assert (= (test-util-test:z) 9))
-      (sleep 1))))
+  (deftest* t1
+    (sleep 1)
+    (sleep 1)
+    (assert (= (test-util-test:y) 2))
+    (assert (= (test-util-test:z) 10))
+      (sleep 1))
+  (deftest* t2
+    (sleep 1)
+    (sleep 1)
+    (assert (= (test-util-test:y) 3))
+    (assert (= (test-util-test:z) 9))
+    (sleep 1)))
 
 (defsuite test-util-test:4
-  (deftest t3
-    (prog1 #t
-      (assert (= (test-util-test:y) 3))
-      (assert (= (test-util-test:z) 8)))))
+  (deftest* t3
+    (assert (= (test-util-test:y) 3))
+    (assert (= (test-util-test:z) 8))))
