@@ -1369,7 +1369,7 @@ function init_vm(vm)
     /*
      * Creates a class metaobject for a JS class.
      */
-    vm.bless_class = (name_sym, js_class, js_super = null, js_meta = vm.Built_in_class) =>
+    vm.bless_class = (name_sym, js_class, js_super = vm.Object, js_meta = vm.Built_in_class) =>
     {
         vm.assert_type(name_sym, vm.Symbol);
         vm.assert_type(js_class, "function");
