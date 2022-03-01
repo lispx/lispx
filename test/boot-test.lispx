@@ -3803,20 +3803,20 @@
        (invoke-restart-interactively 'r1))
      match-error)))
 
-(defsuite cell
+(defsuite box
 
-  (deftest cell.1
-    (let ((#'c (cell)))
+  (deftest box.1
+    (let ((#'c (box)))
       (c))
     #void)
 
-  (deftest cell.2
-    (let ((#'c (cell (+ 1 1))))
+  (deftest box.2
+    (let ((#'c (box (+ 1 1))))
       (c))
     2)
 
-  (deftest cell.3
-    (let ((#'c (cell (+ 1 1))))
+  (deftest box.3
+    (let ((#'c (box (+ 1 1))))
       (c (+ 2 2))
       (assert (= (c) 4))
       (c (+ 4 4))

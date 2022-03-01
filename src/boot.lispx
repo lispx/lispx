@@ -328,7 +328,7 @@ evaluated.  If there are no operands, return true."
 (defmacro dotimes ((var count-form . result-form?) . body-forms)
   "Cf. Common Lisp's DOTIMES."
   (flet ((dotimes* (n #'body #'result)
-           (let ((#'i (cell 0)))
+           (let ((#'i (box 0)))
              (while (< (i) n)
                (body (i))
                (i (+ (i) 1)))
@@ -794,13 +794,13 @@ might be evaluated lazily, so they should not be used for effect."
 option is nil."
   (optional option? (simple-error "Option is nil")))
 
-;;; Cells
+;;; Boxes
 
-;; A cell is a function that encapsulates a mutable value.
+;; A box is a function that encapsulates a mutable value.
 
-(defun cell initial-value?
-  "Create a new cell with the optional initial value.  Calling the
-cell without arguments returns the value.  Calling the cell with an
+(defun box initial-value?
+  "Create a new box with the optional initial value.  Calling the
+box without arguments returns the value.  Calling the box with an
 argument sets the value."
   (def value (optional initial-value?))
   (def env (the-environment))

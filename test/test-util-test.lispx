@@ -1,6 +1,6 @@
 ;; Test before and after (mix in some sleeping to test async)
 
-(def #'test-util-test:x (cell 1))
+(def #'test-util-test:x (box 1))
 
 (defsuite test-util-test:1
   (before
@@ -32,8 +32,8 @@
 
 ;; Test before-each and after-each
 
-(def #'test-util-test:y (cell 1))
-(def #'test-util-test:z (cell 10))
+(def #'test-util-test:y (box 1))
+(def #'test-util-test:z (box 10))
 
 (defsuite test-util-test:3
   (before-each
