@@ -557,7 +557,33 @@ coroutine with `resume'."
         (set-dynamic *bar* 4)
         (assert (= 4 (dynamic *bar*))))
       (assert (= #void (dynamic *bar*)))
-      #t)))
+      #t))
+
+  (deftest dynamic-let*.1
+    (dynamic-let* () (+ 1 1))
+    2)
+
+  (deftest dynamic-let*.2
+    (progn
+      (defdynamic *x* 1)
+      (dynamic-let* ((*x* 2)) (+ 1 (dynamic *x*))))
+    3)
+
+  (deftest dynamic-let*.2
+    (progn
+      (defdynamic *x* 1)
+      (defdynamic *y* 0)
+      (dynamic-let* ((*x* 2) (*y* (+ (dynamic *x*) 1)))
+        (list (dynamic *x*) (dynamic *y*))))
+    '(2 3))
+
+  (deftest dynamic-let-sanity-check
+    (progn
+      (defdynamic *x* 1)
+      (defdynamic *y* 0)
+      (dynamic-let ((*x* 2) (*y* (+ (dynamic *x*) 1)))
+        (list (dynamic *x*) (dynamic *y*))))
+    '(2 2)))
 
 (defsuite default-prompt
 

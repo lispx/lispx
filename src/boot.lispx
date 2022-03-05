@@ -826,13 +826,23 @@ The optional DOCSTRING is currently ignored."
 
 (defexpr dynamic-let (bindings . forms) env
   "Evaluate the FORMS with the dynamic variables specified by BINDINGS
-temporarily bound to new values.
+temporarily bound to new values.  Bindings are established parallely
+as per `let'.
 
 $(syntax binding (dynamic-variable value))"
   (let ((dynamics (mapcar (lambda ((name #ignore)) (eval name env)) bindings))
         (values (mapcar (lambda ((#ignore value)) (eval value env)) bindings))
         (thunk (eval (list* #'lambda () forms) env)))
     (%%progv dynamics values thunk)))
+
+(defmacro dynamic-let* (bindings . forms)
+  "Evaluate the FORMS with the dynamic variables specified by BINDINGS
+temporarily bound to new values.  Bindings are established serially as
+per `let*'."
+  (if (null bindings)
+      (list* #'progn forms)
+      (list #'dynamic-let (list (car bindings))
+            (list* #'dynamic-let* (cdr bindings) forms))))
 
 (defmacro progv (dynamic-variables values . forms)
   "Evaluate the FORMS with the list of DYNAMIC-VARIABLES temporarily
