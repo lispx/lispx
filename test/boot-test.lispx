@@ -1913,7 +1913,7 @@
   (deftest length.2
     (signals-error
      (length #f)
-     unbound-method-error :object #f :method-name 'length)))
+     error)))
 
 (defsuite list-length
 
@@ -2155,6 +2155,11 @@
   (deftest elt.1
     (signals-error
      (elt)
+     error))
+
+  (deftest elt.2
+    (signals-error
+     (elt #t 0)
      error)))
 
 (defsuite list-elt
@@ -2163,11 +2168,6 @@
     (signals-error
      (elt '())
      match-error))
-
-  (deftest list-elt.3
-    (signals-error
-     (elt #t 0)
-     unbound-method-error :object #t :method-name 'elt))
 
   (deftest list-elt.3a
     (signals-error

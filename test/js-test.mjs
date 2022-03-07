@@ -70,4 +70,12 @@ describe("JavaScript Interface", () => {
 
     });
 
+    it("Test js_elt().", () => {
+        const array = [1, 2, 3];
+        assert.equal(1, vm.js_elt(array, vm.num(0)));
+        assert.equal(2, vm.js_elt(array, vm.num(1)));
+        assert.throws(() => vm.js_elt("foo", vm.num(1)), "Assertion failed");
+        assert.throws(() => vm.js_elt(array, vm.f()), "expected number");
+    });
+
 });

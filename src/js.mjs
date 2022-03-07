@@ -43,7 +43,8 @@ export function init_js(vm)
      * Calls a JS constructor with arguments.
      *
      * Note that this is not a fat arrow function because we need
-     * access to the arguments object.
+     * access to the arguments object (although it's probably possible
+     * to use ... syntax and make this a fat arrow function).
      */
     vm.js_new = function(constructor /* , arg1, ..., argN */)
     {
@@ -62,6 +63,16 @@ export function init_js(vm)
     {
         vm.assert_type(prop_name, vm.String);
         return object[prop_name.to_js_string()];
+    };
+
+    /*
+     * Returns an indexed element of a JS array.
+     */
+    vm.js_elt = (js_array, index) =>
+    {
+        vm.assert(Array.isArray(js_array));
+        vm.assert_type(index, vm.Number);
+        return js_array[index.to_js_number()];
     };
 
     /*
@@ -121,6 +132,8 @@ export function init_js(vm)
     vm.define_alien_function("%%js-new", vm.js_new);
 
     vm.define_alien_function("%%js-get", vm.js_get);
+
+    vm.define_alien_function("%%js-elt", vm.js_elt);
 
     vm.define_alien_function("%%list-to-js-array", vm.list_to_array);
 

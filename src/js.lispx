@@ -82,6 +82,17 @@ global doesn't exist."
   "Create a new JS array from the given elements."
   (list-to-js-array elements))
 
+(defmethod elt ((seq object) index)
+  "`elt' for JS arrays.  We must put the method on `object' because we
+don't have a more precise type for them."
+  (if (or (< index 0) (>= index (length seq)))
+      (error (make-instance (class out-of-bounds-error)))
+      (%%js-elt seq index)))
+
+(defmethod length ((seq object))
+  "`length' for JS arrays."
+  (to-lisp-number (js-get seq "length")))
+
 (defun apply-js-method (receiver name arguments)
   "Invoke a JS method by NAME (a string) on the RECEIVER object,
 passing along the list of ARGUMENTS."

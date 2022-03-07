@@ -349,7 +349,25 @@
 
     (deftest js-array-to-list.3
       (js-array-to-list (js-array 1 2 3))
-      '(1 2 3)))
+      '(1 2 3))
+
+    (deftest js-array-elt.1
+      (elt (js-array 1 2 3) 0)
+      1)
+
+    (deftest js-array-elt.2
+      (elt (js-array 1 2 3) 1)
+      2)
+
+    (deftest js-array-elt.3
+      (signals-error
+       (elt (js-array 1 2 3) 10)
+       out-of-bounds-error))
+
+    (deftest js-array-elt.4
+      (signals-error
+       (elt (js-array 1 2 3) -1)
+       out-of-bounds-error)))
 
 (defsuite apply-js-method
 
