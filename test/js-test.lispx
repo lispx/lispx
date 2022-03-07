@@ -367,7 +367,15 @@
     (deftest js-array-elt.4
       (signals-error
        (elt (js-array 1 2 3) -1)
-       out-of-bounds-error)))
+       out-of-bounds-error))
+
+    (deftest js-array-length.1
+      (length (js-array))
+      0)
+
+    (deftest js-array-length.2
+      (length (js-array 1 2 3))
+      3))
 
 (defsuite apply-js-method
 
