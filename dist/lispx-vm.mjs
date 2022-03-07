@@ -3872,6 +3872,19 @@ function init_seq(vm)
     };
 
     /*
+     * Extract the contents of an option, or if it is nil, call a
+     * thunk to obtain a default value.  If no thunk is specified,
+     * produce void.
+     */
+    vm.optional = (option, default_thunk = () => vm.void()) =>
+    {
+        if (option === vm.nil())
+            return default_thunk();
+        else
+            return vm.elt(option, 0);
+    };
+
+    /*
      * Signalled when an indexing operation is out of bounds.
      */
     vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error

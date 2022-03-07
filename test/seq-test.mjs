@@ -99,4 +99,13 @@ describe("Sequence & List Utilities", () => {
 
     });
 
+    it("Test optional().", () => {
+
+        assert(vm.equal(vm.optional(vm.nil()), vm.void()));
+        assert(vm.equal(vm.optional(vm.nil(), () => 12), 12));
+        assert(vm.equal(vm.optional(vm.some(10)), 10));
+        assert(vm.equal(vm.optional(vm.some(10), () => 12), 10));
+
+    });
+
 });
