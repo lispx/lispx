@@ -2150,6 +2150,43 @@
     (subseq "012345" 6)
      ""))
 
+(defsuite elt
+
+  (deftest elt.1
+    (signals-error
+     (elt)
+     error)))
+
+(defsuite list-elt
+
+  (deftest list-elt.2
+    (signals-error
+     (elt '())
+     match-error))
+
+  (deftest list-elt.3
+    (signals-error
+     (elt #t 0)
+     unbound-method-error :object #t :method-name 'elt))
+
+  (deftest list-elt.3a
+    (signals-error
+     (elt '() 1)
+     type-error :datum '() :expected-type 'cons))
+
+  (deftest list-elt.5
+    (elt '(1 2) 0)
+    1)
+
+  (deftest list-elt.6
+    (elt '(1 2) 1)
+    2)
+
+  (deftest list-elt.7
+    (signals-error
+     (elt '(1 2) 2)
+     type-error :datum '() :expected-type 'cons)))
+
 (defsuite memberp
 
   (deftest memberp.1

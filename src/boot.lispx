@@ -723,6 +723,12 @@ is not an instance of the class named by CLASS-NAME."
 (defmethod length ((seq list))
   (%%list-length seq))
 
+(defgeneric elt (sequence index)
+  (:documentation "Return the sequence element at the specified index."))
+
+(defmethod elt ((seq list) index)
+  (nth index seq))
+
 (defgeneric subseq (sequence start . end?)
   (:documentation "Create a sequence that is a copy of the subsequence
 of the SEQUENCE bounded by START and optional END?.  If END?  is not
