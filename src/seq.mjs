@@ -121,7 +121,7 @@ export function init_seq(vm)
 
     /*
      * Implements SUBSEQ for objects that have a .length property and
-     * a slice() method, like JS strings and TypedArrays.
+     * a slice() method, like JS strings, arrays, and TypedArrays.
      */
     vm.slice_subseq = (sliceable, start, end = undefined) =>
     {

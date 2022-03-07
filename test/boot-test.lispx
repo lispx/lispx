@@ -1903,24 +1903,26 @@
     (append '(1 2) '(3 4))
     '(1 2 3 4)))
 
+(defsuite length
+
+  (deftest length.1
+    (signals-error
+     (length)
+     error))
+
+  (deftest length.2
+    (signals-error
+     (length #f)
+     unbound-method-error :object #f :method-name 'length)))
+
 (defsuite list-length
 
   (deftest list-length.1
-    (signals-error
-     (list-length)
-     match-error))
-
-  (deftest list-length.2
-    (signals-error
-     (list-length "foo")
-     type-error :datum "foo" :expected-type 'list))
-
-  (deftest list-length.3
-    (list-length '())
+    (length '())
     0)
 
-  (deftest list-length.4
-    (list-length '(1 2 3))
+  (deftest list-length.2
+    (length '(1 2 3))
     3))
 
 (defsuite nthcdr

@@ -436,10 +436,6 @@ $(syntax clause (class-name . forms))"
   "Return the `cdr' of the `cdr' of the CONS."
   (cdr (cdr cons)))
 
-(defun list-length (list)
-  "Return the length of a proper LIST."
-  (%%list-length list))
-
 (defun append (list1 list2)
   "Append two lists.  The first one must be proper and is copied.  The
 second one is not copied (and doesn't even have to be a list). It
@@ -721,11 +717,17 @@ is not an instance of the class named by CLASS-NAME."
 
 ;;; Sequences
 
+(defgeneric length (sequence)
+  (:documentation "Return the number of elements in a sequence."))
+
+(defmethod length ((seq list))
+  (%%list-length seq))
+
 (defgeneric subseq (sequence start . end?)
-  (:documentation "Creates a sequence that is a copy of the
-subsequence of the SEQUENCE bounded by START and optional END?.  If
-END?  is not supplied or void, the subsequence stretches until the end
-of the list."))
+  (:documentation "Create a sequence that is a copy of the subsequence
+of the SEQUENCE bounded by START and optional END?.  If END?  is not
+supplied or void, the subsequence stretches until the end of the
+list."))
 
 (defmethod subseq ((seq list) start . end?)
   (%%list-subseq seq start (optional end?)))
