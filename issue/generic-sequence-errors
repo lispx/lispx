@@ -1,0 +1,4 @@
+Generic sequence methods should throw the same errors for different
+types of objects.
+
+Out of bounds checking for negative indexes etc is missing.
