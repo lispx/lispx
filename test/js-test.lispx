@@ -497,6 +497,21 @@
      (js-undefined-option)
      match-error)))
 
+(defsuite js-null-option
+
+  (deftest js-null-option.1
+    (js-null-option (+ 12 12))
+    (some 24))
+
+  (deftest js-null-option.2
+    (js-null-option +js-null+)
+    #nil)
+
+  (deftest js-null-option.3
+    (signals-error
+     (js-null-option)
+     match-error)))
+
 (defsuite await
 
   (def Promise (js-global "Promise"))
