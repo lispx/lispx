@@ -115,6 +115,12 @@ more arguments.  The first argument is the receiver of the method
 call (\"this\"), the rest are the normal method arguments."
   (list #'def (function-symbol name) (js-method method-name)))
 
+(defun js-undefined-option (value)
+  "Turn a value that may be undefined into an option."
+  (if (eq value +js-undefined+)
+      #nil
+      (some value)))
+
 (defun await (promise)
   "Wait for the PROMISE to become fulfilled or rejected."
   ;; Capture to the default prompt, and...

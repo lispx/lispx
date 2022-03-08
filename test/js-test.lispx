@@ -482,6 +482,21 @@
      (define-js-method symbol)
      match-error)))
 
+(defsuite js-undefined-option
+
+  (deftest js-undefined-option.1
+    (js-undefined-option (+ 12 12))
+    (some 24))
+
+  (deftest js-undefined-option.2
+    (js-undefined-option +js-undefined+)
+    #nil)
+
+  (deftest js-undefined-option.3
+    (signals-error
+     (js-undefined-option)
+     match-error)))
+
 (defsuite await
 
   (def Promise (js-global "Promise"))
