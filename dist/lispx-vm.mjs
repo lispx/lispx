@@ -3820,6 +3820,17 @@ function init_seq(vm)
     };
 
     /*
+     * Creates a new list by calling a function on every element of a list.
+     */
+    vm.mapcar = (fun, list) =>
+    {
+        if (list === vm.nil())
+            return vm.nil();
+        else
+            return vm.cons(fun(list.car()), vm.mapcar(fun, list.cdr()));
+    };
+
+    /*
      * Calls a function on every list element for effect.
      */
     vm.mapc = (fun, list) =>

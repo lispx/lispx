@@ -45,9 +45,20 @@ describe("Sequence & List Utilities", () => {
 
     });
 
+    it("Test mapcar().", () => {
+
+        assert(vm.equal(vm.nil(), vm.mapcar((elt) => false, vm.nil())));
+
+        const list = vm.list(vm.num(1), vm.num(2), vm.num(3));
+        const expected = vm.list(vm.num(2), vm.num(3), vm.num(4));
+        assert.deepEqual(expected, vm.mapcar((elt) => vm.add(elt, vm.one()), list));
+
+    });
+
     it("Test mapc().", () => {
 
         assert(vm.equal(vm.nil(), vm.mapc((elt) => false, vm.nil())));
+
         let array = [];
         const list = vm.list(vm.num(1), vm.num(2), vm.num(3));
         assert(list === vm.mapc((elt) => array.push(elt), list));
