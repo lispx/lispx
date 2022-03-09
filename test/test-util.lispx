@@ -81,15 +81,3 @@ slots of the signalled condition."
                                    (return-from exit #f)))))
         (eval form env))
       #f)))
-
-(defexpr with-standard-input-from-string (string . forms) env
-  "Evaluate FORMS with `*standard-input*' coming from STRING."
-  (let ((s (eval string env)))
-    (dynamic-let ((*standard-input* (make-string-input-stream s)))
-      (eval (list* #'progn forms) env))))
-
-(defexpr with-standard-output-to-string forms env
-  "Evaluate FORMS with `*standard-output*' being collected in a string."
-  (dynamic-let ((*standard-output* (make-string-output-stream)))
-    (eval (list* #'progn forms) env)
-    (get-output-stream-string (dynamic *standard-output*))))

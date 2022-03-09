@@ -30,8 +30,8 @@
     12)
 
   (deftest with-standard-input-from-string.2
-    (with-standard-input-from-string "12 #t" (read) (read))
-    #t))
+    (with-standard-input-from-string "12 #t" (list (read) (read)))
+    (list 12 #t)))
 
 (defsuite string-output-streams
 

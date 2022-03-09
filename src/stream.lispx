@@ -8,6 +8,12 @@
   "Create a string input stream that reads from STRING."
   (%%make-string-input-stream string))
 
+(defexpr with-standard-input-from-string (string . forms) env
+  "Evaluate FORMS with `*standard-input*' coming from STRING."
+  (let ((s (eval string env)))
+    (dynamic-let ((*standard-input* (make-string-input-stream s)))
+      (eval (list* #'progn forms) env))))
+
 ;;; String Output Streams
 
 (defun make-string-output-stream ()
@@ -17,6 +23,12 @@
 (defun get-output-stream-string (stream)
   "Return the contents of the string output STREAM."
   (%%get-output-stream-string stream))
+
+(defexpr with-standard-output-to-string forms env
+  "Evaluate FORMS with `*standard-output*' being collected in a string."
+  (dynamic-let ((*standard-output* (make-string-output-stream)))
+    (eval (list* #'progn forms) env)
+    (get-output-stream-string (dynamic *standard-output*))))
 
 ;;; Miscellaneous
 
