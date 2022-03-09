@@ -188,7 +188,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
   (deftest testc
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 0))
         (flet ((f () (dynamic *p*)))
           (let ((x (f))
@@ -199,14 +199,14 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
   (deftest test1
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 1))
         (list (dynamic *p*) (dynamic *p*))))
     '(1 1))
 
   (deftest test11
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 1))
         (list (dynamic *p*)
               (dynamic *p*)
@@ -218,7 +218,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
   ;; our `dset' is pretty different from DBplusDC's.
   (deftest test12
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 1))
         (let* ((v1 (dynamic *p*))
                (v2 (dynamic-let ((*p* 2))
@@ -231,7 +231,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
   (deftest test_eq4
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 1))
         (push-prompt 'p0
           (dynamic *p*))))
@@ -239,7 +239,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
   (deftest test_eq5
     (progn
-      (defdynamic *p* #void)
+      (defdynamic *p*)
       (dynamic-let ((*p* 1))
         (push-prompt 'p0
           (dynamic-let ((*p* 2))
@@ -249,8 +249,8 @@ with a `push-delim-subcont' that pushes an unused prompt."
 
   (deftest test_eq6
     (progn
-      (defdynamic *p* #void)
-      (defdynamic *q* #void)
+      (defdynamic *p*)
+      (defdynamic *q*)
       ((lambda (#'f)
          (dynamic-let ((*p* 2) (*q* 20))
            (#'f (lambda () 0))))

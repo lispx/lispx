@@ -324,7 +324,7 @@ coroutine with `resume'."
   (deftest coroutine.progv.1
     (run-coroutine
      (lambda ()
-       (defdynamic *x* #void)
+       (defdynamic *x*)
        (progv (list *x*) (list 1)
          (yield (dynamic *x*))
          (yield (dynamic *x*))
@@ -337,7 +337,7 @@ coroutine with `resume'."
   (deftest coroutine.progv.2
     (run-coroutine-with-values
      (lambda ()
-       (defdynamic *x* #void)
+       (defdynamic *x*)
        (progv (list *x*) (list 1)
          (yield (dynamic *x*))
          (yield (dynamic *x*))
@@ -535,7 +535,7 @@ coroutine with `resume'."
 
   (deftest dynamic.1
     (progn
-      (defdynamic *foo* #void)
+      (defdynamic *foo*)
       (assert (= (dynamic *foo*) #void))
       (assert (= (slot-value *foo* 'value) #void))
       (assert (typep *foo* (class dynamic)))
@@ -547,7 +547,7 @@ coroutine with `resume'."
 
   (deftest set-dynamic.1
     (progn
-      (defdynamic *bar* #void)
+      (defdynamic *bar*)
       (dynamic-let ((*bar* 1))
         (set-dynamic *bar* 2)
         (assert (= 2 (dynamic *bar*)))

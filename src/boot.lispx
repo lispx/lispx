@@ -819,10 +819,11 @@ argument sets the value."
 
 ;;; Dynamic Binding
 
-(defmacro defdynamic (name value . docstring?)
+(defmacro defdynamic (name . value-and-docstring?)
   "Define a new dynamic variable with the given NAME and default VALUE.
-The optional DOCSTRING is currently ignored."
-  (list #'def name (make-instance (class dynamic) :value value)))
+The optional DOCSTRING is currently ignored.
+$(fn (name &optional value docstring))"
+  (list #'def name (make-instance (class dynamic) :value (optional value-and-docstring?))))
 
 (defun dynamic (dynamic-variable)
   "Return the current value of the DYNAMIC-VARIABLE."
