@@ -1,6 +1,6 @@
 /*
  * LispX Sequence and List Processing Utilities
- * Copyright (c) 2021 Manuel J. Simoni
+ * Copyright (c) 2021, 2022 Manuel J. Simoni
  */
 
 /*

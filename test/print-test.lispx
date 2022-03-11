@@ -73,6 +73,21 @@
      (write "foo" :stream 12)
      type-error :datum 12 :expected-type 'output-stream)))
 
+(defsuite write-to-string
+
+  (deftest write-to-string.1
+    (write-to-string 12)
+    "12")
+
+  (deftest write-to-string.2
+    (write-to-string "foo")
+    "\"foo\"")
+
+  (deftest write-to-string.3
+    (signals-error
+     (write-to-string)
+     match-error)))
+
 (defsuite print
 
   (deftest print.1

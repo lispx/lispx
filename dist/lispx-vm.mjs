@@ -1063,7 +1063,7 @@ module.exports = ";;; LispX JavaScript Interface\n\n;; Copyright (c) 2021, 2022 
   \*************************/
 /***/ ((module) => {
 
-module.exports = ";;; LispX Printer\n\n;; Copyright (c) 2021 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n\n$(fn (object &key stream))\"\n  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line.\"\n  (fresh-line)\n  (print1 object))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line.\"\n  (fresh-line)\n  (uprint1 object))\n";
+module.exports = ";;; LispX Printer\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n\n$(fn (object &key stream))\"\n  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line.\"\n  (fresh-line)\n  (print1 object))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line.\"\n  (fresh-line)\n  (uprint1 object))\n";
 
 /***/ }),
 
@@ -3746,7 +3746,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /*
  * LispX Sequence and List Processing Utilities
- * Copyright (c) 2021 Manuel J. Simoni
+ * Copyright (c) 2021, 2022 Manuel J. Simoni
  */
 
 /*
