@@ -1497,8 +1497,6 @@ function init_control(vm)
      *
      * Built-in function that calls a thunk and prevents it from
      * capturing continuations to the outside.
-     *
-     * This is easily the hairiest part of the whole program.
      */
     vm.PUSH_SUBCONT_BARRIER = (args, env) =>
     {
@@ -1513,7 +1511,7 @@ function init_control(vm)
          * resumption, you ask?  Isn't the whole idea behind a
          * continuation barrier that continuations cannot escape it,
          * and therefore obviously cannot reenter it either?  The
-         * answer can be found in the next comment.
+         * answer can be found in the following comments.
          */
         let result;
         if (resumption instanceof vm.Resumption)
@@ -1536,13 +1534,10 @@ function init_control(vm)
                 do_push_subcont_barrier(thunk, env, resumption));
 
             /*
-             * Here comes the klever part: resume back into the
-             * continuation and throw an error from the inside.
-             *
-             * This means the user will be able to see a useful stack
-             * trace that shows where the ill-fated continuation
-             * capture occurred.  (This bold claim is yet to be
-             * verified.)
+             * Resume back into the continuation and throw an error
+             * from the inside.  This means the user will be able to
+             * see a useful stack trace that shows where the ill-fated
+             * continuation capture occurred.
              */
             const handler = vm.alien_function(() => {
                 throw new vm.Prompt_not_found_error(result.prompt); });
