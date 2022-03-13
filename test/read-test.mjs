@@ -199,6 +199,8 @@ describe("Reader", () => {
             vm.list(vm.sym("quote"), vm.nil()),
             "'(1 . 2)":
             vm.list(vm.sym("quote"), vm.cons(vm.num(1), vm.num(2))),
+            "' foo-can-have-whitespace":
+            vm.list(vm.sym("quote"), vm.sym("foo-can-have-whitespace")),
         };
 
         /*
