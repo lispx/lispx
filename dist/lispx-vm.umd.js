@@ -1933,33 +1933,13 @@ function init_eval(vm)
     /*** Evaluation & Operation Core ***/
 
     /*
-     * Evaluate a form in an environment.
-     *
-     * If the form is neither a symbol nor a cons, it evaluates to
-     * itself.
+     * Evaluate a form in an environment.  This is the main entry
+     * point for calling Lisp from JS.
      *
      * The environment defaults to the VM's root environment.
      *
-     * Prefer vm.eval_form() unless you are prepared to handle
-     * suspensions.
-     */
-    vm.eval = (form, env = vm.get_environment()) =>
-    {
-        return vm.trap_exceptions(() => {
-            vm.assert_type(env, vm.Environment);
-            if (form instanceof vm.Symbol)
-                return evaluate_symbol(form, env);
-            else if (form instanceof vm.Cons)
-                return evaluate_cons(form, env);
-            else
-                return form;
-        });
-    };
-
-    /*
-     * Evaluate a form, like vm.eval(), but throw an error if the
-     * code captures a continuation.  This should usually be used
-     * when calling Lisp from JavaScript.
+     * Signals an error if the code attempts to capture a
+     * continuation to an outside prompt.
      */
     vm.eval_form = (form, env = vm.get_environment()) =>
     {
@@ -1968,6 +1948,38 @@ function init_eval(vm)
             throw new vm.Prompt_not_found_error(result.prompt);
         else
             return result;
+    };
+
+    /*
+     * Evaluate a form in an environment.  This is the core evaluation
+     * mechanism.
+     *
+     * The environment defaults to the VM's root environment.
+     *
+     * Unlike eval_form(), this may return a Suspension (see
+     * control.mjs) if the code attempts to capture a continuation to
+     * an outside prompt.
+     */
+    vm.eval = (form, env = vm.get_environment()) =>
+    {
+        /*
+         * All exceptions that happen during evaluation, except
+         * nonlocal exits and panics, are piped into the condition
+         * system.
+         */
+        return vm.trap_exceptions(() => {
+            vm.assert_type(env, vm.Environment);
+            if (form instanceof vm.Symbol)
+                return evaluate_symbol(form, env);
+            else if (form instanceof vm.Cons)
+                return evaluate_cons(form, env);
+            else
+                /*
+                 * If the form is neither a symbol nor a cons, it
+                 * evaluates to itself.
+                 */
+                return form;
+        });
     };
 
     /*
@@ -2039,6 +2051,7 @@ function init_eval(vm)
      * A definiend tree allows arbitrary nesting of definiends.
      */
     const DEFINIEND = vm.type_or(vm.Symbol, vm.Ignore);
+    // We could OR DEFINIEND into this, but keeping it flat produces nicer type errors.
     const DEFINIEND_TREE = vm.type_or(vm.Symbol, vm.Ignore, vm.List);
 
     /*
