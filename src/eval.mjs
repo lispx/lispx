@@ -609,10 +609,9 @@ export function init_eval(vm)
     /*
      * Registers an operator in the VM's root environment.
      */
-    vm.define_operator = (operator) =>
+    vm.define_operator = (name, operator) =>
     {
-        vm.get_environment().put(operator.get_name().to_function_symbol(),
-                                 operator);
+        vm.get_environment().put(vm.fsym(name), operator);
     };
 
     /*
@@ -620,7 +619,7 @@ export function init_eval(vm)
      */
     vm.define_built_in_operator = (name, fun) =>
     {
-        vm.define_operator(vm.built_in_operator(fun, name));
+        vm.define_operator(name, vm.built_in_operator(fun, name));
     };
 
     /*
@@ -628,7 +627,7 @@ export function init_eval(vm)
      */
     vm.define_built_in_function = (name, js_fun) =>
     {
-        vm.define_operator(vm.built_in_function(js_fun, name));
+        vm.define_operator(name, vm.built_in_function(js_fun, name));
     };
 
     /*
@@ -636,7 +635,7 @@ export function init_eval(vm)
      */
     vm.define_alien_function = (name, js_fun) =>
     {
-        vm.define_operator(vm.alien_function(js_fun, name));
+        vm.define_operator(name, vm.alien_function(js_fun, name));
     };
 
     /*** Lisp API ***/
