@@ -106,6 +106,7 @@ describe("Evaluation & Operation", () => {
             "%%some",
             "%%string-subseq",
             "%%subclassp",
+            "%%symbol-name",
             "%%take-subcont",
             "%%throw",
             "%%typep",
