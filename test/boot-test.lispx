@@ -3075,6 +3075,16 @@
      (%%make-standard-class "foo" (class standard-object))
      type-error :datum "foo" :expected-type 'symbol)))
 
+(defsuite %%reinitialize-standard-class
+
+  (deftest* %%reinitialize-standard-class.1
+    (let* ((a (%%make-standard-class 'a (class standard-object)))
+           (b (%%make-standard-class 'b a))
+           (c (%%make-standard-class 'c (class standard-object))))
+      (assert (subclassp b a))
+      (%%reinitialize-standard-class b c)
+      (assert (subclassp b c)))))
+
 (defsuite defclass
 
   (deftest defclass.1
