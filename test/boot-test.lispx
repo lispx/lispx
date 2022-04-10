@@ -3080,10 +3080,15 @@
   (deftest* %%reinitialize-standard-class.1
     (let* ((a (%%make-standard-class 'a (class standard-object)))
            (b (%%make-standard-class 'b a))
-           (c (%%make-standard-class 'c (class standard-object))))
+           (c (%%make-standard-class 'c b))
+           (d (%%make-standard-class 'd (class standard-object))))
       (assert (subclassp b a))
-      (%%reinitialize-standard-class b c)
-      (assert (subclassp b c)))))
+      (assert (subclassp c a))
+      (assert (subclassp c b))
+      (%%reinitialize-standard-class b d)
+      (assert (subclassp b d))
+      (assert (subclassp c d))
+      (assert (subclassp c b)))))
 
 (defsuite defclass
 
