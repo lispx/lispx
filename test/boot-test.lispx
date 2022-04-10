@@ -3011,7 +3011,7 @@
          (subclassp (class standard-class) (class object)))
     #t))
 
-;; Utility used by `%%make-standard-class' and `defclass' tests.
+;; Utility used by `%%ensure-standard-class' and `defclass' tests.
 
 (defun classes-test (c d p q)
   (assert (typep c (class standard-class)))
@@ -3043,36 +3043,36 @@
   (assert (= (slot-value q 'y) 2))
   (assert (= (slot-value q 'z) 3)))
 
-(defsuite %%make-standard-class
+(defsuite %%ensure-standard-class
 
-  (deftest %%make-standard-class.1
-    (let* ((c (%%make-standard-class 'point-2d (class standard-object)))
-           (d (%%make-standard-class 'point-3d c))
+  (deftest %%ensure-standard-class.1
+    (let* ((c (%%ensure-standard-class 'point-2d (class standard-object)))
+           (d (%%ensure-standard-class 'point-3d c))
            (p (make-instance c :x 1 :y 2))
            (q (make-instance d :x 1 :y 2 :z 3)))
       (classes-test c d p q))
     #void)
 
-  (deftest %%make-standard-class.2
+  (deftest %%ensure-standard-class.2
     (signals-error
-     (%%make-standard-class 'foo (class object))
+     (%%ensure-standard-class 'foo (class object))
      type-error :datum (class object) :expected-type 'standard-class))
 
   #|
-  (deftest %%make-standard-class.3
+  (deftest %%ensure-standard-class.3
     (signals-error
-     (%%make-standard-class 'foo)
+     (%%ensure-standard-class 'foo)
      match-error))
 
-  (deftest %%make-standard-class.4
+  (deftest %%ensure-standard-class.4
     (signals-error
-     (%%make-standard-class)
+     (%%ensure-standard-class)
      match-error))
   |#
 
-  (deftest %%make-standard-class.5
+  (deftest %%ensure-standard-class.5
     (signals-error
-     (%%make-standard-class "foo" (class standard-object))
+     (%%ensure-standard-class "foo" (class standard-object))
      type-error :datum "foo" :expected-type 'symbol)))
 
 (defsuite defclass

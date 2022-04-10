@@ -986,6 +986,34 @@ function init_vm(vm)
         return lisp_class;
     };
 
+    /*
+     * Change an existing standard class's superclass.
+     */
+    vm.reinitialize_standard_class = (lisp_class, lisp_super) =>
+    {
+        vm.assert_type(lisp_class, vm.Standard_class);
+        vm.assert_type(lisp_super, vm.Standard_class);
+        const js_class = lisp_class.get_js_class();
+        const js_super = lisp_super.get_js_class();
+        Object.setPrototypeOf(js_class.prototype, js_super.prototype);
+        return lisp_class;
+    };
+
+    /*
+     * Called by DEFCLASS to create or reinitialize a standard class.
+     */
+    vm.ensure_standard_class = (name, lisp_super) =>
+    {
+        vm.assert_type(name, vm.Symbol);
+        const class_name = name.to_class_symbol();
+        if (vm.get_environment().is_bound(class_name)) {
+            const lisp_class = vm.get_environment().lookup(class_name);
+            return vm.reinitialize_standard_class(lisp_class, lisp_super);
+        } else {
+            return vm.make_standard_class(name, lisp_super);
+        }
+    };
+
     /*** Conditions ***/
 
     /*

@@ -654,7 +654,7 @@ $(syntax property (:documentation docstring))"
   ;; Slot-specs are ignored for now, but check them nevertheless.
   (dolist (slot-spec slot-specs)
     (the symbol slot-spec))
-  (eval (list #'def (class-symbol name) (%%make-standard-class name superclass)) env)
+  (eval (list #'def (class-symbol name) (%%ensure-standard-class name superclass)) env)
   name)
 
 ;;; Generic Functions

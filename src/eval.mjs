@@ -748,8 +748,8 @@ export function init_eval(vm)
 
     vm.define_built_in_function("%%invoke-method", vm.INVOKE_METHOD);
 
-    vm.define_alien_function("%%make-standard-class", (name, super_class) =>
-        vm.make_standard_class(name, super_class));
+    vm.define_alien_function("%%ensure-standard-class", (name, super_class) =>
+        vm.ensure_standard_class(name, super_class));
 
     vm.define_alien_function("%%class-name", (cls) =>
         vm.assert_type(cls, vm.Class).get_name());
