@@ -999,21 +999,6 @@ function init_vm(vm)
         return lisp_class;
     };
 
-    /*
-     * Called by DEFCLASS to create or reinitialize a standard class.
-     */
-    vm.ensure_standard_class = (name, lisp_super) =>
-    {
-        vm.assert_type(name, vm.Symbol);
-        const class_name = name.to_class_symbol();
-        if (vm.get_environment().is_bound(class_name)) {
-            const lisp_class = vm.get_environment().lookup(class_name);
-            return vm.reinitialize_standard_class(lisp_class, lisp_super);
-        } else {
-            return vm.make_standard_class(name, lisp_super);
-        }
-    };
-
     /*** Conditions ***/
 
     /*
