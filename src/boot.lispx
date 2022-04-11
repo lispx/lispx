@@ -652,7 +652,7 @@ $(syntax property (:documentation docstring))"
     (the symbol slot-spec))
   (def class-name (class-symbol name))
   (if (boundp class-name env)
-      (%%reinitialize-standard-class (find-class class-name env) superclass)
+      (%%reinitialize-standard-class (eval class-name env) superclass)
       (eval (list #'def class-name (%%make-standard-class name superclass)) env))
   name)
 
