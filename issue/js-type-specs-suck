@@ -1,0 +1,6 @@
+Currently we use (Lisp) strings as type specs for JS objects (per typeof).
+
+E.g. "string" means JS objects whose typeof is "string".  "null" is
+special cased (since it's not a valid typeof result).
+
+Maybe better: '(js-typeof "string") and 'js-null.
