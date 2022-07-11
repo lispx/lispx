@@ -1388,7 +1388,7 @@ function init_control(vm)
      * aborts outwards to the given prompt and calls the suspension
      * handler with the captured continuation.
      */
-    vm.TAKE_SUBCONT = (args, env) =>
+    vm.TAKE_SUBCONT = function(args, env)
     {
         var prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         var handler = vm.assert_type(vm.elt(args, 1), vm.Function);
@@ -1426,7 +1426,7 @@ function init_control(vm)
      * is then called inside the newly delimited continuation.
      * Returns the thunk's result.
      */
-    vm.PUSH_PROMPT = (args, env) =>
+    vm.PUSH_PROMPT = function(args, env)
     {
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
@@ -1446,7 +1446,7 @@ function init_control(vm)
      * delimcc, except that the prompt must be manually supplied,
      * since our continuations don't include prompts.)
      */
-    vm.PUSH_DELIM_SUBCONT = (args, env) =>
+    vm.PUSH_DELIM_SUBCONT = function(args, env)
     {
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const continuation = vm.assert_type(vm.elt(args, 1), vm.Continuation);
@@ -1515,7 +1515,7 @@ function init_control(vm)
      * Built-in function that calls a thunk and prevents it from
      * capturing continuations to the outside.
      */
-    vm.PUSH_SUBCONT_BARRIER = (args, env) =>
+    vm.PUSH_SUBCONT_BARRIER = function(args, env)
     {
         const thunk = vm.assert_type(vm.elt(args, 0), vm.Function);
         return do_push_subcont_barrier(thunk, env);
@@ -1545,7 +1545,8 @@ function init_control(vm)
              * return the suspension back to the caller -- that is
              * after all exactly what we want to prevent.  But we must
              * still suspend ourselves in this way: if we didn't, the
-             * barrier would be missing from the continuation.
+             * barrier would be missing from the continuation after
+             * re-composition.
              */
             result.suspend((resumption) =>
                 do_push_subcont_barrier(thunk, env, resumption));
@@ -1605,12 +1606,13 @@ function init_control(vm)
     /*
      * (%%progv dynamics values thunk) => result
      *
-     * Built-in function that evaluates a thunk with dynamic variables
-     * temporarily bound to new values.
+     * Built-in function that evaluates a thunk with a list of dynamic
+     * variables temporarily bound to new values taken from a second
+     * list.
      *
      * Cf. Common Lisp's PROGV.
      */
-    vm.PROGV = (args, env) =>
+    vm.PROGV = function(args, env)
     {
         const dynamics = vm.list_to_array(vm.elt(args, 0));
         const values = vm.list_to_array(vm.elt(args, 1));
@@ -1675,9 +1677,9 @@ function init_control(vm)
      *
      * Built-in operator that evaluates an expression in a never-ending cycle.
      *
-     * Cf. Common Lisp's "simple" LOOP, NOT the Loop Facility.
+     * Cf. Common Lisp's "simple" LOOP, not the Loop Facility.
      */
-    vm.LOOP = (operands, env) =>
+    vm.LOOP = function(operands, env)
     {
         const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         return do_loop(expr, env);
@@ -1706,13 +1708,13 @@ function init_control(vm)
     /*
      * (%%catch tag thunk) => result
      *
-     * Built-in function that calls a thunk with a catch tag.
-     * Dynamically nested forms may nonlocally exit to the catch tag
-     * with %%THROW.
+     * Built-in function that calls a thunk in a dynamic context where
+     * a catch tag is bound.  Dynamically nested forms may nonlocally
+     * exit to the catch tag with %%THROW.
      *
      * Cf. Common Lisp's CATCH.
      */
-    vm.CATCH = (operands, env) =>
+    vm.CATCH = function(operands, env)
     {
         const tag = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(operands, 1), vm.Function);
@@ -1757,7 +1759,8 @@ function init_control(vm)
      *
      * Cf. Common Lisp's THROW.
      */
-    vm.THROW = (args, env) => {
+    vm.THROW = function(args, env)
+    {
         const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const value = vm.assert_type(vm.elt(args, 1), vm.TYPE_ANY);
         throw new vm.Nonlocal_exit(tag, value);
@@ -1792,7 +1795,7 @@ function init_control(vm)
      *
      * Cf. Common Lisp's UNWIND-PROTECT.
      */
-    vm.UNWIND_PROTECT = (operands, env) =>
+    vm.UNWIND_PROTECT = function(operands, env)
     {
         const protected_expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const cleanup_expr = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
