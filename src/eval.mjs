@@ -421,6 +421,13 @@ export function init_eval(vm)
     /*** The Built-In Operators ***/
 
     /*
+     * The following uppercased functions, like vm.VAU, are the
+     * operate_functions of the built-in operators and functions.
+     * They are written as normal functions, and not as fat arrow
+     * functions, so they have access to 'this'.
+     */
+
+    /*
      * (%%vau param-tree env-param body-form) => fexpr
      *
      * Built-in operator that creates a new fexpr with the given
@@ -429,7 +436,7 @@ export function init_eval(vm)
      * The dynamic environment of the call to %%VAU becomes
      * the static environment of the created fexpr.
      */
-    vm.VAU = (operands, dyn_env) =>
+    vm.VAU = function(operands, dyn_env)
     {
         const param_tree = vm.elt(operands, 0);
         const env_param = vm.elt(operands, 1);
@@ -447,7 +454,7 @@ export function init_eval(vm)
      *
      * Returns the value.
      */
-    vm.DEF = (operands, env) =>
+    vm.DEF = function(operands, env)
     {
         const definiend = vm.elt(operands, 0);
         const expression = vm.elt(operands, 1);
@@ -464,7 +471,7 @@ export function init_eval(vm)
      *
      * Returns #VOID if there are no forms.
      */
-    vm.PROGN = (forms, env) =>
+    vm.PROGN = function(forms, env)
     {
         if (forms === vm.nil())
             return vm.void();
@@ -493,7 +500,7 @@ export function init_eval(vm)
      * depending on the result of the test expression, and returns its
      * result.
      */
-    vm.IF = (operands, env) =>
+    vm.IF = function(operands, env)
     {
         const test = vm.elt(operands, 0);
         const consequent = vm.elt(operands, 1);
@@ -519,7 +526,7 @@ export function init_eval(vm)
      *
      * The first element of method-args must be the receiver object.
      */
-    vm.INVOKE_METHOD = (args, env) =>
+    vm.INVOKE_METHOD = function(args, env)
     {
         const method_name = vm.assert_type(vm.elt(args, 0), vm.Symbol);
         const method_args = vm.assert_type(vm.elt(args, 1), vm.Cons);
