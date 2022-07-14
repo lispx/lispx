@@ -589,7 +589,7 @@ describe("Generic Functions", () => {
         const str_method = vm.alien_operator(() => vm.void());
         vm.lisp_class(vm.String).put_method(method_name, str_method);
 
-        // Test that it returns the new result for strings...
+        // Test that it returns the new method for strings...
         assert(str_method === vm.lisp_class(vm.String).lookup_method(method_name));
         // ...and still the old one for numbers and objects.
         assert(method === vm.lisp_class(vm.Number).lookup_method(method_name));
