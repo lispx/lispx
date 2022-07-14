@@ -162,7 +162,7 @@ export function init_print(vm)
         switch (sym.get_namespace()) {
         case vm.VARIABLE_NAMESPACE: return vm.str("");
         case vm.FUNCTION_NAMESPACE: return vm.str("#'");
-        case vm.CLASS_NAMESPACE: return vm.str("#$");
+        case vm.CLASS_NAMESPACE: return vm.str("#^");
         case vm.KEYWORD_NAMESPACE: return vm.str(":");
         default: vm.panic("Unknown symbol namespace");
         }

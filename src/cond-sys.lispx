@@ -109,7 +109,7 @@ the handler chain (the variable itself as a first class object, not
 its value, so it can be used with `progv')."
   (vau (handler-specs . forms) env
     (let ((handler-frame (make-instance
-                          (class handler-frame)
+                          #^handler-frame
                           :handlers (mapcar (lambda (spec)
                                               (handler-spec-parser spec env))
                                             handler-specs)
@@ -120,7 +120,7 @@ its value, so it can be used with `progv')."
 (def #'handler-bind
   (%make-handler-bind-operator
    (lambda ((class-name function-form) env)
-     (make-instance (class condition-handler)
+     (make-instance #^condition-handler
                     :condition-class
                     (the class (find-class class-name env))
                     :handler-function
@@ -135,7 +135,7 @@ $(syntax handler-spec (condition-class handler-function))")
 (def #'restart-bind
   (%make-handler-bind-operator
    (lambda ((restart-name function-form . properties) env)
-     (make-instance (class restart-handler)
+     (make-instance #^restart-handler
                     :restart-name
                     (the symbol restart-name)
                     :handler-function
@@ -384,7 +384,7 @@ with any condition."
 
 (defun make-restart-error (restart-name)
   "Create a new `restart-error' for the given RESTART-NAME."
-  (make-instance (class restart-error) :restart-name restart-name))
+  (make-instance #^restart-error :restart-name restart-name))
 
 (defclass simple-error (error)
   (message)
@@ -392,7 +392,7 @@ with any condition."
 
 (defun make-simple-error (message)
   "Create a new simple error with a MESSAGE."
-  (make-instance (class simple-error) :message message))
+  (make-instance #^simple-error :message message))
 
 (defun simple-error (message)
   "Signal a simple error with a MESSAGE."

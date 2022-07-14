@@ -55,8 +55,8 @@ describe("Printer", () => {
             "#'foo-bar": vm.fsym("foo-bar"),
             "#'|foo bar|": vm.fsym("foo bar"),
             // Class symbols
-            "#$foo-bar": vm.csym("foo-bar"),
-            "#$|foo bar|": vm.csym("foo bar"),
+            "#^foo-bar": vm.csym("foo-bar"),
+            "#^|foo bar|": vm.csym("foo bar"),
             // Conses
             "(1)": vm.list(vm.num(1)),
             "((1))": vm.list(vm.list(vm.num(1))),
