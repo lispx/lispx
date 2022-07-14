@@ -28,6 +28,7 @@ import { init_js } from "./js.mjs";
  * variables as strings.
  */
 import boot_code from "./boot.lispx";
+import cond_sys_code from "./cond-sys.lispx";
 import stream_code from "./stream.lispx";
 import read_code from "./read.lispx";
 import print_code from "./print.lispx";
@@ -66,6 +67,7 @@ export class VM
          * Evaluate the bootstrap code.
          */
         this.eval_js_string(boot_code);
+        this.eval_js_string(cond_sys_code);
         this.eval_js_string(stream_code);
         this.eval_js_string(read_code);
         this.eval_js_string(print_code);
