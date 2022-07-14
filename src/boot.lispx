@@ -820,7 +820,7 @@ NAME and default VALUE. The optional DOCSTRING is currently ignored.
 $(fn (name &optional value docstring))"
   (def value (eval (optional value-and-docstring?) env))
   (if (boundp name env)
-      (set-slot-value (eval name env) 'value (eval value env))
+      (set-slot-value (the dynamic (eval name env)) 'value (eval value env))
       (eval (list #'def name (make-instance (class dynamic) :value value)) env)))
 
 (defun dynamic (dynamic-variable)
