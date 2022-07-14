@@ -500,7 +500,7 @@ coroutine with `resume'."
   (deftest defdynamic.1
     (progn
       (defdynamic *x* 1)
-      (defdynamic *y* 2)
+      (defdynamic *y* (+ 1 1))
       (assert (= (dynamic *x*) 1))
       (assert (= (dynamic *y*) 2))
       (dynamic-let ((*x* 3))
@@ -514,6 +514,20 @@ coroutine with `resume'."
       (assert (= (dynamic *x*) 1))
       (assert (= (dynamic *y*) 2)))
     #void)
+
+  (deftest* defdynamic.redefine
+    (defdynamic *a* (+ 1 1))
+    (def old-a *a*)
+    (assert (= (dynamic *a*) 2))
+    (assert (= (dynamic old-a) 2))
+    (defdynamic *a* (+ 2 2))
+    (assert (= (dynamic *a*) 4))
+    (assert (= (dynamic old-a) 4))
+    (assert (eq old-a *a*))
+    (defdynamic *a*)
+    (assert (= (dynamic *a*) #void))
+    (assert (= (dynamic old-a) #void))
+    (assert (eq old-a *a*)))
 
   (deftest progv.1
     (progn

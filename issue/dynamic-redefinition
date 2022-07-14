@@ -1,2 +1,0 @@
-Redefining a dynamic with DEFDYNAMIC creates a new instance of the
-dynamic, instead of updating the existing one.
