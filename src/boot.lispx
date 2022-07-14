@@ -673,7 +673,7 @@ $(syntax property (:documentation docstring))"
 for the class named by CLASS-NAME."
   (def class (find-class class-name env))
   (def #'method (eval (list* #'lambda (list* receiver parameters) forms) env))
-  (%%put-method class name #'method)
+  (%%add-method class name #'method)
   name)
 
 ;;; Standard Objects

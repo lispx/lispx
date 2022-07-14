@@ -70,6 +70,7 @@ describe("Evaluation & Operation", () => {
             "%%=",
             "%%>",
             "%%>=",
+            "%%add-method",
             "%%boundp",
             "%%car",
             "%%catch",
@@ -83,7 +84,6 @@ describe("Evaluation & Operation", () => {
             "%%find-method",
             "%%function-symbol",
             "%%intern",
-            "%%invoke-method",
             "%%keyword-symbol",
             "%%list*",
             "%%list-length",
@@ -98,7 +98,6 @@ describe("Evaluation & Operation", () => {
             "%%push-delim-subcont",
             "%%push-prompt",
             "%%push-subcont-barrier",
-            "%%put-method",
             "%%reinitialize-standard-class",
             "%%reverse",
             "%%set-slot-value",
@@ -568,33 +567,33 @@ describe("Alien Operators", () => {
 
 describe("Generic Functions", () => {
 
-    it("Test put_method() and lookup_method().", () => {
+    it("Test add_method() and find_method().", () => {
 
         // Define a method M1 on OBJECT.
         const method_name = vm.sym("m1");
         const method = vm.alien_operator(() => vm.void());
-        vm.lisp_class(vm.Object).put_method(method_name, method);
+        vm.lisp_class(vm.Object).add_method(method_name, method);
 
         // Test that strings and numbers inherit the method.
         for (const cls of [vm.lisp_class(vm.Object),
                            vm.lisp_class(vm.String),
                            vm.lisp_class(vm.Number)]) {
-            assert(method === cls.lookup_method(method_name));
+            assert(method === cls.find_method(method_name));
 
             // Test an unbound method.
-            assert.throws(() => cls.lookup_method(vm.sym("m2")),
+            assert.throws(() => cls.find_method(vm.sym("m2")),
                           "Unbound method: m2");
         }
 
         // Override the method for strings.
         const str_method = vm.alien_operator(() => vm.void());
-        vm.lisp_class(vm.String).put_method(method_name, str_method);
+        vm.lisp_class(vm.String).add_method(method_name, str_method);
 
         // Test that it returns the new method for strings...
-        assert(str_method === vm.lisp_class(vm.String).lookup_method(method_name));
+        assert(str_method === vm.lisp_class(vm.String).find_method(method_name));
         // ...and still the old one for numbers and objects.
-        assert(method === vm.lisp_class(vm.Number).lookup_method(method_name));
-        assert(method === vm.lisp_class(vm.Object).lookup_method(method_name));
+        assert(method === vm.lisp_class(vm.Number).find_method(method_name));
+        assert(method === vm.lisp_class(vm.Object).find_method(method_name));
     });
 
 });

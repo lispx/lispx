@@ -812,7 +812,7 @@ function init_vm(vm)
         /*
          * Creates or updates a method in this class.
          */
-        put_method(name, method)
+        add_method(name, method)
         {
             vm.assert_type(method, vm.Operator);
             const key = this.method_key(name);
@@ -824,7 +824,7 @@ function init_vm(vm)
          *
          * Throws an error if the method is not found.
          */
-        lookup_method(name)
+        find_method(name)
         {
             const key = this.method_key(name);
             const method = this.get_js_class().prototype[key];

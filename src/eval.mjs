@@ -516,30 +516,6 @@ export function init_eval(vm)
                        });
     };
 
-    /*** Generic Functions ***/
-
-    /*
-     * (%%invoke-method method-name method-args) => result
-     *
-     * Built-in function used in the implementation of generic
-     * functions that invokes a method.
-     *
-     * The first element of method-args must be the receiver object.
-     */
-    vm.INVOKE_METHOD = function(args, env)
-    {
-        const method_name = vm.assert_type(vm.elt(args, 0), vm.Symbol);
-        const method_args = vm.assert_type(vm.elt(args, 1), vm.Cons);
-        const receiver = method_args.car();
-        const receiver_class = vm.class_of(receiver);
-        const method = receiver_class.lookup_method(method_name);
-        /*
-         * The dynamic environment isn't really needed here, this could also
-         * use a fresh, empty environment.
-         */
-        return vm.operate(method, method_args, env);
-    };
-
     /*** Exception Trapping and Panicking ***/
 
     /*
@@ -750,13 +726,11 @@ export function init_eval(vm)
     vm.define_alien_function("%%slot-bound-p", (obj, slot_name) =>
         vm.to_lisp_boolean(vm.assert_type(obj, vm.Standard_object).is_slot_bound(slot_name)));
 
-    vm.define_alien_function("%%put-method", (cls, name, method) =>
-        vm.assert_type(cls, vm.Class).put_method(name, method));
+    vm.define_alien_function("%%add-method", (cls, name, method) =>
+        vm.assert_type(cls, vm.Class).add_method(name, method));
 
     vm.define_alien_function("%%find-method", (cls, name) =>
-        vm.assert_type(cls, vm.Class).lookup_method(name));
-
-    vm.define_built_in_function("%%invoke-method", vm.INVOKE_METHOD);
+        vm.assert_type(cls, vm.Class).find_method(name));
 
     vm.define_alien_function("%%make-standard-class", (name, lisp_super) =>
         vm.make_standard_class(name, lisp_super));
