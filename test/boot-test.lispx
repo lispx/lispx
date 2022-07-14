@@ -2002,7 +2002,7 @@
   (deftest subseq.3
     (signals-error
      (subseq 12 1 2)
-     unbound-method-error :object 12 :method-name 'subseq)))
+     unbound-method-error :class (class number) :method-name 'subseq)))
 
 (defsuite list-subseq
 
@@ -3161,20 +3161,20 @@
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :object 12 :method-name 'g1))
+               unbound-method-error :class (class number) :method-name 'g1))
       (assert (signals-error
                (g1 foo (+ 1 1))
-               unbound-method-error :object foo :method-name 'g1))
+               unbound-method-error :class (class foo) :method-name 'g1))
       (assert (signals-error
                (g1 bar (+ 1 1))
-               unbound-method-error :object bar :method-name 'g1))
+               unbound-method-error :class (class bar) :method-name 'g1))
 
       (defmethod g1 ((obj foo) param)
         (+ param 100))
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :object 12 :method-name 'g1))
+               unbound-method-error :class (class number) :method-name 'g1))
       (assert (= 102 (g1 foo (+ 1 1))))
       (assert (= 102 (g1 bar (+ 1 1))))
 
@@ -3183,7 +3183,7 @@
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :object 12 :method-name 'g1))
+               unbound-method-error :class (class number) :method-name 'g1))
       (assert (= 102 (g1 foo (+ 1 1))))
       (assert (= 1002 (g1 bar (+ 1 1))))
 

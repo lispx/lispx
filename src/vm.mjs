@@ -824,19 +824,14 @@ function init_vm(vm)
          *
          * Throws an error if the method is not found.
          */
-        lookup_method(object, name)
+        lookup_method(name)
         {
             const key = this.method_key(name);
-            /*
-             * Looking up the method in the class, and not directly in
-             * the object itself, makes this also work for JS objects
-             * like null.
-             */
             const method = this.get_js_class().prototype[key];
             if (method !== undefined)
                 return method;
             else
-                throw new vm.Unbound_method_error(object, name);
+                throw new vm.Unbound_method_error(this, name);
         }
 
         /*
@@ -1092,18 +1087,19 @@ function init_vm(vm)
     };
 
     /*
-     * Signalled when a method cannot be found in an object.
+     * Signalled when a method cannot be found in a class.
      */
     vm.Unbound_method_error = class Lisp_unbound_method_error extends vm.Error
     {
-        constructor(obj, method_name)
+        constructor(cls, method_name)
         {
+            vm.assert_type(cls, vm.Class);
             vm.assert_type(method_name, vm.Symbol);
 
             const name = method_name.get_string().to_js_string();
             super(`Unbound method: ${name}`);
 
-            this.lisp_slot_object = obj;
+            this.lisp_slot_class = cls;
             this["lisp_slot_method-name"] = method_name;
         }
     };

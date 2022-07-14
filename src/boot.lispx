@@ -658,6 +658,9 @@ $(syntax property (:documentation docstring))"
 
 ;;; Generic Functions
 
+(defun %invoke-method (name args)
+  (apply (%%find-method (class-of (car args)) name) args))
+
 (defexpr defgeneric (name (receiver . parameters) . properties) env
   "Define a new generic function with the given NAME.  The RECEIVER,
 PARAMETERS, and PROPERTIES are currently ignored.

@@ -532,7 +532,7 @@ export function init_eval(vm)
         const method_args = vm.assert_type(vm.elt(args, 1), vm.Cons);
         const receiver = method_args.car();
         const receiver_class = vm.class_of(receiver);
-        const method = receiver_class.lookup_method(receiver, method_name);
+        const method = receiver_class.lookup_method(method_name);
         /*
          * The dynamic environment isn't really needed here, this could also
          * use a fresh, empty environment.
@@ -752,6 +752,9 @@ export function init_eval(vm)
 
     vm.define_alien_function("%%put-method", (cls, name, method) =>
         vm.assert_type(cls, vm.Class).put_method(name, method));
+
+    vm.define_alien_function("%%find-method", (cls, name) =>
+        vm.assert_type(cls, vm.Class).lookup_method(name));
 
     vm.define_built_in_function("%%invoke-method", vm.INVOKE_METHOD);
 
