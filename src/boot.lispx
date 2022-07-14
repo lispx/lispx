@@ -658,26 +658,22 @@ $(syntax property (:documentation docstring))"
 
 ;;; Generic Functions
 
-(defun %invoke-method (name args)
-  (apply (%%find-method (class-of (car args)) name) args))
-
 (defexpr defgeneric (name (receiver . parameters) . properties) env
   "Define a new generic function with the given NAME.  The RECEIVER,
 PARAMETERS, and PROPERTIES are currently ignored.
 
 $(syntax property (:documentation docstring))"
-  (def generic (lambda args (%%invoke-method name args)))
-  (eval (list #'def (function-symbol name) generic) env)
+  (def #'generic (lambda args
+                   (apply (%%find-method (class-of (car args)) name) args)))
+  (eval (list #'def (function-symbol name) #'generic) env)
   name)
 
 (defexpr defmethod (name ((receiver class-name) . parameters) . forms) env
   "Add a new method to the generic function named by NAME specialized
 for the class named by CLASS-NAME."
   (def class (find-class class-name env))
-  ;; Note that the method must be a fexpr because the generic function
-  ;; has already evaluated the arguments when it is called.
-  (def method (eval (list* #'vau (cons receiver parameters) #ignore forms) env))
-  (%%put-method class name method)
+  (def #'method (eval (list* #'lambda (list* receiver parameters) forms) env))
+  (%%put-method class name #'method)
   name)
 
 ;;; Standard Objects

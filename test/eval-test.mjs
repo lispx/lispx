@@ -80,6 +80,7 @@ describe("Evaluation & Operation", () => {
             "%%cons",
             "%%eq",
             "%%eval",
+            "%%find-method",
             "%%function-symbol",
             "%%intern",
             "%%invoke-method",
