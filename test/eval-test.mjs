@@ -567,41 +567,33 @@ describe("Alien Operators", () => {
 
 describe("Generic Functions", () => {
 
-    it("Test put_method() and INVOKE_METHOD().", () => {
+    it("Test put_method() and lookup_method().", () => {
 
-        // Define a method M1 that returns the receiver on the class OBJECT.
+        // Define a method M1 on OBJECT.
         const method_name = vm.sym("m1");
-        const method = vm.alien_operator((...args) => args[0]);
+        const method = vm.alien_operator(() => vm.void());
         vm.lisp_class(vm.Object).put_method(method_name, method);
 
-        // Call it on a string and a number.
-        const receiver1 = vm.str("foo");
-        const receiver2 = vm.num(1);
-        for (const receiver of [receiver1, receiver2]) {
-            const method_args = vm.list(receiver);
-            assert(vm.equal(vm.INVOKE_METHOD(vm.list(method_name, method_args),
-                                             vm.get_environment()),
-                            receiver));
+        // Test that strings and numbers inherit the method.
+        for (const cls of [vm.lisp_class(vm.Object),
+                           vm.lisp_class(vm.String),
+                           vm.lisp_class(vm.Number)]) {
+            assert(method === cls.lookup_method(method_name));
 
             // Test an unbound method.
-            assert.throws(() => vm.INVOKE_METHOD(vm.list(vm.sym("m2"), method_args),
-                                                 vm.get_environment()),
+            assert.throws(() => cls.lookup_method(vm.sym("m2")),
                           "Unbound method: m2");
         }
 
         // Override the method for strings.
-        const str_method = vm.alien_operator((...args) => vm.str("quux"));
+        const str_method = vm.alien_operator(() => vm.void());
         vm.lisp_class(vm.String).put_method(method_name, str_method);
 
         // Test that it returns the new result for strings...
-        assert(vm.equal(vm.INVOKE_METHOD(vm.list(method_name, vm.list(receiver1)),
-                                         vm.get_environment()),
-                        vm.str("quux")));
-        // ...and still the old one for numbers.
-        assert(vm.equal(vm.INVOKE_METHOD(vm.list(method_name, vm.list(receiver2)),
-                                         vm.get_environment()),
-                        receiver2));
-
+        assert(str_method === vm.lisp_class(vm.String).lookup_method(method_name));
+        // ...and still the old one for numbers and objects.
+        assert(method === vm.lisp_class(vm.Number).lookup_method(method_name));
+        assert(method === vm.lisp_class(vm.Object).lookup_method(method_name));
     });
 
 });
