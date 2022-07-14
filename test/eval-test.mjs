@@ -571,7 +571,7 @@ describe("Generic Functions", () => {
 
         // Define a method M1 on OBJECT.
         const method_name = vm.sym("m1");
-        const method = vm.alien_operator(() => vm.void());
+        const method = vm.alien_function(() => vm.void());
         vm.lisp_class(vm.Object).add_method(method_name, method);
 
         // Test that strings and numbers inherit the method.
@@ -586,7 +586,7 @@ describe("Generic Functions", () => {
         }
 
         // Override the method for strings.
-        const str_method = vm.alien_operator(() => vm.void());
+        const str_method = vm.alien_function(() => vm.void());
         vm.lisp_class(vm.String).add_method(method_name, str_method);
 
         // Test that it returns the new method for strings...
