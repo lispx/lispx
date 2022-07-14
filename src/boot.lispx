@@ -648,8 +648,7 @@ $(syntax slot-spec symbol)
 $(syntax property (:documentation docstring))"
   (def superclass (find-class (optional superclass? 'standard-object) env))
   ;; Slot-specs are ignored for now, but check them nevertheless.
-  (dolist (slot-spec slot-specs)
-    (the symbol slot-spec))
+  (dolist (slot-spec slot-specs) (the symbol slot-spec))
   (def class-name (class-symbol name))
   (if (boundp class-name env)
       (%%reinitialize-standard-class (eval class-name env) superclass)
@@ -663,17 +662,15 @@ $(syntax property (:documentation docstring))"
 PARAMETERS, and PROPERTIES are currently ignored.
 
 $(syntax property (:documentation docstring))"
-  (def #'generic (lambda args
-                   (apply (%%find-method (class-of (car args)) name) args)))
+  (def #'generic (lambda args (apply (%%find-method (class-of (car args)) name) args)))
   (eval (list #'def (function-symbol name) #'generic) env)
   name)
 
 (defexpr defmethod (name ((receiver class-name) . parameters) . forms) env
   "Add a new method to the generic function named by NAME specialized
 for the class named by CLASS-NAME."
-  (def class (find-class class-name env))
   (def #'method (eval (list* #'lambda (list* receiver parameters) forms) env))
-  (%%add-method class name #'method)
+  (%%add-method (find-class class-name env) name #'method)
   name)
 
 ;;; Standard Objects
