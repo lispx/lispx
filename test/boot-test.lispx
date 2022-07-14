@@ -73,7 +73,7 @@
 
   (deftest error.1
     (signals-error
-     (error (make-instance (class standard-object) :x 1 :y 2))
+     (error (make-instance #^standard-object :x 1 :y 2))
      standard-object :x 1 :y 2))
 
   (deftest error.2
@@ -120,11 +120,11 @@
 (defsuite assert-type
 
   (deftest assert-type.1
-    (assert-type #t (class boolean)))
+    (assert-type #t #^boolean))
 
   (deftest assert-type.2
     (signals-error
-     (assert-type #t (class string))
+     (assert-type #t #^string)
     type-error :datum #t :expected-type 'string))
 
   (deftest assert-type.3
@@ -172,9 +172,9 @@
 
   (deftest make-type-error.1
     (let ((e (make-type-error "foo" 'number)))
-      (assert (typep e (class type-error)))
-      (assert (typep e (class error)))
-      (assert (typep e (class condition)))
+      (assert (typep e #^type-error))
+      (assert (typep e #^error))
+      (assert (typep e #^condition))
       (assert (= "foo" (slot-value e 'datum)))
       (assert (= 'number (slot-value e 'expected-type))))
     #void))
@@ -183,9 +183,9 @@
 
   (deftest make-simple-error.1
     (let ((e (make-simple-error "foo")))
-      (assert (typep e (class simple-error)))
-      (assert (typep e (class error)))
-      (assert (typep e (class condition)))
+      (assert (typep e #^simple-error))
+      (assert (typep e #^error))
+      (assert (typep e #^condition))
       (assert (= "foo" (slot-value e 'message))))
     #void)
 
@@ -203,9 +203,9 @@
 
   (deftest make-restart-error.1
     (let ((e (make-restart-error 'continue)))
-      (assert (typep e (class restart-error)))
-      (assert (typep e (class error)))
-      (assert (typep e (class condition)))
+      (assert (typep e #^restart-error))
+      (assert (typep e #^error))
+      (assert (typep e #^condition))
       (assert (= 'continue (slot-value e 'restart-name))))
     #void))
 
@@ -234,9 +234,9 @@
 
   (deftest |Fexprs are instances of FEXPR, OPERATOR, OBJECT.|
     (let ((#'fexpr (vau #ignore #ignore 12)))
-      (typep #'fexpr (class fexpr))
-      (typep #'fexpr (class operator))
-      (typep #'fexpr (class object))
+      (typep #'fexpr #^fexpr)
+      (typep #'fexpr #^operator)
+      (typep #'fexpr #^object)
       (fexpr))
     12)
 
@@ -1379,18 +1379,18 @@
 
   (deftest typep.1
     (and
-     (typep #t (class boolean))
-     (typep #f (class boolean))
-     (typep 12 (class number))
-     (typep "foo" (class string))
-     (typep #nil (class nil))
-     (typep (class object) (class class))))
+     (typep #t #^boolean)
+     (typep #f #^boolean)
+     (typep 12 #^number)
+     (typep "foo" #^string)
+     (typep #nil #^nil)
+     (typep #^object #^class)))
 
   (deftest typep.2
     (and
-     (typep (class condition) (class standard-class))
-     (typep (class condition) (class class))
-     (typep (class condition) (class object))))
+     (typep #^condition #^standard-class)
+     (typep #^condition #^class)
+     (typep #^condition #^object)))
 
   (deftest typep.3
     (signals-error
@@ -1445,7 +1445,7 @@
 (defsuite class
 
   (deftest class.1
-    (eq (class string) (class-of "foo")))
+    (eq #^string (class-of "foo")))
 
   (deftest class.2
     (signals-error
@@ -1459,7 +1459,7 @@
 
   (deftest class.4
     (signals-error
-     (class does-not-exist)
+     #^does-not-exist
      unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
 
 (defsuite find-class
@@ -2002,7 +2002,7 @@
   (deftest subseq.3
     (signals-error
      (subseq 12 1 2)
-     unbound-method-error :class (class number) :method-name 'subseq)))
+     unbound-method-error :class #^number :method-name 'subseq)))
 
 (defsuite list-subseq
 
@@ -2355,7 +2355,7 @@
 
   (deftest make-instance.1
     (progn
-      (def obj (make-instance (class type-error) :datum 1 :expected-type 'string))
+      (def obj (make-instance #^type-error :datum 1 :expected-type 'string))
       (assert (= (slot-value obj 'datum) 1))
       (assert (= (slot-value obj :datum) 1))
       (assert (= (slot-value obj 'expected-type) 'string))
@@ -2374,19 +2374,19 @@
 
   (deftest make-instance.4
     (signals-error
-     (make-instance (class object))
-     type-error :datum (class object) :expected-type 'standard-class))
+     (make-instance #^object)
+     type-error :datum #^object :expected-type 'standard-class))
 
   (deftest make-instance.5
     (signals-error
-     (make-instance (class standard-object) :x)
+     (make-instance #^standard-object :x)
      assertion-error)))
 
 (defsuite slots
 
   (deftest slots.1
     (progn
-      (def obj (make-instance (class standard-object)))
+      (def obj (make-instance #^standard-object))
       (assert (not (slot-bound-p obj 'x)))
       (assert (not (slot-bound-p obj :x)))
       (assert (signals-error (slot-value obj 'x)
@@ -2410,12 +2410,12 @@
 
   (deftest slot-value.1a
     (signals-error
-     (slot-value (make-instance (class standard-object)) "x")
+     (slot-value (make-instance #^standard-object) "x")
      type-error :datum "x" :expected-type 'symbol))
 
   (deftest slot-value.2
     (signals-error
-     (slot-value (make-instance (class standard-object)))
+     (slot-value (make-instance #^standard-object))
      match-error))
 
   (deftest slot-value.3
@@ -2430,17 +2430,17 @@
 
   (deftest set-slot-value.1a
     (signals-error
-     (set-slot-value (make-instance (class standard-object)) "x" 1)
+     (set-slot-value (make-instance #^standard-object) "x" 1)
      type-error :datum "x" :expected-type 'symbol))
 
   (deftest set-slot-value.2
     (signals-error
-     (set-slot-value (make-instance (class standard-object)))
+     (set-slot-value (make-instance #^standard-object))
      match-error))
 
   (deftest set-slot-value.3
     (signals-error
-     (set-slot-value (make-instance (class standard-object)) 'x)
+     (set-slot-value (make-instance #^standard-object) 'x)
      match-error))
 
   (deftest slot-bound-p.1
@@ -2450,7 +2450,7 @@
 
   (deftest slot-bound-p.1a
     (signals-error
-     (slot-bound-p (make-instance (class standard-object)) "x")
+     (slot-bound-p (make-instance #^standard-object) "x")
      type-error :datum "x" :expected-type 'symbol))
 
   (deftest slot-bound-p.2
@@ -2460,7 +2460,7 @@
 
   (deftest slot-bound-p.3
     (signals-error
-     (slot-bound-p (make-instance (class standard-object)))
+     (slot-bound-p (make-instance #^standard-object))
      match-error)))
 
 (defsuite let
@@ -2919,9 +2919,9 @@
 
   (deftest class-of.1
     (progn
-      (assert (eq (class-of "foo") (class string)))
-      (assert (eq (class-of 12) (class number)))
-      (assert (eq (class-of (class string)) (class built-in-class))))
+      (assert (eq (class-of "foo") #^string))
+      (assert (eq (class-of 12) #^number))
+      (assert (eq (class-of #^string) #^built-in-class)))
     #void)
 
   (deftest class-of.2
@@ -2983,7 +2983,7 @@
      type-error :datum "foo" :expected-type 'class))
 
   (deftest class-name.3
-    (class-name (class object))
+    (class-name #^object)
     'object))
 
 (defsuite subclassp
@@ -2995,54 +2995,54 @@
 
   (deftest subclassp.2
     (signals-error
-     (subclassp (class object))
+     (subclassp #^object)
      match-error))
 
   (deftest subclassp.3
     (signals-error
-     (subclassp (class object) "foo")
+     (subclassp #^object "foo")
      type-error :datum "foo" :expected-type 'class))
 
   (deftest subclassp.4
     (signals-error
-     (subclassp "foo" (class object))
+     (subclassp "foo" #^object)
      type-error :datum "foo" :expected-type 'class))
 
   (deftest subclassp.5
-    (and (subclassp (class object) (class object))
-         (subclassp (class class) (class object))
-         (subclassp (class standard-class) (class class))
-         (subclassp (class standard-class) (class object)))
+    (and (subclassp #^object #^object)
+         (subclassp #^class #^object)
+         (subclassp #^standard-class #^class)
+         (subclassp #^standard-class #^object))
     #t))
 
 ;; Utility used by `%%make-standard-class' and `defclass' tests.
 
 (defun classes-test (c d p q)
-  (assert (typep c (class standard-class)))
-  (assert (typep c (class class)))
-  (assert (typep c (class object)))
+  (assert (typep c #^standard-class))
+  (assert (typep c #^class))
+  (assert (typep c #^object))
   (assert (= (class-name c) 'point-2d))
-  (assert (subclassp c (class standard-object)))
-  (assert (subclassp c (class object)))
+  (assert (subclassp c #^standard-object))
+  (assert (subclassp c #^object))
 
   (assert (typep p c))
-  (assert (typep p (class standard-object)))
-  (assert (typep p (class object)))
+  (assert (typep p #^standard-object))
+  (assert (typep p #^object))
   (assert (= (slot-value p 'x) 1))
   (assert (= (slot-value p 'y) 2))
 
-  (assert (typep d (class standard-class)))
-  (assert (typep d (class class)))
-  (assert (typep d (class object)))
+  (assert (typep d #^standard-class))
+  (assert (typep d #^class))
+  (assert (typep d #^object))
   (assert (= (class-name d) 'point-3d))
   (assert (subclassp d c))
-  (assert (subclassp d (class standard-object)))
-  (assert (subclassp d (class object)))
+  (assert (subclassp d #^standard-object))
+  (assert (subclassp d #^object))
 
   (assert (typep q d))
   (assert (typep q c))
-  (assert (typep q (class standard-object)))
-  (assert (typep q (class object)))
+  (assert (typep q #^standard-object))
+  (assert (typep q #^object))
   (assert (= (slot-value q 'x) 1))
   (assert (= (slot-value q 'y) 2))
   (assert (= (slot-value q 'z) 3)))
@@ -3050,7 +3050,7 @@
 (defsuite %%make-standard-class
 
   (deftest %%make-standard-class.1
-    (let* ((c (%%make-standard-class 'point-2d (class standard-object)))
+    (let* ((c (%%make-standard-class 'point-2d #^standard-object))
            (d (%%make-standard-class 'point-3d c))
            (p (make-instance c :x 1 :y 2))
            (q (make-instance d :x 1 :y 2 :z 3)))
@@ -3059,8 +3059,8 @@
 
   (deftest %%make-standard-class.2
     (signals-error
-     (%%make-standard-class 'foo (class object))
-     type-error :datum (class object) :expected-type 'standard-class))
+     (%%make-standard-class 'foo #^object)
+     type-error :datum #^object :expected-type 'standard-class))
 
   #|
   (deftest %%make-standard-class.3
@@ -3076,16 +3076,16 @@
 
   (deftest %%make-standard-class.5
     (signals-error
-     (%%make-standard-class "foo" (class standard-object))
+     (%%make-standard-class "foo" #^standard-object)
      type-error :datum "foo" :expected-type 'symbol)))
 
 (defsuite %%reinitialize-standard-class
 
   (deftest* %%reinitialize-standard-class.1
-    (let* ((a (%%make-standard-class 'a (class standard-object)))
+    (let* ((a (%%make-standard-class 'a #^standard-object))
            (b (%%make-standard-class 'b a))
            (c (%%make-standard-class 'c b))
-           (d (%%make-standard-class 'd (class standard-object)))
+           (d (%%make-standard-class 'd #^standard-object))
            (e (%%make-standard-class 'e d)))
       (assert (subclassp b a))
       (assert (subclassp c a))
@@ -3127,9 +3127,9 @@
     (progn
       (defclass point-2d () (x y))
       (defclass point-3d (point-2d) (z))
-      (def p (make-instance (class point-2d) :x 1 :y 2))
-      (def q (make-instance (class point-3d) :x 1 :y 2 :z 3))
-      (classes-test (class point-2d) (class point-3d) p q))
+      (def p (make-instance #^point-2d :x 1 :y 2))
+      (def q (make-instance #^point-3d :x 1 :y 2 :z 3))
+      (classes-test #^point-2d #^point-3d p q))
     #void)
 
   (deftest* defclass.redefine.1
@@ -3137,18 +3137,18 @@
     (defclass b (a) ())
     (defgeneric foo (x))
     (defmethod foo ((a a)) "foo")
-    (def b (make-instance (class b)))
-    (assert (subclassp (class b) (class a)))
-    (assert (typep b (class b)))
-    (assert (typep b (class a)))
+    (def b (make-instance #^b))
+    (assert (subclassp #^b #^a))
+    (assert (typep b #^b))
+    (assert (typep b #^a))
     (assert (= "foo" (foo b)))
     (defclass c () ())
     (defmethod foo ((c c)) "bar")
     (defclass b (c) ())
-    (assert (subclassp (class b) (class c)))
-    (assert (eq (class-of b) (class b)))
-    (assert (typep b (class b)))
-    (assert (typep b (class c)))
+    (assert (subclassp #^b #^c))
+    (assert (eq (class-of b) #^b))
+    (assert (typep b #^b))
+    (assert (typep b #^c))
     (assert (= "bar" (foo b)))))
 
 (defsuite generics
@@ -3157,28 +3157,28 @@
     (progn
       (defclass foo () ())
       (defclass bar (foo) ())
-      (def foo (make-instance (class foo)))
-      (def bar (make-instance (class bar)))
+      (def foo (make-instance #^foo))
+      (def bar (make-instance #^bar))
 
       (defgeneric g1 (obj param))
-      (assert (typep #'g1 (class function)))
+      (assert (typep #'g1 #^function))
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :class (class number) :method-name 'g1))
+               unbound-method-error :class #^number :method-name 'g1))
       (assert (signals-error
                (g1 foo (+ 1 1))
-               unbound-method-error :class (class foo) :method-name 'g1))
+               unbound-method-error :class #^foo :method-name 'g1))
       (assert (signals-error
                (g1 bar (+ 1 1))
-               unbound-method-error :class (class bar) :method-name 'g1))
+               unbound-method-error :class #^bar :method-name 'g1))
 
       (defmethod g1 ((obj foo) param)
         (+ param 100))
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :class (class number) :method-name 'g1))
+               unbound-method-error :class #^number :method-name 'g1))
       (assert (= 102 (g1 foo (+ 1 1))))
       (assert (= 102 (g1 bar (+ 1 1))))
 
@@ -3187,7 +3187,7 @@
 
       (assert (signals-error
                (g1 12 (+ 1 1))
-               unbound-method-error :class (class number) :method-name 'g1))
+               unbound-method-error :class #^number :method-name 'g1))
       (assert (= 102 (g1 foo (+ 1 1))))
       (assert (= 1002 (g1 bar (+ 1 1))))
 
@@ -3288,7 +3288,7 @@
     (block b
       (handler-bind ((test-error (lambda (e) (return-from b 'outer))))
         (handler-bind ((simple-error (lambda (e)
-                                       (signal (make-instance (class test-error))))))
+                                       (signal (make-instance #^test-error)))))
           (handler-bind ((test-error (lambda (e) (return-from b 'inner))))
             (signal (make-simple-error "foo"))))))
     'outer)
@@ -3304,7 +3304,7 @@
     (block b
       (handler-bind ((test-error (lambda (e) (return-from b 'test)))
                      (simple-error (lambda (e) (return-from b 'simple))))
-        (signal (make-instance (class test-error)))))
+        (signal (make-instance #^test-error))))
     'test)
 
   (deftest handler-bind.anything
@@ -3375,7 +3375,7 @@
   (deftest handler-case.multiple.2
     (handler-case ((test-error (lambda (e) 'test))
                    (simple-error (lambda (e) 'simple)))
-      (signal (make-instance (class test-error))))
+      (signal (make-instance #^test-error)))
     'test)
 
   (deftest handler-case.anything
@@ -3779,7 +3779,7 @@
 
   (deftest signal.2
     (signals-error
-     (signal (make-instance (class standard-object) :x 1 :y 2))
+     (signal (make-instance #^standard-object :x 1 :y 2))
      standard-object :x 1 :y 2))
 
   (deftest signal.3
