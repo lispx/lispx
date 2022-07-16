@@ -64,7 +64,7 @@
 ;; 2) Every restart must have a non-nil name; anonymous restarts
 ;;    are not supported.
 
-;;; Core Classes and Dynamic Variables
+;;; Core Classes
 
 (defclass handler-frame ()
   (handlers
@@ -94,6 +94,26 @@ arguments.  The ASSOCIATED-CONDITIONS are a list of conditions with
 which this handler is associated.  If the list is empty, the handler
 is applicable to any condition.  If it's not empty, the handler is
 applicable only to conditions in the list."))
+
+(defclass restart-error (error)
+  (restart-name)
+  (:documentation "Signalled when no handler for RESTART-NAME is found."))
+
+(defun make-restart-error (restart-name)
+  "Create a new `restart-error' for the given RESTART-NAME."
+  (make-instance #^restart-error :restart-name restart-name))
+
+(defclass simple-error (error)
+  (message)
+  (:documentation "Class for simple errors with a MESSAGE."))
+
+(defun make-simple-error (message)
+  "Create a new simple error with a MESSAGE."
+  (make-instance #^simple-error :message message))
+
+(defun simple-error (message)
+  "Signal a simple error with a MESSAGE."
+  (error (make-simple-error message)))
 
 ;;; Establishing Condition and Restart Handlers
 
@@ -361,6 +381,8 @@ of its condition class."
     ;; particular condition then every handler is applicable.
     #t))
 
+;;; Computing Active Restarts
+
 (defun compute-restarts condition?
   "Return the list of currently active restarts, with most recently
 established ones first, optionally limited to those that are
@@ -377,23 +399,3 @@ with any condition."
                                    (slot-value handler-frame 'handlers)))
                           (slot-value handler-frame 'parent-frame?))
       restarts)))
-
-(defclass restart-error (error)
-  (restart-name)
-  (:documentation "Signalled when no handler for RESTART-NAME is found."))
-
-(defun make-restart-error (restart-name)
-  "Create a new `restart-error' for the given RESTART-NAME."
-  (make-instance #^restart-error :restart-name restart-name))
-
-(defclass simple-error (error)
-  (message)
-  (:documentation "Class for simple errors with a MESSAGE."))
-
-(defun make-simple-error (message)
-  "Create a new simple error with a MESSAGE."
-  (make-instance #^simple-error :message message))
-
-(defun simple-error (message)
-  "Signal a simple error with a MESSAGE."
-  (error (make-simple-error message)))
