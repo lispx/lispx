@@ -34,5 +34,5 @@
 
 (defun fresh-line stream?
   "Ensure that the following output appears on a new line by itself.
-The optional STREAM defaults to `*standard-output*'."
+The optional STREAM? defaults to `*standard-output*'."
   (%%fresh-line (optional stream? (dynamic *standard-output*))))
