@@ -69,7 +69,7 @@
    parent-frame?)
   (:documentation "Instances of this class make up the condition and
 restart handler chains.  Each frame stores a list of HANDLERS and an
-optional PARENT-FRAME."))
+optional PARENT-FRAME?."))
 
 (defclass condition-handler ()
   (condition-class
@@ -86,7 +86,7 @@ argument."))
    associated-conditions)
   (:documentation "A restart handler is handling a particular
 RESTART-NAME.  The HANDLER-FUNCTION receives the arguments passed to
-`invoke-restart'.  The optional INTERACTIVE-FUNCTION is called by
+`invoke-restart'.  The optional INTERACTIVE-FUNCTION? is called by
 `invoke-restart-interactively' and should prompt the user for required
 arguments.  The ASSOCIATED-CONDITIONS are a list of conditions with
 which this handler is associated.  If the list is empty, the handler
@@ -297,7 +297,7 @@ looking for a condition handler, it is always nil."
 
 (defun find-restart? (name . condition?)
   "Find a restart handler by NAME, optionally limited to restarts
-associated with a particular CONDITION."
+associated with a particular CONDITION?."
   (when-option ((handler #ignore) (lispx::find-handler?
                                    name
                                    (dynamic *restart-handler-frame?*)
@@ -342,7 +342,7 @@ of its condition class."
 (defun compute-restarts condition?
   "Return the list of currently active restarts, with most recently
 established ones first, optionally limited to those that are
-explicitly associated with the supplied CONDITION or not associated
+explicitly associated with the supplied CONDITION? or not associated
 with any condition."
   (loop-let -compute-restarts- ((restarts '())
                                 (handler-frame? (dynamic *restart-handler-frame?*)))

@@ -6,9 +6,7 @@
 
 (%%def #'list
   (%%wrap (%%vau arguments #ignore arguments))
-
   "Return the list of evaluated ARGUMENTS.
-
 $(fn (arguments))
 $(type function)")
 
@@ -17,10 +15,8 @@ $(type function)")
     (%%eval (list #'%%vau parameter-tree environment-parameter
                   (%%list* #'%%progn forms))
             env))
-
   "Construct a fexpr with the given PARAMETER-TREE,
 ENVIRONMENT-PARAMETER, and FORMS.
-
 $(fn (parameter-tree environment-parameter . forms))
 $(type fexpr)")
 
@@ -31,12 +27,10 @@ $(type fexpr)")
        (%%eval
         (%%eval (%%cons expander form) (%%make-environment))
         env))))
-
   "Create a macro from an EXPANDER operator.  A macro is an operator
 that receives a form and produces an expression (by calling the
 expander with the form as argument) that is then evaluated in place of
 the form.
-
 $(fn (expander))
 $(type function)")
 
@@ -45,9 +39,7 @@ $(type function)")
    (%%vau (parameter-tree . forms) #ignore
      (list #'lispx::make-macro
            (%%list* #'vau parameter-tree #ignore forms))))
-
   "Create an anonymous macro with the given PARAMETER-TREE and FORMS.
-
 $(fn (parameter-tree . forms))
 $(type macro)")
 
@@ -55,9 +47,7 @@ $(type macro)")
   (macro (name parameter-tree . forms)
     (list #'%%def (%%function-symbol name)
           (%%list* #'macro parameter-tree forms)))
-
   "Define a macro with the given NAME, PARAMETER-TREE, and FORMS.
-
 $(fn (name parameter-tree . forms))
 $(type macro)")
 
@@ -69,14 +59,14 @@ ENVIRONMENT-PARAMETER, and FORMS."
 
 (defmacro def (definiend-tree value . docstring?)
   "Match the DEFINIEND-TREE against the VALUE and place resulting
-bindings into the current environment.  The optional DOCSTRING is
+bindings into the current environment.  The optional DOCSTRING? is
 currently ignored."
   (list #'%%def definiend-tree value))
 
 (defmacro defconstant (name value . docstring?)
   "Define a constant with the given NAME and VALUE.  This is mostly
 for documentation purposes, as constants are still mutable.  The
-optional DOCSTRING is currently ignored."
+optional DOCSTRING? is currently ignored."
   (list #'def name value))
 
 (defmacro lambda (parameter-tree . forms)
@@ -109,7 +99,7 @@ tag.  Usually, `block' should be preferred."
 
 (defun throw (tag . result?)
   "Abort to a nesting catch tag established by `catch' and pass the
-RESULT to it."
+optional RESULT? (defaults to void) to it."
   (%%throw tag (optional result?)))
 
 (defmacro loop forms
@@ -187,7 +177,7 @@ induces argument evaluation around it."
   (%%eval form environment))
 
 (defun make-environment parent-environment?
-  "Create a new environment with an optional PARENT-ENVIRONMENT in
+  "Create a new environment with an optional PARENT-ENVIRONMENT? in
 which bindings are looked up if they are not found."
   (apply #'%%make-environment parent-environment?))
 
@@ -206,7 +196,6 @@ out of Lisp."
 (defmacro let (bindings . forms)
   "Establish BINDINGS parallelly during the evaluation of FORMS, so
 that no binding can refer to the other ones.
-
 $(syntax binding (definiend-tree value))"
   (list* (list* #'lambda (mapcar #'car bindings)
                 forms)
@@ -215,7 +204,6 @@ $(syntax binding (definiend-tree value))"
 (defmacro let* (bindings . forms)
   "Establish BINDINGS serially during the evaluation of FORMS, so that
 every binding can refer to previous ones.
-
 $(syntax binding (definiend-tree value))"
   (if (null bindings)
       (list* #'let () forms) ; Always introduce a new scope.
@@ -241,14 +229,12 @@ FORMS.  Used by `labels'."
 (defmacro flet (function-bindings . forms)
   "Establish FUNCTION-BINDINGS parallelly during evaluation of FORMS,
 so that no function can refer to the other ones.
-
 $(syntax function-binding (name parameter-tree . forms))"
   (list* #'let (mapcar #'lispx::function-binding function-bindings) forms))
 
 (defmacro labels (function-bindings . forms)
   "Establish FUNCTION-BINDINGS recursively during evaluation of FORMS,
 so that every function can refer to the other ones.
-
 $(syntax function-binding (name parameter-tree . forms))"
   (list* #'lispx::letrec (mapcar #'lispx::function-binding function-bindings) forms))
 
@@ -278,11 +264,9 @@ Otherwise, return void."
 
 (defexpr cond clauses env
   "Multi-armed conditional.
-
 Go through the CLAUSES in order.  Evaluate the TEST.  If it yields
 true, evaluate the FORMS as an implicit `progn'.  If it yields false,
 go to the next clause, or return void if there are no more clauses.
-
 $(syntax clause (test . forms))"
   (unless (null clauses)
     (let ((((test . forms) . rest-clauses) clauses))
@@ -340,13 +324,11 @@ evaluated.  If there are no operands, return true."
 
 (defmacro loop-let (name initializers . forms)
   "Labelled recursive loop, analogous to Scheme's named `let'.
-
 Lexically bind a function named NAME with one PARAMETER for every
 INITIALIZER and the FORMS as body.  Then immediately apply the
 function to a list containing one VALUE for every INITIALIZER and
 return the result.  The function is bound per `labels' so it can
 recursively refer to itself.
-
 $(syntax initializer (parameter value))"
   (list #'labels (list (list* name (mapcar #'car initializers) forms))
         (list* name (mapcar #'cadr initializers))))
@@ -355,7 +337,6 @@ $(syntax initializer (parameter value))"
   "Establish a block named BLOCK-NAME and evaluate the FORMS as an
 implicit `progn' inside it.  The forms may use `return-from' to
 nonlocally exit from the block.
-
 Note that unlike in Common Lisp, there is no separate namespace for
 block names; a block is named in the normal variable namespace."
   (let ((tag (list #void))) ; cons up a fresh object as tag
@@ -366,10 +347,9 @@ block names; a block is named in the normal variable namespace."
               env)))))
 
 (defun return-from (#'block-name . value?)
-  "Abort evaluation and return the optional VALUE (which defaults to
+  "Abort evaluation and return the optional VALUE? (which defaults to
 void) from the block named BLOCK-NAME.  It is an error to return from
 a block whose dynamic extent has ended.
-
 $(fn (block-name . value?))"
   (block-name (optional value?)))
 
@@ -395,12 +375,10 @@ creating or updating existing bindings."
 
 (defexpr typecase (keyform . clauses) env
   "Multi-armed type test.
-
 Evaluate the KEYFORM.  Go through the CLAUSES.  If the result of
 evaluating KEYFORM is an instance of the class named by CLASS-NAME,
 evaluate the FORMS as an implicit `progn'.  Otherwise go to the next
 clause, or return void if there are no more clauses.
-
 $(syntax clause (class-name . forms))"
   (let ((key (eval keyform env)))
     (loop-let -typecase- ((clauses clauses))
@@ -412,7 +390,7 @@ $(syntax clause (class-name . forms))"
 
 (defun assert (boolean)
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
-  (unless boolean (error (make-instance #^assertion-error))))
+  (unless boolean (error (make-instance (class assertion-error)))))
 
 ;;; Lists
 
@@ -531,41 +509,35 @@ option."
 
 (def #'= (lispx::relational-operator #'%%=)
   "Return true if all ARGUMENTS are equal, false otherwise.
-
 $(fn arguments)
 $(type function)")
 
 (def #'< (lispx::relational-operator #'%%<)
   "Return true if the ARGUMENTS are in monotonically increasing order,
 false otherwise.
-
 $(fn arguments)
 $(type function)")
 
 (def #'> (lispx::relational-operator #'%%>)
   "Return true if the ARGUMENTS are in monotonically decreasing order,
 false otherwise.
-
 $(fn arguments)
 $(type function)")
 
 (def #'<= (lispx::relational-operator #'%%<=)
   "Return true if the ARGUMENTS are in monotonically nondecreasing
 order, false otherwise.
-
 $(fn arguments)
 $(type function)")
 
 (def #'>= (lispx::relational-operator #'%%>=)
   "Return true if the ARGUMENTS are in monotonically nonincreasing
 order, false otherwise.
-
 $(fn arguments)
 $(type function)")
 
 (defun /= (arg . args)
   "Return true if no two ARGUMENTS are the same, false otherwise.
-
 $(fn arguments)"
   (if (null args)
       #t
@@ -584,13 +556,11 @@ $(fn arguments)"
 
 (def #'+ (lispx::thetic-operator #'%%+ 0)
   "Return the sum of the ARGUMENTS, or 0 if no arguments are supplied.
-
 $(fn arguments)
 $(type function)")
 
 (def #'* (lispx::thetic-operator #'%%* 1)
   "Return the product of the ARGUMENTS, or 1 if no arguments are supplied.
-
 $(fn arguments)
 $(type function)")
 
@@ -605,7 +575,6 @@ $(type function)")
   "If only one number is supplied in the ARGUMENTS, return the
 negation of that number. If more than one number is supplied, subtract
 all of the later ones from the first one and return the result.
-
 $(fn arguments)
 $(type function)")
 
@@ -613,7 +582,6 @@ $(type function)")
   "If only one number is supplied in the ARGUMENTS, return the
 reciprocal of that number.  If more than one number is supplied,
 divide the first one by all of the later ones and return the result.
-
 $(fn arguments)
 $(type function)")
 
@@ -640,10 +608,9 @@ A class is considered a subclass of itself."
 
 (defexpr defclass (name superclass? slot-specs . properties) env
   "Define a new `standard-class' with the given NAME, optional
-SUPERCLASS, and SLOT-SPECS.  The superclass defaults to
+SUPERCLASS?, and SLOT-SPECS.  The superclass defaults to
 `standard-object'.  The SLOT-SPECS and PROPERTIES are currently
 ignored.
-
 $(syntax slot-spec symbol)
 $(syntax property (:documentation docstring))"
   (def superclass (find-class (optional superclass? 'standard-object) env))
@@ -660,7 +627,6 @@ $(syntax property (:documentation docstring))"
 (defexpr defgeneric (name (receiver . parameters) . properties) env
   "Define a new generic function with the given NAME.  The RECEIVER,
 PARAMETERS, and PROPERTIES are currently ignored.
-
 $(syntax property (:documentation docstring))"
   (def #'generic (lambda args (apply (%%find-method (class-of (car args)) name) args)))
   (eval (list #'def (function-symbol name) #'generic) env)
@@ -697,7 +663,7 @@ names (symbols, typically keywords) and values."
 
 (defun make-type-error (datum expected-type)
   "Create a `type-error' with the given DATUM and EXPECTED-TYPE."
-  (make-instance #^type-error :datum datum :expected-type expected-type))
+  (make-instance (class type-error) :datum datum :expected-type expected-type))
 
 (defun assert-type (object class)
   "Signal a `type-error' if the OBJECT is not an instance of the CLASS."
@@ -746,7 +712,7 @@ list."))
   (%%some value))
 
 (defexpr if-option ((name option?) then else) env
-  "Destructure the OPTION.  If it's non-nil, evaluate the THEN form
+  "Destructure the OPTION?.  If it's non-nil, evaluate the THEN form
 with the NAME bound to the contents of the option.  If it's nil,
 evaluate the ELSE form."
   ;; (Idea from Taylor R. Campbell's blag.)
@@ -758,12 +724,12 @@ evaluate the ELSE form."
               env))))
 
 (defmacro when-option ((name option?) . forms)
-  "Destructure the OPTION.  If it's non-nil, evaluate the FORMS with
+  "Destructure the OPTION?.  If it's non-nil, evaluate the FORMS with
 the NAME bound to the contents of the option.  If it's nil, return nil."
   (list #'if-option (list name option?) (list* #'progn forms) #nil))
 
 (defmacro unless-option (option? . forms)
-  "Destructure the OPTION.  If it's nil, evaluate the FORMS.  If it's
+  "Destructure the OPTION?.  If it's nil, evaluate the FORMS.  If it's
 non-nil, return nil."
   (list #'if-option (list #ignore option?) #nil (list* #'progn forms)))
 
@@ -780,7 +746,6 @@ evaluated lazily, only when the OPTION? is nil."
 (defun optionals (list . defaults)
   "Similar to `optional', but provides DEFAULTS for any number of
 elements of LIST.
-
 Currently, the DEFAULTS are always evaluated, but in the future, they
 might be evaluated lazily, so they should not be used for effect."
   (loop-let -optionals- ((list list) (defaults defaults))
@@ -793,8 +758,7 @@ might be evaluated lazily, so they should not be used for effect."
             (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))
 
 (defun get-option (option?)
-  "Returns the contents of the option or signals an error if the
-option is nil."
+  "Returns the contents of the OPTION? or signals an error if it is nil."
   (optional option? (simple-error "Option is nil")))
 
 ;;; Boxes
@@ -802,7 +766,7 @@ option is nil."
 ;; A box is a function that encapsulates a mutable value.
 
 (defun box initial-value?
-  "Create a new box with the optional initial value.  Calling the
+  "Create a new box with the optional INITIAL-VALUE?.  Calling the
 box without arguments returns the value.  Calling the box with an
 argument sets the value."
   (def value (optional initial-value?))
@@ -816,12 +780,13 @@ argument sets the value."
 
 (defexpr defdynamic (name . value-and-docstring?) env
   "Define a new or update an existing dynamic variable with the given
-NAME and default VALUE. The optional DOCSTRING is currently ignored.
+NAME and optional default VALUE. The optional DOCSTRING is currently
+ignored.
 $(fn (name &optional value docstring))"
-  (def value (eval (optional value-and-docstring?) env))
+  (def value (eval (optional value-and-docstring?) env)) ; treating 2-elt list as option
   (if (boundp name env)
       (set-dynamic (eval name env) value)
-      (eval (list #'def name (make-instance #^dynamic :value value)) env)))
+      (eval (list #'def name (make-instance (class dynamic) :value value)) env)))
 
 (defun dynamic (dynamic-variable)
   "Return the current value of the DYNAMIC-VARIABLE."
@@ -835,7 +800,6 @@ $(fn (name &optional value docstring))"
   "Evaluate the FORMS with the dynamic variables specified by BINDINGS
 temporarily bound to new values.  Bindings are established parallely
 as per `let'.
-
 $(syntax binding (dynamic-variable value))"
   (let ((dynamics (mapcar (lambda ((name #ignore)) (eval name env)) bindings))
         (values (mapcar (lambda ((#ignore value)) (eval value env)) bindings))
