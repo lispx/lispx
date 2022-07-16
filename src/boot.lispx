@@ -222,7 +222,7 @@ $(syntax binding (definiend-tree value))"
       (list #'let (list (car bindings))
             (list* #'let* (cdr bindings) forms))))
 
-(defmacro %letrec (bindings . forms)
+(defmacro lispx::letrec (bindings . forms)
   "Utility to establish BINDINGS recursively during the evaluation of
 FORMS.  Used by `labels'."
   (if (null bindings)
@@ -233,7 +233,7 @@ FORMS.  Used by `labels'."
                    (list* #'list (mapcar #'cadr bindings)))
              forms)))
 
-(defun %function-binding ((name parameter-tree . forms))
+(defun lispx::function-binding ((name parameter-tree . forms))
   "Utility to turn a function binding as it appears in `flet' and
 `labels' into a binding for `let' or `%letrec'."
   (list (function-symbol name) (list* #'lambda parameter-tree forms)))
@@ -243,14 +243,14 @@ FORMS.  Used by `labels'."
 so that no function can refer to the other ones.
 
 $(syntax function-binding (name parameter-tree . forms))"
-  (list* #'let (mapcar #'%function-binding function-bindings) forms))
+  (list* #'let (mapcar #'lispx::function-binding function-bindings) forms))
 
 (defmacro labels (function-bindings . forms)
   "Establish FUNCTION-BINDINGS recursively during evaluation of FORMS,
 so that every function can refer to the other ones.
 
 $(syntax function-binding (name parameter-tree . forms))"
-  (list* #'%letrec (mapcar #'%function-binding function-bindings) forms))
+  (list* #'lispx::letrec (mapcar #'lispx::function-binding function-bindings) forms))
 
 ;;; Data and Control Flow
 
@@ -519,7 +519,7 @@ option."
 ;; Note that unlike in Common Lisp, these operators currently require
 ;; at least two arguments.  This will be improved in the future.
 
-(defun %relational-operator (#'binary-operator)
+(defun lispx::relational-operator (#'binary-operator)
   "Utility to create an n-ary relational operator from a BINARY-OPERATOR."
   (labels ((operator (arg1 arg2 . rest)
              (if (binary-operator arg1 arg2)
@@ -529,34 +529,34 @@ option."
                  #f)))
     #'operator))
 
-(def #'= (%relational-operator #'%%=)
+(def #'= (lispx::relational-operator #'%%=)
   "Return true if all ARGUMENTS are equal, false otherwise.
 
 $(fn arguments)
 $(type function)")
 
-(def #'< (%relational-operator #'%%<)
+(def #'< (lispx::relational-operator #'%%<)
   "Return true if the ARGUMENTS are in monotonically increasing order,
 false otherwise.
 
 $(fn arguments)
 $(type function)")
 
-(def #'> (%relational-operator #'%%>)
+(def #'> (lispx::relational-operator #'%%>)
   "Return true if the ARGUMENTS are in monotonically decreasing order,
 false otherwise.
 
 $(fn arguments)
 $(type function)")
 
-(def #'<= (%relational-operator #'%%<=)
+(def #'<= (lispx::relational-operator #'%%<=)
   "Return true if the ARGUMENTS are in monotonically nondecreasing
 order, false otherwise.
 
 $(fn arguments)
 $(type function)")
 
-(def #'>= (%relational-operator #'%%>=)
+(def #'>= (lispx::relational-operator #'%%>=)
   "Return true if the ARGUMENTS are in monotonically nonincreasing
 order, false otherwise.
 
@@ -577,31 +577,31 @@ $(fn arguments)"
 
 ;; The terms thetic (for + and *) and lytic (for - and /) are due to Hankel.
 
-(defun %thetic-operator (#'binary-operator initial-value)
+(defun lispx::thetic-operator (#'binary-operator initial-value)
   "Utility to create an n-ary thetic operator from a BINARY-OPERATOR and INITIAL-VALUE."
   (lambda args
     (reduce #'binary-operator args :initial-value initial-value)))
 
-(def #'+ (%thetic-operator #'%%+ 0)
+(def #'+ (lispx::thetic-operator #'%%+ 0)
   "Return the sum of the ARGUMENTS, or 0 if no arguments are supplied.
 
 $(fn arguments)
 $(type function)")
 
-(def #'* (%thetic-operator #'%%* 1)
+(def #'* (lispx::thetic-operator #'%%* 1)
   "Return the product of the ARGUMENTS, or 1 if no arguments are supplied.
 
 $(fn arguments)
 $(type function)")
 
-(defun %lytic-operator (#'binary-operator initial-value)
+(defun lispx::lytic-operator (#'binary-operator initial-value)
   "Utility to create an n-ary lytic operator from a BINARY-OPERATOR and INITIAL-VALUE."
   (lambda (arg1 . rest)
     (if (null rest)
         (binary-operator initial-value arg1)
         (reduce #'binary-operator rest :initial-value arg1))))
 
-(def #'- (%lytic-operator #'%%- 0)
+(def #'- (lispx::lytic-operator #'%%- 0)
   "If only one number is supplied in the ARGUMENTS, return the
 negation of that number. If more than one number is supplied, subtract
 all of the later ones from the first one and return the result.
@@ -609,7 +609,7 @@ all of the later ones from the first one and return the result.
 $(fn arguments)
 $(type function)")
 
-(def #'/ (%lytic-operator #'%%/ 1)
+(def #'/ (lispx::lytic-operator #'%%/ 1)
   "If only one number is supplied in the ARGUMENTS, return the
 reciprocal of that number.  If more than one number is supplied,
 divide the first one by all of the later ones and return the result.
