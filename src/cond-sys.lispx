@@ -64,8 +64,6 @@
 ;; 2) Every restart must have a non-nil name; anonymous restarts
 ;;    are not supported.
 
-;;; Core Classes
-
 (defclass handler-frame ()
   (handlers
    parent-frame?)
@@ -95,28 +93,6 @@ which this handler is associated.  If the list is empty, the handler
 is applicable to any condition.  If it's not empty, the handler is
 applicable only to conditions in the list."))
 
-(defclass restart-error (error)
-  (restart-name)
-  (:documentation "Signalled when no handler for RESTART-NAME is found."))
-
-(defun make-restart-error (restart-name)
-  "Create a new `restart-error' for the given RESTART-NAME."
-  (make-instance #^restart-error :restart-name restart-name))
-
-(defclass simple-error (error)
-  (message)
-  (:documentation "Class for simple errors with a MESSAGE."))
-
-(defun make-simple-error (message)
-  "Create a new simple error with a MESSAGE."
-  (make-instance #^simple-error :message message))
-
-(defun simple-error (message)
-  "Signal a simple error with a MESSAGE."
-  (error (make-simple-error message)))
-
-;;; Establishing Condition and Restart Handlers
-
 (defdynamic *condition-handler-frame?* #nil
   "An option holding the innermost condition handler frame.")
 
@@ -125,7 +101,6 @@ applicable only to conditions in the list."))
 
 (defun lispx::make-handler-bind-operator (#'handler-spec-parser handler-frame-dynamic)
   "Metaprogramming utility to create `handler-bind' and `restart-bind'.
-
 It is parameterized by a function that takes apart the handler
 specifications of the `handler-bind' and `restart-bind' forms and
 produces handlers from them, as well as the dynamic variable holding
@@ -133,7 +108,7 @@ the handler chain (the variable itself as a first class object, not
 its value, so it can be used with `progv')."
   (vau (handler-specs . forms) env
     (let ((handler-frame (make-instance
-                          #^handler-frame
+                          (class handler-frame)
                           :handlers (mapcar (lambda (spec)
                                               (handler-spec-parser spec env))
                                             handler-specs)
@@ -144,22 +119,20 @@ its value, so it can be used with `progv')."
 (def #'handler-bind
   (lispx::make-handler-bind-operator
    (lambda ((class-name function-form) env)
-     (make-instance #^condition-handler
+     (make-instance (class condition-handler)
                     :condition-class
                     (the class (find-class class-name env))
                     :handler-function
                     (the function (eval function-form env))))
    *condition-handler-frame?*)
-
   "Establish condition handlers specified by HANDLER-SPECS around FORMS.
-
 $(fn (handler-specs . forms))
 $(syntax handler-spec (condition-class handler-function))")
 
 (def #'restart-bind
   (lispx::make-handler-bind-operator
    (lambda ((restart-name function-form . properties) env)
-     (make-instance #^restart-handler
+     (make-instance (class restart-handler)
                     :restart-name
                     (the symbol restart-name)
                     :handler-function
@@ -171,10 +144,8 @@ $(syntax handler-spec (condition-class handler-function))")
                     (when-option (a-cs-form (get? properties :associated-conditions))
                       (the list (eval a-cs-form env)))))
    *restart-handler-frame?*)
-
   "Establish restart handlers specified by HANDLER-SPECS around FORMS.
 You should usually prefer `restart-case'.
-
 $(fn (handler-specs . forms))
 $(syntax handler-spec (restart-name handler-function . properties))
 $(syntax properties (&key interactive-function associated-conditions))")
@@ -199,15 +170,11 @@ from `handler-bind'/`restart-bind'."
 
 (def #'handler-case (lispx::make-handler-case-operator #'handler-bind)
   "Like `handler-bind', but the stack is unwound before a handler function is called.
-
 $(fn (handler-specs . forms))")
 
 (def #'restart-case (lispx::make-handler-case-operator #'restart-bind)
   "Like `restart-bind', but the stack is unwound before a handler function is called.
-
 $(fn (handler-specs . forms))")
-
-;;; Signalling Conditions
 
 (defun lispx::signal (condition)
   "Utility to signal the CONDITION.  If the signal is unhandled,
@@ -261,24 +228,18 @@ ones that don't."
 
 (def #'signal (lispx::make-signal-with-restarts-operator #'lispx::signal)
   "Signal the CONDITION.  If the signal is unhandled, return void.
-
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
 `:associated-conditions' property, as it will be set automatically.
-
 $(fn (condition . handler-specs))")
 
 (def #'error (lispx::make-signal-with-restarts-operator #'lispx::error)
   "Signal the CONDITION.  If the condition is unhandled, invoke the
 debugger.  Therefore never returns normally.
-
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
 `:associated-conditions' property, as it will be set automatically.
-
 $(fn (condition . handler-specs))")
-
-;;; Invoking Restarts
 
 (defun invoke-restart (restart-designator . arguments)
   "Invoke the restart designated by RESTART-DESIGNATOR, which can be a
@@ -313,11 +274,8 @@ produced by FUNCTION (which receives a `restart-handler' as argument)."
     (object
      (error (make-type-error restart-designator '(or symbol restart-handler))))))
 
-;;; Finding Condition and Restart Handlers
-
 (defun lispx::find-handler? (object handler-frame? payload?)
   "Utility to find both condition handlers and restart handlers.
-
 The OBJECT can be either a condition or a restart name.  The
 HANDLER-FRAME is the handler frame where the search should start
 (always the innermost handler frame at the start of the search).
@@ -381,8 +339,6 @@ of its condition class."
     ;; particular condition then every handler is applicable.
     #t))
 
-;;; Computing Active Restarts
-
 (defun compute-restarts condition?
   "Return the list of currently active restarts, with most recently
 established ones first, optionally limited to those that are
@@ -399,3 +355,23 @@ with any condition."
                                    (slot-value handler-frame 'handlers)))
                           (slot-value handler-frame 'parent-frame?))
       restarts)))
+
+(defclass restart-error (error)
+  (restart-name)
+  (:documentation "Signalled when no handler for RESTART-NAME is found."))
+
+(defun make-restart-error (restart-name)
+  "Create a new `restart-error' for the given RESTART-NAME."
+  (make-instance (class restart-error) :restart-name restart-name))
+
+(defclass simple-error (error)
+  (message)
+  (:documentation "Class for simple errors with a MESSAGE."))
+
+(defun make-simple-error (message)
+  "Create a new simple error with a MESSAGE."
+  (make-instance (class simple-error) :message message))
+
+(defun simple-error (message)
+  "Signal a simple error with a MESSAGE."
+  (error (make-simple-error message)))
