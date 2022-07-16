@@ -24,7 +24,7 @@ ENVIRONMENT-PARAMETER, and FORMS.
 $(fn (parameter-tree environment-parameter . forms))
 $(type fexpr)")
 
-(%%def #'%make-macro
+(%%def #'lispx::make-macro
   (%%wrap
    (%%vau (expander) #ignore
      (%%vau form env
@@ -41,9 +41,9 @@ $(fn (expander))
 $(type function)")
 
 (%%def #'macro
-  (%make-macro
+  (lispx::make-macro
    (%%vau (parameter-tree . forms) #ignore
-     (list #'%make-macro
+     (list #'lispx::make-macro
            (%%list* #'vau parameter-tree #ignore forms))))
 
   "Create an anonymous macro with the given PARAMETER-TREE and FORMS.
