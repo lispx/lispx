@@ -302,7 +302,7 @@ HANDLER-FRAME is the handler frame where the search should start
 Return an option of the found handler and the frame establishing it as
 a two-element list.  The frame is needed so that we can access its
 parent in the implementation of the condition firewall (see
-`signal' and `lispx::call-condition-handler').
+`lispx::signal' and `lispx::call-condition-handler').
 
 The PAYLOAD? parameter can be used to pass in an optional condition if
 we are looking for a restart handler (see `find-restart?').  If we are
