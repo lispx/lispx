@@ -360,13 +360,6 @@ the CLEANUP-FORMS are evaluated after the protected form.  Note that
 the protected forms are not evaluated in case of `panic'."
   (list #'%%unwind-protect protected-form (list* #'progn cleanup-forms)))
 
-(defexpr set (environment definiend-tree value) dynamic-environment
-  "Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,
-creating or updating existing bindings."
-  (eval (list #'def definiend-tree
-              (list (unwrap #'eval) value dynamic-environment))
-        (eval environment dynamic-environment)))
-
 (defexpr prog1 (form . forms) env
   "Evaluate FORM and any additional FORMS, and return the result of FORM."
   (let ((result (eval form env)))
@@ -387,6 +380,25 @@ $(syntax clause (class-name . forms))"
           (if (typep key (find-class class-name env))
               (eval (cons #'progn forms) env)
               (-typecase- rest-clauses)))))))
+
+(defexpr set (environment definiend-tree value) dynamic-environment
+  "Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,
+creating or updating existing bindings."
+  (eval (list #'def definiend-tree
+              (list (unwrap #'eval) value dynamic-environment))
+        (eval environment dynamic-environment)))
+
+(defun box initial-value?
+  "A box is a function that encapsulates a mutable value.  Create a
+new box with the optional INITIAL-VALUE?.  Calling the box without
+arguments returns the value.  Calling the box with an argument sets
+the value."
+  (def value (optional initial-value?))
+  (def env (the-environment))
+  (lambda new-value?
+    (if-option (new-value new-value?)
+      (set env value new-value)
+      value)))
 
 (defun assert (boolean)
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
@@ -760,21 +772,6 @@ might be evaluated lazily, so they should not be used for effect."
 (defun get-option (option?)
   "Returns the contents of the OPTION? or signals an error if it is nil."
   (optional option? (simple-error "Option is nil")))
-
-;;; Boxes
-
-;; A box is a function that encapsulates a mutable value.
-
-(defun box initial-value?
-  "Create a new box with the optional INITIAL-VALUE?.  Calling the
-box without arguments returns the value.  Calling the box with an
-argument sets the value."
-  (def value (optional initial-value?))
-  (def env (the-environment))
-  (lambda new-value?
-    (if-option (new-value new-value?)
-      (set env value new-value)
-      value)))
 
 ;;; Dynamic Binding
 

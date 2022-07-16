@@ -126,6 +126,7 @@ its value, so it can be used with `progv')."
                     (the function (eval function-form env))))
    *condition-handler-frame?*)
   "Establish condition handlers specified by HANDLER-SPECS around FORMS.
+$(type fexpr)
 $(fn (handler-specs . forms))
 $(syntax handler-spec (condition-class handler-function))")
 
@@ -146,6 +147,7 @@ $(syntax handler-spec (condition-class handler-function))")
    *restart-handler-frame?*)
   "Establish restart handlers specified by HANDLER-SPECS around FORMS.
 You should usually prefer `restart-case'.
+$(type fexpr)
 $(fn (handler-specs . forms))
 $(syntax handler-spec (restart-name handler-function . properties))
 $(syntax properties (&key interactive-function associated-conditions))")
@@ -170,10 +172,12 @@ from `handler-bind'/`restart-bind'."
 
 (def #'handler-case (lispx::make-handler-case-operator #'handler-bind)
   "Like `handler-bind', but the stack is unwound before a handler function is called.
+$(type fexpr)
 $(fn (handler-specs . forms))")
 
 (def #'restart-case (lispx::make-handler-case-operator #'restart-bind)
   "Like `restart-bind', but the stack is unwound before a handler function is called.
+$(type fexpr)
 $(fn (handler-specs . forms))")
 
 (defun lispx::signal (condition)
@@ -231,6 +235,7 @@ ones that don't."
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
 `:associated-conditions' property, as it will be set automatically.
+$(type fexpr)
 $(fn (condition . handler-specs))")
 
 (def #'error (lispx::make-signal-with-restarts-operator #'lispx::error)
@@ -239,6 +244,7 @@ debugger.  Therefore never returns normally.
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
 `:associated-conditions' property, as it will be set automatically.
+$(type fexpr)
 $(fn (condition . handler-specs))")
 
 (defun invoke-restart (restart-designator . arguments)
