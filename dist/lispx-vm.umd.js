@@ -2885,14 +2885,15 @@ function init_print(vm)
 
     /*
      * How many levels should be printed before abbreviating with "#"?
+     * (Option.)
      *
-     * If false, do not abbreviate.
+     * If nil, do not abbreviate.
      */
-    vm.PRINT_LEVEL = vm.make_dynamic(vm.f());
+    vm.PRINT_LEVEL_OPTION = vm.make_dynamic(vm.nil());
 
     /*
      * The current level we are printing at, to be compared against
-     * *PRINT-LEVEL*.  Increased every time WRITE is entered, so
+     * *PRINT-LEVEL?*.  Increased every time WRITE is entered, so
      * effectively starts at 0 for the outermost object.
      */
     vm.CURRENT_PRINT_LEVEL = vm.make_dynamic(vm.num(-1));
@@ -3105,10 +3106,10 @@ function init_print(vm)
      */
     function maybe_abbreviate_object_based_on_current_print_level(stream, thunk)
     {
-        const print_level = vm.PRINT_LEVEL.get_value();
+        const print_level_option = vm.PRINT_LEVEL_OPTION.get_value();
         const current_print_level = vm.CURRENT_PRINT_LEVEL.get_value();
-        if ((print_level === vm.f())
-            || (vm.compare(current_print_level, print_level) < 0)) {
+        if ((print_level_option === vm.nil())
+            || (vm.compare(current_print_level, print_level_option.car()) < 0)) {
             thunk();
         } else {
             stream.write_byte("#");
@@ -3133,7 +3134,7 @@ function init_print(vm)
 
     vm.define_variable("*print-escape*", vm.PRINT_ESCAPE);
 
-    vm.define_variable("*print-level*", vm.PRINT_LEVEL);
+    vm.define_variable("*print-level?*", vm.PRINT_LEVEL_OPTION);
 
     vm.define_alien_function("%%write", (object, stream) => vm.write(object, stream));
 
