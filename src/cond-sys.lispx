@@ -1,4 +1,6 @@
+;;;                                                     -*- Lisp -*-
 ;;; LispX Condition System
+;;;
 
 ;; Copyright (c) 2021, 2022 Manuel J. Simoni
 
