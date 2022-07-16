@@ -100,6 +100,12 @@ describe("Reader", () => {
             "#'|foo|":
             vm.sym("foo").to_function_symbol(),
 
+            // Class symbols.
+            "#^foo":
+            vm.sym("foo").to_class_symbol(),
+            "#^|foo|":
+            vm.sym("foo").to_class_symbol(),
+
             // Strings.
             '""':
             vm.str(""),
