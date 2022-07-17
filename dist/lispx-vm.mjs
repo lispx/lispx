@@ -2691,7 +2691,7 @@ __webpack_require__.r(__webpack_exports__);
  * only supports outputting a full line by itself.  This means that
  * sometimes, such as when the user does a FORCE-OUTPUT and there is
  * some buffered data, we will have to output a full line, even though
- * there is no newline in the actual data written by the user.
+ * there might be no newline in the actual data written by the user.
  *
  * The code currently does not specifically handle CR or LF output, so
  * printing those might lead to weird results.
@@ -2702,19 +2702,15 @@ __webpack_require__.r(__webpack_exports__);
  */
 function init_js_console(vm)
 {
+    /*
+     * See stream.mjs for the documentation of the output stream API methods.
+     */
     vm.JS_console_output_stream = class JS_console_output_stream extends vm.Output_stream
     {
         constructor()
         {
             super();
-            /*
-             * UTF-8 bytes.
-             */
             this.buffer = "";
-            /*
-             * Remembers if we are at the start of a line.
-             */
-            this.line_is_fresh = true;
         }
 
         write_byte(b)
@@ -2722,13 +2718,17 @@ function init_js_console(vm)
             vm.assert_type(b, "string");
             vm.assert(b.length === 1);
             this.buffer += b;
-            this.line_is_fresh = (b === "\n");
             return b;
         }
 
         fresh_line()
         {
-            if (this.line_is_fresh) {
+            /*
+             * If the buffer is empty, or the last byte is a newline,
+             * we don't need to do anything.
+             */
+            if ((this.buffer.length === 0)
+                || (this.buffer[this.buffer.length - 1] === "\n")) {
                 return vm.f();
             } else {
                 this.write_byte("\n");
@@ -2740,7 +2740,6 @@ function init_js_console(vm)
         {
             if (this.buffer.length > 0) {
                 console.log(vm.utf8_decode(this.buffer));
-                this.line_is_fresh = true;
                 this.buffer = "";
             }
             return vm.void();
@@ -2753,6 +2752,7 @@ function init_js_console(vm)
      * Register a JS console output stream as standard output.
      */
     vm.STANDARD_OUTPUT.set_value(new vm.JS_console_output_stream());
+
 };
 
 

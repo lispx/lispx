@@ -34,7 +34,8 @@
                  fexpr
                  function)
        (input-stream string-input-stream)
-       (output-stream string-output-stream)
+       (output-stream string-output-stream
+                      js-console-output-stream)
        (standard-object dynamic
                         (condition (error type-error
                                           unbound-symbol-error
