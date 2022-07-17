@@ -235,6 +235,12 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
   "Metaprogramming utility to create the `signal'/`error' operators
 that take restart handler-specs from the `lispx::signal'/`lispx::error'
 ones that don't."
+  ;; What we're doing here:
+  ;; A call to `signal' (or `error') with restart handler specs like:
+  ;; (signal some-condition (continue (lambda () ...)))
+  ;; is turned into:
+  ;; (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
+  ;;   (lispx::signal some-condition))
   (vau (condition . handler-specs) env
     (let ((c (eval condition env)))
       (flet ((append-associated-condition (handler-spec)
