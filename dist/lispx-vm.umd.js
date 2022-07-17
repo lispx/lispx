@@ -2725,7 +2725,7 @@ function init_js_console(vm)
     /*
      * See stream.mjs for the documentation of the output stream API methods.
      */
-    vm.JS_console_output_stream = class JS_console_output_stream extends vm.Output_stream
+    vm.JS_console_output_stream = class Lisp_js_console_output_stream extends vm.Output_stream
     {
         constructor()
         {

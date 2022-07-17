@@ -72,7 +72,7 @@ describe("Classes", () => {
     /*
      * These tests could be improved by using the check_class() utility
      * from test-util.mjs but so far I have been too lazy to do this.
-     +/
+     */
 
     it("Classes are named and registered in the root environment.", () => {
 
