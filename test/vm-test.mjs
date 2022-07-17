@@ -69,6 +69,11 @@ describe("Objects", () => {
 
 describe("Classes", () => {
 
+    /*
+     * These tests could be improved by using the check_class() utility
+     * from test-util.mjs but so far I have been too lazy to do this.
+     +/
+
     it("Classes are named and registered in the root environment.", () => {
 
         function check_vm_class_name(vm, js_class, name)
@@ -110,6 +115,7 @@ describe("Classes", () => {
         check_vm_class_name(vm, vm.String_input_stream, "string-input-stream");
         check_vm_class_name(vm, vm.Output_stream, "output-stream");
         check_vm_class_name(vm, vm.String_output_stream, "string-output-stream");
+        check_vm_class_name(vm, vm.JS_console_output_stream, "js-console-output-stream");
 
         check_vm_class_name(vm, vm.Standard_object, "standard-object");
         check_vm_class_name(vm, vm.Condition, "condition");
@@ -153,6 +159,7 @@ describe("Classes", () => {
         check_superclass(vm, vm.String_input_stream, vm.Input_stream);
         check_superclass(vm, vm.Output_stream, vm.Object);
         check_superclass(vm, vm.String_output_stream, vm.Output_stream);
+        check_superclass(vm, vm.JS_console_output_stream, vm.Output_stream);
 
         check_superclass(vm, vm.Standard_object, vm.Object);
         check_superclass(vm, vm.Dynamic, vm.Standard_object);
@@ -197,6 +204,7 @@ describe("Classes", () => {
         check_metaclass(vm, vm.String_input_stream, vm.Built_in_class);
         check_metaclass(vm, vm.Output_stream, vm.Built_in_class);
         check_metaclass(vm, vm.String_output_stream, vm.Built_in_class);
+        check_metaclass(vm, vm.JS_console_output_stream, vm.Built_in_class);
 
         check_metaclass(vm, vm.Standard_object, vm.Standard_class);
         check_metaclass(vm, vm.Dynamic, vm.Standard_class);
@@ -242,6 +250,7 @@ describe("Classes", () => {
         check_class_linkage(vm, vm.String_input_stream);
         check_class_linkage(vm, vm.Output_stream);
         check_class_linkage(vm, vm.String_output_stream);
+        check_class_linkage(vm, vm.JS_console_output_stream);
 
         check_class_linkage(vm, vm.Standard_object);
         check_class_linkage(vm, vm.Condition);
