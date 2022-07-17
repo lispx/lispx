@@ -15,21 +15,25 @@ $(fn (object &key stream))"
   (with-standard-output-to-string (write object)))
 
 (defun print1 (object)
-  "Print OBJECT readably on the current line."
+  "Print OBJECT readably on the current line.  May or may not force
+the output."
   (dynamic-let ((*print-escape* #t))
     (write object)))
 
 (defun uprint1 (object)
-  "Print OBJECT unreadably on the current line."
+  "Print OBJECT unreadably on the current line.  May or may not force
+the output."
   (dynamic-let ((*print-escape* #f))
     (write object)))
 
 (defun print (object)
-  "Print OBJECT readably on a fresh line."
+  "Print OBJECT readably on a fresh line and force the output."
   (fresh-line)
-  (print1 object))
+  (prog1 (print1 object)
+    (force-output)))
 
 (defun uprint (object)
-  "Print OBJECT unreadably on a fresh line."
+  "Print OBJECT unreadably on a fresh line and force the output."
   (fresh-line)
-  (uprint1 object))
+  (prog1 (uprint1 object)
+    (force-output)))

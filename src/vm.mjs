@@ -22,6 +22,7 @@ import { init_stream } from "./stream.mjs";
 import { init_read } from "./read.mjs";
 import { init_print } from "./print.mjs";
 import { init_js } from "./js.mjs";
+import { init_js_console } from "./js-console.mjs";
 
 /*
  * A build system contraption loads the contents of the files into the
@@ -62,6 +63,7 @@ export class VM
         init_read(this);
         init_print(this);
         init_js(this);
+        init_js_console(this);
 
         /*
          * Evaluate the bootstrap code.

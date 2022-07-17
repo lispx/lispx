@@ -1088,7 +1088,7 @@ module.exports = ";;;                                                     -*- Li
 /***/ ((module) => {
 
 "use strict";
-module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Printer\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n$(fn (object &key stream))\"\n  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line.\"\n  (fresh-line)\n  (print1 object))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line.\"\n  (fresh-line)\n  (uprint1 object))\n";
+module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Printer\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n$(fn (object &key stream))\"\n  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (print1 object)\n    (force-output)))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (uprint1 object)\n    (force-output)))\n";
 
 /***/ }),
 
@@ -1110,7 +1110,7 @@ module.exports = ";;;                                                     -*- Li
 /***/ ((module) => {
 
 "use strict";
-module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Streams\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; String Input Streams\n\n(defun make-string-input-stream (string)\n  \"Create a string input stream that reads from STRING.\"\n  (%%make-string-input-stream string))\n\n(defexpr with-standard-input-from-string (string . forms) env\n  \"Evaluate FORMS with `*standard-input*' coming from STRING.\"\n  (let ((s (eval string env)))\n    (dynamic-let ((*standard-input* (make-string-input-stream s)))\n      (eval (list* #'progn forms) env))))\n\n;;; String Output Streams\n\n(defun make-string-output-stream ()\n  \"Construct an empty string output stream.\"\n  (%%make-string-output-stream))\n\n(defun get-output-stream-string (stream)\n  \"Return the contents of the string output STREAM.\"\n  (%%get-output-stream-string stream))\n\n(defexpr with-standard-output-to-string forms env\n  \"Evaluate FORMS with `*standard-output*' being collected in a string.\"\n  (dynamic-let ((*standard-output* (make-string-output-stream)))\n    (eval (list* #'progn forms) env)\n    (get-output-stream-string (dynamic *standard-output*))))\n\n;;; Miscellaneous\n\n(defun fresh-line stream?\n  \"Ensure that the following output appears on a new line by itself.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%%fresh-line (optional stream? (dynamic *standard-output*))))\n";
+module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Streams\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; String Input Streams\n\n(defun make-string-input-stream (string)\n  \"Create a string input stream that reads from STRING.\"\n  (%%make-string-input-stream string))\n\n(defexpr with-standard-input-from-string (string . forms) env\n  \"Evaluate FORMS with `*standard-input*' coming from STRING.\"\n  (let ((s (eval string env)))\n    (dynamic-let ((*standard-input* (make-string-input-stream s)))\n      (eval (list* #'progn forms) env))))\n\n;;; String Output Streams\n\n(defun make-string-output-stream ()\n  \"Construct an empty string output stream.\"\n  (%%make-string-output-stream))\n\n(defun get-output-stream-string (stream)\n  \"Return the contents of the string output STREAM.\"\n  (%%get-output-stream-string stream))\n\n(defexpr with-standard-output-to-string forms env\n  \"Evaluate FORMS with `*standard-output*' being collected in a string.\"\n  (dynamic-let ((*standard-output* (make-string-output-stream)))\n    (eval (list* #'progn forms) env)\n    (get-output-stream-string (dynamic *standard-output*))))\n\n;;; Miscellaneous\n\n(defun fresh-line stream?\n  \"Ensure that the following output appears on a new line by itself.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%%fresh-line (optional stream? (dynamic *standard-output*))))\n\n(defun force-output stream?\n  \"Initiate the emptying of any internal buffers but don't wait for them to finish.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%%force-output (optional stream? (dynamic *standard-output*))))\n";
 
 /***/ }),
 
@@ -2682,6 +2682,97 @@ function init_eval(vm)
 
     vm.define_alien_function("%%panic", (exception) => vm.panic(exception));
 
+};
+
+
+/***/ }),
+
+/***/ "./src/js-console.mjs":
+/*!****************************!*\
+  !*** ./src/js-console.mjs ***!
+  \****************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "init_js_console": () => (/* binding */ init_js_console)
+/* harmony export */ });
+/*
+ * LispX JavaScript Console Output
+ * Copyright (c) 2022 Manuel J. Simoni
+ */
+
+/*
+ * This file implements an output stream that prints to the JS
+ * console.
+ *
+ * The JS console does not allow appending to the current line -- it
+ * only supports outputting a full line by itself.  This means that
+ * sometimes, such as when the user does a FORCE-OUTPUT and there is
+ * some buffered data, we will have to output a full line, even though
+ * there is no newline in the actual data written by the user.
+ *
+ * The code currently does not specifically handle CR or LF output, so
+ * printing those might lead to weird results.
+ *
+ * The code currently does not force the output by itself, so
+ * FORCE-OUTPUT (or a function that calls it, like PRINT) must be
+ * called from time to time.
+ */
+function init_js_console(vm)
+{
+    vm.JS_console_output_stream = class JS_console_output_stream extends vm.Output_stream
+    {
+        constructor()
+        {
+            super();
+            /*
+             * UTF-8 bytes.
+             */
+            this.buffer = "";
+            /*
+             * Remembers if we are at the start of a line.
+             */
+            this.line_is_fresh = true;
+        }
+
+        write_byte(b)
+        {
+            vm.assert_type(b, "string");
+            vm.assert(b.length === 1);
+            this.buffer += b;
+            this.line_is_fresh = (b === "\n");
+            return b;
+        }
+
+        fresh_line()
+        {
+            if (this.line_is_fresh) {
+                return vm.f();
+            } else {
+                this.write_byte("\n");
+                return vm.t();
+            }
+        }
+
+        force_output()
+        {
+            if (this.buffer.length > 0) {
+                console.log(vm.utf8_decode(this.buffer));
+                this.line_is_fresh = true;
+                this.buffer = "";
+            }
+            return vm.void();
+        }
+    };
+
+    vm.define_class("js-console-output-stream", vm.JS_console_output_stream, vm.Output_stream);
+
+    /*
+     * Register a JS console output stream as standard output.
+     */
+    vm.STANDARD_OUTPUT.set_value(new vm.JS_console_output_stream());
 };
 
 
@@ -4282,6 +4373,9 @@ function init_stream(vm)
     vm.define_alien_function("%%fresh-line", (stream) =>
         vm.assert_type(stream, vm.Output_stream).fresh_line());
 
+    vm.define_alien_function("%%force-output", (stream) =>
+        vm.assert_type(stream, vm.Output_stream).force_output());
+
 };
 
 
@@ -4362,12 +4456,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _read_mjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./read.mjs */ "./src/read.mjs");
 /* harmony import */ var _print_mjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./print.mjs */ "./src/print.mjs");
 /* harmony import */ var _js_mjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./js.mjs */ "./src/js.mjs");
-/* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
-/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
-/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
-/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
-/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
-/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
+/* harmony import */ var _js_console_mjs__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./js-console.mjs */ "./src/js-console.mjs");
+/* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
+/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
+/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
+/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
+/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
+/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
 /*
  * LispX Virtual Machine
  * Copyright (c) 2021 Manuel J. Simoni
@@ -4385,6 +4480,7 @@ __webpack_require__.r(__webpack_exports__);
  * be possible to make them optional, so that one can obtain e.g. a
  * smaller VM without IO support.
  */
+
 
 
 
@@ -4432,16 +4528,17 @@ class VM
         (0,_read_mjs__WEBPACK_IMPORTED_MODULE_5__.init_read)(this);
         (0,_print_mjs__WEBPACK_IMPORTED_MODULE_6__.init_print)(this);
         (0,_js_mjs__WEBPACK_IMPORTED_MODULE_7__.init_js)(this);
+        (0,_js_console_mjs__WEBPACK_IMPORTED_MODULE_8__.init_js_console)(this);
 
         /*
          * Evaluate the bootstrap code.
          */
-        this.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_8__);
-        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__);
-        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_10__);
-        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_11__);
-        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_12__);
-        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_13__);
+        this.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_9__);
+        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_10__);
+        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_11__);
+        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_12__);
+        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_13__);
+        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_14__);
     }
 
     /*

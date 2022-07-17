@@ -265,4 +265,7 @@ export function init_stream(vm)
     vm.define_alien_function("%%fresh-line", (stream) =>
         vm.assert_type(stream, vm.Output_stream).fresh_line());
 
+    vm.define_alien_function("%%force-output", (stream) =>
+        vm.assert_type(stream, vm.Output_stream).force_output());
+
 };
