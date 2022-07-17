@@ -1,7 +1,0 @@
-Currently there are no built-in stdin and stdout streams at all.
-
-We might want to use prompt() as stdin and console.log as stdout by
-default.
-
-OTOH, this means a prompt would pop up when Lisp calls READ, which
-could be bad for many apps.
