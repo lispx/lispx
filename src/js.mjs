@@ -9,28 +9,6 @@
 export function init_js(vm)
 {
     /*
-     * Transforms a JS boolean into a Lisp one.
-     */
-    vm.to_lisp_boolean = (js_bool) =>
-    {
-        return vm.assert_type(js_bool, "boolean") ? vm.t() : vm.f();
-    };
-
-    /*
-     * Invokes a JS method on an object from Lisp.
-     */
-    vm.apply_js_method = (receiver, method_name, args) =>
-    {
-        vm.assert_type(method_name, vm.String);
-        vm.assert_type(args, vm.List);
-        /*
-         * Could throw a more helpful error here if the method isn't found.
-         */
-        const method = vm.assert_type(receiver[method_name.to_js_string()], "function");
-        return method.apply(receiver, vm.list_to_array(args))
-    };
-
-    /*
      * Accesses a global variable by name.
      */
     vm.js_global = (name) =>
@@ -76,6 +54,28 @@ export function init_js(vm)
     };
 
     /*
+     * Invokes a JS method on an object from Lisp.
+     */
+    vm.apply_js_method = (receiver, method_name, args) =>
+    {
+        vm.assert_type(method_name, vm.String);
+        vm.assert_type(args, vm.List);
+        /*
+         * Could throw a more helpful error here if the method isn't found.
+         */
+        const method = vm.assert_type(receiver[method_name.to_js_string()], "function");
+        return method.apply(receiver, vm.list_to_array(args))
+    };
+
+    /*
+     * Transforms a JS boolean into a Lisp one.
+     */
+    vm.to_lisp_boolean = (js_bool) =>
+    {
+        return vm.assert_type(js_bool, "boolean") ? vm.t() : vm.f();
+    };
+
+    /*
      * Makes a JS function callable as a Lisp one.
      */
     vm.to_lisp_function = (js_fun) =>
@@ -106,6 +106,14 @@ export function init_js(vm)
 
     vm.define_constant("+js-undefined+", undefined);
 
+    vm.define_alien_function("%%js-global", vm.js_global);
+
+    vm.define_alien_function("%%js-new", vm.js_new);
+
+    vm.define_alien_function("%%js-get", vm.js_get);
+
+    vm.define_alien_function("%%js-elt", vm.js_elt);
+
     vm.define_alien_function("%%to-lisp-boolean", vm.to_lisp_boolean);
 
     vm.define_alien_function("%%to-js-boolean", (bool) =>
@@ -126,14 +134,6 @@ export function init_js(vm)
     vm.define_alien_function("%%to-lisp-function", vm.to_lisp_function);
 
     vm.define_alien_function("%%to-js-function", vm.to_js_function);
-
-    vm.define_alien_function("%%js-global", vm.js_global);
-
-    vm.define_alien_function("%%js-new", vm.js_new);
-
-    vm.define_alien_function("%%js-get", vm.js_get);
-
-    vm.define_alien_function("%%js-elt", vm.js_elt);
 
     vm.define_alien_function("%%list-to-js-array", vm.list_to_array);
 

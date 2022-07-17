@@ -9,6 +9,37 @@
 equality, false otherwise."
   (eq a b))
 
+(defun apply-js-function (js-function arguments)
+  "Call JS-FUNCTION with a list of ARGUMENTS."
+  (apply (to-lisp-function js-function) arguments))
+
+(defun call-js-function (js-function . arguments)
+  "Call JS-FUNCTION with the rest ARGUMENTS."
+  (apply-js-function js-function arguments))
+
+(defmacro js-lambda (parameter-tree . forms)
+  "Construct a lambda with the given PARAMETER-TREE and body FORMS
+that's callable from JS."
+  (list #'to-js-function
+        (list #'lambda parameter-tree
+              ;; Push a barrier around the body forms to prevent
+              ;; continuations from escaping to JS.
+              (list* #'push-subcont-barrier
+                     forms))))
+
+(defun js-global (name)
+  "Access a JS global by NAME (a string).  Return undefined if the
+global doesn't exist."
+  (%%js-global name))
+
+(defun js-new (constructor . arguments)
+  "Call the JS CONSTRUCTOR function with ARGUMENTS."
+  (apply #'%%js-new (cons constructor arguments)))
+
+(defun js-get (object name)
+  "Access a property of a JS object by NAME (a string)."
+  (%%js-get object name))
+
 (defun to-lisp-boolean (js-boolean)
   "Convert the JS-BOOLEAN to a Lisp boolean."
   (%%to-lisp-boolean js-boolean))
@@ -40,37 +71,6 @@ equality, false otherwise."
 (defun to-js-function (lisp-operator)
   "Convert the LISP-OPERATOR to a JS function."
   (%%to-js-function lisp-operator))
-
-(defun apply-js-function (js-function arguments)
-  "Call JS-FUNCTION with a list of ARGUMENTS."
-  (apply (to-lisp-function js-function) arguments))
-
-(defun call-js-function (js-function . arguments)
-  "Call JS-FUNCTION with the rest ARGUMENTS."
-  (apply-js-function js-function arguments))
-
-(defmacro js-lambda (parameter-tree . forms)
-  "Construct a lambda with the given PARAMETER-TREE and body FORMS
-that's callable from JS."
-  (list #'to-js-function
-        (list #'lambda parameter-tree
-              ;; Push a barrier around the body forms to prevent
-              ;; continuations from escaping to JS.
-              (list* #'push-subcont-barrier
-                     forms))))
-
-(defun js-global (name)
-  "Access a JS global by NAME (a string).  Return undefined if the
-global doesn't exist."
-  (%%js-global name))
-
-(defun js-new (constructor . arguments)
-  "Call the JS CONSTRUCTOR function with ARGUMENTS."
-  (apply #'%%js-new (cons constructor arguments)))
-
-(defun js-get (object name)
-  "Access a property of a JS object by NAME (a string)."
-  (%%js-get object name))
 
 (defun list-to-js-array (list)
   "Turn a list into a JS array."
