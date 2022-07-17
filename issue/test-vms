@@ -1,0 +1,2 @@
+Currently every test file boots its own VM, but they could all use the
+same one.

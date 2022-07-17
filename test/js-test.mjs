@@ -78,4 +78,8 @@ describe("JavaScript Interface", () => {
         assert.throws(() => vm.js_elt(array, vm.f()), "expected number");
     });
 
+    it("Test JS console output.", () => {
+
+    });
+
 });
