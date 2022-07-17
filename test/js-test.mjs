@@ -80,6 +80,80 @@ describe("JavaScript Interface", () => {
 
     it("Test JS console output.", () => {
 
+        function test_output(expected_result, expected_output_lines, thunk)
+        {
+            const output_lines = [];
+            function output_function(line) { output_lines.push(line); };
+            const stream = new vm.JS_console_output_stream(output_function);
+            assert.deepEqual(thunk(stream), expected_result);
+            assert.deepEqual(output_lines, expected_output_lines);
+        }
+
+        test_output(vm.f(), [], (stream) => {
+            return stream.fresh_line()
+        });
+        test_output(vm.f(), [], (stream) => {
+            stream.fresh_line();
+            return stream.fresh_line();
+        });
+        test_output(vm.void(), [], (stream) => {
+            return stream.force_output()
+        });
+        test_output(vm.void(), [], (stream) => {
+            stream.fresh_line();
+            return stream.force_output()
+        });
+        test_output(vm.str("foo"), [], (stream) => {
+            return stream.write_string(vm.str("foo"));
+        });
+        test_output(vm.void(), ["foo"], (stream) => {
+            stream.write_string(vm.str("foo"));
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["foobar"], (stream) => {
+            stream.write_string(vm.str("foo"));
+            stream.write_string(vm.str("bar"));
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["foobar", "foobar"], (stream) => {
+            stream.write_string(vm.str("foo"));
+            stream.write_string(vm.str("bar"));
+            stream.force_output();
+            stream.write_string(vm.str("foo"));
+            stream.write_string(vm.str("bar"));
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["foo\nbar", "foobar"], (stream) => {
+            stream.write_string(vm.str("foo"));
+            assert.deepEqual(stream.fresh_line(), vm.t());
+            assert.deepEqual(stream.fresh_line(), vm.f());
+            stream.write_string(vm.str("bar"));
+            stream.force_output();
+            stream.write_string(vm.str("foo"));
+            stream.write_string(vm.str("bar"));
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["\n"], (stream) => {
+            stream.write_string(vm.str("\n"));
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["\n"], (stream) => {
+            stream.write_string(vm.str("\n"));
+            assert.deepEqual(stream.fresh_line(), vm.f());
+            return stream.force_output();
+        });
+        test_output(vm.void(), ["\nfoo\nbar", "quux"], (stream) => {
+            stream.write_string(vm.str("\n"));
+            assert.deepEqual(stream.fresh_line(), vm.f());
+            assert.deepEqual(vm.str("foo"), stream.write_string(vm.str("foo")));
+            stream.write_string(vm.str("\n"));
+            assert.deepEqual(stream.fresh_line(), vm.f());
+            assert.deepEqual(vm.str("bar"), stream.write_string(vm.str("bar")));
+            stream.force_output();
+            assert.deepEqual(vm.str("quux"), stream.write_string(vm.str("quux")));
+            return stream.force_output();
+        });
+
     });
 
 });

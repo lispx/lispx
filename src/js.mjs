@@ -112,9 +112,6 @@ export function init_js(vm)
      * The code currently does not force the output by itself, so
      * FORCE-OUTPUT (or a function that calls it, like PRINT) must be
      * called from time to time.
-     *
-     * See stream.mjs for the documentation of the output stream API
-     * methods.
      */
     vm.JS_console_output_stream = class Lisp_js_console_output_stream extends vm.Output_stream
     {
@@ -127,6 +124,11 @@ export function init_js(vm)
             this.buffer = "";
             this.output_function = output_function;
         }
+
+        /*
+         * See stream.mjs for the documentation of the output stream API
+         * methods.
+         */
 
         write_byte(b)
         {
