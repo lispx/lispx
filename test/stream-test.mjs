@@ -169,4 +169,40 @@ describe("String Output Streams", () => {
 
     });
 
+    it("Test FRESH-LINE and FORCE-OUTPUT", () => {
+
+        class Test_stream extends vm.Output_stream
+        {
+            constructor() {
+                super();
+                this.fresh_line_call_ct = 0;
+                this.force_output_call_ct = 0;
+            }
+            fresh_line() { this.fresh_line_call_ct++; return vm.f(); }
+            force_output() { this.force_output_call_ct++; return vm.void(); }
+        }
+
+        // Test that they can be called with a stream as argument
+        const test_stream_1 = new Test_stream();
+        assert.equal(0, test_stream_1.fresh_line_call_ct);
+        assert.equal(0, test_stream_1.force_output_call_ct);
+        vm.eval_form(vm.list(vm.sym("fresh-line"), test_stream_1));
+        assert.equal(1, test_stream_1.fresh_line_call_ct);
+        assert.equal(0, test_stream_1.force_output_call_ct);
+        vm.eval_form(vm.list(vm.sym("force-output"), test_stream_1));
+        assert.equal(1, test_stream_1.fresh_line_call_ct);
+        assert.equal(1, test_stream_1.force_output_call_ct);
+
+        // Test that they work on *STANDARD-OUTPUT* otherwise
+        const test_stream_2 = new Test_stream();
+        vm.progv([vm.STANDARD_OUTPUT], [test_stream_2], () => {
+            vm.eval_form(vm.list(vm.sym("fresh-line")));
+            assert.equal(1, test_stream_2.fresh_line_call_ct);
+            assert.equal(0, test_stream_2.force_output_call_ct);
+            vm.eval_form(vm.list(vm.sym("force-output")));
+            assert.equal(1, test_stream_2.fresh_line_call_ct);
+            assert.equal(1, test_stream_2.force_output_call_ct);
+        });
+    });
+
 });
