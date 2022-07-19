@@ -7,1046 +7,10 @@
 		exports["lispx-vm"] = factory();
 	else
 		root["lispx-vm"] = factory();
-})(this, function() {
+})(this, () => {
 return /******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
-
-/***/ "./node_modules/big.js/big.js":
-/*!************************************!*\
-  !*** ./node_modules/big.js/big.js ***!
-  \************************************/
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_RESULT__;/*
- *  big.js v6.1.1
- *  A small, fast, easy-to-use library for arbitrary-precision decimal arithmetic.
- *  Copyright (c) 2021 Michael Mclaughlin
- *  https://github.com/MikeMcl/big.js/LICENCE.md
- */
-;(function (GLOBAL) {
-  'use strict';
-  var Big,
-
-
-/************************************** EDITABLE DEFAULTS *****************************************/
-
-
-    // The default values below must be integers within the stated ranges.
-
-    /*
-     * The maximum number of decimal places (DP) of the results of operations involving division:
-     * div and sqrt, and pow with negative exponents.
-     */
-    DP = 20,            // 0 to MAX_DP
-
-    /*
-     * The rounding mode (RM) used when rounding to the above decimal places.
-     *
-     *  0  Towards zero (i.e. truncate, no rounding).       (ROUND_DOWN)
-     *  1  To nearest neighbour. If equidistant, round up.  (ROUND_HALF_UP)
-     *  2  To nearest neighbour. If equidistant, to even.   (ROUND_HALF_EVEN)
-     *  3  Away from zero.                                  (ROUND_UP)
-     */
-    RM = 1,             // 0, 1, 2 or 3
-
-    // The maximum value of DP and Big.DP.
-    MAX_DP = 1E6,       // 0 to 1000000
-
-    // The maximum magnitude of the exponent argument to the pow method.
-    MAX_POWER = 1E6,    // 1 to 1000000
-
-    /*
-     * The negative exponent (NE) at and beneath which toString returns exponential notation.
-     * (JavaScript numbers: -7)
-     * -1000000 is the minimum recommended exponent value of a Big.
-     */
-    NE = -7,            // 0 to -1000000
-
-    /*
-     * The positive exponent (PE) at and above which toString returns exponential notation.
-     * (JavaScript numbers: 21)
-     * 1000000 is the maximum recommended exponent value of a Big, but this limit is not enforced.
-     */
-    PE = 21,            // 0 to 1000000
-
-    /*
-     * When true, an error will be thrown if a primitive number is passed to the Big constructor,
-     * or if valueOf is called, or if toNumber is called on a Big which cannot be converted to a
-     * primitive number without a loss of precision.
-     */
-    STRICT = false,     // true or false
-
-
-/**************************************************************************************************/
-
-
-    // Error messages.
-    NAME = '[big.js] ',
-    INVALID = NAME + 'Invalid ',
-    INVALID_DP = INVALID + 'decimal places',
-    INVALID_RM = INVALID + 'rounding mode',
-    DIV_BY_ZERO = NAME + 'Division by zero',
-
-    // The shared prototype object.
-    P = {},
-    UNDEFINED = void 0,
-    NUMERIC = /^-?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
-
-
-  /*
-   * Create and return a Big constructor.
-   */
-  function _Big_() {
-
-    /*
-     * The Big constructor and exported function.
-     * Create and return a new instance of a Big number object.
-     *
-     * n {number|string|Big} A numeric value.
-     */
-    function Big(n) {
-      var x = this;
-
-      // Enable constructor usage without new.
-      if (!(x instanceof Big)) return n === UNDEFINED ? _Big_() : new Big(n);
-
-      // Duplicate.
-      if (n instanceof Big) {
-        x.s = n.s;
-        x.e = n.e;
-        x.c = n.c.slice();
-      } else {
-        if (typeof n !== 'string') {
-          if (Big.strict === true) {
-            throw TypeError(INVALID + 'number');
-          }
-
-          // Minus zero?
-          n = n === 0 && 1 / n < 0 ? '-0' : String(n);
-        }
-
-        parse(x, n);
-      }
-
-      // Retain a reference to this Big constructor.
-      // Shadow Big.prototype.constructor which points to Object.
-      x.constructor = Big;
-    }
-
-    Big.prototype = P;
-    Big.DP = DP;
-    Big.RM = RM;
-    Big.NE = NE;
-    Big.PE = PE;
-    Big.strict = STRICT;
-    Big.roundDown = 0;
-    Big.roundHalfUp = 1;
-    Big.roundHalfEven = 2;
-    Big.roundUp = 3;
-
-    return Big;
-  }
-
-
-  /*
-   * Parse the number or string value passed to a Big constructor.
-   *
-   * x {Big} A Big number instance.
-   * n {number|string} A numeric value.
-   */
-  function parse(x, n) {
-    var e, i, nl;
-
-    if (!NUMERIC.test(n)) {
-      throw Error(INVALID + 'number');
-    }
-
-    // Determine sign.
-    x.s = n.charAt(0) == '-' ? (n = n.slice(1), -1) : 1;
-
-    // Decimal point?
-    if ((e = n.indexOf('.')) > -1) n = n.replace('.', '');
-
-    // Exponential form?
-    if ((i = n.search(/e/i)) > 0) {
-
-      // Determine exponent.
-      if (e < 0) e = i;
-      e += +n.slice(i + 1);
-      n = n.substring(0, i);
-    } else if (e < 0) {
-
-      // Integer.
-      e = n.length;
-    }
-
-    nl = n.length;
-
-    // Determine leading zeros.
-    for (i = 0; i < nl && n.charAt(i) == '0';) ++i;
-
-    if (i == nl) {
-
-      // Zero.
-      x.c = [x.e = 0];
-    } else {
-
-      // Determine trailing zeros.
-      for (; nl > 0 && n.charAt(--nl) == '0';);
-      x.e = e - i - 1;
-      x.c = [];
-
-      // Convert string to array of digits without leading/trailing zeros.
-      for (e = 0; i <= nl;) x.c[e++] = +n.charAt(i++);
-    }
-
-    return x;
-  }
-
-
-  /*
-   * Round Big x to a maximum of sd significant digits using rounding mode rm.
-   *
-   * x {Big} The Big to round.
-   * sd {number} Significant digits: integer, 0 to MAX_DP inclusive.
-   * rm {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   * [more] {boolean} Whether the result of division was truncated.
-   */
-  function round(x, sd, rm, more) {
-    var xc = x.c;
-
-    if (rm === UNDEFINED) rm = x.constructor.RM;
-    if (rm !== 0 && rm !== 1 && rm !== 2 && rm !== 3) {
-      throw Error(INVALID_RM);
-    }
-
-    if (sd < 1) {
-      more =
-        rm === 3 && (more || !!xc[0]) || sd === 0 && (
-        rm === 1 && xc[0] >= 5 ||
-        rm === 2 && (xc[0] > 5 || xc[0] === 5 && (more || xc[1] !== UNDEFINED))
-      );
-
-      xc.length = 1;
-
-      if (more) {
-
-        // 1, 0.1, 0.01, 0.001, 0.0001 etc.
-        x.e = x.e - sd + 1;
-        xc[0] = 1;
-      } else {
-
-        // Zero.
-        xc[0] = x.e = 0;
-      }
-    } else if (sd < xc.length) {
-
-      // xc[sd] is the digit after the digit that may be rounded up.
-      more =
-        rm === 1 && xc[sd] >= 5 ||
-        rm === 2 && (xc[sd] > 5 || xc[sd] === 5 &&
-          (more || xc[sd + 1] !== UNDEFINED || xc[sd - 1] & 1)) ||
-        rm === 3 && (more || !!xc[0]);
-
-      // Remove any digits after the required precision.
-      xc.length = sd--;
-
-      // Round up?
-      if (more) {
-
-        // Rounding up may mean the previous digit has to be rounded up.
-        for (; ++xc[sd] > 9;) {
-          xc[sd] = 0;
-          if (!sd--) {
-            ++x.e;
-            xc.unshift(1);
-          }
-        }
-      }
-
-      // Remove trailing zeros.
-      for (sd = xc.length; !xc[--sd];) xc.pop();
-    }
-
-    return x;
-  }
-
-
-  /*
-   * Return a string representing the value of Big x in normal or exponential notation.
-   * Handles P.toExponential, P.toFixed, P.toJSON, P.toPrecision, P.toString and P.valueOf.
-   */
-  function stringify(x, doExponential, isNonzero) {
-    var e = x.e,
-      s = x.c.join(''),
-      n = s.length;
-
-    // Exponential notation?
-    if (doExponential) {
-      s = s.charAt(0) + (n > 1 ? '.' + s.slice(1) : '') + (e < 0 ? 'e' : 'e+') + e;
-
-    // Normal notation.
-    } else if (e < 0) {
-      for (; ++e;) s = '0' + s;
-      s = '0.' + s;
-    } else if (e > 0) {
-      if (++e > n) {
-        for (e -= n; e--;) s += '0';
-      } else if (e < n) {
-        s = s.slice(0, e) + '.' + s.slice(e);
-      }
-    } else if (n > 1) {
-      s = s.charAt(0) + '.' + s.slice(1);
-    }
-
-    return x.s < 0 && isNonzero ? '-' + s : s;
-  }
-
-
-  // Prototype/instance methods
-
-
-  /*
-   * Return a new Big whose value is the absolute value of this Big.
-   */
-  P.abs = function () {
-    var x = new this.constructor(this);
-    x.s = 1;
-    return x;
-  };
-
-
-  /*
-   * Return 1 if the value of this Big is greater than the value of Big y,
-   *       -1 if the value of this Big is less than the value of Big y, or
-   *        0 if they have the same value.
-   */
-  P.cmp = function (y) {
-    var isneg,
-      x = this,
-      xc = x.c,
-      yc = (y = new x.constructor(y)).c,
-      i = x.s,
-      j = y.s,
-      k = x.e,
-      l = y.e;
-
-    // Either zero?
-    if (!xc[0] || !yc[0]) return !xc[0] ? !yc[0] ? 0 : -j : i;
-
-    // Signs differ?
-    if (i != j) return i;
-
-    isneg = i < 0;
-
-    // Compare exponents.
-    if (k != l) return k > l ^ isneg ? 1 : -1;
-
-    j = (k = xc.length) < (l = yc.length) ? k : l;
-
-    // Compare digit by digit.
-    for (i = -1; ++i < j;) {
-      if (xc[i] != yc[i]) return xc[i] > yc[i] ^ isneg ? 1 : -1;
-    }
-
-    // Compare lengths.
-    return k == l ? 0 : k > l ^ isneg ? 1 : -1;
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big divided by the value of Big y, rounded,
-   * if necessary, to a maximum of Big.DP decimal places using rounding mode Big.RM.
-   */
-  P.div = function (y) {
-    var x = this,
-      Big = x.constructor,
-      a = x.c,                  // dividend
-      b = (y = new Big(y)).c,   // divisor
-      k = x.s == y.s ? 1 : -1,
-      dp = Big.DP;
-
-    if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
-      throw Error(INVALID_DP);
-    }
-
-    // Divisor is zero?
-    if (!b[0]) {
-      throw Error(DIV_BY_ZERO);
-    }
-
-    // Dividend is 0? Return +-0.
-    if (!a[0]) {
-      y.s = k;
-      y.c = [y.e = 0];
-      return y;
-    }
-
-    var bl, bt, n, cmp, ri,
-      bz = b.slice(),
-      ai = bl = b.length,
-      al = a.length,
-      r = a.slice(0, bl),   // remainder
-      rl = r.length,
-      q = y,                // quotient
-      qc = q.c = [],
-      qi = 0,
-      p = dp + (q.e = x.e - y.e) + 1;    // precision of the result
-
-    q.s = k;
-    k = p < 0 ? 0 : p;
-
-    // Create version of divisor with leading zero.
-    bz.unshift(0);
-
-    // Add zeros to make remainder as long as divisor.
-    for (; rl++ < bl;) r.push(0);
-
-    do {
-
-      // n is how many times the divisor goes into current remainder.
-      for (n = 0; n < 10; n++) {
-
-        // Compare divisor and remainder.
-        if (bl != (rl = r.length)) {
-          cmp = bl > rl ? 1 : -1;
-        } else {
-          for (ri = -1, cmp = 0; ++ri < bl;) {
-            if (b[ri] != r[ri]) {
-              cmp = b[ri] > r[ri] ? 1 : -1;
-              break;
-            }
-          }
-        }
-
-        // If divisor < remainder, subtract divisor from remainder.
-        if (cmp < 0) {
-
-          // Remainder can't be more than 1 digit longer than divisor.
-          // Equalise lengths using divisor with extra leading zero?
-          for (bt = rl == bl ? b : bz; rl;) {
-            if (r[--rl] < bt[rl]) {
-              ri = rl;
-              for (; ri && !r[--ri];) r[ri] = 9;
-              --r[ri];
-              r[rl] += 10;
-            }
-            r[rl] -= bt[rl];
-          }
-
-          for (; !r[0];) r.shift();
-        } else {
-          break;
-        }
-      }
-
-      // Add the digit n to the result array.
-      qc[qi++] = cmp ? n : ++n;
-
-      // Update the remainder.
-      if (r[0] && cmp) r[rl] = a[ai] || 0;
-      else r = [a[ai]];
-
-    } while ((ai++ < al || r[0] !== UNDEFINED) && k--);
-
-    // Leading zero? Do not remove if result is simply zero (qi == 1).
-    if (!qc[0] && qi != 1) {
-
-      // There can't be more than one zero.
-      qc.shift();
-      q.e--;
-      p--;
-    }
-
-    // Round?
-    if (qi > p) round(q, p, Big.RM, r[0] !== UNDEFINED);
-
-    return q;
-  };
-
-
-  /*
-   * Return true if the value of this Big is equal to the value of Big y, otherwise return false.
-   */
-  P.eq = function (y) {
-    return this.cmp(y) === 0;
-  };
-
-
-  /*
-   * Return true if the value of this Big is greater than the value of Big y, otherwise return
-   * false.
-   */
-  P.gt = function (y) {
-    return this.cmp(y) > 0;
-  };
-
-
-  /*
-   * Return true if the value of this Big is greater than or equal to the value of Big y, otherwise
-   * return false.
-   */
-  P.gte = function (y) {
-    return this.cmp(y) > -1;
-  };
-
-
-  /*
-   * Return true if the value of this Big is less than the value of Big y, otherwise return false.
-   */
-  P.lt = function (y) {
-    return this.cmp(y) < 0;
-  };
-
-
-  /*
-   * Return true if the value of this Big is less than or equal to the value of Big y, otherwise
-   * return false.
-   */
-  P.lte = function (y) {
-    return this.cmp(y) < 1;
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big minus the value of Big y.
-   */
-  P.minus = P.sub = function (y) {
-    var i, j, t, xlty,
-      x = this,
-      Big = x.constructor,
-      a = x.s,
-      b = (y = new Big(y)).s;
-
-    // Signs differ?
-    if (a != b) {
-      y.s = -b;
-      return x.plus(y);
-    }
-
-    var xc = x.c.slice(),
-      xe = x.e,
-      yc = y.c,
-      ye = y.e;
-
-    // Either zero?
-    if (!xc[0] || !yc[0]) {
-      if (yc[0]) {
-        y.s = -b;
-      } else if (xc[0]) {
-        y = new Big(x);
-      } else {
-        y.s = 1;
-      }
-      return y;
-    }
-
-    // Determine which is the bigger number. Prepend zeros to equalise exponents.
-    if (a = xe - ye) {
-
-      if (xlty = a < 0) {
-        a = -a;
-        t = xc;
-      } else {
-        ye = xe;
-        t = yc;
-      }
-
-      t.reverse();
-      for (b = a; b--;) t.push(0);
-      t.reverse();
-    } else {
-
-      // Exponents equal. Check digit by digit.
-      j = ((xlty = xc.length < yc.length) ? xc : yc).length;
-
-      for (a = b = 0; b < j; b++) {
-        if (xc[b] != yc[b]) {
-          xlty = xc[b] < yc[b];
-          break;
-        }
-      }
-    }
-
-    // x < y? Point xc to the array of the bigger number.
-    if (xlty) {
-      t = xc;
-      xc = yc;
-      yc = t;
-      y.s = -y.s;
-    }
-
-    /*
-     * Append zeros to xc if shorter. No need to add zeros to yc if shorter as subtraction only
-     * needs to start at yc.length.
-     */
-    if ((b = (j = yc.length) - (i = xc.length)) > 0) for (; b--;) xc[i++] = 0;
-
-    // Subtract yc from xc.
-    for (b = i; j > a;) {
-      if (xc[--j] < yc[j]) {
-        for (i = j; i && !xc[--i];) xc[i] = 9;
-        --xc[i];
-        xc[j] += 10;
-      }
-
-      xc[j] -= yc[j];
-    }
-
-    // Remove trailing zeros.
-    for (; xc[--b] === 0;) xc.pop();
-
-    // Remove leading zeros and adjust exponent accordingly.
-    for (; xc[0] === 0;) {
-      xc.shift();
-      --ye;
-    }
-
-    if (!xc[0]) {
-
-      // n - n = +0
-      y.s = 1;
-
-      // Result must be zero.
-      xc = [ye = 0];
-    }
-
-    y.c = xc;
-    y.e = ye;
-
-    return y;
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big modulo the value of Big y.
-   */
-  P.mod = function (y) {
-    var ygtx,
-      x = this,
-      Big = x.constructor,
-      a = x.s,
-      b = (y = new Big(y)).s;
-
-    if (!y.c[0]) {
-      throw Error(DIV_BY_ZERO);
-    }
-
-    x.s = y.s = 1;
-    ygtx = y.cmp(x) == 1;
-    x.s = a;
-    y.s = b;
-
-    if (ygtx) return new Big(x);
-
-    a = Big.DP;
-    b = Big.RM;
-    Big.DP = Big.RM = 0;
-    x = x.div(y);
-    Big.DP = a;
-    Big.RM = b;
-
-    return this.minus(x.times(y));
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big plus the value of Big y.
-   */
-  P.plus = P.add = function (y) {
-    var e, k, t,
-      x = this,
-      Big = x.constructor;
-
-    y = new Big(y);
-
-    // Signs differ?
-    if (x.s != y.s) {
-      y.s = -y.s;
-      return x.minus(y);
-    }
-
-    var xe = x.e,
-      xc = x.c,
-      ye = y.e,
-      yc = y.c;
-
-    // Either zero?
-    if (!xc[0] || !yc[0]) {
-      if (!yc[0]) {
-        if (xc[0]) {
-          y = new Big(x);
-        } else {
-          y.s = x.s;
-        }
-      }
-      return y;
-    }
-
-    xc = xc.slice();
-
-    // Prepend zeros to equalise exponents.
-    // Note: reverse faster than unshifts.
-    if (e = xe - ye) {
-      if (e > 0) {
-        ye = xe;
-        t = yc;
-      } else {
-        e = -e;
-        t = xc;
-      }
-
-      t.reverse();
-      for (; e--;) t.push(0);
-      t.reverse();
-    }
-
-    // Point xc to the longer array.
-    if (xc.length - yc.length < 0) {
-      t = yc;
-      yc = xc;
-      xc = t;
-    }
-
-    e = yc.length;
-
-    // Only start adding at yc.length - 1 as the further digits of xc can be left as they are.
-    for (k = 0; e; xc[e] %= 10) k = (xc[--e] = xc[e] + yc[e] + k) / 10 | 0;
-
-    // No need to check for zero, as +x + +y != 0 && -x + -y != 0
-
-    if (k) {
-      xc.unshift(k);
-      ++ye;
-    }
-
-    // Remove trailing zeros.
-    for (e = xc.length; xc[--e] === 0;) xc.pop();
-
-    y.c = xc;
-    y.e = ye;
-
-    return y;
-  };
-
-
-  /*
-   * Return a Big whose value is the value of this Big raised to the power n.
-   * If n is negative, round to a maximum of Big.DP decimal places using rounding
-   * mode Big.RM.
-   *
-   * n {number} Integer, -MAX_POWER to MAX_POWER inclusive.
-   */
-  P.pow = function (n) {
-    var x = this,
-      one = new x.constructor('1'),
-      y = one,
-      isneg = n < 0;
-
-    if (n !== ~~n || n < -MAX_POWER || n > MAX_POWER) {
-      throw Error(INVALID + 'exponent');
-    }
-
-    if (isneg) n = -n;
-
-    for (;;) {
-      if (n & 1) y = y.times(x);
-      n >>= 1;
-      if (!n) break;
-      x = x.times(x);
-    }
-
-    return isneg ? one.div(y) : y;
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big rounded to a maximum precision of sd
-   * significant digits using rounding mode rm, or Big.RM if rm is not specified.
-   *
-   * sd {number} Significant digits: integer, 1 to MAX_DP inclusive.
-   * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   */
-  P.prec = function (sd, rm) {
-    if (sd !== ~~sd || sd < 1 || sd > MAX_DP) {
-      throw Error(INVALID + 'precision');
-    }
-    return round(new this.constructor(this), sd, rm);
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big rounded to a maximum of dp decimal places
-   * using rounding mode rm, or Big.RM if rm is not specified.
-   * If dp is negative, round to an integer which is a multiple of 10**-dp.
-   * If dp is not specified, round to 0 decimal places.
-   *
-   * dp? {number} Integer, -MAX_DP to MAX_DP inclusive.
-   * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   */
-  P.round = function (dp, rm) {
-    if (dp === UNDEFINED) dp = 0;
-    else if (dp !== ~~dp || dp < -MAX_DP || dp > MAX_DP) {
-      throw Error(INVALID_DP);
-    }
-    return round(new this.constructor(this), dp + this.e + 1, rm);
-  };
-
-
-  /*
-   * Return a new Big whose value is the square root of the value of this Big, rounded, if
-   * necessary, to a maximum of Big.DP decimal places using rounding mode Big.RM.
-   */
-  P.sqrt = function () {
-    var r, c, t,
-      x = this,
-      Big = x.constructor,
-      s = x.s,
-      e = x.e,
-      half = new Big('0.5');
-
-    // Zero?
-    if (!x.c[0]) return new Big(x);
-
-    // Negative?
-    if (s < 0) {
-      throw Error(NAME + 'No square root');
-    }
-
-    // Estimate.
-    s = Math.sqrt(x + '');
-
-    // Math.sqrt underflow/overflow?
-    // Re-estimate: pass x coefficient to Math.sqrt as integer, then adjust the result exponent.
-    if (s === 0 || s === 1 / 0) {
-      c = x.c.join('');
-      if (!(c.length + e & 1)) c += '0';
-      s = Math.sqrt(c);
-      e = ((e + 1) / 2 | 0) - (e < 0 || e & 1);
-      r = new Big((s == 1 / 0 ? '5e' : (s = s.toExponential()).slice(0, s.indexOf('e') + 1)) + e);
-    } else {
-      r = new Big(s + '');
-    }
-
-    e = r.e + (Big.DP += 4);
-
-    // Newton-Raphson iteration.
-    do {
-      t = r;
-      r = half.times(t.plus(x.div(t)));
-    } while (t.c.slice(0, e).join('') !== r.c.slice(0, e).join(''));
-
-    return round(r, (Big.DP -= 4) + r.e + 1, Big.RM);
-  };
-
-
-  /*
-   * Return a new Big whose value is the value of this Big times the value of Big y.
-   */
-  P.times = P.mul = function (y) {
-    var c,
-      x = this,
-      Big = x.constructor,
-      xc = x.c,
-      yc = (y = new Big(y)).c,
-      a = xc.length,
-      b = yc.length,
-      i = x.e,
-      j = y.e;
-
-    // Determine sign of result.
-    y.s = x.s == y.s ? 1 : -1;
-
-    // Return signed 0 if either 0.
-    if (!xc[0] || !yc[0]) {
-      y.c = [y.e = 0];
-      return y;
-    }
-
-    // Initialise exponent of result as x.e + y.e.
-    y.e = i + j;
-
-    // If array xc has fewer digits than yc, swap xc and yc, and lengths.
-    if (a < b) {
-      c = xc;
-      xc = yc;
-      yc = c;
-      j = a;
-      a = b;
-      b = j;
-    }
-
-    // Initialise coefficient array of result with zeros.
-    for (c = new Array(j = a + b); j--;) c[j] = 0;
-
-    // Multiply.
-
-    // i is initially xc.length.
-    for (i = b; i--;) {
-      b = 0;
-
-      // a is yc.length.
-      for (j = a + i; j > i;) {
-
-        // Current sum of products at this digit position, plus carry.
-        b = c[j] + yc[i] * xc[j - i - 1] + b;
-        c[j--] = b % 10;
-
-        // carry
-        b = b / 10 | 0;
-      }
-
-      c[j] = b;
-    }
-
-    // Increment result exponent if there is a final carry, otherwise remove leading zero.
-    if (b) ++y.e;
-    else c.shift();
-
-    // Remove trailing zeros.
-    for (i = c.length; !c[--i];) c.pop();
-    y.c = c;
-
-    return y;
-  };
-
-
-  /*
-   * Return a string representing the value of this Big in exponential notation rounded to dp fixed
-   * decimal places using rounding mode rm, or Big.RM if rm is not specified.
-   *
-   * dp? {number} Decimal places: integer, 0 to MAX_DP inclusive.
-   * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   */
-  P.toExponential = function (dp, rm) {
-    var x = this,
-      n = x.c[0];
-
-    if (dp !== UNDEFINED) {
-      if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
-        throw Error(INVALID_DP);
-      }
-      x = round(new x.constructor(x), ++dp, rm);
-      for (; x.c.length < dp;) x.c.push(0);
-    }
-
-    return stringify(x, true, !!n);
-  };
-
-
-  /*
-   * Return a string representing the value of this Big in normal notation rounded to dp fixed
-   * decimal places using rounding mode rm, or Big.RM if rm is not specified.
-   *
-   * dp? {number} Decimal places: integer, 0 to MAX_DP inclusive.
-   * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   *
-   * (-0).toFixed(0) is '0', but (-0.1).toFixed(0) is '-0'.
-   * (-0).toFixed(1) is '0.0', but (-0.01).toFixed(1) is '-0.0'.
-   */
-  P.toFixed = function (dp, rm) {
-    var x = this,
-      n = x.c[0];
-
-    if (dp !== UNDEFINED) {
-      if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
-        throw Error(INVALID_DP);
-      }
-      x = round(new x.constructor(x), dp + x.e + 1, rm);
-
-      // x.e may have changed if the value is rounded up.
-      for (dp = dp + x.e + 1; x.c.length < dp;) x.c.push(0);
-    }
-
-    return stringify(x, false, !!n);
-  };
-
-
-  /*
-   * Return a string representing the value of this Big.
-   * Return exponential notation if this Big has a positive exponent equal to or greater than
-   * Big.PE, or a negative exponent equal to or less than Big.NE.
-   * Omit the sign for negative zero.
-   */
-  P.toJSON = P.toString = function () {
-    var x = this,
-      Big = x.constructor;
-    return stringify(x, x.e <= Big.NE || x.e >= Big.PE, !!x.c[0]);
-  };
-
-
-  /*
-   * Return the value of this Big as a primitve number.
-   */
-  P.toNumber = function () {
-    var n = Number(stringify(this, true, true));
-    if (this.constructor.strict === true && !this.eq(n.toString())) {
-      throw Error(NAME + 'Imprecise conversion');
-    }
-    return n;
-  };
-
-
-  /*
-   * Return a string representing the value of this Big rounded to sd significant digits using
-   * rounding mode rm, or Big.RM if rm is not specified.
-   * Use exponential notation if sd is less than the number of digits necessary to represent
-   * the integer part of the value in normal notation.
-   *
-   * sd {number} Significant digits: integer, 1 to MAX_DP inclusive.
-   * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
-   */
-  P.toPrecision = function (sd, rm) {
-    var x = this,
-      Big = x.constructor,
-      n = x.c[0];
-
-    if (sd !== UNDEFINED) {
-      if (sd !== ~~sd || sd < 1 || sd > MAX_DP) {
-        throw Error(INVALID + 'precision');
-      }
-      x = round(new Big(x), sd, rm);
-      for (; x.c.length < sd;) x.c.push(0);
-    }
-
-    return stringify(x, sd <= x.e || x.e <= Big.NE || x.e >= Big.PE, !!n);
-  };
-
-
-  /*
-   * Return a string representing the value of this Big.
-   * Return exponential notation if this Big has a positive exponent equal to or greater than
-   * Big.PE, or a negative exponent equal to or less than Big.NE.
-   * Include the sign for negative zero.
-   */
-  P.valueOf = function () {
-    var x = this,
-      Big = x.constructor;
-    if (Big.strict === true) {
-      throw Error(NAME + 'valueOf disallowed');
-    }
-    return stringify(x, x.e <= Big.NE || x.e >= Big.PE, true);
-  };
-
-
-  // Export
-
-
-  Big = _Big_();
-
-  Big['default'] = Big.Big = Big;
-
-  //AMD.
-  if (true) {
-    !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () { return Big; }).call(exports, __webpack_require__, exports, module),
-		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-
-  // Node and other CommonJS-like environments that support module.exports.
-  } else {}
-})(this);
-
-
-/***/ }),
 
 /***/ "./src/boot.lispx":
 /*!************************!*\
@@ -1054,7 +18,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*
   \************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Bootstrap\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; Core Forms\n\n(%%def #'list\n  (%%wrap (%%vau arguments #ignore arguments))\n  \"Return the list of evaluated ARGUMENTS.\n$(fn (arguments))\n$(type function)\")\n\n(%%def #'vau\n  (%%vau (parameter-tree environment-parameter . forms) env\n    (%%eval (list #'%%vau parameter-tree environment-parameter\n                  (%%list* #'%%progn forms))\n            env))\n  \"Construct a fexpr with the given PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\n$(fn (parameter-tree environment-parameter . forms))\n$(type fexpr)\")\n\n(%%def #'lispx::make-macro\n  (%%wrap\n   (%%vau (expander) #ignore\n     (%%vau form env\n       (%%eval\n        (%%eval (%%cons expander form) (%%make-environment))\n        env))))\n  \"Create a macro from an EXPANDER operator.  A macro is an operator\nthat receives a form and produces an expression (by calling the\nexpander with the form as argument) that is then evaluated in place of\nthe form.\n$(fn (expander))\n$(type function)\")\n\n(%%def #'macro\n  (lispx::make-macro\n   (%%vau (parameter-tree . forms) #ignore\n     (list #'lispx::make-macro\n           (%%list* #'vau parameter-tree #ignore forms))))\n  \"Create an anonymous macro with the given PARAMETER-TREE and FORMS.\n$(fn (parameter-tree . forms))\n$(type macro)\")\n\n(%%def #'defmacro\n  (macro (name parameter-tree . forms)\n    (list #'%%def (%%function-symbol name)\n          (%%list* #'macro parameter-tree forms)))\n  \"Define a macro with the given NAME, PARAMETER-TREE, and FORMS.\n$(fn (name parameter-tree . forms))\n$(type macro)\")\n\n(defmacro defexpr (name parameter-tree environment-parameter . forms)\n  \"Define a fexpr with the given NAME, PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\"\n  (list #'%%def (%%function-symbol name)\n        (%%list* #'vau parameter-tree environment-parameter forms)))\n\n(defmacro def (definiend-tree value . docstring?)\n  \"Match the DEFINIEND-TREE against the VALUE and place resulting\nbindings into the current environment.  The optional DOCSTRING? is\ncurrently ignored.\"\n  (list #'%%def definiend-tree value))\n\n(defmacro defconstant (name value . docstring?)\n  \"Define a constant with the given NAME and VALUE.  This is mostly\nfor documentation purposes, as constants are still mutable.  The\noptional DOCSTRING? is currently ignored.\"\n  (list #'def name value))\n\n(defmacro lambda (parameter-tree . forms)\n  \"Create an anonymous function with the given PARAMETER-TREE and FORMS.\"\n  (list #'%%wrap (%%list* #'vau parameter-tree #ignore forms)))\n\n(defmacro defun (name parameter-tree . forms)\n  \"Define a function with the given NAME, PARAMETER-TREE, and FORMS.\"\n  (list #'def (%%function-symbol name)\n        (%%list* #'lambda parameter-tree forms)))\n\n;;; Built-Ins\n\n(defmacro progn forms\n  \"Sequentially evaluate FORMS, returning the value of the last one,\nor void if there are no forms.\"\n  (list* #'%%progn forms))\n\n(defmacro if (test consequent alternative)\n  \"Evaluate the TEST which must yield a boolean.  Then evaluate either\nthe CONSEQUENT or ALTERNATIVE depending on whether the TEST yielded\ntrue or false.\"\n  (list #'%%if test consequent alternative))\n\n(defmacro catch (tag . forms)\n  \"Establish a catch tag and evaluate FORMS as an implicit `progn'\ninside it.  The forms may use `throw' to nonlocally exit from the\ntag.  Usually, `block' should be preferred.\"\n  (list #'%%catch tag (list* #'lambda () forms)))\n\n(defun throw (tag . result?)\n  \"Abort to a nesting catch tag established by `catch' and pass the\noptional RESULT? (defaults to void) to it.\"\n  (%%throw tag (optional result?)))\n\n(defmacro loop forms\n  \"Evaluate the FORMS in an infinite loop.\"\n  (list #'%%loop (list* #'progn forms)))\n\n(defun eq (a b)\n  \"Return true if the values A and B are pointer-identical, false otherwise.\"\n  (%%eq a b))\n\n(defun class-of (object)\n  \"Return the class of the OBJECT.\"\n  (%%class-of object))\n\n(defun typep (object class)\n  \"Return true if the OBJECT is an instance of the CLASS, false otherwise.\"\n  (%%typep object class))\n\n(defun intern (string)\n  \"Get or create the unique symbol with STRING as name.\"\n  (%%intern string))\n\n(defun symbol-name (symbol)\n  \"Return the name of the SYMBOL as a string.\"\n  (%%symbol-name symbol))\n\n(defun variable-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the variable namespace.\"\n  (%%variable-symbol symbol))\n\n(defun function-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the function namespace.\"\n  (%%function-symbol symbol))\n\n(defun class-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the class namespace.\"\n  (%%class-symbol symbol))\n\n(defun keyword-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the keyword namespace.\"\n  (%%keyword-symbol symbol))\n\n(defun cons (car cdr)\n  \"Create a cons with the given CAR and CDR.\"\n  (%%cons car cdr))\n\n(defun car (cons)\n  \"Return the contents of the address part of the register.\"\n  (%%car cons))\n\n(defun cdr (cons)\n  \"Return the contents of the decrement part of the register.\"\n  (%%cdr cons))\n\n(defun list* arguments\n  \"Create a list from the ARGUMENTS so that the last argument becomes\nthe `cdr' of the list.\"\n  (apply #'%%list* arguments))\n\n(defun reverse (list)\n  \"Reverse the LIST.\"\n  (%%reverse list))\n\n(defun wrap (operator)\n  \"Create a new function that wraps around an underlying OPERATOR, and\ninduces argument evaluation around it.\"\n  (%%wrap operator))\n\n(defun unwrap (function)\n  \"Return the underlying operator of a FUNCTION.\"\n  (%%unwrap function))\n\n(defun eval (form environment)\n  \"Evaluate the FORM in the ENVIRONMENT, returning its result.\"\n  (%%eval form environment))\n\n(defun make-environment parent-environment?\n  \"Create a new environment with an optional PARENT-ENVIRONMENT? in\nwhich bindings are looked up if they are not found.\"\n  (apply #'%%make-environment parent-environment?))\n\n(defun boundp (symbol environment)\n  \"Return true if the SYMBOL is bound in the ENVIRONMENT, false otherwise.\"\n  (%%boundp symbol environment))\n\n(defun panic (error)\n  \"Signal the ERROR in such a way that it cannot be caught by\ncondition handlers or `unwind-protect'.  This unconditionally breaks\nout of Lisp.\"\n  (%%panic error))\n\n;;; Lexical Bindings\n\n(defmacro let (bindings . forms)\n  \"Establish BINDINGS parallelly during the evaluation of FORMS, so\nthat no binding can refer to the other ones.\n$(syntax binding (definiend-tree value))\"\n  (list* (list* #'lambda (mapcar #'car bindings)\n                forms)\n         (mapcar #'cadr bindings)))\n\n(defmacro let* (bindings . forms)\n  \"Establish BINDINGS serially during the evaluation of FORMS, so that\nevery binding can refer to previous ones.\n$(syntax binding (definiend-tree value))\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list #'let (list (car bindings))\n            (list* #'let* (cdr bindings) forms))))\n\n(defmacro lispx::letrec (bindings . forms)\n  \"Utility to establish BINDINGS recursively during the evaluation of\nFORMS.  Used by `labels'.\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list* #'let ()\n             (list #'def\n                   (mapcar #'car bindings)\n                   (list* #'list (mapcar #'cadr bindings)))\n             forms)))\n\n(defun lispx::function-binding ((name parameter-tree . forms))\n  \"Utility to turn a function binding as it appears in `flet' and\n`labels' into a binding for `let' or `%letrec'.\"\n  (list (function-symbol name) (list* #'lambda parameter-tree forms)))\n\n(defmacro flet (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS parallelly during evaluation of FORMS,\nso that no function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'let (mapcar #'lispx::function-binding function-bindings) forms))\n\n(defmacro labels (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS recursively during evaluation of FORMS,\nso that every function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'lispx::letrec (mapcar #'lispx::function-binding function-bindings) forms))\n\n;;; Data and Control Flow\n\n(defexpr quote (operand) #ignore\n  \"Return the unevaluated OPERAND.\"\n  operand)\n\n(defexpr the-environment () environment\n  \"Return the current environment.\"\n  environment)\n\n(defun apply (function arguments)\n  \"Call the FUNCTION with a dynamically-supplied list of ARGUMENTS.\"\n  (eval (cons (unwrap function) arguments) (%%make-environment)))\n\n(defmacro when (test . forms)\n  \"If TEST yields true, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test (list* #'progn forms) #void))\n\n(defmacro unless (test . forms)\n  \"If TEST yields false, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test #void (list* #'progn forms)))\n\n(defexpr cond clauses env\n  \"Multi-armed conditional.\nGo through the CLAUSES in order.  Evaluate the TEST.  If it yields\ntrue, evaluate the FORMS as an implicit `progn'.  If it yields false,\ngo to the next clause, or return void if there are no more clauses.\n$(syntax clause (test . forms))\"\n  (unless (null clauses)\n    (let ((((test . forms) . rest-clauses) clauses))\n      (if (eval test env)\n          (eval (cons #'progn forms) env)\n          (eval (cons #'cond rest-clauses) env)))))\n\n(defun not (boolean)\n  \"Invert the BOOLEAN.\"\n  (if boolean #f #t))\n\n(defexpr and operands env\n  \"Return true if all OPERANDS evaluate to true, false otherwise.  If\nan operand evaluates to false, later operands are not evaluated.  If\nthere are no operands, return false.\"\n  (cond ((null operands)           #t)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) (eval (cons #'and (cdr operands)) env))\n        (#t                        #f)))\n\n(defexpr or operands env\n  \"Return true if one of the OPERANDS evaluates to true, false\notherwise.  If an operand evaluates to true, later operands are not\nevaluated.  If there are no operands, return true.\"\n  (cond ((null operands)           #f)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) #t)\n        (#t                        (eval (cons #'or (cdr operands)) env))))\n\n(defexpr while (test-form . forms) env\n  \"Evaluate FORMS while TEST-FORM evaluates to true.\"\n  (let ((forms (list* #'progn forms)))\n    (block exit\n      (loop\n        (if (eval test-form env)\n            (eval forms env)\n            (return-from exit))))))\n\n(defmacro until (test-form . forms)\n  \"Evaluate FORMS until TEST-FORM evaluates to true.\"\n  (list* #'while (list #'not test-form) forms))\n\n(defmacro dotimes ((var count-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOTIMES.\"\n  (flet ((dotimes* (n #'body #'result)\n           (let ((#'i (box 0)))\n             (while (< (i) n)\n               (body (i))\n               (i (+ (i) 1)))\n             (result (i)))))\n    (list #'dotimes*\n          count-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defmacro loop-let (name initializers . forms)\n  \"Labelled recursive loop, analogous to Scheme's named `let'.\nLexically bind a function named NAME with one PARAMETER for every\nINITIALIZER and the FORMS as body.  Then immediately apply the\nfunction to a list containing one VALUE for every INITIALIZER and\nreturn the result.  The function is bound per `labels' so it can\nrecursively refer to itself.\n$(syntax initializer (parameter value))\"\n  (list #'labels (list (list* name (mapcar #'car initializers) forms))\n        (list* name (mapcar #'cadr initializers))))\n\n(defexpr block (block-name . forms) env\n  \"Establish a block named BLOCK-NAME and evaluate the FORMS as an\nimplicit `progn' inside it.  The forms may use `return-from' to\nnonlocally exit from the block.\nNote that unlike in Common Lisp, there is no separate namespace for\nblock names; a block is named in the normal variable namespace.\"\n  (let ((tag (list #void))) ; cons up a fresh object as tag\n    (flet ((escape (value) (throw tag value)))\n      (catch tag\n        (eval (list (list* #'lambda (list block-name) forms)\n                    #'escape)\n              env)))))\n\n(defun return-from (#'block-name . value?)\n  \"Abort evaluation and return the optional VALUE? (which defaults to\nvoid) from the block named BLOCK-NAME.  It is an error to return from\na block whose dynamic extent has ended.\n$(fn (block-name . value?))\"\n  (block-name (optional value?)))\n\n(defmacro unwind-protect (protected-form . cleanup-forms)\n  \"Evaluate the PROTECTED-FORM and return its result.  Regardless of\nwhether the protected form returns normally, or via a nonlocal exit,\nthe CLEANUP-FORMS are evaluated after the protected form.  Note that\nthe protected forms are not evaluated in case of `panic'.\"\n  (list #'%%unwind-protect protected-form (list* #'progn cleanup-forms)))\n\n(defexpr prog1 (form . forms) env\n  \"Evaluate FORM and any additional FORMS, and return the result of FORM.\"\n  (let ((result (eval form env)))\n    (eval (list* #'progn forms) env)\n    result))\n\n(defexpr typecase (keyform . clauses) env\n  \"Multi-armed type test.\nEvaluate the KEYFORM.  Go through the CLAUSES.  If the result of\nevaluating KEYFORM is an instance of the class named by CLASS-NAME,\nevaluate the FORMS as an implicit `progn'.  Otherwise go to the next\nclause, or return void if there are no more clauses.\n$(syntax clause (class-name . forms))\"\n  (let ((key (eval keyform env)))\n    (loop-let -typecase- ((clauses clauses))\n      (unless (null clauses)\n        (let ((((class-name . forms) . rest-clauses) clauses))\n          (if (typep key (find-class class-name env))\n              (eval (cons #'progn forms) env)\n              (-typecase- rest-clauses)))))))\n\n(defexpr set (environment definiend-tree value) dynamic-environment\n  \"Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,\ncreating or updating existing bindings.\"\n  (eval (list #'def definiend-tree\n              (list (unwrap #'eval) value dynamic-environment))\n        (eval environment dynamic-environment)))\n\n(defun box initial-value?\n  \"A box is a function that encapsulates a mutable value.  Create a\nnew box with the optional INITIAL-VALUE?.  Calling the box without\narguments returns the value.  Calling the box with an argument sets\nthe value.\"\n  (def value (optional initial-value?))\n  (def env (the-environment))\n  (lambda new-value?\n    (if-option (new-value new-value?)\n      (set env value new-value)\n      value)))\n\n(defun assert (boolean)\n  \"Signal an error if the BOOLEAN is false.  Otherwise return void.\"\n  (unless boolean (error (make-instance (class assertion-error)))))\n\n;;; Lists\n\n(defun null (object)\n  \"Return true if the OBJECT is nil, false otherwise.\"\n  (eq object #nil))\n\n(defun caar (cons)\n  \"Return the `car' of the `car' of the CONS.\"\n  (car (car cons)))\n\n(defun cadr (cons)\n  \"Return the `car' of the `cdr' of the CONS.\"\n  (car (cdr cons)))\n\n(defun cdar (cons)\n  \"Return the `cdr' of the `car' of the CONS.\"\n  (cdr (car cons)))\n\n(defun cddr (cons)\n  \"Return the `cdr' of the `cdr' of the CONS.\"\n  (cdr (cdr cons)))\n\n(defun append (list1 list2)\n  \"Append two lists.  The first one must be proper and is copied.  The\nsecond one is not copied (and doesn't even have to be a list). It\nbecomes the `cdr' of the final cons of the first list, or is returned\ndirectly if the first list is empty.\"\n  (%%append list1 list2))\n\n(defun nth (n list)\n  \"Return element number N of LIST, where the `car' is element zero.\"\n  (%%nth n list))\n\n(defun nthcdr (n list)\n  \"Returns the tail of LIST that would be obtained by calling `cdr' N\ntimes in succession.\"\n  (%%nthcdr n list))\n\n(defun mapcar (#'function list)\n  \"Create a new list by applying the FUNCTION to every element of the LIST.\"\n  (if (null list)\n      #nil\n      (cons (function (car list)) (mapcar #'function (cdr list)))))\n\n(defun mapc (#'function list)\n  \"Apply the FUNCTION to every element of the LIST for effect.  Return the list.\"\n  (unless (null list)\n    (function (car list))\n    (mapc #'function (cdr list)))\n  list)\n\n(defmacro dolist ((var list-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOLIST.\"\n  (labels ((dolist* (list #'body #'result)\n             (if (null list)\n                 (result list)\n                 (progn\n                   (body (car list))\n                   (dolist* (cdr list) #'body #'result)))))\n    (list #'dolist*\n          list-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defun reduce (#'function list :initial-value initial-value)\n  \"Use the binary FUNCTION to combine the elements of the LIST.  The\nINITIAL-VALUE is logically placed before the list.\"\n  (if (null list)\n      initial-value\n      (reduce #'function (cdr list) :initial-value (function initial-value (car list)))))\n\n(defun memberp (element list :test #'test)\n  \"Return true if the ELEMENT is contained in the LIST according to\nthe TEST predicate, false otherwise.\"\n  (if (null list)\n      #f\n      (if (test element (car list))\n          #t\n          (memberp element (cdr list) :test #'test))))\n\n(defun remove-if (#'test list)\n  \"Return a new list from which the elements that satisfy the TEST\nhave been removed.\"\n  (if (null list)\n      #nil\n      (if (test (car list))\n          (remove-if #'test (cdr list))\n          (cons (car list) (remove-if #'test (cdr list))))))\n\n(defun get? (plist indicator)\n  \"Search for the INDICATOR keyword in the property list PLIST (a list\nof alternating keywords and values) and return the found value as an\noption.\"\n  (if (null plist)\n      #nil\n      (let (((i v . plist) plist))\n        (if (eq i indicator)\n            (some v)\n            (get? plist indicator)))))\n\n;;; Relational Operators\n\n;; Note that unlike in Common Lisp, these operators currently require\n;; at least two arguments.  This will be improved in the future.\n\n(defun lispx::relational-operator (#'binary-operator)\n  \"Utility to create an n-ary relational operator from a BINARY-OPERATOR.\"\n  (labels ((operator (arg1 arg2 . rest)\n             (if (binary-operator arg1 arg2)\n                 (if (null rest)\n                     #t\n                     (apply #'operator (list* arg2 rest)))\n                 #f)))\n    #'operator))\n\n(def #'= (lispx::relational-operator #'%%=)\n  \"Return true if all ARGUMENTS are equal, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'< (lispx::relational-operator #'%%<)\n  \"Return true if the ARGUMENTS are in monotonically increasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'> (lispx::relational-operator #'%%>)\n  \"Return true if the ARGUMENTS are in monotonically decreasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'<= (lispx::relational-operator #'%%<=)\n  \"Return true if the ARGUMENTS are in monotonically nondecreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'>= (lispx::relational-operator #'%%>=)\n  \"Return true if the ARGUMENTS are in monotonically nonincreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(defun /= (arg . args)\n  \"Return true if no two ARGUMENTS are the same, false otherwise.\n$(fn arguments)\"\n  (if (null args)\n      #t\n      (if (memberp arg args :test #'=)\n          #f\n          (apply #'/= args))))\n\n;;; Numbers\n\n;; The terms thetic (for + and *) and lytic (for - and /) are due to Hankel.\n\n(defun lispx::thetic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary thetic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda args\n    (reduce #'binary-operator args :initial-value initial-value)))\n\n(def #'+ (lispx::thetic-operator #'%%+ 0)\n  \"Return the sum of the ARGUMENTS, or 0 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(def #'* (lispx::thetic-operator #'%%* 1)\n  \"Return the product of the ARGUMENTS, or 1 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(defun lispx::lytic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary lytic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda (arg1 . rest)\n    (if (null rest)\n        (binary-operator initial-value arg1)\n        (reduce #'binary-operator rest :initial-value arg1))))\n\n(def #'- (lispx::lytic-operator #'%%- 0)\n  \"If only one number is supplied in the ARGUMENTS, return the\nnegation of that number. If more than one number is supplied, subtract\nall of the later ones from the first one and return the result.\n$(fn arguments)\n$(type function)\")\n\n(def #'/ (lispx::lytic-operator #'%%/ 1)\n  \"If only one number is supplied in the ARGUMENTS, return the\nreciprocal of that number.  If more than one number is supplied,\ndivide the first one by all of the later ones and return the result.\n$(fn arguments)\n$(type function)\")\n\n;;; Classes\n\n(defmacro class (name)\n  \"Access a class by the (unevaluated) NAME symbol in the current\nenvironment.  This is required because classes have their own\nnamespace.\"\n  (class-symbol name))\n\n(defun find-class (name environment)\n  \"Look up a class based on its NAME symbol (evaluated) in the given ENVIRONMENT.\"\n  (eval (class-symbol name) environment))\n\n(defun class-name (class)\n  \"Return the name symbol of the CLASS.\"\n  (%%class-name class))\n\n(defun subclassp (class superclass)\n  \"Return true if the CLASS is a subclass of the SUPERCLASS, false otherwise.\nA class is considered a subclass of itself.\"\n  (%%subclassp class superclass))\n\n(defexpr defclass (name superclass? slot-specs . properties) env\n  \"Define a new `standard-class' with the given NAME, optional\nSUPERCLASS?, and SLOT-SPECS.  The superclass defaults to\n`standard-object'.  The SLOT-SPECS and PROPERTIES are currently\nignored.\n$(syntax slot-spec symbol)\n$(syntax property (:documentation docstring))\"\n  (def superclass (find-class (optional superclass? 'standard-object) env))\n  ;; Slot-specs are ignored for now, but check them nevertheless.\n  (dolist (slot-spec slot-specs) (the symbol slot-spec))\n  (def class-name (class-symbol name))\n  (if (boundp class-name env)\n      (%%reinitialize-standard-class (eval class-name env) superclass)\n      (eval (list #'def class-name (%%make-standard-class name superclass)) env))\n  name)\n\n;;; Generic Functions\n\n(defexpr defgeneric (name (receiver . parameters) . properties) env\n  \"Define a new generic function with the given NAME.  The RECEIVER,\nPARAMETERS, and PROPERTIES are currently ignored.\n$(syntax property (:documentation docstring))\"\n  (def #'generic (lambda args (apply (%%find-method (class-of (car args)) name) args)))\n  (eval (list #'def (function-symbol name) #'generic) env)\n  name)\n\n(defexpr defmethod (name ((receiver class-name) . parameters) . forms) env\n  \"Add a new method to the generic function named by NAME specialized\nfor the class named by CLASS-NAME.\"\n  (def #'method (eval (list* #'lambda (list* receiver parameters) forms) env))\n  (%%add-method (find-class class-name env) name #'method)\n  name)\n\n;;; Standard Objects\n\n(defun make-instance (class . slot-inits)\n  \"Create a new instance of CLASS (that must be a `standard-class').\nThe SLOT-INITS must be of even length, and alternately contain slot\nnames (symbols, typically keywords) and values.\"\n  (apply #'%%make-instance (cons class slot-inits)))\n\n(defun slot-value (object slot-name)\n  \"Return the value of the slot named SLOT-NAME of the OBJECT.\"\n  (%%slot-value object slot-name))\n\n(defun set-slot-value (object slot-name value)\n  \"Set the value of the slot named SLOT-NAME of the OBJECT to VALUE.\"\n  (%%set-slot-value object slot-name value))\n\n(defun slot-bound-p (object slot-name)\n  \"Return true if the slot named SLOT-NAME of the OBJECT is set, false otherwise.\"\n  (%%slot-bound-p object slot-name))\n\n;;; Type Checks\n\n(defun make-type-error (datum expected-type)\n  \"Create a `type-error' with the given DATUM and EXPECTED-TYPE.\"\n  (make-instance (class type-error) :datum datum :expected-type expected-type))\n\n(defun assert-type (object class)\n  \"Signal a `type-error' if the OBJECT is not an instance of the CLASS.\"\n  (if (typep object class)\n      object\n      (error (make-type-error object (class-name class)))))\n\n(defexpr the (class-name object) env\n  \"Shorthand for `assert-type'.  Signal a `type-error' if the OBJECT\nis not an instance of the class named by CLASS-NAME.\"\n  (assert-type (eval object env) (find-class class-name env)))\n\n;;; Sequences\n\n(defgeneric length (sequence)\n  (:documentation \"Return the number of elements in a sequence.\"))\n\n(defmethod length ((seq list))\n  (%%list-length seq))\n\n(defgeneric elt (sequence index)\n  (:documentation \"Return the sequence element at the specified index.\"))\n\n(defmethod elt ((seq list) index)\n  (nth index seq))\n\n(defgeneric subseq (sequence start . end?)\n  (:documentation \"Create a sequence that is a copy of the subsequence\nof the SEQUENCE bounded by START and optional END?.  If END?  is not\nsupplied or void, the subsequence stretches until the end of the\nlist.\"))\n\n(defmethod subseq ((seq list) start . end?)\n  (%%list-subseq seq start (optional end?)))\n\n(defmethod subseq ((seq string) start . end?)\n  (%%string-subseq seq start (optional end?)))\n\n;;; Options\n\n;; An option is either nil (\"none\"), or a one-element list (\"some\").\n;; Variables holding options are conventionally suffixed with \"?\".\n\n(defun some (value)\n  \"Create a one-element list from the VALUE.\"\n  (%%some value))\n\n(defexpr if-option ((name option?) then else) env\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the THEN form\nwith the NAME bound to the contents of the option.  If it's nil,\nevaluate the ELSE form.\"\n  ;; (Idea from Taylor R. Campbell's blag.)\n  (let ((o? (eval option? env)))\n    (if (null o?)\n        (eval else env)\n        (eval (list (list #'vau (list name) #ignore then)\n                    (car o?))\n              env))))\n\n(defmacro when-option ((name option?) . forms)\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the FORMS with\nthe NAME bound to the contents of the option.  If it's nil, return nil.\"\n  (list #'if-option (list name option?) (list* #'progn forms) #nil))\n\n(defmacro unless-option (option? . forms)\n  \"Destructure the OPTION?.  If it's nil, evaluate the FORMS.  If it's\nnon-nil, return nil.\"\n  (list #'if-option (list #ignore option?) #nil (list* #'progn forms)))\n\n(defexpr optional (option? . default?) env\n  \"Return the contents of the OPTION?, or the DEFAULT? if the option\nis nil.  The default itself defaults to void.  The DEFAULT? is\nevaluated lazily, only when the OPTION? is nil.\"\n  (if-option (value (eval option? env))\n    value\n    (if-option (default default?)\n      (eval default env)\n      #void)))\n\n(defun optionals (list . defaults)\n  \"Similar to `optional', but provides DEFAULTS for any number of\nelements of LIST.\nCurrently, the DEFAULTS are always evaluated, but in the future, they\nmight be evaluated lazily, so they should not be used for effect.\"\n  (loop-let -optionals- ((list list) (defaults defaults))\n    (if (null list)\n        (if (null defaults)\n            #nil\n            (cons (car defaults) (-optionals- #nil (cdr defaults))))\n        (if (null defaults)\n            (cons (car list)     (-optionals- (cdr list) #nil))\n            (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))\n\n(defun get-option (option?)\n  \"Returns the contents of the OPTION? or signals an error if it is nil.\"\n  (optional option? (simple-error \"Option is nil\")))\n\n;;; Dynamic Binding\n\n(defexpr defdynamic (name . value-and-docstring?) env\n  \"Define a new or update an existing dynamic variable with the given\nNAME and optional default VALUE. The optional DOCSTRING is currently\nignored.\n$(fn (name &optional value docstring))\"\n  (def value (eval (optional value-and-docstring?) env)) ; treating 2-elt list as option\n  (if (boundp name env)\n      (set-dynamic (eval name env) value)\n      (eval (list #'def name (make-instance (class dynamic) :value value)) env)))\n\n(defun dynamic (dynamic-variable)\n  \"Return the current value of the DYNAMIC-VARIABLE.\"\n  (slot-value dynamic-variable 'value))\n\n(defun set-dynamic (dynamic-variable value)\n  \"Set the current value of the DYNAMIC-VARIABLE.\"\n  (set-slot-value dynamic-variable 'value value))\n\n(defexpr dynamic-let (bindings . forms) env\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established parallely\nas per `let'.\n$(syntax binding (dynamic-variable value))\"\n  (let ((dynamics (mapcar (lambda ((name #ignore)) (eval name env)) bindings))\n        (values (mapcar (lambda ((#ignore value)) (eval value env)) bindings))\n        (thunk (eval (list* #'lambda () forms) env)))\n    (%%progv dynamics values thunk)))\n\n(defmacro dynamic-let* (bindings . forms)\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established serially as\nper `let*'.\"\n  (if (null bindings)\n      (list* #'progn forms)\n      (list #'dynamic-let (list (car bindings))\n            (list* #'dynamic-let* (cdr bindings) forms))))\n\n(defmacro progv (dynamic-variables values . forms)\n  \"Evaluate the FORMS with the list of DYNAMIC-VARIABLES temporarily\nbound to new VALUES.  The DYNAMIC-VARIABLES and VALUES lists must have\nthe same length.\"\n  (list #'%%progv dynamic-variables values (list* #'lambda () forms)))\n\n;;; Delimited Control Operators\n\n;; These operators follow the API put forth in the delimcc library\n;; at URL `http://okmij.org/ftp/continuations/implementations.html'.\n\n(defmacro push-prompt (prompt . forms)\n  \"Push the PROMPT and evaluate the FORMS inside the prompt.  This\ndelimits the continuation.\"\n  (list #'%%push-prompt prompt (list* #'lambda () forms)))\n\n(defmacro take-subcont (prompt name . forms)\n  \"Abort outwards to the PROMPT.  When the prompt is reached, evaluate\nthe FORMS with NAME bound to the captured continuation (which does not\ninclude the prompt).\"\n  (list #'%%take-subcont prompt (list* #'lambda (list name) forms)))\n\n(defmacro push-delim-subcont (prompt continuation . forms)\n  \"Push the PROMPT and compose the previously captured CONTINUATION\ninside it.  The FORMS are then evaluated inside the new continuation.\"\n  (list #'%%push-delim-subcont prompt continuation (list* #'lambda () forms)))\n\n(defmacro push-subcont-barrier forms\n  \"Push a continuation barrier that prevents the FORMS from capturing\nany continuations to the outside.\"\n  (list #'%%push-subcont-barrier (list* #'lambda () forms)))\n\n(defconstant +default-prompt+ 'default-prompt\n  \"This prompt is used for general coroutine-like use of continuations.\")\n";
 
 /***/ }),
@@ -1065,7 +28,6 @@ module.exports = ";;;                                                     -*- Li
   \****************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Condition System\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;; This file implements a condition system in the style of Common\n;; Lisp.\n;;\n;; Implementation Notes\n;; --------------------\n;;\n;; Condition handling and restart handling share some similarities\n;; while also being quite different in other respects.\n;;\n;; The main similarities between condition and restart handling are:\n;;\n;; * Both condition and restart handlers are arranged in\n;;   dynamically-bound handler chains, consisting of individual\n;;   handler frames.  Each frame binds a number of handlers.  We use\n;;   two dynamic variables, `*condition-handler-frame?*' and\n;;   `*restart-handler-frame?*', to point at the innermost frame of\n;;   each chain.  Note that the variables hold options, as indicated\n;;   by the question mark.\n;;\n;; * Signalling a condition and invoking a restart are very similar\n;;   operations, in that a handler is looked up in the chain, and\n;;   then its handler function is invoked.\n;;\n;; The main differences:\n;;\n;; * Conditions are classes organized in a type hierarchy\n;;   (e.g. `type-error' as subtype of `error'), whereas restarts are\n;;   plain names (e.g. `abort' and `continue').\n;;\n;; * A condition handler function always receives only a single\n;;   argument, the condition, whereas a restart handler function\n;;   receives any number of arguments passed to `invoke-restart'.\n;;\n;; * A condition handler function may decline handling a condition by\n;;   returning normally instead of performing a nonlocal exit; this\n;;   causes the search for a handler to continue.  In contrast, if a\n;;   restart handler function returns normally, the restart is\n;;   considered handled, and its result value is returned from\n;;   `invoke-restart'.\n;;\n;; * A restart handler may optionally have an interactive function\n;;   that prompts the user for arguments when the restart is invoked\n;;   by `invoke-restart-interactively'.\n;;\n;; * A restart handler may optionally be associated with a list of\n;;   conditions, to tell apart restarts belonging to different,\n;;   concurrently signalled conditions.\n;;\n;; We follow the Common Lisp condition system quite closely\n;; (including details like the condition firewall), with two\n;; differences:\n;;\n;; 1) There is no `with-condition-restarts'.  Instead there is an\n;;    additional keyword, `:associated-conditions', in the\n;;    handler-specs of `restart-bind' and `restart-case' that\n;;    establishes the associations.  Alternatively, `signal' and\n;;    `error' also support the establishment of restart handlers\n;;    associated with the signalled condition.\n;;\n;; 2) Every restart must have a non-nil name; anonymous restarts\n;;    are not supported.\n\n(defclass handler-frame ()\n  (handlers\n   parent-frame?)\n  (:documentation \"Instances of this class make up the condition and\nrestart handler chains.  Each frame stores a list of HANDLERS and an\noptional PARENT-FRAME?.\"))\n\n(defclass condition-handler ()\n  (condition-class\n   handler-function)\n  (:documentation \"A condition handler is handling a particular\nCONDITION-CLASS (can be `object' to handle all conditions).  The\nHANDLER-FUNCTION receives a signalled condition as its single\nargument.\"))\n\n(defclass restart-handler ()\n  (restart-name\n   handler-function\n   interactive-function?\n   associated-conditions)\n  (:documentation \"A restart handler is handling a particular\nRESTART-NAME.  The HANDLER-FUNCTION receives the arguments passed to\n`invoke-restart'.  The optional INTERACTIVE-FUNCTION? is called by\n`invoke-restart-interactively' and should prompt the user for required\narguments.  The ASSOCIATED-CONDITIONS are a list of conditions with\nwhich this handler is associated.  If the list is empty, the handler\nis applicable to any condition.  If it's not empty, the handler is\napplicable only to conditions in the list.\"))\n\n(defdynamic *condition-handler-frame?* #nil\n  \"An option holding the innermost condition handler frame.\")\n\n(defdynamic *restart-handler-frame?* #nil\n  \"An option holding the innermost restart handler frame.\")\n\n(defun lispx::make-handler-bind-operator (#'handler-spec-parser handler-frame-dynamic)\n  \"Metaprogramming utility to create `handler-bind' and `restart-bind'.\nIt is parameterized by a function that takes apart the handler\nspecifications of the `handler-bind' and `restart-bind' forms and\nproduces handlers from them, as well as the dynamic variable holding\nthe handler chain (the variable itself as a first class object, not\nits value, so it can be used with `progv').\"\n  (vau (handler-specs . forms) env\n    (let ((handler-frame (make-instance\n                          (class handler-frame)\n                          :handlers (mapcar (lambda (spec)\n                                              (handler-spec-parser spec env))\n                                            handler-specs)\n                          :parent-frame? (dynamic handler-frame-dynamic))))\n      (progv (list handler-frame-dynamic) (list (some handler-frame))\n        (eval (list* #'progn forms) env)))))\n\n(def #'handler-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((class-name function-form) env)\n     (make-instance (class condition-handler)\n                    :condition-class\n                    (the class (find-class class-name env))\n                    :handler-function\n                    (the function (eval function-form env))))\n   *condition-handler-frame?*)\n  \"Establish condition handlers specified by HANDLER-SPECS around FORMS.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (condition-class handler-function))\")\n\n(def #'restart-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((restart-name function-form . properties) env)\n     (make-instance (class restart-handler)\n                    :restart-name\n                    (the symbol restart-name)\n                    :handler-function\n                    (the function (eval function-form env))\n                    :interactive-function?\n                    (when-option (i-f-form (get? properties :interactive-function))\n                      (some (the function (eval i-f-form env))))\n                    :associated-conditions\n                    (when-option (a-cs-form (get? properties :associated-conditions))\n                      (the list (eval a-cs-form env)))))\n   *restart-handler-frame?*)\n  \"Establish restart handlers specified by HANDLER-SPECS around FORMS.\nYou should usually prefer `restart-case'.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (restart-name handler-function . properties))\n$(syntax properties (&key interactive-function associated-conditions))\")\n\n(defun lispx::make-handler-case-operator (#'handler-bind-operator)\n  \"Metaprogramming utility to create `handler-case'/`restart-case'\nfrom `handler-bind'/`restart-bind'.  The `*-case' operators unwind the\nstack before the handler is called.  We do this with an outer exit and\nan inner trampoline, both wrapped around the original `*-bind'\noperator (a similar technique is described in the Common Lisp spec for\n`handler-case').  The`*-bind' operator's handler functions are\nreplaced with functions that jump into the trampoline, and call the\noriginal handler functions there.  If no condition is signalled / no\nrestart is invoked during evaluation of the body forms, we immediately\nreturn from the outer exit, jumping across and ignoring the\ntrampoline.  If on the other hand a condition is signalled / a restart\nis invoked, we unwind the stack out of the `*-bind' form by jumping\ninto the trampoline, and call the handler there.\"\n  (vau (handler-specs . forms) env\n    (block exit\n      ((block trampoline\n         (eval (list #'handler-bind-operator\n                     (mapcar (lambda ((name function-form . properties))\n                               (list* name\n                                      (lambda args\n                                        (return-from trampoline\n                                                     (lambda ()\n                                                       (apply (eval function-form env) args))))\n                                      properties))\n                             handler-specs)\n                     (list #'return-from exit (list* #'progn forms)))\n               env))))))\n\n(def #'handler-case (lispx::make-handler-case-operator #'handler-bind)\n  \"Like `handler-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(def #'restart-case (lispx::make-handler-case-operator #'restart-bind)\n  \"Like `restart-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(defun lispx::signal (condition)\n  \"Utility to signal the CONDITION.  If the signal is unhandled,\nreturn void.  See `signal'.\"\n  (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))\n    ;; Payload to `lispx::find-handler?' is always nil for condition handlers.\n    (if-option ((handler frame) (lispx::find-handler? condition handler-frame? #nil))\n      (progn\n        ;; Handler found; call it, passing along frame.\n        (lispx::call-condition-handler handler frame condition)\n        ;; Signal unhandled: continue search for handlers.\n        (-signal- (slot-value frame 'parent-frame?)))\n      ;; No handler found, return void.\n      #void)))\n\n(defun lispx::call-condition-handler (handler handler-frame condition)\n  \"Call a condition HANDLER's handler function with the given\nCONDITION.  During the call, the condition handler chain gets swapped\nto that chain that was active at the time the handler was established.\nThis is the so-called \\\"condition firewall\\\".  The chain gets passed\nin as the value of HANDLER-FRAME.\"\n  (dynamic-let ((*condition-handler-frame?* (slot-value handler-frame 'parent-frame?)))\n    (lispx::apply-handler-function handler (list condition))))\n\n(defun lispx::apply-handler-function (handler arguments)\n  \"Utility to call a condition or restart HANDLER's handler function\nwith a list of ARGUMENTS.\"\n  (apply (slot-value handler 'handler-function) arguments))\n\n(defun lispx::error (condition)\n  \"Utility to signal the CONDITION.  If the condition is unhandled,\ninvoke the debugger.  Therefore never returns normally.  See `error'.\"\n  (lispx::signal condition)\n  (invoke-debugger condition))\n\n(defun invoke-debugger (condition)\n  \"Invoke the debugger, which currently just means panicking.\"\n  (panic condition))\n\n(defun lispx::make-signal-with-restarts-operator (#'signal-operator)\n  \"Metaprogramming utility to create the `signal'/`error' operators\nthat take restart handler-specs from the `lispx::signal'/`lispx::error'\nones that don't.\"\n  ;; What we're doing here:\n  ;; A call to `signal' (or `error') with restart handler specs like:\n  ;; (signal some-condition (continue (lambda () ...)))\n  ;; is turned into:\n  ;; (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))\n  ;;   (lispx::signal some-condition))\n  (vau (condition . handler-specs) env\n    (let ((c (eval condition env)))\n      (flet ((append-associated-condition (handler-spec)\n               (append handler-spec (list :associated-conditions (list #'list c)))))\n        (eval (list #'restart-case (mapcar #'append-associated-condition handler-specs)\n                    (list #'signal-operator c))\n              env)))))\n\n(def #'signal (lispx::make-signal-with-restarts-operator #'lispx::signal)\n  \"Signal the CONDITION.  If the signal is unhandled, return void.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(def #'error (lispx::make-signal-with-restarts-operator #'lispx::error)\n  \"Signal the CONDITION.  If the condition is unhandled, invoke the\ndebugger.  Therefore never returns normally.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(defun invoke-restart (restart-designator . arguments)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', with the given ARGUMENTS.  Signal an\nerror if the restart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (#ignore) arguments)))\n\n(defun invoke-restart-interactively (restart-designator)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', by prompting the user for arguments via\nthe restart's optional interactive function.  Signal an error if the\nrestart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (restart-handler)\n     (when-option (#'i-f (slot-value restart-handler 'interactive-function?))\n       (i-f)))))\n\n(defun lispx::invoke-restart-with-arguments-producing-function (restart-designator #'function)\n  \"Utility to invoke the restart designated by RESTART-DESIGNATOR,\nwhich can be a symbol or a `restart-handler', with an arguments list\nproduced by FUNCTION (which receives a `restart-handler' as argument).\"\n  (typecase restart-designator\n    (symbol\n     (if-option (restart-handler (find-restart? restart-designator))\n       (lispx::apply-handler-function restart-handler (function restart-handler))\n       (error (make-restart-error restart-designator))))\n    (restart-handler\n     (lispx::apply-handler-function restart-designator (function restart-designator)))\n    (object\n     (error (make-type-error restart-designator '(or symbol restart-handler))))))\n\n(defun lispx::find-handler? (object handler-frame? payload?)\n  \"Utility to find both condition handlers and restart handlers.\nThe OBJECT can be either a condition or a restart name.  The\nHANDLER-FRAME is the handler frame where the search should start\n(always the innermost handler frame at the start of the search).\n\nReturn an option of the found handler and the frame establishing it as\na two-element list.  The frame is needed so that we can access its\nparent in the implementation of the condition firewall (see\n`lispx::signal' and `lispx::call-condition-handler').\n\nThe PAYLOAD? parameter can be used to pass in an optional condition if\nwe are looking for a restart handler (see `find-restart?').  If we are\nlooking for a condition handler, it is always nil.\"\n  (when-option (handler-frame handler-frame?)\n    (block found\n      (dolist (handler (slot-value handler-frame 'handlers))\n        (when (lispx::handler-applicable-p handler object payload?)\n          (return-from found (some (list handler handler-frame)))))\n      (lispx::find-handler? object (slot-value handler-frame 'parent-frame?) payload?))))\n\n(defun find-restart? (name . condition?)\n  \"Find a restart handler by NAME, optionally limited to restarts\nassociated with a particular CONDITION?.\"\n  (when-option ((handler #ignore) (lispx::find-handler?\n                                   name\n                                   (dynamic *restart-handler-frame?*)\n                                   condition?))\n    (some handler)))\n\n(defgeneric lispx::handler-applicable-p (handler object payload?)\n  (:documentation \"Return true if a condition or restart HANDLER is\napplicable, false otherwise.  The OBJECT can be a condition or a\nrestart name.  The PAYLOAD? is only used for restart handlers, and\nalways nil for condition handlers.\"))\n\n(defmethod lispx::handler-applicable-p ((handler condition-handler) condition #nil)\n  \"A condition handler is applicable if the condition is an instance\nof its condition class.\"\n  (typep condition (slot-value handler 'condition-class)))\n\n(defmethod lispx::handler-applicable-p ((handler restart-handler) restart-name condition?)\n  \"A restart handler is applicable to a restart name and optional condition...\"\n  ;; ...if the restart name matches the handler's restart name, and...\n  (and (eq restart-name (slot-value handler 'restart-name))\n       ;; ...the handler is applicable to the condition.\n       (lispx::restart-handler-applicable-to-condition-p handler condition?)))\n\n(defun lispx::restart-handler-applicable-to-condition-p (handler condition?)\n  \"A restart handler is applicable to an optional condition...\"\n  (if-option (condition condition?)\n    ;; ...if we are looking for restarts associated with a\n    ;; particular condition...\n    (let ((a-cs (slot-value handler 'associated-conditions)))\n      (if (null a-cs)\n          ;; ...if the restart handler is not associated with\n          ;; particular conditions,...\n          #t\n          ;; ...or if the condition we are looking is one of the\n          ;; handler's associated conditions.\n          (memberp condition a-cs :test #'eq)))\n    ;; ...if we are not looking for restarts associated with a\n    ;; particular condition then every handler is applicable.\n    #t))\n\n(defun compute-restarts condition?\n  \"Return the list of currently active restarts, with most recently\nestablished ones first, optionally limited to those that are\nexplicitly associated with the supplied CONDITION? or not associated\nwith any condition.\"\n  (loop-let -compute-restarts- ((restarts '())\n                                (handler-frame? (dynamic *restart-handler-frame?*)))\n    (if-option (handler-frame handler-frame?)\n      (-compute-restarts- (append restarts\n                                  (remove-if\n                                   (lambda (restart)\n                                     (not (lispx::restart-handler-applicable-to-condition-p\n                                           restart condition?)))\n                                   (slot-value handler-frame 'handlers)))\n                          (slot-value handler-frame 'parent-frame?))\n      restarts)))\n\n(defclass restart-error (error)\n  (restart-name)\n  (:documentation \"Signalled when no handler for RESTART-NAME is found.\"))\n\n(defun make-restart-error (restart-name)\n  \"Create a new `restart-error' for the given RESTART-NAME.\"\n  (make-instance (class restart-error) :restart-name restart-name))\n\n(defclass simple-error (error)\n  (message)\n  (:documentation \"Class for simple errors with a MESSAGE.\"))\n\n(defun make-simple-error (message)\n  \"Create a new simple error with a MESSAGE.\"\n  (make-instance (class simple-error) :message message))\n\n(defun simple-error (message)\n  \"Signal a simple error with a MESSAGE.\"\n  (error (make-simple-error message)))\n";
 
 /***/ }),
@@ -1076,7 +38,6 @@ module.exports = ";;;                                                     -*- Li
   \**********************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX JavaScript Interface\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun js-eq (a b)\n  \"Return true if the values A and B are equal per JavaScript's strict\nequality, false otherwise.\"\n  (eq a b))\n\n(defun apply-js-function (js-function arguments)\n  \"Call JS-FUNCTION with a list of ARGUMENTS.\"\n  (apply (to-lisp-function js-function) arguments))\n\n(defun call-js-function (js-function . arguments)\n  \"Call JS-FUNCTION with the rest ARGUMENTS.\"\n  (apply-js-function js-function arguments))\n\n(defmacro js-lambda (parameter-tree . forms)\n  \"Construct a lambda with the given PARAMETER-TREE and body FORMS\nthat's callable from JS.\"\n  (list #'to-js-function\n        (list #'lambda parameter-tree\n              ;; Push a barrier around the body forms to prevent\n              ;; continuations from escaping to JS.\n              (list* #'push-subcont-barrier\n                     forms))))\n\n(defun js-global (name)\n  \"Access a JS global by NAME (a string).  Return undefined if the\nglobal doesn't exist.\"\n  (%%js-global name))\n\n(defun js-new (constructor . arguments)\n  \"Call the JS CONSTRUCTOR function with ARGUMENTS.\"\n  (apply #'%%js-new (cons constructor arguments)))\n\n(defun js-get (object name)\n  \"Access a property of a JS object by NAME (a string).\"\n  (%%js-get object name))\n\n(defun to-lisp-boolean (js-boolean)\n  \"Convert the JS-BOOLEAN to a Lisp boolean.\"\n  (%%to-lisp-boolean js-boolean))\n\n(defun to-js-boolean (lisp-boolean)\n  \"Convert the LISP-BOOLEAN to a JS boolean.\"\n  (%%to-js-boolean lisp-boolean))\n\n(defun to-lisp-number (js-number)\n  \"Convert the JS-NUMBER to a Lisp number.\"\n  (%%to-lisp-number js-number))\n\n(defun to-js-number (lisp-number)\n  \"Convert the LISP-NUMBER to a JS number.\"\n  (%%to-js-number lisp-number))\n\n(defun to-lisp-string (js-string)\n  \"Convert the JS-STRING to a Lisp string.\"\n  (%%to-lisp-string js-string))\n\n(defun to-js-string (lisp-string)\n  \"Convert the LISP-STRING to a JS string.\"\n  (%%to-js-string lisp-string))\n\n(defun to-lisp-function (js-function)\n  \"Convert the JS-FUNCTION to a Lisp function.\"\n  (%%to-lisp-function js-function))\n\n(defun to-js-function (lisp-operator)\n  \"Convert the LISP-OPERATOR to a JS function.\"\n  (%%to-js-function lisp-operator))\n\n(defun list-to-js-array (list)\n  \"Turn a list into a JS array.\"\n  (%%list-to-js-array list))\n\n(defun js-array-to-list (array)\n  \"Turn a JS array into a list.\"\n  (%%js-array-to-list array))\n\n(defun js-array elements\n  \"Create a new JS array from the given elements.\"\n  (list-to-js-array elements))\n\n(defmethod elt ((seq object) index)\n  \"`elt' for JS arrays.  We must put the method on `object' because we\ndon't have a more precise type for them.\"\n  (if (or (< index 0) (>= index (length seq)))\n      (error (make-instance #^out-of-bounds-error))\n      (%%js-elt seq index)))\n\n(defmethod length ((seq object))\n  \"`length' for JS arrays.\"\n  (to-lisp-number (js-get seq \"length\")))\n\n(defun apply-js-method (receiver name arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the list of ARGUMENTS.\"\n  (%%apply-js-method receiver name arguments))\n\n(defun call-js-method (receiver name . arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the rest ARGUMENTS.\"\n  (apply #'apply-js-method (list receiver name arguments)))\n\n(defun js-method (method-name)\n  \"Create a function that when called will call the specified method.\"\n  (lambda (receiver . arguments)\n    (apply-js-method receiver method-name arguments)))\n\n(defmacro define-js-method (name method-name)\n  \"Define a new function with the given NAME (a symbol) that invokes a\nJS method named METHOD-NAME (a string).  The function takes one or\nmore arguments.  The first argument is the receiver of the method\ncall (\\\"this\\\"), the rest are the normal method arguments.\"\n  (list #'def (function-symbol name) (js-method method-name)))\n\n(defun js-undefined-option (value)\n  \"Turn a value that may be undefined into an option.\"\n  (if (eq value +js-undefined+)\n      #nil\n      (some value)))\n\n(defun js-null-option (value)\n  \"Turn a value that may be null into an option.\"\n  (if (eq value +js-null+)\n      #nil\n      (some value)))\n\n(defun await (promise)\n  \"Wait for the PROMISE to become fulfilled or rejected.\"\n  ;; Capture to the default prompt, and...\n  (take-subcont +default-prompt+ k\n    ;; ...return a new promise there.  From the caller's perspective,\n    ;; we are now paused -- but from context's perspective, we are\n    ;; returning a promise.  See `deftest' for how this nicely\n    ;; interacts with promise-based test frameworks.\n    (call-js-method promise \"then\"\n                    (js-lambda (value)\n                      ;; When the original promise is fulfilled with a\n                      ;; value, reinstate the continuation, returning\n                      ;; the value where `await' was called.\n                      (push-delim-subcont +default-prompt+ k value))\n                    (js-lambda (error)\n                      ;; When the original promise is rejected,\n                      ;; reinstate the continuation, signalling an\n                      ;; error where `await' was called.\n                      (push-delim-subcont +default-prompt+ k (error error))))))\n\n(defun sync (#'fun)\n  \"Create a function that will await an underlying function.\"\n  (lambda args (await (apply #'fun args))))\n\n(defmacro define-js-method/sync (name method-name)\n  \"Like `define-js-method', but awaits the method result.\"\n  (list #'def (function-symbol name) (sync (js-method method-name))))\n\n(defun sleep (ms)\n  \"Sleep for some milliseconds.\"\n  (await (%%sleep ms)))\n\n(defun js-log arguments\n  \"Log the ARGUMENTS to the JS console.\"\n  (apply #'%%js-log arguments))\n";
 
 /***/ }),
@@ -1087,7 +48,6 @@ module.exports = ";;;                                                     -*- Li
   \*************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Printer\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n$(fn (object &key stream))\"\n  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (print1 object)\n    (force-output)))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (uprint1 object)\n    (force-output)))\n";
 
 /***/ }),
@@ -1098,7 +58,6 @@ module.exports = ";;;                                                     -*- Li
   \************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Reader\n;;;\n\n;; Copyright (c) 2021 Manuel J. Simoni\n\n(defun read arguments\n  \"Reads an object from the STREAM (which defaults to\n`*standard-input*').  If EOF is reached, and `eof-error-p' is true\n(the default), `end-of-file' is signalled. If it is false, `eof-value'\nis returned (it defaults to void).\n$(fn (&optional stream eof-error-p eof-value))\"\n  (apply #'stream-read (optionals arguments (dynamic *standard-input*) #t #void)))\n\n;;; Unstable/Experimental API:\n\n(defgeneric stream-read (stream eof-error-p eof-value)\n  (:documentation \"Underlying, generic implementation of `read'.\nEvery stream class can provide a specialized method.\"))\n\n(defmethod stream-read ((stream input-stream) eof-error-p eof-value)\n  \"The default implementation of `stream-read' calls a built-in\nfunction written in JS.\"\n  (%%read stream eof-error-p eof-value))\n";
 
 /***/ }),
@@ -1109,8 +68,1049 @@ module.exports = ";;;                                                     -*- Li
   \**************************/
 /***/ ((module) => {
 
-"use strict";
 module.exports = ";;;                                                     -*- Lisp -*-\n;;; LispX Streams\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; String Input Streams\n\n(defun make-string-input-stream (string)\n  \"Create a string input stream that reads from STRING.\"\n  (%%make-string-input-stream string))\n\n(defexpr with-standard-input-from-string (string . forms) env\n  \"Evaluate FORMS with `*standard-input*' coming from STRING.\"\n  (let ((s (eval string env)))\n    (dynamic-let ((*standard-input* (make-string-input-stream s)))\n      (eval (list* #'progn forms) env))))\n\n;;; String Output Streams\n\n(defun make-string-output-stream ()\n  \"Construct an empty string output stream.\"\n  (%%make-string-output-stream))\n\n(defun get-output-stream-string (stream)\n  \"Return the contents of the string output STREAM.\"\n  (%%get-output-stream-string stream))\n\n(defexpr with-standard-output-to-string forms env\n  \"Evaluate FORMS with `*standard-output*' being collected in a string.\"\n  (dynamic-let ((*standard-output* (make-string-output-stream)))\n    (eval (list* #'progn forms) env)\n    (get-output-stream-string (dynamic *standard-output*))))\n\n;;; Miscellaneous\n\n(defun fresh-line stream?\n  \"Ensure that the following output appears on a new line by itself.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%%fresh-line (optional stream? (dynamic *standard-output*))))\n\n(defun force-output stream?\n  \"Initiate the emptying of any internal buffers but don't wait for them to finish.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%%force-output (optional stream? (dynamic *standard-output*))))\n";
+
+/***/ }),
+
+/***/ "./node_modules/big.js/big.mjs":
+/*!*************************************!*\
+  !*** ./node_modules/big.js/big.mjs ***!
+  \*************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Big": () => (/* binding */ Big),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/*
+ *  big.js v6.2.1
+ *  A small, fast, easy-to-use library for arbitrary-precision decimal arithmetic.
+ *  Copyright (c) 2022 Michael Mclaughlin
+ *  https://github.com/MikeMcl/big.js/LICENCE.md
+ */
+
+
+/************************************** EDITABLE DEFAULTS *****************************************/
+
+
+  // The default values below must be integers within the stated ranges.
+
+  /*
+   * The maximum number of decimal places (DP) of the results of operations involving division:
+   * div and sqrt, and pow with negative exponents.
+   */
+var DP = 20,          // 0 to MAX_DP
+
+  /*
+   * The rounding mode (RM) used when rounding to the above decimal places.
+   *
+   *  0  Towards zero (i.e. truncate, no rounding).       (ROUND_DOWN)
+   *  1  To nearest neighbour. If equidistant, round up.  (ROUND_HALF_UP)
+   *  2  To nearest neighbour. If equidistant, to even.   (ROUND_HALF_EVEN)
+   *  3  Away from zero.                                  (ROUND_UP)
+   */
+  RM = 1,             // 0, 1, 2 or 3
+
+  // The maximum value of DP and Big.DP.
+  MAX_DP = 1E6,       // 0 to 1000000
+
+  // The maximum magnitude of the exponent argument to the pow method.
+  MAX_POWER = 1E6,    // 1 to 1000000
+
+  /*
+   * The negative exponent (NE) at and beneath which toString returns exponential notation.
+   * (JavaScript numbers: -7)
+   * -1000000 is the minimum recommended exponent value of a Big.
+   */
+  NE = -7,            // 0 to -1000000
+
+  /*
+   * The positive exponent (PE) at and above which toString returns exponential notation.
+   * (JavaScript numbers: 21)
+   * 1000000 is the maximum recommended exponent value of a Big, but this limit is not enforced.
+   */
+  PE = 21,            // 0 to 1000000
+
+  /*
+   * When true, an error will be thrown if a primitive number is passed to the Big constructor,
+   * or if valueOf is called, or if toNumber is called on a Big which cannot be converted to a
+   * primitive number without a loss of precision.
+   */
+  STRICT = false,     // true or false
+
+
+/**************************************************************************************************/
+
+
+  // Error messages.
+  NAME = '[big.js] ',
+  INVALID = NAME + 'Invalid ',
+  INVALID_DP = INVALID + 'decimal places',
+  INVALID_RM = INVALID + 'rounding mode',
+  DIV_BY_ZERO = NAME + 'Division by zero',
+
+  // The shared prototype object.
+  P = {},
+  UNDEFINED = void 0,
+  NUMERIC = /^-?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
+
+
+/*
+ * Create and return a Big constructor.
+ */
+function _Big_() {
+
+  /*
+   * The Big constructor and exported function.
+   * Create and return a new instance of a Big number object.
+   *
+   * n {number|string|Big} A numeric value.
+   */
+  function Big(n) {
+    var x = this;
+
+    // Enable constructor usage without new.
+    if (!(x instanceof Big)) return n === UNDEFINED ? _Big_() : new Big(n);
+
+    // Duplicate.
+    if (n instanceof Big) {
+      x.s = n.s;
+      x.e = n.e;
+      x.c = n.c.slice();
+    } else {
+      if (typeof n !== 'string') {
+        if (Big.strict === true && typeof n !== 'bigint') {
+          throw TypeError(INVALID + 'value');
+        }
+
+        // Minus zero?
+        n = n === 0 && 1 / n < 0 ? '-0' : String(n);
+      }
+
+      parse(x, n);
+    }
+
+    // Retain a reference to this Big constructor.
+    // Shadow Big.prototype.constructor which points to Object.
+    x.constructor = Big;
+  }
+
+  Big.prototype = P;
+  Big.DP = DP;
+  Big.RM = RM;
+  Big.NE = NE;
+  Big.PE = PE;
+  Big.strict = STRICT;
+  Big.roundDown = 0;
+  Big.roundHalfUp = 1;
+  Big.roundHalfEven = 2;
+  Big.roundUp = 3;
+
+  return Big;
+}
+
+
+/*
+ * Parse the number or string value passed to a Big constructor.
+ *
+ * x {Big} A Big number instance.
+ * n {number|string} A numeric value.
+ */
+function parse(x, n) {
+  var e, i, nl;
+
+  if (!NUMERIC.test(n)) {
+    throw Error(INVALID + 'number');
+  }
+
+  // Determine sign.
+  x.s = n.charAt(0) == '-' ? (n = n.slice(1), -1) : 1;
+
+  // Decimal point?
+  if ((e = n.indexOf('.')) > -1) n = n.replace('.', '');
+
+  // Exponential form?
+  if ((i = n.search(/e/i)) > 0) {
+
+    // Determine exponent.
+    if (e < 0) e = i;
+    e += +n.slice(i + 1);
+    n = n.substring(0, i);
+  } else if (e < 0) {
+
+    // Integer.
+    e = n.length;
+  }
+
+  nl = n.length;
+
+  // Determine leading zeros.
+  for (i = 0; i < nl && n.charAt(i) == '0';) ++i;
+
+  if (i == nl) {
+
+    // Zero.
+    x.c = [x.e = 0];
+  } else {
+
+    // Determine trailing zeros.
+    for (; nl > 0 && n.charAt(--nl) == '0';);
+    x.e = e - i - 1;
+    x.c = [];
+
+    // Convert string to array of digits without leading/trailing zeros.
+    for (e = 0; i <= nl;) x.c[e++] = +n.charAt(i++);
+  }
+
+  return x;
+}
+
+
+/*
+ * Round Big x to a maximum of sd significant digits using rounding mode rm.
+ *
+ * x {Big} The Big to round.
+ * sd {number} Significant digits: integer, 0 to MAX_DP inclusive.
+ * rm {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ * [more] {boolean} Whether the result of division was truncated.
+ */
+function round(x, sd, rm, more) {
+  var xc = x.c;
+
+  if (rm === UNDEFINED) rm = x.constructor.RM;
+  if (rm !== 0 && rm !== 1 && rm !== 2 && rm !== 3) {
+    throw Error(INVALID_RM);
+  }
+
+  if (sd < 1) {
+    more =
+      rm === 3 && (more || !!xc[0]) || sd === 0 && (
+      rm === 1 && xc[0] >= 5 ||
+      rm === 2 && (xc[0] > 5 || xc[0] === 5 && (more || xc[1] !== UNDEFINED))
+    );
+
+    xc.length = 1;
+
+    if (more) {
+
+      // 1, 0.1, 0.01, 0.001, 0.0001 etc.
+      x.e = x.e - sd + 1;
+      xc[0] = 1;
+    } else {
+
+      // Zero.
+      xc[0] = x.e = 0;
+    }
+  } else if (sd < xc.length) {
+
+    // xc[sd] is the digit after the digit that may be rounded up.
+    more =
+      rm === 1 && xc[sd] >= 5 ||
+      rm === 2 && (xc[sd] > 5 || xc[sd] === 5 &&
+        (more || xc[sd + 1] !== UNDEFINED || xc[sd - 1] & 1)) ||
+      rm === 3 && (more || !!xc[0]);
+
+    // Remove any digits after the required precision.
+    xc.length = sd;
+
+    // Round up?
+    if (more) {
+
+      // Rounding up may mean the previous digit has to be rounded up.
+      for (; ++xc[--sd] > 9;) {
+        xc[sd] = 0;
+        if (sd === 0) {
+          ++x.e;
+          xc.unshift(1);
+          break;
+        }
+      }
+    }
+
+    // Remove trailing zeros.
+    for (sd = xc.length; !xc[--sd];) xc.pop();
+  }
+
+  return x;
+}
+
+
+/*
+ * Return a string representing the value of Big x in normal or exponential notation.
+ * Handles P.toExponential, P.toFixed, P.toJSON, P.toPrecision, P.toString and P.valueOf.
+ */
+function stringify(x, doExponential, isNonzero) {
+  var e = x.e,
+    s = x.c.join(''),
+    n = s.length;
+
+  // Exponential notation?
+  if (doExponential) {
+    s = s.charAt(0) + (n > 1 ? '.' + s.slice(1) : '') + (e < 0 ? 'e' : 'e+') + e;
+
+  // Normal notation.
+  } else if (e < 0) {
+    for (; ++e;) s = '0' + s;
+    s = '0.' + s;
+  } else if (e > 0) {
+    if (++e > n) {
+      for (e -= n; e--;) s += '0';
+    } else if (e < n) {
+      s = s.slice(0, e) + '.' + s.slice(e);
+    }
+  } else if (n > 1) {
+    s = s.charAt(0) + '.' + s.slice(1);
+  }
+
+  return x.s < 0 && isNonzero ? '-' + s : s;
+}
+
+
+// Prototype/instance methods
+
+
+/*
+ * Return a new Big whose value is the absolute value of this Big.
+ */
+P.abs = function () {
+  var x = new this.constructor(this);
+  x.s = 1;
+  return x;
+};
+
+
+/*
+ * Return 1 if the value of this Big is greater than the value of Big y,
+ *       -1 if the value of this Big is less than the value of Big y, or
+ *        0 if they have the same value.
+ */
+P.cmp = function (y) {
+  var isneg,
+    x = this,
+    xc = x.c,
+    yc = (y = new x.constructor(y)).c,
+    i = x.s,
+    j = y.s,
+    k = x.e,
+    l = y.e;
+
+  // Either zero?
+  if (!xc[0] || !yc[0]) return !xc[0] ? !yc[0] ? 0 : -j : i;
+
+  // Signs differ?
+  if (i != j) return i;
+
+  isneg = i < 0;
+
+  // Compare exponents.
+  if (k != l) return k > l ^ isneg ? 1 : -1;
+
+  j = (k = xc.length) < (l = yc.length) ? k : l;
+
+  // Compare digit by digit.
+  for (i = -1; ++i < j;) {
+    if (xc[i] != yc[i]) return xc[i] > yc[i] ^ isneg ? 1 : -1;
+  }
+
+  // Compare lengths.
+  return k == l ? 0 : k > l ^ isneg ? 1 : -1;
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big divided by the value of Big y, rounded,
+ * if necessary, to a maximum of Big.DP decimal places using rounding mode Big.RM.
+ */
+P.div = function (y) {
+  var x = this,
+    Big = x.constructor,
+    a = x.c,                  // dividend
+    b = (y = new Big(y)).c,   // divisor
+    k = x.s == y.s ? 1 : -1,
+    dp = Big.DP;
+
+  if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
+    throw Error(INVALID_DP);
+  }
+
+  // Divisor is zero?
+  if (!b[0]) {
+    throw Error(DIV_BY_ZERO);
+  }
+
+  // Dividend is 0? Return +-0.
+  if (!a[0]) {
+    y.s = k;
+    y.c = [y.e = 0];
+    return y;
+  }
+
+  var bl, bt, n, cmp, ri,
+    bz = b.slice(),
+    ai = bl = b.length,
+    al = a.length,
+    r = a.slice(0, bl),   // remainder
+    rl = r.length,
+    q = y,                // quotient
+    qc = q.c = [],
+    qi = 0,
+    p = dp + (q.e = x.e - y.e) + 1;    // precision of the result
+
+  q.s = k;
+  k = p < 0 ? 0 : p;
+
+  // Create version of divisor with leading zero.
+  bz.unshift(0);
+
+  // Add zeros to make remainder as long as divisor.
+  for (; rl++ < bl;) r.push(0);
+
+  do {
+
+    // n is how many times the divisor goes into current remainder.
+    for (n = 0; n < 10; n++) {
+
+      // Compare divisor and remainder.
+      if (bl != (rl = r.length)) {
+        cmp = bl > rl ? 1 : -1;
+      } else {
+        for (ri = -1, cmp = 0; ++ri < bl;) {
+          if (b[ri] != r[ri]) {
+            cmp = b[ri] > r[ri] ? 1 : -1;
+            break;
+          }
+        }
+      }
+
+      // If divisor < remainder, subtract divisor from remainder.
+      if (cmp < 0) {
+
+        // Remainder can't be more than 1 digit longer than divisor.
+        // Equalise lengths using divisor with extra leading zero?
+        for (bt = rl == bl ? b : bz; rl;) {
+          if (r[--rl] < bt[rl]) {
+            ri = rl;
+            for (; ri && !r[--ri];) r[ri] = 9;
+            --r[ri];
+            r[rl] += 10;
+          }
+          r[rl] -= bt[rl];
+        }
+
+        for (; !r[0];) r.shift();
+      } else {
+        break;
+      }
+    }
+
+    // Add the digit n to the result array.
+    qc[qi++] = cmp ? n : ++n;
+
+    // Update the remainder.
+    if (r[0] && cmp) r[rl] = a[ai] || 0;
+    else r = [a[ai]];
+
+  } while ((ai++ < al || r[0] !== UNDEFINED) && k--);
+
+  // Leading zero? Do not remove if result is simply zero (qi == 1).
+  if (!qc[0] && qi != 1) {
+
+    // There can't be more than one zero.
+    qc.shift();
+    q.e--;
+    p--;
+  }
+
+  // Round?
+  if (qi > p) round(q, p, Big.RM, r[0] !== UNDEFINED);
+
+  return q;
+};
+
+
+/*
+ * Return true if the value of this Big is equal to the value of Big y, otherwise return false.
+ */
+P.eq = function (y) {
+  return this.cmp(y) === 0;
+};
+
+
+/*
+ * Return true if the value of this Big is greater than the value of Big y, otherwise return
+ * false.
+ */
+P.gt = function (y) {
+  return this.cmp(y) > 0;
+};
+
+
+/*
+ * Return true if the value of this Big is greater than or equal to the value of Big y, otherwise
+ * return false.
+ */
+P.gte = function (y) {
+  return this.cmp(y) > -1;
+};
+
+
+/*
+ * Return true if the value of this Big is less than the value of Big y, otherwise return false.
+ */
+P.lt = function (y) {
+  return this.cmp(y) < 0;
+};
+
+
+/*
+ * Return true if the value of this Big is less than or equal to the value of Big y, otherwise
+ * return false.
+ */
+P.lte = function (y) {
+  return this.cmp(y) < 1;
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big minus the value of Big y.
+ */
+P.minus = P.sub = function (y) {
+  var i, j, t, xlty,
+    x = this,
+    Big = x.constructor,
+    a = x.s,
+    b = (y = new Big(y)).s;
+
+  // Signs differ?
+  if (a != b) {
+    y.s = -b;
+    return x.plus(y);
+  }
+
+  var xc = x.c.slice(),
+    xe = x.e,
+    yc = y.c,
+    ye = y.e;
+
+  // Either zero?
+  if (!xc[0] || !yc[0]) {
+    if (yc[0]) {
+      y.s = -b;
+    } else if (xc[0]) {
+      y = new Big(x);
+    } else {
+      y.s = 1;
+    }
+    return y;
+  }
+
+  // Determine which is the bigger number. Prepend zeros to equalise exponents.
+  if (a = xe - ye) {
+
+    if (xlty = a < 0) {
+      a = -a;
+      t = xc;
+    } else {
+      ye = xe;
+      t = yc;
+    }
+
+    t.reverse();
+    for (b = a; b--;) t.push(0);
+    t.reverse();
+  } else {
+
+    // Exponents equal. Check digit by digit.
+    j = ((xlty = xc.length < yc.length) ? xc : yc).length;
+
+    for (a = b = 0; b < j; b++) {
+      if (xc[b] != yc[b]) {
+        xlty = xc[b] < yc[b];
+        break;
+      }
+    }
+  }
+
+  // x < y? Point xc to the array of the bigger number.
+  if (xlty) {
+    t = xc;
+    xc = yc;
+    yc = t;
+    y.s = -y.s;
+  }
+
+  /*
+   * Append zeros to xc if shorter. No need to add zeros to yc if shorter as subtraction only
+   * needs to start at yc.length.
+   */
+  if ((b = (j = yc.length) - (i = xc.length)) > 0) for (; b--;) xc[i++] = 0;
+
+  // Subtract yc from xc.
+  for (b = i; j > a;) {
+    if (xc[--j] < yc[j]) {
+      for (i = j; i && !xc[--i];) xc[i] = 9;
+      --xc[i];
+      xc[j] += 10;
+    }
+
+    xc[j] -= yc[j];
+  }
+
+  // Remove trailing zeros.
+  for (; xc[--b] === 0;) xc.pop();
+
+  // Remove leading zeros and adjust exponent accordingly.
+  for (; xc[0] === 0;) {
+    xc.shift();
+    --ye;
+  }
+
+  if (!xc[0]) {
+
+    // n - n = +0
+    y.s = 1;
+
+    // Result must be zero.
+    xc = [ye = 0];
+  }
+
+  y.c = xc;
+  y.e = ye;
+
+  return y;
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big modulo the value of Big y.
+ */
+P.mod = function (y) {
+  var ygtx,
+    x = this,
+    Big = x.constructor,
+    a = x.s,
+    b = (y = new Big(y)).s;
+
+  if (!y.c[0]) {
+    throw Error(DIV_BY_ZERO);
+  }
+
+  x.s = y.s = 1;
+  ygtx = y.cmp(x) == 1;
+  x.s = a;
+  y.s = b;
+
+  if (ygtx) return new Big(x);
+
+  a = Big.DP;
+  b = Big.RM;
+  Big.DP = Big.RM = 0;
+  x = x.div(y);
+  Big.DP = a;
+  Big.RM = b;
+
+  return this.minus(x.times(y));
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big negated.
+ */
+P.neg = function () {
+  var x = new this.constructor(this);
+  x.s = -x.s;
+  return x;
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big plus the value of Big y.
+ */
+P.plus = P.add = function (y) {
+  var e, k, t,
+    x = this,
+    Big = x.constructor;
+
+  y = new Big(y);
+
+  // Signs differ?
+  if (x.s != y.s) {
+    y.s = -y.s;
+    return x.minus(y);
+  }
+
+  var xe = x.e,
+    xc = x.c,
+    ye = y.e,
+    yc = y.c;
+
+  // Either zero?
+  if (!xc[0] || !yc[0]) {
+    if (!yc[0]) {
+      if (xc[0]) {
+        y = new Big(x);
+      } else {
+        y.s = x.s;
+      }
+    }
+    return y;
+  }
+
+  xc = xc.slice();
+
+  // Prepend zeros to equalise exponents.
+  // Note: reverse faster than unshifts.
+  if (e = xe - ye) {
+    if (e > 0) {
+      ye = xe;
+      t = yc;
+    } else {
+      e = -e;
+      t = xc;
+    }
+
+    t.reverse();
+    for (; e--;) t.push(0);
+    t.reverse();
+  }
+
+  // Point xc to the longer array.
+  if (xc.length - yc.length < 0) {
+    t = yc;
+    yc = xc;
+    xc = t;
+  }
+
+  e = yc.length;
+
+  // Only start adding at yc.length - 1 as the further digits of xc can be left as they are.
+  for (k = 0; e; xc[e] %= 10) k = (xc[--e] = xc[e] + yc[e] + k) / 10 | 0;
+
+  // No need to check for zero, as +x + +y != 0 && -x + -y != 0
+
+  if (k) {
+    xc.unshift(k);
+    ++ye;
+  }
+
+  // Remove trailing zeros.
+  for (e = xc.length; xc[--e] === 0;) xc.pop();
+
+  y.c = xc;
+  y.e = ye;
+
+  return y;
+};
+
+
+/*
+ * Return a Big whose value is the value of this Big raised to the power n.
+ * If n is negative, round to a maximum of Big.DP decimal places using rounding
+ * mode Big.RM.
+ *
+ * n {number} Integer, -MAX_POWER to MAX_POWER inclusive.
+ */
+P.pow = function (n) {
+  var x = this,
+    one = new x.constructor('1'),
+    y = one,
+    isneg = n < 0;
+
+  if (n !== ~~n || n < -MAX_POWER || n > MAX_POWER) {
+    throw Error(INVALID + 'exponent');
+  }
+
+  if (isneg) n = -n;
+
+  for (;;) {
+    if (n & 1) y = y.times(x);
+    n >>= 1;
+    if (!n) break;
+    x = x.times(x);
+  }
+
+  return isneg ? one.div(y) : y;
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big rounded to a maximum precision of sd
+ * significant digits using rounding mode rm, or Big.RM if rm is not specified.
+ *
+ * sd {number} Significant digits: integer, 1 to MAX_DP inclusive.
+ * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ */
+P.prec = function (sd, rm) {
+  if (sd !== ~~sd || sd < 1 || sd > MAX_DP) {
+    throw Error(INVALID + 'precision');
+  }
+  return round(new this.constructor(this), sd, rm);
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big rounded to a maximum of dp decimal places
+ * using rounding mode rm, or Big.RM if rm is not specified.
+ * If dp is negative, round to an integer which is a multiple of 10**-dp.
+ * If dp is not specified, round to 0 decimal places.
+ *
+ * dp? {number} Integer, -MAX_DP to MAX_DP inclusive.
+ * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ */
+P.round = function (dp, rm) {
+  if (dp === UNDEFINED) dp = 0;
+  else if (dp !== ~~dp || dp < -MAX_DP || dp > MAX_DP) {
+    throw Error(INVALID_DP);
+  }
+  return round(new this.constructor(this), dp + this.e + 1, rm);
+};
+
+
+/*
+ * Return a new Big whose value is the square root of the value of this Big, rounded, if
+ * necessary, to a maximum of Big.DP decimal places using rounding mode Big.RM.
+ */
+P.sqrt = function () {
+  var r, c, t,
+    x = this,
+    Big = x.constructor,
+    s = x.s,
+    e = x.e,
+    half = new Big('0.5');
+
+  // Zero?
+  if (!x.c[0]) return new Big(x);
+
+  // Negative?
+  if (s < 0) {
+    throw Error(NAME + 'No square root');
+  }
+
+  // Estimate.
+  s = Math.sqrt(x + '');
+
+  // Math.sqrt underflow/overflow?
+  // Re-estimate: pass x coefficient to Math.sqrt as integer, then adjust the result exponent.
+  if (s === 0 || s === 1 / 0) {
+    c = x.c.join('');
+    if (!(c.length + e & 1)) c += '0';
+    s = Math.sqrt(c);
+    e = ((e + 1) / 2 | 0) - (e < 0 || e & 1);
+    r = new Big((s == 1 / 0 ? '5e' : (s = s.toExponential()).slice(0, s.indexOf('e') + 1)) + e);
+  } else {
+    r = new Big(s + '');
+  }
+
+  e = r.e + (Big.DP += 4);
+
+  // Newton-Raphson iteration.
+  do {
+    t = r;
+    r = half.times(t.plus(x.div(t)));
+  } while (t.c.slice(0, e).join('') !== r.c.slice(0, e).join(''));
+
+  return round(r, (Big.DP -= 4) + r.e + 1, Big.RM);
+};
+
+
+/*
+ * Return a new Big whose value is the value of this Big times the value of Big y.
+ */
+P.times = P.mul = function (y) {
+  var c,
+    x = this,
+    Big = x.constructor,
+    xc = x.c,
+    yc = (y = new Big(y)).c,
+    a = xc.length,
+    b = yc.length,
+    i = x.e,
+    j = y.e;
+
+  // Determine sign of result.
+  y.s = x.s == y.s ? 1 : -1;
+
+  // Return signed 0 if either 0.
+  if (!xc[0] || !yc[0]) {
+    y.c = [y.e = 0];
+    return y;
+  }
+
+  // Initialise exponent of result as x.e + y.e.
+  y.e = i + j;
+
+  // If array xc has fewer digits than yc, swap xc and yc, and lengths.
+  if (a < b) {
+    c = xc;
+    xc = yc;
+    yc = c;
+    j = a;
+    a = b;
+    b = j;
+  }
+
+  // Initialise coefficient array of result with zeros.
+  for (c = new Array(j = a + b); j--;) c[j] = 0;
+
+  // Multiply.
+
+  // i is initially xc.length.
+  for (i = b; i--;) {
+    b = 0;
+
+    // a is yc.length.
+    for (j = a + i; j > i;) {
+
+      // Current sum of products at this digit position, plus carry.
+      b = c[j] + yc[i] * xc[j - i - 1] + b;
+      c[j--] = b % 10;
+
+      // carry
+      b = b / 10 | 0;
+    }
+
+    c[j] = b;
+  }
+
+  // Increment result exponent if there is a final carry, otherwise remove leading zero.
+  if (b) ++y.e;
+  else c.shift();
+
+  // Remove trailing zeros.
+  for (i = c.length; !c[--i];) c.pop();
+  y.c = c;
+
+  return y;
+};
+
+
+/*
+ * Return a string representing the value of this Big in exponential notation rounded to dp fixed
+ * decimal places using rounding mode rm, or Big.RM if rm is not specified.
+ *
+ * dp? {number} Decimal places: integer, 0 to MAX_DP inclusive.
+ * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ */
+P.toExponential = function (dp, rm) {
+  var x = this,
+    n = x.c[0];
+
+  if (dp !== UNDEFINED) {
+    if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
+      throw Error(INVALID_DP);
+    }
+    x = round(new x.constructor(x), ++dp, rm);
+    for (; x.c.length < dp;) x.c.push(0);
+  }
+
+  return stringify(x, true, !!n);
+};
+
+
+/*
+ * Return a string representing the value of this Big in normal notation rounded to dp fixed
+ * decimal places using rounding mode rm, or Big.RM if rm is not specified.
+ *
+ * dp? {number} Decimal places: integer, 0 to MAX_DP inclusive.
+ * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ *
+ * (-0).toFixed(0) is '0', but (-0.1).toFixed(0) is '-0'.
+ * (-0).toFixed(1) is '0.0', but (-0.01).toFixed(1) is '-0.0'.
+ */
+P.toFixed = function (dp, rm) {
+  var x = this,
+    n = x.c[0];
+
+  if (dp !== UNDEFINED) {
+    if (dp !== ~~dp || dp < 0 || dp > MAX_DP) {
+      throw Error(INVALID_DP);
+    }
+    x = round(new x.constructor(x), dp + x.e + 1, rm);
+
+    // x.e may have changed if the value is rounded up.
+    for (dp = dp + x.e + 1; x.c.length < dp;) x.c.push(0);
+  }
+
+  return stringify(x, false, !!n);
+};
+
+
+/*
+ * Return a string representing the value of this Big.
+ * Return exponential notation if this Big has a positive exponent equal to or greater than
+ * Big.PE, or a negative exponent equal to or less than Big.NE.
+ * Omit the sign for negative zero.
+ */
+P[Symbol.for('nodejs.util.inspect.custom')] = P.toJSON = P.toString = function () {
+  var x = this,
+    Big = x.constructor;
+  return stringify(x, x.e <= Big.NE || x.e >= Big.PE, !!x.c[0]);
+};
+
+
+/*
+ * Return the value of this Big as a primitve number.
+ */
+P.toNumber = function () {
+  var n = Number(stringify(this, true, true));
+  if (this.constructor.strict === true && !this.eq(n.toString())) {
+    throw Error(NAME + 'Imprecise conversion');
+  }
+  return n;
+};
+
+
+/*
+ * Return a string representing the value of this Big rounded to sd significant digits using
+ * rounding mode rm, or Big.RM if rm is not specified.
+ * Use exponential notation if sd is less than the number of digits necessary to represent
+ * the integer part of the value in normal notation.
+ *
+ * sd {number} Significant digits: integer, 1 to MAX_DP inclusive.
+ * rm? {number} Rounding mode: 0 (down), 1 (half-up), 2 (half-even) or 3 (up).
+ */
+P.toPrecision = function (sd, rm) {
+  var x = this,
+    Big = x.constructor,
+    n = x.c[0];
+
+  if (sd !== UNDEFINED) {
+    if (sd !== ~~sd || sd < 1 || sd > MAX_DP) {
+      throw Error(INVALID + 'precision');
+    }
+    x = round(new Big(x), sd, rm);
+    for (; x.c.length < sd;) x.c.push(0);
+  }
+
+  return stringify(x, sd <= x.e || x.e <= Big.NE || x.e >= Big.PE, !!n);
+};
+
+
+/*
+ * Return a string representing the value of this Big.
+ * Return exponential notation if this Big has a positive exponent equal to or greater than
+ * Big.PE, or a negative exponent equal to or less than Big.NE.
+ * Include the sign for negative zero.
+ */
+P.valueOf = function () {
+  var x = this,
+    Big = x.constructor;
+  if (Big.strict === true) {
+    throw Error(NAME + 'valueOf disallowed');
+  }
+  return stringify(x, x.e <= Big.NE || x.e >= Big.PE, true);
+};
+
+
+// Export
+
+
+var Big = _Big_();
+
+/// <reference types="https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/big.js/index.d.ts" />
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Big);
+
 
 /***/ }),
 
@@ -1120,7 +1120,6 @@ module.exports = ";;;                                                     -*- Li
   \*************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_control": () => (/* binding */ init_control)
@@ -1929,7 +1928,6 @@ function init_control(vm)
   \**********************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_eval": () => (/* binding */ init_eval)
@@ -2693,7 +2691,6 @@ function init_eval(vm)
   \********************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_js": () => (/* binding */ init_js)
@@ -2933,7 +2930,6 @@ function init_js(vm)
   \***********************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_print": () => (/* binding */ init_print)
@@ -3223,7 +3219,6 @@ function init_print(vm)
   \**********************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_read": () => (/* binding */ init_read)
@@ -3851,7 +3846,6 @@ function init_read(vm)
   \*********************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_seq": () => (/* binding */ init_seq)
@@ -4084,7 +4078,6 @@ function init_seq(vm)
   \************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init_stream": () => (/* binding */ init_stream)
@@ -4384,7 +4377,7 @@ function init_stream(vm)
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -4421,9 +4414,8 @@ function init_stream(vm)
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-"use strict";
 /*!********************!*\
   !*** ./src/vm.mjs ***!
   \********************/
@@ -4431,7 +4423,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "VM": () => (/* binding */ VM)
 /* harmony export */ });
-/* harmony import */ var big_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! big.js */ "./node_modules/big.js/big.js");
+/* harmony import */ var big_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! big.js */ "./node_modules/big.js/big.mjs");
 /* harmony import */ var _eval_mjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eval.mjs */ "./src/eval.mjs");
 /* harmony import */ var _control_mjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./control.mjs */ "./src/control.mjs");
 /* harmony import */ var _seq_mjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./seq.mjs */ "./src/seq.mjs");
@@ -4586,7 +4578,7 @@ class VM
     num(js_string_or_number)
     {
         this.assert_type(js_string_or_number, this.type_or("string", "number"));
-        return new this.Number(new big_js__WEBPACK_IMPORTED_MODULE_0__(js_string_or_number));
+        return new this.Number(new big_js__WEBPACK_IMPORTED_MODULE_0__["default"](js_string_or_number));
     }
 
     /*
@@ -4946,7 +4938,7 @@ function init_vm(vm)
         constructor(big)
         {
             super();
-            vm.assert_type(big, big_js__WEBPACK_IMPORTED_MODULE_0__);
+            vm.assert_type(big, big_js__WEBPACK_IMPORTED_MODULE_0__["default"]);
             this.big = big;
         }
 
