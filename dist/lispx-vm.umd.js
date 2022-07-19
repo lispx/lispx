@@ -1575,7 +1575,7 @@ function init_control(vm)
         } else {
             return result;
         }
-    };
+    }
 
     /*
      * Signalled on continuation barrier breach.
