@@ -188,9 +188,12 @@ which bindings are looked up if they are not found."
   (%%boundp symbol environment))
 
 (defun panic (error)
-  "Signal the ERROR in such a way that it cannot be caught by
-condition handlers or `unwind-protect'.  This unconditionally breaks
-out of Lisp."
+  "Signal the ERROR in such a way that it cannot be handled and escapes
+the VM as a host language exception.  This unconditionally breaks out
+of Lisp, ignoring `handler-bind', `unwind-protect', `progv', and other
+operators that are normally invoked while signalling or unwinding.
+Therefore Lisp invariants might be invalid after calling this
+function, and the VM should be discarded."
   (%%panic error))
 
 ;;; Lexical Bindings

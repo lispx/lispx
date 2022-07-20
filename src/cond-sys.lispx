@@ -103,7 +103,7 @@ applicable only to conditions in the list."))
 
 (defun lispx::make-handler-bind-operator (#'handler-spec-parser handler-frame-dynamic)
   "Metaprogramming utility to create `handler-bind' and `restart-bind'.
-It is parameterized by a function that takes apart the handler
+It is parameterized by a function that parses the handler
 specifications of the `handler-bind' and `restart-bind' forms and
 produces handlers from them, as well as the dynamic variable holding
 the handler chain (the variable itself as a first class object, not
