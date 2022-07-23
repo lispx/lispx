@@ -1,1 +1,4 @@
 Boxes might hold onto their parent environment unnecessarily?
+
+Well, the parent environment is the VM's root environment (where the
+box-creating BOX function is defined), so it should be OK?
