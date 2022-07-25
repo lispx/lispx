@@ -1445,7 +1445,7 @@
 (defsuite class
 
   (deftest class.1
-    (eq #^string (class-of "foo")))
+    (eq (class string) (class-of "foo")))
 
   (deftest class.2
     (signals-error
@@ -1459,7 +1459,7 @@
 
   (deftest class.4
     (signals-error
-     #^does-not-exist
+     (class does-not-exist)
      unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
 
 (defsuite find-class
