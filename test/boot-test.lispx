@@ -256,13 +256,18 @@
     (and
      (eq 'foo 'foo)
      (eq '#'foo '#'foo)
-     (eq (class-symbol 'foo) (class-symbol 'foo))))
+     (eq '#'foo (function-symbol 'foo))
+     (eq '#^foo '#^foo)
+     (eq '#^foo (class-symbol 'foo))))
 
   (deftest |Ordinary symbols can be quoted.|
     (eq 'foo (variable-symbol 'foo)))
 
   (deftest |Function symbols can be quoted.|
     (eq '#'foo (function-symbol 'foo)))
+
+  (deftest |Class symbols can be quoted.|
+    (eq '#^foo (class-symbol 'foo)))
 
   (deftest |Lists can be quoted.|
     (= '(1 2 3) (list 1 2 3)))
@@ -350,7 +355,7 @@
     (boundp '#'defun (the-environment)))
 
   (deftest boundp.3
-    (boundp (class-symbol 'standard-object) (the-environment)))
+    (boundp '#^standard-object (the-environment)))
 
   (deftest boundp.4
     (signals-error
