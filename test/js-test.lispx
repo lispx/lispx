@@ -561,7 +561,7 @@
 
   (deftest sync.2
     (prog1 #t
-      ((sync #'%%sleep) 1)))
+      ((sync #'%sleep) 1)))
 
   (def Promise (js-global "Promise"))
   (define-js-method resolve "resolve")

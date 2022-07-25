@@ -253,19 +253,19 @@ export function init_stream(vm)
 
     vm.define_variable("*standard-output*", vm.STANDARD_OUTPUT);
 
-    vm.define_alien_function("%%make-string-input-stream", (string) =>
+    vm.define_alien_function("%make-string-input-stream", (string) =>
         new vm.String_input_stream(string));
 
-    vm.define_alien_function("%%make-string-output-stream", () =>
+    vm.define_alien_function("%make-string-output-stream", () =>
         new vm.String_output_stream());
 
-    vm.define_alien_function("%%get-output-stream-string", (sos) =>
+    vm.define_alien_function("%get-output-stream-string", (sos) =>
         vm.assert_type(sos, vm.String_output_stream).get_string());
 
-    vm.define_alien_function("%%fresh-line", (stream) =>
+    vm.define_alien_function("%fresh-line", (stream) =>
         vm.assert_type(stream, vm.Output_stream).fresh_line());
 
-    vm.define_alien_function("%%force-output", (stream) =>
+    vm.define_alien_function("%force-output", (stream) =>
         vm.assert_type(stream, vm.Output_stream).force_output());
 
 };

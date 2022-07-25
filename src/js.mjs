@@ -173,44 +173,44 @@ export function init_js(vm)
 
     vm.define_constant("+js-undefined+", undefined);
 
-    vm.define_alien_function("%%js-global", vm.js_global);
+    vm.define_alien_function("%js-global", vm.js_global);
 
-    vm.define_alien_function("%%js-new", vm.js_new);
+    vm.define_alien_function("%js-new", vm.js_new);
 
-    vm.define_alien_function("%%js-get", vm.js_get);
+    vm.define_alien_function("%js-get", vm.js_get);
 
-    vm.define_alien_function("%%js-elt", vm.js_elt);
+    vm.define_alien_function("%js-elt", vm.js_elt);
 
-    vm.define_alien_function("%%to-lisp-boolean", vm.to_lisp_boolean);
+    vm.define_alien_function("%to-lisp-boolean", vm.to_lisp_boolean);
 
-    vm.define_alien_function("%%to-js-boolean", (bool) =>
+    vm.define_alien_function("%to-js-boolean", (bool) =>
         vm.assert_type(bool, vm.Boolean).to_js_boolean());
 
-    vm.define_alien_function("%%to-lisp-number", (js_num) =>
+    vm.define_alien_function("%to-lisp-number", (js_num) =>
         vm.num(vm.assert_type(js_num, "number")));
 
-    vm.define_alien_function("%%to-js-number", (num) =>
+    vm.define_alien_function("%to-js-number", (num) =>
         vm.assert_type(num, vm.Number).to_js_number());
 
-    vm.define_alien_function("%%to-lisp-string", (js_str) =>
+    vm.define_alien_function("%to-lisp-string", (js_str) =>
         vm.str(vm.assert_type(js_str, "string")));
 
-    vm.define_alien_function("%%to-js-string", (str) =>
+    vm.define_alien_function("%to-js-string", (str) =>
         vm.assert_type(str, vm.String).to_js_string());
 
-    vm.define_alien_function("%%to-lisp-function", vm.to_lisp_function);
+    vm.define_alien_function("%to-lisp-function", vm.to_lisp_function);
 
-    vm.define_alien_function("%%to-js-function", vm.to_js_function);
+    vm.define_alien_function("%to-js-function", vm.to_js_function);
 
-    vm.define_alien_function("%%list-to-js-array", vm.list_to_array);
+    vm.define_alien_function("%list-to-js-array", vm.list_to_array);
 
-    vm.define_alien_function("%%js-array-to-list", vm.array_to_list);
+    vm.define_alien_function("%js-array-to-list", vm.array_to_list);
 
-    vm.define_alien_function("%%apply-js-method", vm.apply_js_method);
+    vm.define_alien_function("%apply-js-method", vm.apply_js_method);
 
-    vm.define_alien_function("%%js-log", (...objects) => console.log(...objects));
+    vm.define_alien_function("%js-log", (...objects) => console.log(...objects));
 
-    vm.define_alien_function("%%sleep", (ms) => {
+    vm.define_alien_function("%sleep", (ms) => {
         vm.assert_type(ms, vm.Number);
         return new Promise(resolve => setTimeout(resolve, ms.to_js_number()));
     });

@@ -455,13 +455,13 @@ describe("eval_{stream,string,js_string}", () => {
              * Test that it uses the VM's root environment by default.
              */
 
-            assert(eval_x_fun("#'%%vau") instanceof vm.Built_in_operator);
+            assert(eval_x_fun("#'%vau") instanceof vm.Built_in_operator);
 
             /*
              * Test that another environment can be supplied.
              */
-            assert.throws(() => eval_x_fun("#'%%vau", vm.make_environment()),
-                          "Unbound function: %%vau");
+            assert.throws(() => eval_x_fun("#'%vau", vm.make_environment()),
+                          "Unbound function: %vau");
 
             /*
              * Test that suspensions are not swallowed.

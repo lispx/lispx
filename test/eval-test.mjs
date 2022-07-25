@@ -42,12 +42,12 @@ describe("Evaluation & Operation", () => {
     it("Built-in operators are defined.", () => {
 
         const operators = [
-            "%%vau",
-            "%%def",
-            "%%progn",
-            "%%if",
-            "%%loop",
-            "%%unwind-protect",
+            "%vau",
+            "%def",
+            "%progn",
+            "%if",
+            "%loop",
+            "%unwind-protect",
         ];
 
         for (const name of operators) {
@@ -61,58 +61,58 @@ describe("Evaluation & Operation", () => {
     it("Built-in functions are defined.", () => {
 
         const functions = [
-            "%%*",
-            "%%+",
-            "%%-",
-            "%%/",
-            "%%<",
-            "%%<=",
-            "%%=",
-            "%%>",
-            "%%>=",
-            "%%add-method",
-            "%%boundp",
-            "%%car",
-            "%%catch",
-            "%%cdr",
-            "%%class-name",
-            "%%class-of",
-            "%%class-symbol",
-            "%%cons",
-            "%%eq",
-            "%%eval",
-            "%%find-method",
-            "%%function-symbol",
-            "%%intern",
-            "%%keyword-symbol",
-            "%%list*",
-            "%%list-length",
-            "%%list-subseq",
-            "%%make-environment",
-            "%%make-instance",
-            "%%make-standard-class",
-            "%%nth",
-            "%%nthcdr",
-            "%%panic",
-            "%%progv",
-            "%%push-delim-subcont",
-            "%%push-prompt",
-            "%%push-subcont-barrier",
-            "%%reinitialize-standard-class",
-            "%%reverse",
-            "%%set-slot-value",
-            "%%slot-bound-p",
-            "%%slot-value",
-            "%%some",
-            "%%string-subseq",
-            "%%subclassp",
-            "%%symbol-name",
-            "%%take-subcont",
-            "%%throw",
-            "%%typep",
-            "%%unwrap",
-            "%%variable-symbol",
-            "%%wrap",
+            "%*",
+            "%+",
+            "%-",
+            "%/",
+            "%<",
+            "%<=",
+            "%=",
+            "%>",
+            "%>=",
+            "%add-method",
+            "%boundp",
+            "%car",
+            "%catch",
+            "%cdr",
+            "%class-name",
+            "%class-of",
+            "%class-symbol",
+            "%cons",
+            "%eq",
+            "%eval",
+            "%find-method",
+            "%function-symbol",
+            "%intern",
+            "%keyword-symbol",
+            "%list*",
+            "%list-length",
+            "%list-subseq",
+            "%make-environment",
+            "%make-instance",
+            "%make-standard-class",
+            "%nth",
+            "%nthcdr",
+            "%panic",
+            "%progv",
+            "%push-delim-subcont",
+            "%push-prompt",
+            "%push-subcont-barrier",
+            "%reinitialize-standard-class",
+            "%reverse",
+            "%set-slot-value",
+            "%slot-bound-p",
+            "%slot-value",
+            "%some",
+            "%string-subseq",
+            "%subclassp",
+            "%symbol-name",
+            "%take-subcont",
+            "%throw",
+            "%typep",
+            "%unwrap",
+            "%variable-symbol",
+            "%wrap",
         ];
 
         for (const name of functions) {
@@ -203,9 +203,9 @@ describe("Evaluation & Operation", () => {
 
     });
 
-    it("%%EVAL uses the root environment if no environment is specified.", () => {
+    it("%EVAL uses the root environment if no environment is specified.", () => {
 
-        assert.instanceOf(vm.eval(vm.list(vm.sym("%%eval"), quote(vm.csym("object")))),
+        assert.instanceOf(vm.eval(vm.list(vm.sym("%eval"), quote(vm.csym("object")))),
                           vm.Class);
 
     });
@@ -213,14 +213,14 @@ describe("Evaluation & Operation", () => {
     it("Symbols in the operator position are looked up in the function namespace.", () => {
 
         const env = make_child_environment();
-        env.put(vm.fsym("foo"), vm.eval_js_string("(%%vau #ignore #ignore 100)"));
+        env.put(vm.fsym("foo"), vm.eval_js_string("(%vau #ignore #ignore 100)"));
         assert(vm.equal(vm.eval_js_string("(foo)", env), vm.num(100)));
 
     });
 
     it("Non-symbol expressions in the operator position are evaluated normally.", () => {
 
-        assert(vm.equal(vm.eval_js_string("((%%vau #ignore #ignore 200))"), vm.num(200)));
+        assert(vm.equal(vm.eval_js_string("((%vau #ignore #ignore 200))"), vm.num(200)));
 
     });
 
@@ -234,7 +234,7 @@ describe("Evaluation & Operation", () => {
 
     it("The environment to operate in can be specified.", () => {
 
-        const def_op = vm.get_environment().lookup(vm.fsym("%%def"));
+        const def_op = vm.get_environment().lookup(vm.fsym("%def"));
         const env = make_child_environment();
         vm.operate(def_op, vm.list(vm.sym("x"), vm.num(1)), env);
         assert(vm.equal(env.lookup(vm.sym("x")), vm.num(1)));
@@ -305,27 +305,27 @@ describe("Fexprs", () => {
 
     it("Fexprs are anonymous.", () => {
 
-        assert.equal(vm.eval_js_string("(%%vau #ignore #ignore #ignore)").get_name(),
+        assert.equal(vm.eval_js_string("(%vau #ignore #ignore #ignore)").get_name(),
                      vm.sym("anonymous operator"));
 
     });
 
 });
 
-describe("%%VAU", () => {
+describe("%VAU", () => {
 
-    it("%%VAU constructs simple fexprs.", () => {
+    it("%VAU constructs simple fexprs.", () => {
 
-        const fexpr = vm.eval_js_string("(%%vau #ignore #ignore 12)");
+        const fexpr = vm.eval_js_string("(%vau #ignore #ignore 12)");
         vm.assert_type(fexpr, vm.Fexpr);
         assert(vm.equal(vm.eval(vm.list(fexpr)), vm.num(12)));
 
     });
 
-    it("%%VAU sets fexpr properties.", () => {
+    it("%VAU sets fexpr properties.", () => {
 
         const def_env = make_child_environment();
-        const fexpr = vm.eval_js_string("(%%vau x y z)", def_env);
+        const fexpr = vm.eval_js_string("(%vau x y z)", def_env);
         vm.assert_type(fexpr, vm.Fexpr);
         assert(vm.equal(fexpr.param_tree, vm.sym("x")));
         assert(vm.equal(fexpr.env_param, vm.sym("y")));
@@ -334,45 +334,45 @@ describe("%%VAU", () => {
 
     });
 
-    it("%%VAU evaluates the body form and passes on errors.", () => {
+    it("%VAU evaluates the body form and passes on errors.", () => {
 
-        assert.throws(() => vm.eval_js_string("((%%vau #ignore #ignore z))"),
+        assert.throws(() => vm.eval_js_string("((%vau #ignore #ignore z))"),
                       "Unbound variable: z");
 
     });
 
-    it("%%VAU receives the operands.", () => {
+    it("%VAU receives the operands.", () => {
 
-        assert(vm.equal(vm.eval_js_string("((%%vau (x y z) #ignore z) 1 2 3)"),
+        assert(vm.equal(vm.eval_js_string("((%vau (x y z) #ignore z) 1 2 3)"),
                         vm.num(3)));
 
     });
 
-    it("%%VAU throws for illegal definiends.", () => {
+    it("%VAU throws for illegal definiends.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%vau 1 #ignore #ignore)"),
+        assert.throws(() => vm.eval_js_string("(%vau 1 #ignore #ignore)"),
                       "Type assertion failed");
-        assert.throws(() => vm.eval_js_string("(%%vau #ignore 1 #ignore)"),
+        assert.throws(() => vm.eval_js_string("(%vau #ignore 1 #ignore)"),
                       "Type assertion failed");
 
     });
 
-    it("%%VAU binds the environment parameter.", () => {
+    it("%VAU binds the environment parameter.", () => {
 
         const dyn_env = make_child_environment();
-        assert(vm.equal(vm.eval_js_string("((%%vau #ignore env env))", dyn_env),
+        assert(vm.equal(vm.eval_js_string("((%vau #ignore env env))", dyn_env),
                         dyn_env));
 
     });
 
 });
 
-describe("%%DEF", () => {
+describe("%DEF", () => {
 
-    it("%%DEF evaluates the expression and matches the definiend.", () => {
+    it("%DEF evaluates the expression and matches the definiend.", () => {
 
         const env = make_child_environment();
-        const fexpr = vm.eval_js_string("(%%def #'some-fexpr (%%vau x #ignore 12))", env);
+        const fexpr = vm.eval_js_string("(%def #'some-fexpr (%vau x #ignore 12))", env);
         vm.assert_type(fexpr, vm.Fexpr);
         assert(vm.equal(vm.eval_js_string("(some-fexpr)", env), vm.num(12)));
         assert(vm.equal(env.lookup(vm.fsym("some-fexpr")), fexpr));
@@ -381,54 +381,54 @@ describe("%%DEF", () => {
 
     });
 
-    it("%%DEF throws for illegal definiends.", () => {
+    it("%DEF throws for illegal definiends.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%def 1 #ignore)"),
+        assert.throws(() => vm.eval_js_string("(%def 1 #ignore)"),
                       "Type assertion failed");
-        assert.throws(() => vm.eval_js_string("(%%def #t #ignore)"),
+        assert.throws(() => vm.eval_js_string("(%def #t #ignore)"),
                       "Type assertion failed");
 
     });
 
-    it("%%DEF passes on errors from the expression.", () => {
+    it("%DEF passes on errors from the expression.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%def #ignore x)"),
+        assert.throws(() => vm.eval_js_string("(%def #ignore x)"),
                       "Unbound variable: x");
 
     });
 
 });
 
-describe("%%PROGN", () => {
+describe("%PROGN", () => {
 
-    it("%%PROGN evaluates its operands and returns the result of the last.", () => {
+    it("%PROGN evaluates its operands and returns the result of the last.", () => {
 
         const env = make_child_environment();
         env.put(vm.sym("x"), vm.num(3));
-        assert(vm.equal(vm.eval_js_string("(%%progn 1 2 x)", env),
+        assert(vm.equal(vm.eval_js_string("(%progn 1 2 x)", env),
                         vm.num(3)));
 
     });
 
-    it("%%PROGN evaluates to #VOID if there are no operands.", () => {
+    it("%PROGN evaluates to #VOID if there are no operands.", () => {
 
-        assert(vm.equal(vm.eval_js_string("(%%progn)"),
+        assert(vm.equal(vm.eval_js_string("(%progn)"),
                         vm.void()));
 
     });
 
-    it("%%PROGN passes on errors from the operands.", () => {
+    it("%PROGN passes on errors from the operands.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%progn 1 x 2)"),
+        assert.throws(() => vm.eval_js_string("(%progn 1 x 2)"),
                       "Unbound variable: x");
 
     });
 
 });
 
-describe("%%IF", () => {
+describe("%IF", () => {
 
-    it("%%IF evaluates the test and sub-expressions.", () => {
+    it("%IF evaluates the test and sub-expressions.", () => {
 
         const env = make_child_environment();
 
@@ -438,34 +438,34 @@ describe("%%IF", () => {
         env.put(vm.sym("a"), vm.num(1));
         env.put(vm.sym("b"), vm.num(2));
 
-        assert(vm.equal(vm.eval_js_string("(%%if x a b)", env), vm.num(1)));
-        assert(vm.equal(vm.eval_js_string("(%%if y a b)", env), vm.num(2)));
+        assert(vm.equal(vm.eval_js_string("(%if x a b)", env), vm.num(1)));
+        assert(vm.equal(vm.eval_js_string("(%if y a b)", env), vm.num(2)));
 
     });
 
-    it("%%IF requires a boolean test.", () => {
+    it("%IF requires a boolean test.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%if 1 2 3)"),
+        assert.throws(() => vm.eval_js_string("(%if 1 2 3)"),
                       "Type assertion failed");
 
     });
 
-    it("%%IF passes on errors from evaluating the subexpressions.", () => {
+    it("%IF passes on errors from evaluating the subexpressions.", () => {
 
-        assert.throws(() => vm.eval_js_string("(%%if x 2 3)"),
+        assert.throws(() => vm.eval_js_string("(%if x 2 3)"),
                       "Unbound variable: x");
-        assert.throws(() => vm.eval_js_string("(%%if #t y 3)"),
+        assert.throws(() => vm.eval_js_string("(%if #t y 3)"),
                       "Unbound variable: y");
-        assert.throws(() => vm.eval_js_string("(%%if #f 2 z)"),
+        assert.throws(() => vm.eval_js_string("(%if #f 2 z)"),
                       "Unbound variable: z");
 
     });
 
-    it("%%IF only evaluates one of consequent and alternative, not both.", () => {
+    it("%IF only evaluates one of consequent and alternative, not both.", () => {
 
         // X is unbound.
-        assert(vm.equal(vm.eval_js_string("(%%if #t 1 x)"), vm.num(1)));
-        assert(vm.equal(vm.eval_js_string("(%%if #f x 1)"), vm.num(1)));
+        assert(vm.equal(vm.eval_js_string("(%if #t 1 x)"), vm.num(1)));
+        assert(vm.equal(vm.eval_js_string("(%if #f x 1)"), vm.num(1)));
 
     });
 
@@ -494,7 +494,7 @@ describe("Wrapping and unwrapping.", () => {
         const env = make_child_environment();
         env.put(vm.sym("x"), vm.num(1));
         env.put(vm.sym("y"), vm.num(2));
-        env.put(vm.fsym("f"), vm.wrap(vm.eval_js_string("(%%vau args #ignore args)")));
+        env.put(vm.fsym("f"), vm.wrap(vm.eval_js_string("(%vau args #ignore args)")));
 
         assert(vm.equal(vm.eval_js_string("(f x y)", env),
                         vm.list(vm.num(1), vm.num(2))));

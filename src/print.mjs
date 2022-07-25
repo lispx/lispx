@@ -270,6 +270,6 @@ export function init_print(vm)
 
     vm.define_variable("*print-level?*", vm.PRINT_LEVEL_OPTION);
 
-    vm.define_alien_function("%%write", (object, stream) => vm.write(object, stream));
+    vm.define_alien_function("%write", (object, stream) => vm.write(object, stream));
 
 };

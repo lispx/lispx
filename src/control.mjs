@@ -64,11 +64,11 @@ export function init_control(vm)
 
     /*
      * A continuation is organized as a stack of continuation frames.
-     * The innermost frame corresponds to the %%TAKE-SUBCONT
+     * The innermost frame corresponds to the %TAKE-SUBCONT
      * expression that triggered continuation capture.  The outermost
      * frame corresponds to the expression that appeared directly
-     * within the prompt-pushing expression (%%PUSH-PROMPT or
-     * %%PUSH-DELIM-SUBCONT).  The prompt-pushing expression itself
+     * within the prompt-pushing expression (%PUSH-PROMPT or
+     * %PUSH-DELIM-SUBCONT).  The prompt-pushing expression itself
      * is not included in the continuation.
      *
      * Every continuation frame contains a work function (a JavaScript
@@ -84,7 +84,7 @@ export function init_control(vm)
          * work function and an inner continuation frame.
          *
          * The inner continuation frame is null for the innermost
-         * frame created by the %%TAKE-SUBCONT expression that triggered
+         * frame created by the %TAKE-SUBCONT expression that triggered
          * continuation capture.
          */
         constructor(work_fun, inner)
@@ -101,12 +101,12 @@ export function init_control(vm)
      * A suspension is a helper object created during the capture
      * (creation) of a continuation.
      *
-     * It gets passed outwards from the %%TAKE-SUBCONT expression that
-     * triggers the capture until a %%PUSH-PROMPT or
-     * %%PUSH-DELIM-SUBCONT with a matching prompt is reached.  Every
+     * It gets passed outwards from the %TAKE-SUBCONT expression that
+     * triggers the capture until a %PUSH-PROMPT or
+     * %PUSH-DELIM-SUBCONT with a matching prompt is reached.  Every
      * intervening Lisp expression adds one or more continuation
      * frames to the suspension on the way out.  Once the
-     * %%PUSH-PROMPT or %%PUSH-DELIM-SUBCONT is reached, the
+     * %PUSH-PROMPT or %PUSH-DELIM-SUBCONT is reached, the
      * suspension's handler gets called with the captured
      * continuation.
      *
@@ -266,7 +266,7 @@ export function init_control(vm)
     /*** Delimited Control Operators ***/
 
     /*
-     * (%%take-subcont prompt handler) => |
+     * (%take-subcont prompt handler) => |
      *
      * Built-in function that initiates continuation capture.  It
      * aborts outwards to the given prompt and calls the suspension
@@ -304,7 +304,7 @@ export function init_control(vm)
     };
 
     /*
-     * (%%push-prompt prompt thunk) => result
+     * (%push-prompt prompt thunk) => result
      *
      * Built-in function that pushes a prompt.  A user-supplied thunk
      * is then called inside the newly delimited continuation.
@@ -319,7 +319,7 @@ export function init_control(vm)
     };
 
     /*
-     * (%%push-delim-subcont prompt continuation thunk) => result
+     * (%push-delim-subcont prompt continuation thunk) => result
      *
      * Built-in function that pushes a prompt and reinstates a
      * previously captured continuation inside it.  A user-supplied
@@ -394,7 +394,7 @@ export function init_control(vm)
     }
 
     /*
-     * (%%push-subcont-barrier thunk) => result
+     * (%push-subcont-barrier thunk) => result
      *
      * Built-in function that calls a thunk and prevents it from
      * capturing continuations to the outside.
@@ -488,7 +488,7 @@ export function init_control(vm)
     };
 
     /*
-     * (%%progv dynamics values thunk) => result
+     * (%progv dynamics values thunk) => result
      *
      * Built-in function that evaluates a thunk with a list of dynamic
      * variables temporarily bound to new values taken from a second
@@ -525,7 +525,7 @@ export function init_control(vm)
     /*
      * Utility to bind dynamic variables during a JS thunk.
      *
-     * This can also be used outside of the %%PROGV primitive.
+     * This can also be used outside of the %PROGV primitive.
      */
     vm.progv = (dynamics, values, thunk) =>
     {
@@ -557,7 +557,7 @@ export function init_control(vm)
     /*** Simple Control ***/
 
     /*
-     * (%%loop expr) => |
+     * (%loop expr) => |
      *
      * Built-in operator that evaluates an expression in a never-ending cycle.
      *
@@ -590,11 +590,11 @@ export function init_control(vm)
     }
 
     /*
-     * (%%catch tag thunk) => result
+     * (%catch tag thunk) => result
      *
      * Built-in function that calls a thunk in a dynamic context where
      * a catch tag is bound.  Dynamically nested forms may nonlocally
-     * exit to the catch tag with %%THROW.
+     * exit to the catch tag with %THROW.
      *
      * Cf. Common Lisp's CATCH.
      */
@@ -636,7 +636,7 @@ export function init_control(vm)
     }
 
     /*
-     * (%%throw tag value) => |
+     * (%throw tag value) => |
      *
      * Built-in function that nonlocally exits to the dynamically
      * nesting catch tag and passes the value to it.
@@ -651,7 +651,7 @@ export function init_control(vm)
     };
 
     /*
-     * Instances of this class are thrown by %%THROW.
+     * Instances of this class are thrown by %THROW.
      */
     vm.Nonlocal_exit = class Nonlocal_exit
     {
@@ -663,7 +663,7 @@ export function init_control(vm)
     };
 
     /*
-     * (%%unwind-protect protected-expr cleanup-expr) => result
+     * (%unwind-protect protected-expr cleanup-expr) => result
      *
      * Built-in operator that evaluates the protected expression and
      * returns its result.
@@ -773,22 +773,22 @@ export function init_control(vm)
 
     vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
 
-    vm.define_built_in_function("%%take-subcont", vm.TAKE_SUBCONT);
+    vm.define_built_in_function("%take-subcont", vm.TAKE_SUBCONT);
 
-    vm.define_built_in_function("%%push-prompt", vm.PUSH_PROMPT);
+    vm.define_built_in_function("%push-prompt", vm.PUSH_PROMPT);
 
-    vm.define_built_in_function("%%push-delim-subcont", vm.PUSH_DELIM_SUBCONT);
+    vm.define_built_in_function("%push-delim-subcont", vm.PUSH_DELIM_SUBCONT);
 
-    vm.define_built_in_function("%%push-subcont-barrier", vm.PUSH_SUBCONT_BARRIER);
+    vm.define_built_in_function("%push-subcont-barrier", vm.PUSH_SUBCONT_BARRIER);
 
-    vm.define_built_in_function("%%progv", vm.PROGV);
+    vm.define_built_in_function("%progv", vm.PROGV);
 
-    vm.define_built_in_operator("%%loop", vm.LOOP);
+    vm.define_built_in_operator("%loop", vm.LOOP);
 
-    vm.define_built_in_function("%%catch", vm.CATCH);
+    vm.define_built_in_function("%catch", vm.CATCH);
 
-    vm.define_built_in_function("%%throw", vm.THROW);
+    vm.define_built_in_function("%throw", vm.THROW);
 
-    vm.define_built_in_operator("%%unwind-protect", vm.UNWIND_PROTECT);
+    vm.define_built_in_operator("%unwind-protect", vm.UNWIND_PROTECT);
 
 };

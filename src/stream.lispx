@@ -8,7 +8,7 @@
 
 (defun make-string-input-stream (string)
   "Create a string input stream that reads from STRING."
-  (%%make-string-input-stream string))
+  (%make-string-input-stream string))
 
 (defexpr with-standard-input-from-string (string . forms) env
   "Evaluate FORMS with `*standard-input*' coming from STRING."
@@ -20,11 +20,11 @@
 
 (defun make-string-output-stream ()
   "Construct an empty string output stream."
-  (%%make-string-output-stream))
+  (%make-string-output-stream))
 
 (defun get-output-stream-string (stream)
   "Return the contents of the string output STREAM."
-  (%%get-output-stream-string stream))
+  (%get-output-stream-string stream))
 
 (defexpr with-standard-output-to-string forms env
   "Evaluate FORMS with `*standard-output*' being collected in a string."
@@ -37,9 +37,9 @@
 (defun fresh-line stream?
   "Ensure that the following output appears on a new line by itself.
 The optional STREAM? defaults to `*standard-output*'."
-  (%%fresh-line (optional stream? (dynamic *standard-output*))))
+  (%fresh-line (optional stream? (dynamic *standard-output*))))
 
 (defun force-output stream?
   "Initiate the emptying of any internal buffers but don't wait for them to finish.
 The optional STREAM? defaults to `*standard-output*'."
-  (%%force-output (optional stream? (dynamic *standard-output*))))
+  (%force-output (optional stream? (dynamic *standard-output*))))

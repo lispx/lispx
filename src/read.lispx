@@ -21,4 +21,4 @@ Every stream class can provide a specialized method."))
 (defmethod stream-read ((stream input-stream) eof-error-p eof-value)
   "The default implementation of `stream-read' calls a built-in
 function written in JS."
-  (%%read stream eof-error-p eof-value))
+  (%read stream eof-error-p eof-value))

@@ -30,55 +30,55 @@ that's callable from JS."
 (defun js-global (name)
   "Access a JS global by NAME (a string).  Return undefined if the
 global doesn't exist."
-  (%%js-global name))
+  (%js-global name))
 
 (defun js-new (constructor . arguments)
   "Call the JS CONSTRUCTOR function with ARGUMENTS."
-  (apply #'%%js-new (cons constructor arguments)))
+  (apply #'%js-new (cons constructor arguments)))
 
 (defun js-get (object name)
   "Access a property of a JS object by NAME (a string)."
-  (%%js-get object name))
+  (%js-get object name))
 
 (defun to-lisp-boolean (js-boolean)
   "Convert the JS-BOOLEAN to a Lisp boolean."
-  (%%to-lisp-boolean js-boolean))
+  (%to-lisp-boolean js-boolean))
 
 (defun to-js-boolean (lisp-boolean)
   "Convert the LISP-BOOLEAN to a JS boolean."
-  (%%to-js-boolean lisp-boolean))
+  (%to-js-boolean lisp-boolean))
 
 (defun to-lisp-number (js-number)
   "Convert the JS-NUMBER to a Lisp number."
-  (%%to-lisp-number js-number))
+  (%to-lisp-number js-number))
 
 (defun to-js-number (lisp-number)
   "Convert the LISP-NUMBER to a JS number."
-  (%%to-js-number lisp-number))
+  (%to-js-number lisp-number))
 
 (defun to-lisp-string (js-string)
   "Convert the JS-STRING to a Lisp string."
-  (%%to-lisp-string js-string))
+  (%to-lisp-string js-string))
 
 (defun to-js-string (lisp-string)
   "Convert the LISP-STRING to a JS string."
-  (%%to-js-string lisp-string))
+  (%to-js-string lisp-string))
 
 (defun to-lisp-function (js-function)
   "Convert the JS-FUNCTION to a Lisp function."
-  (%%to-lisp-function js-function))
+  (%to-lisp-function js-function))
 
 (defun to-js-function (lisp-operator)
   "Convert the LISP-OPERATOR to a JS function."
-  (%%to-js-function lisp-operator))
+  (%to-js-function lisp-operator))
 
 (defun list-to-js-array (list)
   "Turn a list into a JS array."
-  (%%list-to-js-array list))
+  (%list-to-js-array list))
 
 (defun js-array-to-list (array)
   "Turn a JS array into a list."
-  (%%js-array-to-list array))
+  (%js-array-to-list array))
 
 (defun js-array elements
   "Create a new JS array from the given elements."
@@ -89,7 +89,7 @@ global doesn't exist."
 don't have a more precise type for them."
   (if (or (< index 0) (>= index (length seq)))
       (error (make-instance #^out-of-bounds-error))
-      (%%js-elt seq index)))
+      (%js-elt seq index)))
 
 (defmethod length ((seq object))
   "`length' for JS arrays."
@@ -98,7 +98,7 @@ don't have a more precise type for them."
 (defun apply-js-method (receiver name arguments)
   "Invoke a JS method by NAME (a string) on the RECEIVER object,
 passing along the list of ARGUMENTS."
-  (%%apply-js-method receiver name arguments))
+  (%apply-js-method receiver name arguments))
 
 (defun call-js-method (receiver name . arguments)
   "Invoke a JS method by NAME (a string) on the RECEIVER object,
@@ -159,8 +159,8 @@ call (\"this\"), the rest are the normal method arguments."
 
 (defun sleep (ms)
   "Sleep for some milliseconds."
-  (await (%%sleep ms)))
+  (await (%sleep ms)))
 
 (defun js-log arguments
   "Log the ARGUMENTS to the JS console."
-  (apply #'%%js-log arguments))
+  (apply #'%js-log arguments))

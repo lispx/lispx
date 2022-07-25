@@ -8,7 +8,7 @@
   "Write OBJECT to STREAM (defaults to `*standard-output*').  Main
 printer entry point.
 $(fn (object &key stream))"
-  (%%write object (optional (get? keywords :stream) (dynamic *standard-output*))))
+  (%write object (optional (get? keywords :stream) (dynamic *standard-output*))))
 
 (defun write-to-string (object)
   "Create a string consisting of the printed representation of object."

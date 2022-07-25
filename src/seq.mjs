@@ -187,31 +187,31 @@ export function init_seq(vm)
         else return vm.assert_type(end, vm.Number).to_js_number();
     }
 
-    vm.define_alien_function("%%list*", (...objects) => vm.list_star(...objects));
+    vm.define_alien_function("%list*", (...objects) => vm.list_star(...objects));
 
-    vm.define_alien_function("%%append", (list1, list2) => vm.append(list1, list2));
+    vm.define_alien_function("%append", (list1, list2) => vm.append(list1, list2));
 
-    vm.define_alien_function("%%list-length", (list) => vm.num(vm.list_length(list)));
+    vm.define_alien_function("%list-length", (list) => vm.num(vm.list_length(list)));
 
-    vm.define_alien_function("%%nth", (num, list) =>
+    vm.define_alien_function("%nth", (num, list) =>
         vm.elt(list, vm.assert_type(num, vm.Number).to_js_number()));
 
-    vm.define_alien_function("%%nthcdr", (num, list) =>
+    vm.define_alien_function("%nthcdr", (num, list) =>
         vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
 
-    vm.define_alien_function("%%list-subseq", (list, start, end) =>
+    vm.define_alien_function("%list-subseq", (list, start, end) =>
         vm.list_subseq(list,
                        vm.assert_type(start, vm.Number).to_js_number(),
                        canonicalize_end(end)));
 
-    vm.define_alien_function("%%string-subseq", (string, start, end) =>
+    vm.define_alien_function("%string-subseq", (string, start, end) =>
         vm.string_subseq(string,
                          vm.assert_type(start, vm.Number).to_js_number(),
                          canonicalize_end(end)));
 
-    vm.define_alien_function("%%reverse", (list) => vm.reverse(list));
+    vm.define_alien_function("%reverse", (list) => vm.reverse(list));
 
-    vm.define_alien_function("%%some", (value) => vm.some(value));
+    vm.define_alien_function("%some", (value) => vm.some(value));
 
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
 

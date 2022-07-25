@@ -11,9 +11,9 @@ function lookup_operator(name)
 
 describe("Continuations", () => {
 
-    it("Test %%TAKE-SUBCONT suspension and resumption.", () => {
+    it("Test %TAKE-SUBCONT suspension and resumption.", () => {
 
-        const take_subcont = lookup_operator("%%take-subcont");
+        const take_subcont = lookup_operator("%take-subcont");
         const prompt = vm.str("p");
         const handler = vm.alien_function(() => {}); // Unused here.
 

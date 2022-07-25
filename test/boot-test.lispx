@@ -1678,11 +1678,11 @@
 (defsuite reduce
 
   (deftest reduce.1
-    (reduce #'%%* (list 1 2 3) :initial-value 10)
+    (reduce #'%* (list 1 2 3) :initial-value 10)
     60)
 
   (deftest reduce.2
-    (reduce #'%%* (list) :initial-value 10)
+    (reduce #'%* (list) :initial-value 10)
     10)
 
   (deftest reduce.3
@@ -1692,12 +1692,12 @@
 
   (deftest reduce.4
     (signals-error
-     (reduce #'%%*)
+     (reduce #'%*)
      match-error))
 
   (deftest reduce.5
     (signals-error
-     (reduce #'%%* (list))
+     (reduce #'%* (list))
      match-error))
 
   (deftest reduce.ansi.3
@@ -3015,7 +3015,7 @@
          (subclassp #^standard-class #^object))
     #t))
 
-;; Utility used by `%%make-standard-class' and `defclass' tests.
+;; Utility used by `%make-standard-class' and `defclass' tests.
 
 (defun classes-test (c d p q)
   (assert (typep c #^standard-class))
@@ -3047,50 +3047,50 @@
   (assert (= (slot-value q 'y) 2))
   (assert (= (slot-value q 'z) 3)))
 
-(defsuite %%make-standard-class
+(defsuite %make-standard-class
 
-  (deftest %%make-standard-class.1
-    (let* ((c (%%make-standard-class 'point-2d #^standard-object))
-           (d (%%make-standard-class 'point-3d c))
+  (deftest %make-standard-class.1
+    (let* ((c (%make-standard-class 'point-2d #^standard-object))
+           (d (%make-standard-class 'point-3d c))
            (p (make-instance c :x 1 :y 2))
            (q (make-instance d :x 1 :y 2 :z 3)))
       (classes-test c d p q))
     #void)
 
-  (deftest %%make-standard-class.2
+  (deftest %make-standard-class.2
     (signals-error
-     (%%make-standard-class 'foo #^object)
+     (%make-standard-class 'foo #^object)
      type-error :datum #^object :expected-type 'standard-class))
 
   #|
-  (deftest %%make-standard-class.3
+  (deftest %make-standard-class.3
     (signals-error
-     (%%make-standard-class 'foo)
+     (%make-standard-class 'foo)
      match-error))
 
-  (deftest %%make-standard-class.4
+  (deftest %make-standard-class.4
     (signals-error
-     (%%make-standard-class)
+     (%make-standard-class)
      match-error))
   |#
 
-  (deftest %%make-standard-class.5
+  (deftest %make-standard-class.5
     (signals-error
-     (%%make-standard-class "foo" #^standard-object)
+     (%make-standard-class "foo" #^standard-object)
      type-error :datum "foo" :expected-type 'symbol)))
 
-(defsuite %%reinitialize-standard-class
+(defsuite %reinitialize-standard-class
 
-  (deftest* %%reinitialize-standard-class.1
-    (let* ((a (%%make-standard-class 'a #^standard-object))
-           (b (%%make-standard-class 'b a))
-           (c (%%make-standard-class 'c b))
-           (d (%%make-standard-class 'd #^standard-object))
-           (e (%%make-standard-class 'e d)))
+  (deftest* %reinitialize-standard-class.1
+    (let* ((a (%make-standard-class 'a #^standard-object))
+           (b (%make-standard-class 'b a))
+           (c (%make-standard-class 'c b))
+           (d (%make-standard-class 'd #^standard-object))
+           (e (%make-standard-class 'e d)))
       (assert (subclassp b a))
       (assert (subclassp c a))
       (assert (subclassp c b))
-      (%%reinitialize-standard-class b e)
+      (%reinitialize-standard-class b e)
       (assert (subclassp b e))
       (assert (subclassp b d))
       (assert (subclassp c e))

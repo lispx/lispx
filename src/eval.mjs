@@ -428,12 +428,12 @@ export function init_eval(vm)
      */
 
     /*
-     * (%%vau param-tree env-param body-form) => fexpr
+     * (%vau param-tree env-param body-form) => fexpr
      *
      * Built-in operator that creates a new fexpr with the given
      * parameter tree, environment parameter, and body form.
      *
-     * The dynamic environment of the call to %%VAU becomes
+     * The dynamic environment of the call to %VAU becomes
      * the static environment of the created fexpr.
      */
     vm.VAU = function(operands, dyn_env)
@@ -446,11 +446,11 @@ export function init_eval(vm)
     };
 
     /*
-     * (%%def definiend expression) => result
+     * (%def definiend expression) => result
      *
      * Built-in operator that evaluates the expression and matches the
      * definiend against the result value.  Bindings are placed into
-     * the dynamic environment in which %%DEF is called.
+     * the dynamic environment in which %DEF is called.
      *
      * Returns the value.
      */
@@ -464,7 +464,7 @@ export function init_eval(vm)
     };
 
     /*
-     * (%%progn . forms) => result
+     * (%progn . forms) => result
      *
      * Built-in operator that evaluates the forms from left to right
      * and returns the result of the last one.
@@ -491,7 +491,7 @@ export function init_eval(vm)
     };
 
     /*
-     * (%%if test consequent alternative) => result
+     * (%if test consequent alternative) => result
      *
      * First, evaluates the test expression which must yield a
      * boolean.
@@ -646,104 +646,104 @@ export function init_eval(vm)
 
     vm.define_condition("match-error", vm.Match_error, vm.Error);
 
-    vm.define_built_in_operator("%%vau", vm.VAU);
+    vm.define_built_in_operator("%vau", vm.VAU);
 
-    vm.define_built_in_operator("%%def", vm.DEF);
+    vm.define_built_in_operator("%def", vm.DEF);
 
-    vm.define_built_in_operator("%%progn", vm.PROGN);
+    vm.define_built_in_operator("%progn", vm.PROGN);
 
-    vm.define_built_in_operator("%%if", vm.IF);
+    vm.define_built_in_operator("%if", vm.IF);
 
-    vm.define_alien_function("%%wrap", (operator) => vm.wrap(operator));
+    vm.define_alien_function("%wrap", (operator) => vm.wrap(operator));
 
-    vm.define_alien_function("%%unwrap", (fun) => vm.assert_type(fun, vm.Function).unwrap());
+    vm.define_alien_function("%unwrap", (fun) => vm.assert_type(fun, vm.Function).unwrap());
 
-    vm.define_alien_function("%%eval", (expr, env) => vm.eval(expr, env));
+    vm.define_alien_function("%eval", (expr, env) => vm.eval(expr, env));
 
-    vm.define_alien_function("%%eq", (a, b) => vm.to_lisp_boolean(a === b));
+    vm.define_alien_function("%eq", (a, b) => vm.to_lisp_boolean(a === b));
 
-    vm.define_alien_function("%%=", (a, b) => vm.to_lisp_boolean(vm.equal(a, b)));
+    vm.define_alien_function("%=", (a, b) => vm.to_lisp_boolean(vm.equal(a, b)));
 
-    vm.define_alien_function("%%<", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) < 0));
+    vm.define_alien_function("%<", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) < 0));
 
-    vm.define_alien_function("%%>", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) > 0));
+    vm.define_alien_function("%>", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) > 0));
 
-    vm.define_alien_function("%%<=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) <= 0));
+    vm.define_alien_function("%<=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) <= 0));
 
-    vm.define_alien_function("%%>=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) >= 0));
+    vm.define_alien_function("%>=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) >= 0));
 
-    vm.define_alien_function("%%+", (a, b) => vm.add(a, b));
+    vm.define_alien_function("%+", (a, b) => vm.add(a, b));
 
-    vm.define_alien_function("%%-", (a, b) => vm.subtract(a, b));
+    vm.define_alien_function("%-", (a, b) => vm.subtract(a, b));
 
-    vm.define_alien_function("%%*", (a, b) => vm.multiply(a, b));
+    vm.define_alien_function("%*", (a, b) => vm.multiply(a, b));
 
-    vm.define_alien_function("%%/", (a, b) => vm.divide(a, b));
+    vm.define_alien_function("%/", (a, b) => vm.divide(a, b));
 
-    vm.define_alien_function("%%cons", (car, cdr) => vm.cons(car, cdr));
+    vm.define_alien_function("%cons", (car, cdr) => vm.cons(car, cdr));
 
-    vm.define_alien_function("%%car", (cons) => vm.assert_type(cons, vm.Cons).car());
+    vm.define_alien_function("%car", (cons) => vm.assert_type(cons, vm.Cons).car());
 
-    vm.define_alien_function("%%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
+    vm.define_alien_function("%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
 
-    vm.define_alien_function("%%intern", (string) => vm.intern(string));
+    vm.define_alien_function("%intern", (string) => vm.intern(string));
 
-    vm.define_alien_function("%%symbol-name", (sym) =>
+    vm.define_alien_function("%symbol-name", (sym) =>
         vm.assert_type(sym, vm.Symbol).get_string());
 
-    vm.define_alien_function("%%variable-symbol", (sym) =>
+    vm.define_alien_function("%variable-symbol", (sym) =>
         vm.assert_type(sym, vm.Symbol).to_variable_symbol());
 
-    vm.define_alien_function("%%function-symbol", (sym) =>
+    vm.define_alien_function("%function-symbol", (sym) =>
         vm.assert_type(sym, vm.Symbol).to_function_symbol());
 
-    vm.define_alien_function("%%class-symbol", (sym) =>
+    vm.define_alien_function("%class-symbol", (sym) =>
         vm.assert_type(sym, vm.Symbol).to_class_symbol());
 
-    vm.define_alien_function("%%keyword-symbol", (sym) =>
+    vm.define_alien_function("%keyword-symbol", (sym) =>
         vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
 
-    vm.define_alien_function("%%make-environment", (parent = null) =>
+    vm.define_alien_function("%make-environment", (parent = null) =>
         vm.make_environment(parent));
 
-    vm.define_alien_function("%%boundp", (sym, env) =>
+    vm.define_alien_function("%boundp", (sym, env) =>
         vm.to_lisp_boolean(vm.assert_type(env, vm.Environment).is_bound(sym)));
 
-    vm.define_alien_function("%%class-of", (obj) => vm.class_of(obj));
+    vm.define_alien_function("%class-of", (obj) => vm.class_of(obj));
 
-    vm.define_alien_function("%%typep", (obj, cls) =>
+    vm.define_alien_function("%typep", (obj, cls) =>
         vm.to_lisp_boolean(vm.is_subclass(vm.class_of(obj), cls)));
 
-    vm.define_alien_function("%%make-instance", (cls, ...slot_inits) =>
+    vm.define_alien_function("%make-instance", (cls, ...slot_inits) =>
         vm.make_instance(cls, ...slot_inits));
 
-    vm.define_alien_function("%%slot-value", (obj, slot_name) =>
+    vm.define_alien_function("%slot-value", (obj, slot_name) =>
         vm.assert_type(obj, vm.Standard_object).slot_value(slot_name));
 
-    vm.define_alien_function("%%set-slot-value", (obj, slot_name, slot_value) =>
+    vm.define_alien_function("%set-slot-value", (obj, slot_name, slot_value) =>
         vm.assert_type(obj, vm.Standard_object).set_slot_value(slot_name, slot_value));
 
-    vm.define_alien_function("%%slot-bound-p", (obj, slot_name) =>
+    vm.define_alien_function("%slot-bound-p", (obj, slot_name) =>
         vm.to_lisp_boolean(vm.assert_type(obj, vm.Standard_object).is_slot_bound(slot_name)));
 
-    vm.define_alien_function("%%add-method", (cls, name, method) =>
+    vm.define_alien_function("%add-method", (cls, name, method) =>
         vm.assert_type(cls, vm.Class).add_method(name, method));
 
-    vm.define_alien_function("%%find-method", (cls, name) =>
+    vm.define_alien_function("%find-method", (cls, name) =>
         vm.assert_type(cls, vm.Class).find_method(name));
 
-    vm.define_alien_function("%%make-standard-class", (name, lisp_super) =>
+    vm.define_alien_function("%make-standard-class", (name, lisp_super) =>
         vm.make_standard_class(name, lisp_super));
 
-    vm.define_alien_function("%%reinitialize-standard-class", (lisp_class, lisp_super) =>
+    vm.define_alien_function("%reinitialize-standard-class", (lisp_class, lisp_super) =>
         vm.reinitialize_standard_class(lisp_class, lisp_super));
 
-    vm.define_alien_function("%%class-name", (cls) =>
+    vm.define_alien_function("%class-name", (cls) =>
         vm.assert_type(cls, vm.Class).get_name());
 
-    vm.define_alien_function("%%subclassp", (sub_cls, super_cls) =>
+    vm.define_alien_function("%subclassp", (sub_cls, super_cls) =>
         vm.to_lisp_boolean(vm.is_subclass(sub_cls, super_cls)));
 
-    vm.define_alien_function("%%panic", (exception) => vm.panic(exception));
+    vm.define_alien_function("%panic", (exception) => vm.panic(exception));
 
 };
