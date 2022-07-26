@@ -943,6 +943,37 @@
       (object 1))
     2))
 
+(defsuite etypecase
+
+  (deftest etypecase.1
+    (signals-error
+     (etypecase)
+     match-error))
+
+  (deftest etypecase.2
+    (signals-error
+     (etypecase (+ 2 2))
+     type-error :datum 4))
+
+  (deftest etypecase.3
+    (etypecase (+ 2 2)
+      (object 1)
+      (number 2))
+    1)
+
+  (deftest etypecase.4
+    (etypecase (+ 2 2)
+      (number 2)
+      (object 1))
+    2)
+
+  (deftest etypecase.5
+    (signals-error
+     (etypecase (+ 2 2)
+       (string 2)
+       (boolean 1))
+     type-error :datum 4)))
+
 (defsuite not
 
   (deftest not.1
@@ -3848,7 +3879,7 @@
   (deftest invoke-restart.1
     (signals-error
      (invoke-restart "foo")
-     type-error :datum "foo" :expected-type '(or symbol restart-handler))))
+     type-error :datum "foo")))
 
 (defsuite invoke-restart-interactively
 

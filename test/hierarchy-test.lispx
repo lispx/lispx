@@ -6,16 +6,14 @@
     (let ((env (the-environment)))
       (loop-let -test-classes- ((classes classes) (superclass (class object)))
         (dolist (c classes #t)
-          (typecase c
+          (etypecase c
             (symbol
              (let ((class (find-class c env)))
                (assert (subclassp class superclass))))
             (cons
              (let ((class (find-class (car c) env)))
                (assert (subclassp class superclass))
-               (-test-classes- (cdr c) class)))
-            (object
-             (assert #f)))))))
+               (-test-classes- (cdr c) class))))))))
 
   (deftest test-hierarchy
     (test-hierarchy

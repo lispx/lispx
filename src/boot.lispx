@@ -371,20 +371,41 @@ the protected forms are not evaluated in case of `panic'."
     (eval (list* #'progn forms) env)
     result))
 
-(defexpr typecase (keyform . clauses) env
+(defun lispx::make-typecase-with-default-function (#'default)
+  "Metaprogramming utility used to create `typecase' and `etypecase'.
+If no matching clause is found, the #'DEFAULT function is called with
+the key."
+  (vau (keyform . clauses) env
+    (let ((key (eval keyform env)))
+      (loop-let -typecase- ((clauses clauses))
+        (if (null clauses)
+            (default key)
+            (let ((((class-name . forms) . rest-clauses) clauses))
+              (if (typep key (find-class class-name env))
+                  (eval (list* #'progn forms) env)
+                  (-typecase- rest-clauses))))))))
+
+(def #'typecase (lispx::make-typecase-with-default-function
+                 (lambda (#ignore) #void))
   "Multi-armed type test.
 Evaluate the KEYFORM.  Go through the CLAUSES.  If the result of
 evaluating KEYFORM is an instance of the class named by CLASS-NAME,
 evaluate the FORMS as an implicit `progn'.  Otherwise go to the next
 clause, or return void if there are no more clauses.
-$(syntax clause (class-name . forms))"
-  (let ((key (eval keyform env)))
-    (loop-let -typecase- ((clauses clauses))
-      (unless (null clauses)
-        (let ((((class-name . forms) . rest-clauses) clauses))
-          (if (typep key (find-class class-name env))
-              (eval (cons #'progn forms) env)
-              (-typecase- rest-clauses)))))))
+$(type fexpr)
+$(fn (key . clauses))
+$(syntax clause (class-name . forms))")
+
+(def #'etypecase (lispx::make-typecase-with-default-function
+                  ;; Note: we use #^object as :expected-type of the
+                  ;; type error which is somewhat nonsensical.  The
+                  ;; proper/CL way would be to use an OR type spec,
+                  ;; but they might get removed from the language.
+                  (lambda (key) (error (make-type-error key #^object))))
+  "Like `typecase' but signal a `type-error' if no clause matches the key.
+$(type fexpr)
+$(fn (key . clauses))
+$(syntax clause (class-name . forms))")
 
 (defexpr set (environment definiend-tree value) dynamic-environment
   "Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,

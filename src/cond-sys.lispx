@@ -110,7 +110,7 @@ the handler chain (the variable itself as a first class object, not
 its value, so it can be used with `progv')."
   (vau (handler-specs . forms) env
     (let ((handler-frame (make-instance
-                          (class handler-frame)
+                          #^handler-frame
                           :handlers (mapcar (lambda (spec)
                                               (handler-spec-parser spec env))
                                             handler-specs)
@@ -121,7 +121,7 @@ its value, so it can be used with `progv')."
 (def #'handler-bind
   (lispx::make-handler-bind-operator
    (lambda ((class-name function-form) env)
-     (make-instance (class condition-handler)
+     (make-instance #^condition-handler
                     :condition-class
                     (the class (find-class class-name env))
                     :handler-function
@@ -135,7 +135,7 @@ $(syntax handler-spec (condition-class handler-function))")
 (def #'restart-bind
   (lispx::make-handler-bind-operator
    (lambda ((restart-name function-form . properties) env)
-     (make-instance (class restart-handler)
+     (make-instance #^restart-handler
                     :restart-name
                     (the symbol restart-name)
                     :handler-function
@@ -289,15 +289,13 @@ restart is not found."
   "Utility to invoke the restart designated by RESTART-DESIGNATOR,
 which can be a symbol or a `restart-handler', with an arguments list
 produced by FUNCTION (which receives a `restart-handler' as argument)."
-  (typecase restart-designator
+  (etypecase restart-designator
     (symbol
      (if-option (restart-handler (find-restart? restart-designator))
        (lispx::apply-handler-function restart-handler (function restart-handler))
        (error (make-restart-error restart-designator))))
     (restart-handler
-     (lispx::apply-handler-function restart-designator (function restart-designator)))
-    (object
-     (error (make-type-error restart-designator '(or symbol restart-handler))))))
+     (lispx::apply-handler-function restart-designator (function restart-designator)))))
 
 (defun lispx::find-handler? (object handler-frame? payload?)
   "Utility to find both condition handlers and restart handlers.
@@ -387,7 +385,7 @@ with any condition."
 
 (defun make-restart-error (restart-name)
   "Create a new `restart-error' for the given RESTART-NAME."
-  (make-instance (class restart-error) :restart-name restart-name))
+  (make-instance #^restart-error :restart-name restart-name))
 
 (defclass simple-error (error)
   (message)
@@ -395,7 +393,7 @@ with any condition."
 
 (defun make-simple-error (message)
   "Create a new simple error with a MESSAGE."
-  (make-instance (class simple-error) :message message))
+  (make-instance #^simple-error :message message))
 
 (defun simple-error (message)
   "Signal a simple error with a MESSAGE."

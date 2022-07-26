@@ -8,4 +8,4 @@
 
 set -eux
 # Node tests
-./node_modules/mocha/bin/mocha --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js --grep $1
+./node_modules/mocha/bin/mocha.js --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js --grep $1
