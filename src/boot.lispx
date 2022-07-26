@@ -665,9 +665,8 @@ $(syntax property (:documentation docstring))"
   "Define a new generic function with the given NAME.  The RECEIVER,
 PARAMETERS, and PROPERTIES are currently ignored.
 $(syntax property (:documentation docstring))"
-  (def #'generic (lambda args (apply (%find-method (class-of (car args)) name) args)))
-  (eval (list #'def (function-symbol name) #'generic) env)
-  name)
+  (flet ((generic args (apply (%find-method (class-of (car args)) name) args)))
+    (eval (list #'def (function-symbol name) #'generic) env)))
 
 (defexpr defmethod (name ((receiver class-name) . parameters) . forms) env
   "Add a new method to the generic function named by NAME specialized
