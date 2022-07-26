@@ -59,9 +59,21 @@
 ;; 1) There is no `with-condition-restarts'.  Instead there is an
 ;;    additional keyword, `:associated-conditions', in the
 ;;    handler-specs of `restart-bind' and `restart-case' that
-;;    establishes the associations.  Alternatively, `signal' and
-;;    `error' also support the establishment of restart handlers
-;;    associated with the signalled condition.
+;;    establishes the associations.
+;;
+;;    Alternatively, `signal' and `error' also support the
+;;    establishment of restart handlers associated with the signalled
+;;    condition.
+;;
+;;    A call to `signal' (or `error') with restart handler specs like:
+;;
+;;    (signal some-condition
+;;      (continue (lambda () ...)))
+;;
+;;    is equivalent to:
+;;
+;;    (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
+;;      (signal some-condition))
 ;;
 ;; 2) Every restart must have a non-nil name; anonymous restarts
 ;;    are not supported.
@@ -235,12 +247,6 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
   "Metaprogramming utility to create the `signal' / `error' operators
 that take restart handler-specs from the `lispx::signal-impl' /
 `lispx::error-impl' ones that don't."
-  ;; What we're doing here:
-  ;; A call to `signal' (or `error') with restart handler specs like:
-  ;; (signal some-condition (continue (lambda () ...)))
-  ;; is turned into:
-  ;; (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
-  ;;   (lispx::signal-impl some-condition))
   (vau (condition . handler-specs) env
     (let ((c (eval condition env)))
       (flet ((append-associated-condition (handler-spec)
