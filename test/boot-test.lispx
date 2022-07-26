@@ -580,7 +580,10 @@
   (deftest defun.5
     (signals-error
      (defun #t ())
-     type-error :datum #t :expected-type 'symbol)))
+     type-error :datum #t :expected-type 'symbol))
+
+  (deftest defun.6
+    (typep (defun foo ()) #^function)))
 
 (defsuite progn
 
