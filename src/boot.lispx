@@ -651,14 +651,13 @@ SUPERCLASS?, and SLOT-SPECS.  The superclass defaults to
 ignored.
 $(syntax slot-spec symbol)
 $(syntax property (:documentation docstring))"
-  (def superclass (find-class (optional superclass? 'standard-object) env))
-  ;; Slot-specs are ignored for now, but check them nevertheless.
+  ;; Slot-specs are ignored for now, but check that they are symbols nevertheless.
   (dolist (slot-spec slot-specs) (the symbol slot-spec))
-  (def class-name (class-symbol name))
-  (if (boundp class-name env)
-      (%reinitialize-standard-class (eval class-name env) superclass)
-      (eval (list #'def class-name (%make-standard-class name superclass)) env))
-  name)
+  (let ((class-name (class-symbol name))
+        (superclass (find-class (optional superclass? 'standard-object) env)))
+    (if (boundp class-name env)
+        (%reinitialize-standard-class (eval class-name env) superclass)
+        (eval (list #'def class-name (%make-standard-class name superclass)) env))))
 
 ;;; Generic Functions
 

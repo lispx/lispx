@@ -3156,8 +3156,7 @@
      match-error))
 
   (deftest defclass.5
-    (defclass c () ())
-    'c)
+    (typep (defclass c () ()) #^standard-class))
 
   (deftest defclass.6
     (progn
