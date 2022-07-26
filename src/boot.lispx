@@ -428,7 +428,7 @@ the value."
 
 (defun assert (boolean)
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
-  (unless boolean (error (make-instance (class assertion-error)))))
+  (unless boolean (error (make-instance #^assertion-error))))
 
 ;;; Lists
 
@@ -701,7 +701,7 @@ names (symbols, typically keywords) and values."
 
 (defun make-type-error (datum expected-type)
   "Create a `type-error' with the given DATUM and EXPECTED-TYPE."
-  (make-instance (class type-error) :datum datum :expected-type expected-type))
+  (make-instance #^type-error :datum datum :expected-type expected-type))
 
 (defun assert-type (object class)
   "Signal a `type-error' if the OBJECT is not an instance of the CLASS."
@@ -810,7 +810,7 @@ $(fn (name &optional value docstring))"
   (def value (eval (optional value-and-docstring?) env)) ; treating 2-elt list as option
   (if (boundp name env)
       (set-dynamic (eval name env) value)
-      (eval (list #'def name (make-instance (class dynamic) :value value)) env)))
+      (eval (list #'def name (make-instance #^dynamic :value value)) env)))
 
 (defun dynamic (dynamic-variable)
   "Return the current value of the DYNAMIC-VARIABLE."
