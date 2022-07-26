@@ -373,7 +373,7 @@ the protected forms are not evaluated in case of `panic'."
 
 (defun lispx::make-typecase-with-default-function (#'default)
   "Metaprogramming utility used to create `typecase' and `etypecase'.
-If no matching clause is found, the #'DEFAULT function is called with
+If no matching clause is found, the DEFAULT function is called with
 the key."
   (vau (keyform . clauses) env
     (let ((key (eval keyform env)))
