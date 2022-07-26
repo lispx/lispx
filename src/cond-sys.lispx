@@ -155,10 +155,10 @@ $(syntax handler-spec (restart-name handler-function . properties))
 $(syntax properties (&key interactive-function associated-conditions))")
 
 (defun lispx::make-handler-case-operator (#'handler-bind-operator)
-  "Metaprogramming utility to create `handler-case'/`restart-case'
-from `handler-bind'/`restart-bind'.  The `*-case' operators unwind the
-stack before the handler is called.  We do this with an outer exit and
-an inner trampoline, both wrapped around the original `*-bind'
+  "Metaprogramming utility to create `handler-case' / `restart-case'
+from `handler-bind' / `restart-bind'.  The `*-case' operators unwind
+the stack before the handler is called.  We do this with an outer exit
+and an inner trampoline, both wrapped around the original `*-bind'
 operator (a similar technique is described in the Common Lisp spec for
 `handler-case').  The`*-bind' operator's handler functions are
 replaced with functions that jump into the trampoline, and call the
@@ -232,9 +232,9 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
   (panic condition))
 
 (defun lispx::make-signal-with-restarts-operator (#'signal-operator)
-  "Metaprogramming utility to create the `signal'/`error' operators
-that take restart handler-specs from the
-`lispx::signal-impl'/`lispx::error-impl' ones that don't."
+  "Metaprogramming utility to create the `signal' / `error' operators
+that take restart handler-specs from the `lispx::signal-impl' /
+`lispx::error-impl' ones that don't."
   ;; What we're doing here:
   ;; A call to `signal' (or `error') with restart handler specs like:
   ;; (signal some-condition (continue (lambda () ...)))
