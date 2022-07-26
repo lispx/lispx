@@ -60,6 +60,10 @@
 ;;    `handler-bind' and `restart-bind' functions.  There is no extra
 ;;    "user interface" processing going on.
 ;;
+;;    Likewise, `signal' and `error' do not support creating simple
+;;    conditions from formatting strings and arguments, you must
+;;    always pass in a fully formed condition yourself.
+;;
 ;; 2) There is no `with-condition-restarts'.  Instead there is an
 ;;    additional keyword, `:associated-conditions', in the
 ;;    handler-specs of `restart-bind' and `restart-case' that
