@@ -409,14 +409,18 @@ $(syntax clause (class-name . forms))")
 
 (defexpr set (environment definiend-tree value) dynamic-environment
   "Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,
-creating or updating existing bindings."
+creating or updating existing bindings.  Unlike Common Lisp (or
+Scheme), we have no `setq' (or `set!') that allows updating arbitrary
+bindings -- you always need to know the environment a binding is in to
+change it.  Therefore, we usually use boxes (see below) instead of
+mutating bindings directly."
   (eval (list #'def definiend-tree
               (list (unwrap #'eval) value dynamic-environment))
         (eval environment dynamic-environment)))
 
 (defun box initial-value?
-  "A box is a function that encapsulates a mutable value.  Create a
-new box with the optional INITIAL-VALUE?.  Calling the box without
+  "Create a new box with the optional INITIAL-VALUE?.  A box is a
+function that encapsulates a mutable value.  Calling the box without
 arguments returns the value.  Calling the box with an argument sets
 the value."
   (def value (optional initial-value?))
