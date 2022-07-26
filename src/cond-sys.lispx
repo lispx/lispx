@@ -193,7 +193,7 @@ $(fn (handler-specs . forms))")
 $(type fexpr)
 $(fn (handler-specs . forms))")
 
-(defun lispx::signal (condition)
+(defun lispx::signal-impl (condition)
   "Utility to signal the CONDITION.  If the signal is unhandled,
 return void.  See `signal'."
   (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))
@@ -221,10 +221,10 @@ in as the value of HANDLER-FRAME."
 with a list of ARGUMENTS."
   (apply (slot-value handler 'handler-function) arguments))
 
-(defun lispx::error (condition)
+(defun lispx::error-impl (condition)
   "Utility to signal the CONDITION.  If the condition is unhandled,
 invoke the debugger.  Therefore never returns normally.  See `error'."
-  (lispx::signal condition)
+  (signal condition)
   (invoke-debugger condition))
 
 (defun invoke-debugger (condition)
@@ -233,14 +233,14 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
 
 (defun lispx::make-signal-with-restarts-operator (#'signal-operator)
   "Metaprogramming utility to create the `signal'/`error' operators
-that take restart handler-specs from the `lispx::signal'/`lispx::error'
-ones that don't."
+that take restart handler-specs from the
+`lispx::signal-impl'/`lispx::error-impl' ones that don't."
   ;; What we're doing here:
   ;; A call to `signal' (or `error') with restart handler specs like:
   ;; (signal some-condition (continue (lambda () ...)))
   ;; is turned into:
   ;; (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
-  ;;   (lispx::signal some-condition))
+  ;;   (lispx::signal-impl some-condition))
   (vau (condition . handler-specs) env
     (let ((c (eval condition env)))
       (flet ((append-associated-condition (handler-spec)
@@ -249,7 +249,7 @@ ones that don't."
                     (list #'signal-operator c))
               env)))))
 
-(def #'signal (lispx::make-signal-with-restarts-operator #'lispx::signal)
+(def #'signal (lispx::make-signal-with-restarts-operator #'lispx::signal-impl)
   "Signal the CONDITION.  If the signal is unhandled, return void.
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
@@ -257,7 +257,7 @@ as per `restart-case'.  The handlers should not specify the
 $(type fexpr)
 $(fn (condition . handler-specs))")
 
-(def #'error (lispx::make-signal-with-restarts-operator #'lispx::error)
+(def #'error (lispx::make-signal-with-restarts-operator #'lispx::error-impl)
   "Signal the CONDITION.  If the condition is unhandled, invoke the
 debugger.  Therefore never returns normally.
 Restart handlers that are associated with the condition can be bound
@@ -306,7 +306,7 @@ HANDLER-FRAME is the handler frame where the search should start
 Return an option of the found handler and the frame establishing it as
 a two-element list.  The frame is needed so that we can access its
 parent in the implementation of the condition firewall (see
-`lispx::signal' and `lispx::call-condition-handler').
+`lispx::signal-impl' and `lispx::call-condition-handler').
 
 The PAYLOAD? parameter can be used to pass in an optional condition if
 we are looking for a restart handler (see `find-restart?').  If we are
