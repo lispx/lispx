@@ -671,9 +671,8 @@ $(syntax property (:documentation docstring))"
 (defexpr defmethod (name ((receiver class-name) . parameters) . forms) env
   "Add a new method to the generic function named by NAME specialized
 for the class named by CLASS-NAME."
-  (def #'method (eval (list* #'lambda (list* receiver parameters) forms) env))
-  (%add-method (find-class class-name env) name #'method)
-  name)
+  (let ((#'method (eval (list* #'lambda (list* receiver parameters) forms) env)))
+    (%add-method (find-class class-name env) name #'method)))
 
 ;;; Standard Objects
 
