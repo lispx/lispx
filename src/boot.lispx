@@ -783,9 +783,10 @@ evaluated lazily, only when the OPTION? is nil."
 
 (defun optionals (list . defaults)
   "Similar to `optional', but provides DEFAULTS for any number of
-elements of LIST.
-Currently, the DEFAULTS are always evaluated, but in the future, they
-might be evaluated lazily, so they should not be used for effect."
+elements of LIST.  This is useful for implementing functions that take
+multiple optional arguments.  Currently, the DEFAULTS are always
+evaluated, but in the future, they might be evaluated lazily, so they
+should not be used for effect."
   (loop-let -optionals- ((list list) (defaults defaults))
     (if (null list)
         (if (null defaults)
