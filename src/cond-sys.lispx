@@ -52,11 +52,15 @@
 ;;   conditions, to tell apart restarts belonging to different,
 ;;   concurrently signalled conditions.
 ;;
-;; We follow the Common Lisp condition system quite closely
-;; (including details like the condition firewall), with two
-;; differences:
+;; We follow the Common Lisp condition system quite closely (including
+;; details like the condition firewall), with some minor differences:
 ;;
-;; 1) There is no `with-condition-restarts'.  Instead there is an
+;; 1) For simplicity, the syntaxes of `handler-case' and
+;;    `restart-case' are equal to the syntaxes for the lower-level
+;;    `handler-bind' and `restart-bind' functions.  There is no extra
+;;    "user interface" processing going on.
+;;
+;; 2) There is no `with-condition-restarts'.  Instead there is an
 ;;    additional keyword, `:associated-conditions', in the
 ;;    handler-specs of `restart-bind' and `restart-case' that
 ;;    establishes the associations.
@@ -75,7 +79,7 @@
 ;;    (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
 ;;      (signal some-condition))
 ;;
-;; 2) Every restart must have a non-nil name; anonymous restarts
+;; 3) Every restart must have a non-nil name; anonymous restarts
 ;;    are not supported.
 
 (defclass handler-frame ()
