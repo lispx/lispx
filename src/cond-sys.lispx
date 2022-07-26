@@ -56,9 +56,9 @@
 ;; details like the condition firewall), with some minor differences:
 ;;
 ;; 1) For simplicity, the syntaxes of `handler-case' and
-;;    `restart-case' are equal to the syntaxes for the lower-level
+;;    `restart-case' are equal to the syntaxes of the lower-level
 ;;    `handler-bind' and `restart-bind' functions.  There is no extra
-;;    "user interface" processing going on.
+;;    "user interface" processing for the higher-level functions.
 ;;
 ;;    Likewise, `signal' and `error' do not support creating simple
 ;;    conditions from formatting strings and arguments, you must
@@ -320,7 +320,7 @@ HANDLER-FRAME is the handler frame where the search should start
 Return an option of the found handler and the frame establishing it as
 a two-element list.  The frame is needed so that we can access its
 parent in the implementation of the condition firewall (see
-`lispx::signal-impl' and `lispx::call-condition-handler').
+`lispx::call-condition-handler').
 
 The PAYLOAD? parameter can be used to pass in an optional condition if
 we are looking for a restart handler (see `find-restart?').  If we are
