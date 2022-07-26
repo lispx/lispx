@@ -530,6 +530,10 @@
     (progn
       (defconstant x 1)
       x)
+    1)
+
+  (deftest defconstant.5
+    (defconstant x 1)
     1))
 
 (defsuite lambda
