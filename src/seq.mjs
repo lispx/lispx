@@ -211,8 +211,6 @@ export function init_seq(vm)
 
     vm.define_alien_function("%reverse", (list) => vm.reverse(list));
 
-    vm.define_alien_function("%some", (value) => vm.some(value));
-
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
 
 };
