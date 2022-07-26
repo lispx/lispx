@@ -177,7 +177,7 @@ $(syntax properties (&key interactive-function associated-conditions))")
 (defun lispx::make-handler-case-operator (#'handler-bind-operator)
   "Metaprogramming utility to create `handler-case' / `restart-case'
 from `handler-bind' / `restart-bind'.  The `*-case' operators unwind
-the stack before the handler is called.  We do this with an outer exit
+the stack before a handler is called.  We do this with an outer exit
 and an inner trampoline, both wrapped around the original `*-bind'
 operator.  The original form's handler functions are replaced with
 functions that use the trampoline.  If a condition is signalled / a
