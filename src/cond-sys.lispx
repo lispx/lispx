@@ -179,15 +179,12 @@ $(syntax properties (&key interactive-function associated-conditions))")
 from `handler-bind' / `restart-bind'.  The `*-case' operators unwind
 the stack before the handler is called.  We do this with an outer exit
 and an inner trampoline, both wrapped around the original `*-bind'
-operator (a similar technique is described in the Common Lisp spec for
-`handler-case').  The`*-bind' operator's handler functions are
-replaced with functions that jump into the trampoline, and call the
-original handler functions there.  If no condition is signalled / no
-restart is invoked during evaluation of the body forms, we immediately
-return from the outer exit, jumping across and ignoring the
-trampoline.  If on the other hand a condition is signalled / a restart
-is invoked, we unwind the stack out of the `*-bind' form by jumping
-into the trampoline, and call the handler there."
+operator.  The original form's handler functions are replaced with
+functions that use the trampoline.  If a condition is signalled / a
+restart is invoked during the evaluation of the body forms, they
+unwind the stack by jumping into the trampoline, and call the original
+handler function there.  If no condition is signalled / no restart is
+invoked, we return from the outer exit, ignoring the trampoline."
   (vau (handler-specs . forms) env
     (block exit
       ((block trampoline
