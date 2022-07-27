@@ -68,7 +68,7 @@ specified by SLOT-SPECS (a plist) and will be compared against the
 slots of the signalled condition."
   (let ((class (find-class condition-class env)))
     (block exit
-      (handler-bind ((object (lambda (c)
+      (handler-case ((object (lambda (c)
                                (if (typep c class)
                                    (progn
                                      (loop-let -check-slots- ((slot-specs slot-specs))
