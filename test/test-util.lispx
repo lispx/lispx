@@ -48,7 +48,7 @@ must not capure any continuations."
      ;; `js-lambda').
      (eval (list* #'progn forms) env))))
 
-(defun %make-mocha-hook (#'mocha-hook-fun)
+(defun lispx::make-mocha-hook (#'mocha-hook-fun)
   "Metaprogramming utility to create Mocha hooks.  Hooks may capture."
   (vau forms env
     (mocha-hook-fun
@@ -56,10 +56,10 @@ must not capure any continuations."
        (push-prompt 'default-prompt
          (eval (list* #'progn forms) env))))))
 
-(def #'before (%make-mocha-hook #'mocha:before))
-(def #'before-each (%make-mocha-hook #'mocha:before-each))
-(def #'after (%make-mocha-hook #'mocha:after))
-(def #'after-each (%make-mocha-hook #'mocha:after-each))
+(def #'before (lispx::make-mocha-hook #'mocha:before))
+(def #'before-each (lispx::make-mocha-hook #'mocha:before-each))
+(def #'after (lispx::make-mocha-hook #'mocha:after))
+(def #'after-each (lispx::make-mocha-hook #'mocha:after-each))
 
 (defexpr signals-error (form condition-class . slot-specs) env
   "Evaluate the FORM and assert that it signals a condition of the
