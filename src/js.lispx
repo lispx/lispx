@@ -22,10 +22,11 @@ equality, false otherwise."
 that's callable from JS."
   (list #'to-js-function
         (list #'lambda parameter-tree
-              ;; Push a barrier around the body forms to prevent
-              ;; continuations from escaping to JS.
-              (list* #'push-subcont-barrier
-                     forms))))
+              ;; This mirrors eval_form() in control.mjs.
+              ;; Check the docs there for an explanation.
+              (list #'push-subcont-barrier
+                    (list* #'push-prompt '+root-prompt+
+                           forms)))))
 
 (defun js-global (name)
   "Access a JS global by NAME (a string).  Return undefined if the
