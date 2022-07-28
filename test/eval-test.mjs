@@ -205,7 +205,7 @@ describe("Evaluation & Operation", () => {
     it("vm.eval_form() doesn't swallow suspensions.", () => {
 
         const form = vm.list(vm.sym("take-subcont"), vm.str("prompt"), vm.sym("k"));
-        assert.throws(() => vm.eval_form(form), "Prompt not found");
+        assert.throws(() => vm.eval_form(form), "Prompt not found: \"prompt\"");
         assert.instanceOf(vm.eval(form), vm.Suspension);
 
     });
@@ -258,10 +258,14 @@ describe("Evaluation & Operation", () => {
 
     });
 
-    it("match() doesn't allow keyword definiends.", () => {
+    it("match() requires keyword definiends to match exactly.", () => {
 
+        const env = vm.make_environment();
+        const result = vm.match(vm.kwd("x"), vm.kwd("x"), env);
+        assert.throws(() => env.lookup(vm.sym("x")),
+                      "Unbound variable: x");
         assert.throws(() => vm.match(vm.kwd("x"), vm.nil()),
-                      "Match error");
+                      "Match error: :x vs #nil");
 
     });
 
@@ -275,7 +279,7 @@ describe("Evaluation & Operation", () => {
         assert(vm.equal(env.lookup(vm.sym("y")), vm.num(33)));
 
         assert.throws(() => vm.match(vm.cons(vm.sym("x"), vm.sym("y")), vm.t(), env),
-                      "Match error");
+                      "Match error: (x . y) vs #t");
 
     });
 
@@ -285,7 +289,7 @@ describe("Evaluation & Operation", () => {
         assert(vm.equal(vm.match(vm.nil(), vm.nil(), env), vm.nil()));
 
         assert.throws(() => vm.match(vm.nil(), vm.t(), env),
-                      "Match error");
+                      "Match error: #nil vs #t");
 
     });
 
