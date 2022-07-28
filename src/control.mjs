@@ -820,4 +820,13 @@ export function init_control(vm)
 
     vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
+    function print_stacktrace(k)
+    {
+        vm.assert_type(k, vm.Continuation);
+        do {
+        } while((k = k.inner));
+    }
+
+    vm.define_alien_function("%print-stacktrace", print_stacktrace);
+
 };

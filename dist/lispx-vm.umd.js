@@ -38,7 +38,7 @@ module.exports = ";;;                                                     -*- Li
   \*************************/
 /***/ ((module) => {
 
-module.exports = "(defun invoke-debugger (condition)\n  \"Invoke the debugger, which currently just means panicking.\"\n  (panic condition))\n";
+module.exports = "(defun invoke-debugger (condition)\n  \"Invoke the debugger.\"\n  (take-subcont +root-prompt+ k\n    (push-delim-subcont +root-prompt+ k\n      (%print-stacktrace k)\n      (panic condition))))\n";
 
 /***/ }),
 
@@ -1955,6 +1955,15 @@ function init_control(vm)
     vm.define_built_in_operator("%unwind-protect", vm.UNWIND_PROTECT);
 
     vm.define_constant("+root-prompt+", ROOT_PROMPT);
+
+    function print_stacktrace(k)
+    {
+        vm.assert_type(k, vm.Continuation);
+        do {
+        } while((k = k.inner));
+    }
+
+    vm.define_alien_function("%print-stacktrace", print_stacktrace);
 
 };
 

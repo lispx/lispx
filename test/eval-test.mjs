@@ -160,9 +160,17 @@ describe("Evaluation & Operation", () => {
 
     });
 
+    /*
+     * The following two tests exercise only eval_form() and not
+     * eval().  The reason is that they cause an error, and so
+     * INVOKE-DEBUGGER is called, which attempts to print a stack
+     * trace.  This works for eval_form() which pushes the root
+     * prompt, but not for eval(), which doesn't.
+     */
+
     it("Evaluating an unbound symbol causes an error.", () => {
 
-        for (const eval_fun of [vm.eval, vm.eval_form]) {
+        for (const eval_fun of [vm.eval_form]) {
             assert.throws(() => eval_fun(vm.sym("this-is-not-bound")),
                           "Unbound variable: this-is-not-bound");
             assert.throws(() => eval_fun(vm.fsym("this-is-not-bound")),
@@ -178,7 +186,7 @@ describe("Evaluation & Operation", () => {
         const examples = [ vm.nil(), undefined, "foo", vm.str("foo"), vm.num(1) ];
 
         for (const ex of examples)
-            for (const eval_fun of [vm.eval, vm.eval_form])
+            for (const eval_fun of [vm.eval_form])
                 assert.throws(() => eval_fun(vm.list(ex)),
                               "Type assertion failed");
 
