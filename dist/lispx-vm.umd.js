@@ -1441,7 +1441,7 @@ function init_control(vm)
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
         const action = () => vm.operate(thunk, vm.nil(), env);
-        return vm.do_push_prompt(prompt, action, env);
+        return vm.push_prompt(prompt, action, env);
     };
 
     /*
@@ -1468,14 +1468,14 @@ function init_control(vm)
          * This is the first event of continuation composition.
          */
         const action = () => new vm.Resumption(continuation, thunk).resume();
-        return vm.do_push_prompt(prompt, action, env);
+        return vm.push_prompt(prompt, action, env);
     };
 
     /*
      * Work function for PUSH_PROMPT and PUSH_DELIM_SUBCONT
      * whose difference is factored out into the action parameter.
      */
-    vm.do_push_prompt = (prompt, action, env, resumption = null) =>
+    vm.push_prompt = (prompt, action, env, resumption = null) =>
     {
         /*
          * Do the action.
@@ -1509,7 +1509,7 @@ function init_control(vm)
                  * suspend, ourselves.
                  */
                 return result.suspend((resumption) =>
-                    vm.do_push_prompt(prompt, action, env, resumption));
+                    vm.push_prompt(prompt, action, env, resumption));
             }
         } else {
             /*
@@ -1528,10 +1528,10 @@ function init_control(vm)
     vm.PUSH_SUBCONT_BARRIER = function(args, env)
     {
         const thunk = vm.assert_type(vm.elt(args, 0), vm.Function);
-        return vm.do_push_subcont_barrier(() => vm.operate(thunk, vm.nil(), env), env);
+        return vm.push_subcont_barrier(() => vm.operate(thunk, vm.nil(), env), env);
     };
 
-    vm.do_push_subcont_barrier = (action, env, resumption = null) =>
+    vm.push_subcont_barrier = (action, env, resumption = null) =>
     {
         /*
          * How can it be that this work function must handle
@@ -1559,7 +1559,7 @@ function init_control(vm)
              * re-composition.
              */
             result.suspend((resumption) =>
-                vm.do_push_subcont_barrier(action, env, resumption));
+                vm.push_subcont_barrier(action, env, resumption));
 
             /*
              * Resume back into the continuation and throw an error
@@ -1912,10 +1912,10 @@ function init_control(vm)
      * traces) around the user-supplied form.
      */
     vm.eval_form = (form, env = vm.get_environment()) =>
-        vm.do_push_subcont_barrier(() =>
-            vm.do_push_prompt(ROOT_PROMPT,
-                              () => vm.eval(form, env),
-                              env),
+        vm.push_subcont_barrier(() =>
+            vm.push_prompt(ROOT_PROMPT,
+                           () => vm.eval(form, env),
+                           env),
             env);
 
     /*** Lisp API ***/
