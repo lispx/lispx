@@ -177,7 +177,9 @@ export function init_eval(vm)
     {
         constructor(definiend, value)
         {
-            super("Match error");
+            super("Match error: "
+                  + vm.write_to_string(definiend).to_js_string() + " vs "
+                  + vm.write_to_string(value).to_js_string());
             this.lisp_slot_definiend = definiend;
             this.lisp_slot_value = value;
         }
