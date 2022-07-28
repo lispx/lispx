@@ -1396,7 +1396,7 @@ function init_control(vm)
      * aborts outwards to the given prompt and calls the suspension
      * handler with the captured continuation.
      */
-    vm.TAKE_SUBCONT = function(args, env)
+    function TAKE_SUBCONT(args, env)
     {
         var prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         var handler = vm.assert_type(vm.elt(args, 1), vm.Function);
@@ -1425,7 +1425,7 @@ function init_control(vm)
              */
             vm.operate(resumption.handler, vm.nil(), env)
         );
-    };
+    }
 
     /*
      * (%push-prompt prompt thunk) => result
@@ -1434,7 +1434,7 @@ function init_control(vm)
      * is then called inside the newly delimited continuation.
      * Returns the thunk's result.
      */
-    vm.PUSH_PROMPT = function(args, env)
+    function PUSH_PROMPT(args, env)
     {
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
@@ -1454,7 +1454,7 @@ function init_control(vm)
      * delimcc, except that the prompt must be manually supplied,
      * since our continuations don't include prompts.)
      */
-    vm.PUSH_DELIM_SUBCONT = function(args, env)
+    function PUSH_DELIM_SUBCONT(args, env)
     {
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const continuation = vm.assert_type(vm.elt(args, 1), vm.Continuation);
@@ -1467,7 +1467,7 @@ function init_control(vm)
          */
         const action = () => new vm.Resumption(continuation, thunk).resume();
         return vm.push_prompt(prompt, action, env);
-    };
+    }
 
     /*
      * Work function for PUSH_PROMPT and PUSH_DELIM_SUBCONT
@@ -1523,11 +1523,11 @@ function init_control(vm)
      * Built-in function that calls a thunk and prevents it from
      * capturing continuations to the outside.
      */
-    vm.PUSH_SUBCONT_BARRIER = function(args, env)
+    function PUSH_SUBCONT_BARRIER(args, env)
     {
         const thunk = vm.assert_type(vm.elt(args, 0), vm.Function);
         return vm.push_subcont_barrier(() => vm.operate(thunk, vm.nil(), env), env);
-    };
+    }
 
     vm.push_subcont_barrier = (action, env, resumption = null) =>
     {
@@ -1620,13 +1620,13 @@ function init_control(vm)
      *
      * Cf. Common Lisp's PROGV.
      */
-    vm.PROGV = function(args, env)
+    function PROGV(args, env)
     {
         const dynamics = vm.list_to_array(vm.elt(args, 0));
         const values = vm.list_to_array(vm.elt(args, 1));
         const thunk = vm.assert_type(vm.elt(args, 2), vm.Function);
         return do_progv(dynamics, values, thunk, env);
-    };
+    }
 
     function do_progv(dynamics, values, thunk, env, resumption = null)
     {
@@ -1687,11 +1687,11 @@ function init_control(vm)
      *
      * Cf. Common Lisp's "simple" LOOP, not the Loop Facility.
      */
-    vm.LOOP = function(operands, env)
+    function LOOP(operands, env)
     {
         const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         return do_loop(expr, env);
-    };
+    }
 
     function do_loop(expr, env, resumption = null)
     {
@@ -1722,12 +1722,12 @@ function init_control(vm)
      *
      * Cf. Common Lisp's CATCH.
      */
-    vm.CATCH = function(operands, env)
+    function CATCH(operands, env)
     {
         const tag = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(operands, 1), vm.Function);
         return do_catch(tag, thunk, env);
-    };
+    }
 
     function do_catch(tag, thunk, env, resumption = null)
     {
@@ -1767,12 +1767,12 @@ function init_control(vm)
      *
      * Cf. Common Lisp's THROW.
      */
-    vm.THROW = function(args, env)
+    function THROW(args, env)
     {
         const tag = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const value = vm.assert_type(vm.elt(args, 1), vm.TYPE_ANY);
         throw new vm.Nonlocal_exit(tag, value);
-    };
+    }
 
     /*
      * Instances of this class are thrown by %THROW.
@@ -1803,7 +1803,7 @@ function init_control(vm)
      *
      * Cf. Common Lisp's UNWIND-PROTECT.
      */
-    vm.UNWIND_PROTECT = function(operands, env)
+    function UNWIND_PROTECT(operands, env)
     {
         const protected_expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const cleanup_expr = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
@@ -1924,23 +1924,23 @@ function init_control(vm)
 
     vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
 
-    vm.define_built_in_function("%take-subcont", vm.TAKE_SUBCONT);
+    vm.define_built_in_function("%take-subcont", TAKE_SUBCONT);
 
-    vm.define_built_in_function("%push-prompt", vm.PUSH_PROMPT);
+    vm.define_built_in_function("%push-prompt", PUSH_PROMPT);
 
-    vm.define_built_in_function("%push-delim-subcont", vm.PUSH_DELIM_SUBCONT);
+    vm.define_built_in_function("%push-delim-subcont", PUSH_DELIM_SUBCONT);
 
-    vm.define_built_in_function("%push-subcont-barrier", vm.PUSH_SUBCONT_BARRIER);
+    vm.define_built_in_function("%push-subcont-barrier", PUSH_SUBCONT_BARRIER);
 
-    vm.define_built_in_function("%progv", vm.PROGV);
+    vm.define_built_in_function("%progv", PROGV);
 
-    vm.define_built_in_operator("%loop", vm.LOOP);
+    vm.define_built_in_operator("%loop", LOOP);
 
-    vm.define_built_in_function("%catch", vm.CATCH);
+    vm.define_built_in_function("%catch", CATCH);
 
-    vm.define_built_in_function("%throw", vm.THROW);
+    vm.define_built_in_function("%throw", THROW);
 
-    vm.define_built_in_operator("%unwind-protect", vm.UNWIND_PROTECT);
+    vm.define_built_in_operator("%unwind-protect", UNWIND_PROTECT);
 
     vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
