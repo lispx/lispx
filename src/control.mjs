@@ -471,7 +471,7 @@ export function init_control(vm)
     {
         constructor(prompt)
         {
-            super("Prompt not found: " + vm.write_to_string(prompt).to_js_string());
+            super("Prompt not found: " + vm.write_to_js_string(prompt));
             this.lisp_slot_prompt = prompt;
         }
     };
