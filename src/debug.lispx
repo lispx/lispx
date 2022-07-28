@@ -1,0 +1,6 @@
+(defun invoke-debugger (condition)
+  "Invoke the debugger."
+  (take-subcont +root-prompt+ k
+    (push-delim-subcont +root-prompt+ k
+      (%print-stacktrace k)
+      (panic condition))))

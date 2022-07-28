@@ -824,6 +824,7 @@ export function init_control(vm)
     {
         vm.assert_type(k, vm.Continuation);
         do {
+            console.log(k);
         } while((k = k.inner));
     }
 
