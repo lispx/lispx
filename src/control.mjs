@@ -316,7 +316,7 @@ export function init_control(vm)
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
         const action = () => vm.operate(thunk, vm.nil(), env);
         return vm.push_prompt(prompt, action, env);
-    };
+    }
 
     /*
      * (%push-delim-subcont prompt continuation thunk) => result
@@ -684,7 +684,7 @@ export function init_control(vm)
         const protected_expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const cleanup_expr = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
         return do_unwind_protect_1(protected_expr, cleanup_expr, env);
-    };
+    }
 
     /*
      * This must be implemented in two steps, with two work functions.
