@@ -1118,8 +1118,8 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 /*
- * Adds delimited control, delimited dynamic binding, and continuation
- * barriers to a virtual machine.
+ * Adds multi-prompt delimited control, delimited dynamic binding, and
+ * continuation barriers to a virtual machine.
  *
  * The API follows the delimcc library:
  * `http://okmij.org/ftp/continuations/caml-shift-journal.pdf'
@@ -1879,7 +1879,7 @@ function init_control(vm)
         }
     }
 
-    /*** Evaluation Entry Point and Root Prompt ***/
+    /*** Root Prompt and Evaluation Entry Point ***/
 
     /*
      * This prompt is pushed around all code evaluated by the VM.
@@ -1887,7 +1887,7 @@ function init_control(vm)
      *
      * Its purpose is to serve as a delimiter for stack traces.
      */
-    vm.ROOT_PROMPT = vm.sym("root-prompt");
+    const ROOT_PROMPT = vm.sym("root-prompt");
 
     /*
      * Evaluate a form in an environment.  This is the main entry
@@ -1895,12 +1895,13 @@ function init_control(vm)
      *
      * The environment defaults to the VM's root environment.
      *
-     * Signals an error if the code attempts to capture a
-     * continuation to an outside prompt.
+     * Pushes a continuation barrier (to prevent continuations from
+     * escaping to JS) and the root prompt (to enable taking of stack
+     * traces) around the user-supplied form.
      */
     vm.eval_form = (form, env = vm.get_environment()) =>
         vm.do_push_subcont_barrier(() =>
-            vm.do_push_prompt(vm.ROOT_PROMPT,
+            vm.do_push_prompt(ROOT_PROMPT,
                               () => vm.eval(form, env),
                               env),
             env);
@@ -1931,7 +1932,7 @@ function init_control(vm)
 
     vm.define_built_in_operator("%unwind-protect", vm.UNWIND_PROTECT);
 
-    vm.define_constant("+root-prompt+", vm.ROOT_PROMPT);
+    vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
 };
 
@@ -1961,14 +1962,14 @@ function init_eval(vm)
     /*** Evaluation & Operation Core ***/
 
     /*
-     * Evaluate a form in an environment.  This is the core evaluation
-     * mechanism.
+     * Evaluate a form in an environment.  This is the core internal
+     * evaluation mechanism.
      *
      * The environment defaults to the VM's root environment.
      *
-     * Unlike eval_form(), this may return a Suspension (see
-     * control.mjs) if the code attempts to capture a continuation to
-     * an outside prompt.
+     * Unlike the main evaluation entry point eval_form() (in
+     * control.mjs), this may return a Suspension if the code attempts
+     * to capture a continuation to an outside prompt.
      */
     vm.eval = (form, env = vm.get_environment()) =>
     {

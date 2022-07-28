@@ -11,14 +11,14 @@ export function init_eval(vm)
     /*** Evaluation & Operation Core ***/
 
     /*
-     * Evaluate a form in an environment.  This is the core evaluation
-     * mechanism.
+     * Evaluate a form in an environment.  This is the core internal
+     * evaluation mechanism.
      *
      * The environment defaults to the VM's root environment.
      *
-     * Unlike eval_form(), this may return a Suspension (see
-     * control.mjs) if the code attempts to capture a continuation to
-     * an outside prompt.
+     * Unlike the main evaluation entry point eval_form() (in
+     * control.mjs), this may return a Suspension if the code attempts
+     * to capture a continuation to an outside prompt.
      */
     vm.eval = (form, env = vm.get_environment()) =>
     {
