@@ -1211,15 +1211,27 @@ function init_control(vm)
          * frame created by the %TAKE-SUBCONT expression that triggered
          * continuation capture.
          */
-        constructor(work_fun, inner)
+        constructor(work_fun, inner, trace)
         {
             super();
             vm.assert_type(work_fun, "function");
             vm.assert_type(inner, vm.type_or(vm.TYPE_NULL, vm.Continuation));
             this.work_fun = work_fun;
             this.inner = inner;
+            this.trace = trace;
         }
     };
+
+    class Trace
+    {
+        constructor(expr, env)
+        {
+            this.expr = expr;
+            this.env = env;
+        }
+    }
+
+    vm.trace = (expr, env) => new Trace(expr, env);
 
     /*
      * A suspension is a helper object created during the capture
@@ -1261,10 +1273,10 @@ function init_control(vm)
          * given work function to the suspension as we move outwards
          * during continuation creation.
          */
-        suspend(work_fun)
+        suspend(work_fun, trace)
         {
             vm.assert_type(work_fun, "function");
-            this.continuation = new vm.Continuation(work_fun, this.continuation);
+            this.continuation = new vm.Continuation(work_fun, this.continuation, trace);
             return this;
         }
     };
@@ -1324,11 +1336,11 @@ function init_control(vm)
      * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
      */
-    vm.bind = (first, second) =>
+    vm.bind = (first, second, trace) =>
     {
         vm.assert_type(first, "function");
         vm.assert_type(second, "function");
-        return do_bind(first, second);
+        return do_bind(first, second, trace);
     };
 
     /*
@@ -1349,7 +1361,7 @@ function init_control(vm)
      * must support.  The work functions of the more complicated
      * operators, below, follow this same protocol.
      */
-    function do_bind(first, second, resumption = null)
+    function do_bind(first, second, trace, resumption = null)
     {
         /*
          * Evaluate first thunk.
@@ -1378,7 +1390,9 @@ function init_control(vm)
              * that will restart later where we left off.
              */
             return val.suspend((resumption) =>
-                do_bind(first, second, resumption));
+                do_bind(first, second, trace, resumption),
+                trace
+            );
         else
             /*
              * The first thunk returned normally.
@@ -1947,9 +1961,15 @@ function init_control(vm)
     function print_stacktrace(k)
     {
         vm.assert_type(k, vm.Continuation);
+        const lines = [];
         do {
-            console.log(k);
+            if (k.trace)
+                lines.push(vm.write_to_string(k.trace.expr).to_js_string());
+            else
+                lines.push("[built-in]");
         } while((k = k.inner));
+        lines.reverse();
+        lines.slice(33).forEach((line) => console.log(line));
     }
 
     vm.define_alien_function("%print-stacktrace", print_stacktrace);
@@ -2035,7 +2055,8 @@ function init_eval(vm)
     {
         // (See control.mjs for the definition of vm.bind().)
         return vm.bind(() => evaluate_operator(cons.car(), env),
-                       (operator) => vm.operate(operator, cons.cdr(), env));
+                       (operator) => vm.operate(operator, cons.cdr(), env),
+                       vm.trace(cons, env));
     }
 
     /*
@@ -2266,7 +2287,8 @@ function init_eval(vm)
         operate(operands, env)
         {
             return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env));
+                           (args) => vm.operate(this.wrapped_operator, args, env),
+                           vm.trace(operands, env));
 
             function eval_args(todo, done)
             {
@@ -2274,7 +2296,8 @@ function init_eval(vm)
                     return vm.reverse(done);
                 else
                     return vm.bind(() => vm.eval(todo.car(), env),
-                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)));
+                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)),
+                                   vm.trace(todo.car(), env));
             }
         }
 
@@ -2406,7 +2429,8 @@ function init_eval(vm)
         const expression = vm.elt(operands, 1);
 
         return vm.bind(() => vm.eval(expression, env),
-                       (result) => vm.match(definiend, result, env));
+                       (result) => vm.match(definiend, result, env),
+                       vm.trace(operands, env));
     }
 
     /*
@@ -2432,7 +2456,8 @@ function init_eval(vm)
                                    return result;
                                else
                                    return progn(forms.cdr());
-                           });
+                           },
+                           vm.trace(forms.car(), env));
         }
     }
 
@@ -2459,7 +2484,8 @@ function init_eval(vm)
                                return vm.eval(consequent, env);
                            else
                                return vm.eval(alternative, env);
-                       });
+                       },
+                       vm.trace(test, env));
     }
 
     /*** Exception Trapping and Panicking ***/

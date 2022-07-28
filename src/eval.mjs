@@ -64,7 +64,8 @@ export function init_eval(vm)
     {
         // (See control.mjs for the definition of vm.bind().)
         return vm.bind(() => evaluate_operator(cons.car(), env),
-                       (operator) => vm.operate(operator, cons.cdr(), env));
+                       (operator) => vm.operate(operator, cons.cdr(), env),
+                       vm.trace(cons, env));
     }
 
     /*
@@ -295,7 +296,8 @@ export function init_eval(vm)
         operate(operands, env)
         {
             return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env));
+                           (args) => vm.operate(this.wrapped_operator, args, env),
+                           vm.trace(operands, env));
 
             function eval_args(todo, done)
             {
@@ -303,7 +305,8 @@ export function init_eval(vm)
                     return vm.reverse(done);
                 else
                     return vm.bind(() => vm.eval(todo.car(), env),
-                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)));
+                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)),
+                                   vm.trace(todo.car(), env));
             }
         }
 
@@ -435,7 +438,8 @@ export function init_eval(vm)
         const expression = vm.elt(operands, 1);
 
         return vm.bind(() => vm.eval(expression, env),
-                       (result) => vm.match(definiend, result, env));
+                       (result) => vm.match(definiend, result, env),
+                       vm.trace(operands, env));
     }
 
     /*
@@ -461,7 +465,8 @@ export function init_eval(vm)
                                    return result;
                                else
                                    return progn(forms.cdr());
-                           });
+                           },
+                           vm.trace(forms.car(), env));
         }
     }
 
@@ -488,7 +493,8 @@ export function init_eval(vm)
                                return vm.eval(consequent, env);
                            else
                                return vm.eval(alternative, env);
-                       });
+                       },
+                       vm.trace(test, env));
     }
 
     /*** Exception Trapping and Panicking ***/
