@@ -608,6 +608,9 @@ coroutine with `resume'."
     (boundp '+root-prompt+ (the-environment)))
 
   (deftest |Root prompt is set|
+    ;; I have no idea why this works.  I mean it's the right thing,
+    ;; but it's unclear how it interacts with test-util.lispx's
+    ;; Mocha stuff that runs this test.
     (take-subcont +root-prompt+ #ignore)
     #void))
 
