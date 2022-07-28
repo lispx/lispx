@@ -1429,7 +1429,7 @@ function init_control(vm)
         const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
         const thunk = vm.assert_type(vm.elt(args, 1), vm.Function);
         const action = () => vm.operate(thunk, vm.nil(), env);
-        return do_push_action(prompt, action, env);
+        return vm.do_push_prompt(prompt, action, env);
     };
 
     /*
@@ -1456,14 +1456,14 @@ function init_control(vm)
          * This is the first event of continuation composition.
          */
         const action = () => new vm.Resumption(continuation, thunk).resume();
-        return do_push_action(prompt, action, env);
+        return vm.do_push_prompt(prompt, action, env);
     };
 
     /*
      * Work function for PUSH_PROMPT and PUSH_DELIM_SUBCONT
      * whose difference is factored out into the action parameter.
      */
-    function do_push_action(prompt, action, env, resumption = null)
+    vm.do_push_prompt = (prompt, action, env, resumption = null) =>
     {
         /*
          * Do the action.
@@ -1497,7 +1497,7 @@ function init_control(vm)
                  * suspend, ourselves.
                  */
                 return result.suspend((resumption) =>
-                    do_push_action(prompt, action, env, resumption));
+                    vm.do_push_prompt(prompt, action, env, resumption));
             }
         } else {
             /*
@@ -1505,7 +1505,7 @@ function init_control(vm)
              */
             return result;
         }
-    }
+    };
 
     /*
      * (%push-subcont-barrier thunk) => result
@@ -1516,10 +1516,10 @@ function init_control(vm)
     vm.PUSH_SUBCONT_BARRIER = function(args, env)
     {
         const thunk = vm.assert_type(vm.elt(args, 0), vm.Function);
-        return do_push_subcont_barrier(thunk, env);
+        return vm.do_push_subcont_barrier(() => vm.operate(thunk, vm.nil(), env), env);
     };
 
-    function do_push_subcont_barrier(thunk, env, resumption = null)
+    vm.do_push_subcont_barrier = (action, env, resumption = null) =>
     {
         /*
          * How can it be that this work function must handle
@@ -1532,7 +1532,7 @@ function init_control(vm)
         if (resumption instanceof vm.Resumption)
             result = resumption.resume();
         else
-            result = vm.operate(thunk, vm.nil(), env);
+            result = action();
 
         if (result instanceof vm.Suspension) {
             /*
@@ -1547,7 +1547,7 @@ function init_control(vm)
              * re-composition.
              */
             result.suspend((resumption) =>
-                do_push_subcont_barrier(thunk, env, resumption));
+                vm.do_push_subcont_barrier(action, env, resumption));
 
             /*
              * Resume back into the continuation and throw an error
@@ -1879,6 +1879,32 @@ function init_control(vm)
         }
     }
 
+    /*** Evaluation Entry Point and Root Prompt ***/
+
+    /*
+     * This prompt is pushed around all code evaluated by the VM.
+     * It is also pushed around the bodies of JS lambdas (see js.lispx).
+     *
+     * Its purpose is to serve as a delimiter for stack traces.
+     */
+    vm.ROOT_PROMPT = vm.sym("root-prompt");
+
+    /*
+     * Evaluate a form in an environment.  This is the main entry
+     * point for calling Lisp from JS.
+     *
+     * The environment defaults to the VM's root environment.
+     *
+     * Signals an error if the code attempts to capture a
+     * continuation to an outside prompt.
+     */
+    vm.eval_form = (form, env = vm.get_environment()) =>
+        vm.do_push_subcont_barrier(() =>
+            vm.do_push_prompt(vm.ROOT_PROMPT,
+                              () => vm.eval(form, env),
+                              env),
+            env);
+
     /*** Lisp API ***/
 
     vm.define_class("continuation", vm.Continuation);
@@ -1904,6 +1930,8 @@ function init_control(vm)
     vm.define_built_in_function("%throw", vm.THROW);
 
     vm.define_built_in_operator("%unwind-protect", vm.UNWIND_PROTECT);
+
+    vm.define_constant("+root-prompt+", vm.ROOT_PROMPT);
 
 };
 
@@ -1931,24 +1959,6 @@ __webpack_require__.r(__webpack_exports__);
 function init_eval(vm)
 {
     /*** Evaluation & Operation Core ***/
-
-    /*
-     * Evaluate a form in an environment.  This is the main entry
-     * point for calling Lisp from JS.
-     *
-     * The environment defaults to the VM's root environment.
-     *
-     * Signals an error if the code attempts to capture a
-     * continuation to an outside prompt.
-     */
-    vm.eval_form = (form, env = vm.get_environment()) =>
-    {
-        const result = vm.eval(form, env);
-        if (result instanceof vm.Suspension)
-            throw new vm.Prompt_not_found_error(result.prompt);
-        else
-            return result;
-    };
 
     /*
      * Evaluate a form in an environment.  This is the core evaluation

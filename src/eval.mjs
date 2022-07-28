@@ -11,24 +11,6 @@ export function init_eval(vm)
     /*** Evaluation & Operation Core ***/
 
     /*
-     * Evaluate a form in an environment.  This is the main entry
-     * point for calling Lisp from JS.
-     *
-     * The environment defaults to the VM's root environment.
-     *
-     * Signals an error if the code attempts to capture a
-     * continuation to an outside prompt.
-     */
-    vm.eval_form = (form, env = vm.get_environment()) =>
-    {
-        const result = vm.eval(form, env);
-        if (result instanceof vm.Suspension)
-            throw new vm.Prompt_not_found_error(result.prompt);
-        else
-            return result;
-    };
-
-    /*
      * Evaluate a form in an environment.  This is the core evaluation
      * mechanism.
      *
