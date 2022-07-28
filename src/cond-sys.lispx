@@ -244,10 +244,6 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
   (signal condition)
   (invoke-debugger condition))
 
-(defun invoke-debugger (condition)
-  "Invoke the debugger, which currently just means panicking."
-  (panic condition))
-
 (defun lispx::make-signal-with-restarts-operator (#'signal-operator)
   "Metaprogramming utility to create the `signal' / `error' operators
 that take restart handler-specs from the `lispx::signal-impl' /
