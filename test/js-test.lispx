@@ -232,7 +232,12 @@
      type-error :datum 12 :expected-type '(or symbol ignore list)))
 
   (deftest js-lambda.4
-    (eq #void (call-js-function (js-lambda ()))))
+    (call-js-function (js-lambda ()))
+    #void)
+
+  (deftest js-lambda.root-prompt-is-set
+    (call-js-function (js-lambda () (take-subcont +root-prompt+ #ignore)))
+    #void)
 
   (deftest js-lambda.barrier
     (signals-error
