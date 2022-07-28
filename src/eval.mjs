@@ -403,13 +403,6 @@ export function init_eval(vm)
     /*** The Built-In Operators ***/
 
     /*
-     * The following uppercased functions, like vm.VAU, are the
-     * operate_functions of the built-in operators and functions.
-     * They are written as normal functions, and not as fat arrow
-     * functions, so they have access to 'this'.
-     */
-
-    /*
      * (%vau param-tree env-param body-form) => fexpr
      *
      * Built-in operator that creates a new fexpr with the given
@@ -418,14 +411,14 @@ export function init_eval(vm)
      * The dynamic environment of the call to %VAU becomes
      * the static environment of the created fexpr.
      */
-    vm.VAU = function(operands, dyn_env)
+    function VAU(operands, dyn_env)
     {
         const param_tree = vm.elt(operands, 0);
         const env_param = vm.elt(operands, 1);
         const body_form = vm.elt(operands, 2);
         const def_env = dyn_env;
         return new vm.Fexpr(param_tree, env_param, body_form, def_env);
-    };
+    }
 
     /*
      * (%def definiend expression) => result
@@ -436,14 +429,14 @@ export function init_eval(vm)
      *
      * Returns the value.
      */
-    vm.DEF = function(operands, env)
+    function DEF(operands, env)
     {
         const definiend = vm.elt(operands, 0);
         const expression = vm.elt(operands, 1);
 
         return vm.bind(() => vm.eval(expression, env),
                        (result) => vm.match(definiend, result, env));
-    };
+    }
 
     /*
      * (%progn . forms) => result
@@ -453,7 +446,7 @@ export function init_eval(vm)
      *
      * Returns #VOID if there are no forms.
      */
-    vm.PROGN = function(forms, env)
+    function PROGN(forms, env)
     {
         if (forms === vm.nil())
             return vm.void();
@@ -470,7 +463,7 @@ export function init_eval(vm)
                                    return progn(forms.cdr());
                            });
         }
-    };
+    }
 
     /*
      * (%if test consequent alternative) => result
@@ -482,7 +475,7 @@ export function init_eval(vm)
      * depending on the result of the test expression, and returns its
      * result.
      */
-    vm.IF = function(operands, env)
+    function IF(operands, env)
     {
         const test = vm.elt(operands, 0);
         const consequent = vm.elt(operands, 1);
@@ -496,7 +489,7 @@ export function init_eval(vm)
                            else
                                return vm.eval(alternative, env);
                        });
-    };
+    }
 
     /*** Exception Trapping and Panicking ***/
 
@@ -628,13 +621,13 @@ export function init_eval(vm)
 
     vm.define_condition("match-error", vm.Match_error, vm.Error);
 
-    vm.define_built_in_operator("%vau", vm.VAU);
+    vm.define_built_in_operator("%vau", VAU);
 
-    vm.define_built_in_operator("%def", vm.DEF);
+    vm.define_built_in_operator("%def", DEF);
 
-    vm.define_built_in_operator("%progn", vm.PROGN);
+    vm.define_built_in_operator("%progn", PROGN);
 
-    vm.define_built_in_operator("%if", vm.IF);
+    vm.define_built_in_operator("%if", IF);
 
     vm.define_alien_function("%wrap", (operator) => vm.wrap(operator));
 
