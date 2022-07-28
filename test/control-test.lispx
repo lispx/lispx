@@ -599,10 +599,17 @@ coroutine with `resume'."
         (list (dynamic *x*) (dynamic *y*))))
     '(2 2)))
 
-(defsuite default-prompt
+(defsuite built-in-prompts
 
   (deftest |Default prompt exists|
-    (boundp '+default-prompt+ (the-environment))))
+    (boundp '+default-prompt+ (the-environment)))
+
+  (deftest |Root prompt exists|
+    (boundp '+root-prompt+ (the-environment)))
+
+  (deftest |Root prompt is set|
+    (take-subcont +root-prompt+ #ignore)
+    #void))
 
 ;;; Simple Control Operators
 
