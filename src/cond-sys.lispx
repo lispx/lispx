@@ -307,7 +307,7 @@ produced by FUNCTION (which receives a `restart-handler' as argument)."
 (defun lispx::find-handler? (object handler-frame? payload?)
   "Utility to find both condition handlers and restart handlers.
 The OBJECT can be either a condition or a restart name.  The
-HANDLER-FRAME is the handler frame where the search should start
+HANDLER-FRAME? is the handler frame where the search should start
 (always the innermost handler frame at the start of the search).
 
 Return an option of the found handler and the frame establishing it as
