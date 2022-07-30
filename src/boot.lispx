@@ -872,5 +872,16 @@ inside it.  The FORMS are then evaluated inside the new continuation."
 any continuations to the outside."
   (list #'%push-subcont-barrier (list* #'lambda () forms)))
 
+;;; Coroutines
+
 (defconstant +default-prompt+ 'default-prompt
   "This prompt is used for general coroutine-like use of continuations.")
+
+(defmacro coroutine forms
+  (list* #'push-prompt '+default-prompt+ forms))
+
+(defmacro yield (name . forms)
+  (list* #'take-subcont '+default-prompt+ name forms))
+
+(defmacro resume (k . forms)
+  (list* #'push-delim-subcont '+default-prompt+ k forms))

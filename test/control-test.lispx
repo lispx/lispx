@@ -1,15 +1,18 @@
 ;;; Control-related Tests
 
-;;; Coroutines
+;;; Fibers
 
-;; The following implementation of coroutines follows the one at URL
+;; The following implementation of fibers follows the one at URL
 ;; `http://okmij.org/ftp/continuations/implementations.html#dynamic-wind'
+;;
+;; We're calling them fibers instead of coroutines so as to not
+;; conflict with the built-in coroutine operators.
 ;;
 ;; We use it for testing that built-in operators properly suspend and
 ;; resume.
 
-(defconstant +coroutine-prompt+ 'coroutine-prompt
-  "The prompt used for delimiting coroutines.")
+(defconstant +fiber-prompt+ 'fiber-prompt
+  "The prompt used for delimiting fibers.")
 
 (defclass yield-record ()
   (value continuation)
@@ -19,180 +22,180 @@
   "Create a new yield record with the given yielded value and resume continuation."
   (make-instance #^yield-record :value v :continuation k))
 
-(defun yield v?
+(defun fiber-yield v?
   "Yield a value (which defaults to void)."
-  (take-subcont +coroutine-prompt+ k
+  (take-subcont +fiber-prompt+ k
     (make-yield-record (optional v?) k)))
 
-(defun resume (yield-record . v?)
-  "Resume a suspended coroutine with a value (which defaults to void)."
-  (push-delim-subcont +coroutine-prompt+ (slot-value yield-record 'continuation)
+(defun fiber-resume (yield-record . v?)
+  "Resume a suspended fiber with a value (which defaults to void)."
+  (push-delim-subcont +fiber-prompt+ (slot-value yield-record 'continuation)
     (optional v?)))
 
-(defmacro coroutine body
-  "Evaluate the body expressions as a coroutine."
-  (list* #'push-prompt '+coroutine-prompt+ body))
+(defmacro fiber body
+  "Evaluate the body expressions as a fiber."
+  (list* #'push-prompt '+fiber-prompt+ body))
 
-(defun run-coroutine (#'thunk)
-  "Get all values yielded by a coroutine, and its final result, and
+(defun run-fiber (#'thunk)
+  "Get all values yielded by a fiber, and its final result, and
 collect them in a list."
-  (loop-let -run- ((result (coroutine (thunk))))
+  (loop-let -run- ((result (fiber (thunk))))
     (if (typep result #^yield-record)
-        (cons (slot-value result 'value) (-run- (resume result)))
+        (cons (slot-value result 'value) (-run- (fiber-resume result)))
         (list result))))
 
-(defun run-coroutine-with-values (#'thunk values)
-  "Like `run-coroutine' but uses a list of values that are sent to the
-coroutine with `resume'."
-  (loop-let -run- ((result (coroutine (thunk))) (values values))
+(defun run-fiber-with-values (#'thunk values)
+  "Like `run-fiber' but uses a list of values that are sent to the
+fiber with `fiber-resume'."
+  (loop-let -run- ((result (fiber (thunk))) (values values))
     (if (typep result #^yield-record)
         (cons (slot-value result 'value)
-              (-run- (resume result (car values)) (cdr values)))
+              (-run- (fiber-resume result (car values)) (cdr values)))
         (list result))))
 
-(defsuite coroutines
+(defsuite fibers
 
-  (deftest coroutine.1
-    (coroutine 1 2 (= 1 1))
+  (deftest fiber.1
+    (fiber 1 2 (= 1 1))
     #t)
 
-  (deftest coroutine.2
+  (deftest fiber.2
     (progn
-      (def yield-record (coroutine 1 2 (+ (yield (= 1 1)) 3)))
+      (def yield-record (fiber 1 2 (+ (fiber-yield (= 1 1)) 3)))
       (assert (typep yield-record #^yield-record))
       (assert (= #t (slot-value yield-record 'value)))
-      (assert (= 33 (resume yield-record 30))))
+      (assert (= 33 (fiber-resume yield-record 30))))
     #void)
 
-  (deftest coroutine.progn.1
-    (run-coroutine
+  (deftest fiber.progn.1
+    (run-fiber
      (lambda ()
        (progn
-         (yield 1)
-         (yield 2)
+         (fiber-yield 1)
+         (fiber-yield 2)
          3)))
     '(1 2 3))
 
-  (deftest coroutine.progn.2
-    (run-coroutine-with-values
+  (deftest fiber.progn.2
+    (run-fiber-with-values
      (lambda ()
        (progn
-         (yield 1)
-         (yield 2)))
+         (fiber-yield 1)
+         (fiber-yield 2)))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.vau.1
-    (run-coroutine
+  (deftest fiber.vau.1
+    (run-fiber
      (lambda ()
        ((vau () #ignore
-          (yield 1)
-          (yield 2)
+          (fiber-yield 1)
+          (fiber-yield 2)
           3))))
     '(1 2 3))
 
-  (deftest coroutine.vau.2
-    (run-coroutine-with-values
+  (deftest fiber.vau.2
+    (run-fiber-with-values
      (lambda ()
        ((vau () #ignore
-          (yield 1)
-          (yield 2))))
+          (fiber-yield 1)
+          (fiber-yield 2))))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.lambda.1
-    (run-coroutine
+  (deftest fiber.lambda.1
+    (run-fiber
      (lambda ()
        ((lambda ()
-          (yield 1)
-          (yield 2)
+          (fiber-yield 1)
+          (fiber-yield 2)
           3))))
     '(1 2 3))
 
-  (deftest coroutine.lambda.2
-    (run-coroutine-with-values
+  (deftest fiber.lambda.2
+    (run-fiber-with-values
      (lambda ()
        ((lambda ()
-          (yield 1)
-          (yield 2))))
+          (fiber-yield 1)
+          (fiber-yield 2))))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.def.1
-    (run-coroutine
+  (deftest fiber.def.1
+    (run-fiber
      (lambda ()
-       (def (x y) (list (yield 1) (yield 2)))
+       (def (x y) (list (fiber-yield 1) (fiber-yield 2)))
        (list x y)))
     '(1 2 (#void #void)))
 
-  (deftest coroutine.def.2
-    (run-coroutine-with-values
+  (deftest fiber.def.2
+    (run-fiber-with-values
      (lambda ()
-       (def (x y) (list (yield 1) (yield 2)))
+       (def (x y) (list (fiber-yield 1) (fiber-yield 2)))
        (list x y))
      '(3 4))
     '(1 2 (3 4)))
 
-  (deftest coroutine.if.1
-    (run-coroutine
+  (deftest fiber.if.1
+    (run-fiber
      (lambda ()
-       (if #t (yield 1) (yield 2))))
+       (if #t (fiber-yield 1) (fiber-yield 2))))
     '(1 #void))
 
-  (deftest coroutine.if.2
-    (run-coroutine-with-values
+  (deftest fiber.if.2
+    (run-fiber-with-values
      (lambda ()
-       (if #t (yield 1) (yield 2)))
+       (if #t (fiber-yield 1) (fiber-yield 2)))
      '(3))
     '(1 3))
 
-  (deftest coroutine.if.3
-    (run-coroutine
+  (deftest fiber.if.3
+    (run-fiber
      (lambda ()
-       (if #f (yield 1) (yield 2))))
+       (if #f (fiber-yield 1) (fiber-yield 2))))
     '(2 #void))
 
-  (deftest coroutine.if.4
-    (run-coroutine-with-values
+  (deftest fiber.if.4
+    (run-fiber-with-values
      (lambda ()
-       (if #f (yield 1) (yield 2)))
+       (if #f (fiber-yield 1) (fiber-yield 2)))
      '(3))
     '(2 3))
 
-  (deftest coroutine.if.5
-    (run-coroutine-with-values
+  (deftest fiber.if.5
+    (run-fiber-with-values
      (lambda ()
-       (if (yield 1) (yield 2) (yield 3)))
+       (if (fiber-yield 1) (fiber-yield 2) (fiber-yield 3)))
      '(#t 4))
     '(1 2 4))
 
-  (deftest coroutine.if.6
-    (run-coroutine-with-values
+  (deftest fiber.if.6
+    (run-fiber-with-values
      (lambda ()
-       (if (yield 1) (yield 2) (yield 3)))
+       (if (fiber-yield 1) (fiber-yield 2) (fiber-yield 3)))
      '(#f 4))
     '(1 3 4))
 
-  (deftest coroutine.if.7
-    (run-coroutine-with-values
+  (deftest fiber.if.7
+    (run-fiber-with-values
      (lambda ()
-       (if (progn (yield 1) (yield 2))
-           (progn (yield 3) (yield 3.5))
-           (progn (yield 4) (yield 4.5))))
+       (if (progn (fiber-yield 1) (fiber-yield 2))
+           (progn (fiber-yield 3) (fiber-yield 3.5))
+           (progn (fiber-yield 4) (fiber-yield 4.5))))
      '(#void #t #void 5))
     '(1 2 3 3.5 5))
 
-  (deftest coroutine.if.8
-    (run-coroutine-with-values
+  (deftest fiber.if.8
+    (run-fiber-with-values
      (lambda ()
-       (if (progn (yield 1) (yield 2))
-           (progn (yield 3) (yield 3.5))
-           (progn (yield 4) (yield 4.5))))
+       (if (progn (fiber-yield 1) (fiber-yield 2))
+           (progn (fiber-yield 3) (fiber-yield 3.5))
+           (progn (fiber-yield 4) (fiber-yield 4.5))))
      '(#void #f #void 5))
     '(1 2 4 4.5 5))
 
-  (deftest coroutine.loop.1
-    (run-coroutine
+  (deftest fiber.loop.1
+    (run-fiber
      (lambda ()
        (def ct 1)
        (def env (the-environment))
@@ -201,161 +204,161 @@ coroutine with `resume'."
           (if (= ct 5)
               (return-from exit ct)
               (progn
-                (yield ct)
-                (yield (- ct))
+                (fiber-yield ct)
+                (fiber-yield (- ct))
                 (set env ct (+ ct 1))))))))
     '(1 -1 2 -2 3 -3 4 -4 5))
 
-  (deftest coroutine.block.1
-    (run-coroutine
+  (deftest fiber.block.1
+    (run-fiber
      (lambda ()
        (block b
-         (yield 1)
-         (yield 2)
+         (fiber-yield 1)
+         (fiber-yield 2)
          3)))
     '(1 2 3))
 
-  (deftest coroutine.block.2
-    (run-coroutine-with-values
+  (deftest fiber.block.2
+    (run-fiber-with-values
      (lambda ()
        (block b
-         (yield 1)
-         (yield 2)))
+         (fiber-yield 1)
+         (fiber-yield 2)))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.block.3
-    (run-coroutine
+  (deftest fiber.block.3
+    (run-fiber
      (lambda ()
        (block b
-         (yield 1)
-         (yield 2)
+         (fiber-yield 1)
+         (fiber-yield 2)
          (return-from b 3))))
     '(1 2 3))
 
-  (deftest coroutine.block.4
-    (run-coroutine-with-values
+  (deftest fiber.block.4
+    (run-fiber-with-values
      (lambda ()
        (block b
-         (yield 1)
-         (return-from b (yield 2))))
+         (fiber-yield 1)
+         (return-from b (fiber-yield 2))))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.catch.1
-    (run-coroutine
+  (deftest fiber.catch.1
+    (run-fiber
      (lambda ()
        (catch 'b
-         (yield 1)
-         (yield 2)
+         (fiber-yield 1)
+         (fiber-yield 2)
          3)))
     '(1 2 3))
 
-  (deftest coroutine.catch.2
-    (run-coroutine-with-values
+  (deftest fiber.catch.2
+    (run-fiber-with-values
      (lambda ()
        (catch 'b
-         (yield 1)
-         (yield 2)))
+         (fiber-yield 1)
+         (fiber-yield 2)))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.catch.3
-    (run-coroutine
+  (deftest fiber.catch.3
+    (run-fiber
      (lambda ()
        (catch 'b
-         (yield 1)
-         (yield 2)
+         (fiber-yield 1)
+         (fiber-yield 2)
          (throw 'b 3))))
     '(1 2 3))
 
-  (deftest coroutine.catch.4
-    (run-coroutine-with-values
+  (deftest fiber.catch.4
+    (run-fiber-with-values
      (lambda ()
        (catch 'b
-         (yield 1)
-         (throw 'b (yield 2))))
+         (fiber-yield 1)
+         (throw 'b (fiber-yield 2))))
      '(#void 3))
     '(1 2 3))
 
-  (deftest coroutine.unwind-protect.1
-    (run-coroutine-with-values
+  (deftest fiber.unwind-protect.1
+    (run-fiber-with-values
      (lambda ()
-       (unwind-protect (yield 1)
-         (yield 2)
-         (yield 2.5)
+       (unwind-protect (fiber-yield 1)
+         (fiber-yield 2)
+         (fiber-yield 2.5)
          3))
      '(4 #void #void))
     '(1 2 2.5 4))
 
-  (deftest coroutine.unwind-protect.2
-    (run-coroutine-with-values
+  (deftest fiber.unwind-protect.2
+    (run-fiber-with-values
      (lambda ()
        (block exit
-         (unwind-protect (return-from exit (yield 1))
-           (yield 2)
-           (yield 2.5)
+         (unwind-protect (return-from exit (fiber-yield 1))
+           (fiber-yield 2)
+           (fiber-yield 2.5)
            3)))
      '(4 #void #void))
     '(1 2 2.5 4))
 
-  (deftest coroutine.unwind-protect.3
-    (run-coroutine-with-values
+  (deftest fiber.unwind-protect.3
+    (run-fiber-with-values
      (lambda ()
        (block exit
          (unwind-protect (return-from exit 4)
-           (yield 2)
-           (yield 2.5)
+           (fiber-yield 2)
+           (fiber-yield 2.5)
            3)))
      '(#void #void))
     '(2 2.5 4))
 
-  (deftest coroutine.unwind-protect.4
-    (run-coroutine-with-values
+  (deftest fiber.unwind-protect.4
+    (run-fiber-with-values
      (lambda ()
        (block exit
-         (unwind-protect (progn (yield 1) (yield 1.5))
-           (yield 2)
-           (yield 2.5)
+         (unwind-protect (progn (fiber-yield 1) (fiber-yield 1.5))
+           (fiber-yield 2)
+           (fiber-yield 2.5)
            3)))
      '(#void 4 #void #void))
     '(1 1.5 2 2.5 4))
 
-  (deftest coroutine.progv.1
-    (run-coroutine
+  (deftest fiber.progv.1
+    (run-fiber
      (lambda ()
        (defdynamic *x*)
        (progv (list *x*) (list 1)
-         (yield (dynamic *x*))
-         (yield (dynamic *x*))
+         (fiber-yield (dynamic *x*))
+         (fiber-yield (dynamic *x*))
          (progv (list *x*) (list 2)
-           (yield (dynamic *x*))
-           (yield (dynamic *x*))
+           (fiber-yield (dynamic *x*))
+           (fiber-yield (dynamic *x*))
            3))))
     '(1 1 2 2 3))
 
-  (deftest coroutine.progv.2
-    (run-coroutine-with-values
+  (deftest fiber.progv.2
+    (run-fiber-with-values
      (lambda ()
        (defdynamic *x*)
        (progv (list *x*) (list 1)
-         (yield (dynamic *x*))
-         (yield (dynamic *x*))
+         (fiber-yield (dynamic *x*))
+         (fiber-yield (dynamic *x*))
          (progv (list *x*) (list 2)
-           (yield (dynamic *x*))
-           (yield (dynamic *x*)))))
+           (fiber-yield (dynamic *x*))
+           (fiber-yield (dynamic *x*)))))
      '(#void #void #void 3))
     '(1 1 2 2 3))
 
-  (deftest coroutine.fun.1
-    (run-coroutine
+  (deftest fiber.fun.1
+    (run-fiber
      (lambda ()
-       (list (yield 1) (yield 2))))
+       (list (fiber-yield 1) (fiber-yield 2))))
     '(1 2 (#void #void)))
 
-  (deftest coroutine.fun.2
-    (run-coroutine-with-values
-     (lambda () (list (yield 1) (yield 2)))
+  (deftest fiber.fun.2
+    (run-fiber-with-values
+     (lambda () (list (fiber-yield 1) (fiber-yield 2)))
      '(3 4))
     '(1 2 (3 4))))
 
