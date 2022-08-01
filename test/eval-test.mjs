@@ -265,7 +265,7 @@ describe("Evaluation & Operation", () => {
         assert.throws(() => env.lookup(vm.sym("x")),
                       "Unbound variable: x");
         assert.throws(() => vm.match(vm.kwd("x"), vm.nil()),
-                      "Match error: :x vs #nil");
+                      "Match error: :x vs ()");
 
     });
 
@@ -289,7 +289,7 @@ describe("Evaluation & Operation", () => {
         assert(vm.equal(vm.match(vm.nil(), vm.nil(), env), vm.nil()));
 
         assert.throws(() => vm.match(vm.nil(), vm.t(), env),
-                      "Match error: #nil vs #t");
+                      "Match error: () vs #t");
 
     });
 

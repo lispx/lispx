@@ -32,7 +32,7 @@ describe("Printer", () => {
             // Constants
             "#t": vm.t(),
             "#f": vm.f(),
-            "#nil": vm.nil(),
+            "()": vm.nil(),
             "#void": vm.void(),
             "#ignore": vm.ignore(),
             // Numbers

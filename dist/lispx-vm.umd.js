@@ -3084,7 +3084,7 @@ function init_print(vm)
 
     vm.Nil.prototype.write_object = function(stream)
     {
-        stream.write_string(vm.str("#nil"));
+        stream.write_string(vm.str("()"));
     };
 
     vm.Void.prototype.write_object = function(stream)
