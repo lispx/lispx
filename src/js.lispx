@@ -133,7 +133,7 @@ call (\"this\"), the rest are the normal method arguments."
 (defun await (promise)
   "Wait for the PROMISE to become fulfilled or rejected."
   ;; Capture to the default prompt, and...
-  (take-subcont +default-prompt+ k
+  (yield k
     ;; ...return a new promise there.  From the caller's perspective,
     ;; we are now paused -- but from context's perspective, we are
     ;; returning a promise.  See `deftest' for how this nicely
@@ -143,12 +143,12 @@ call (\"this\"), the rest are the normal method arguments."
                       ;; When the original promise is fulfilled with a
                       ;; value, reinstate the continuation, returning
                       ;; the value where `await' was called.
-                      (push-delim-subcont +default-prompt+ k value))
+                      (resume k value))
                     (js-lambda (error)
                       ;; When the original promise is rejected,
                       ;; reinstate the continuation, signalling an
                       ;; error where `await' was called.
-                      (push-delim-subcont +default-prompt+ k (error error))))))
+                      (resume k (error error))))))
 
 (defun sync (#'fun)
   "Create a function that will await an underlying function."
