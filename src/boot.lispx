@@ -393,7 +393,7 @@ evaluating KEYFORM is an instance of the class named by CLASS-NAME,
 evaluate the FORMS as an implicit `progn'.  Otherwise go to the next
 clause, or return void if there are no more clauses.
 $(type fexpr)
-$(fn (key . clauses))
+$(fn (keyform . clauses))
 $(syntax clause (class-name . forms))")
 
 (def #'etypecase (lispx::make-typecase-with-default-function
@@ -402,9 +402,9 @@ $(syntax clause (class-name . forms))")
                   ;; proper/CL way would be to use an OR type spec,
                   ;; but they might get removed from the language.
                   (lambda (key) (error (make-type-error key #^object))))
-  "Like `typecase' but signal a `type-error' if no clause matches the key.
+  "Like `typecase' but signal a `type-error' if no clause matches the KEYFORM.
 $(type fexpr)
-$(fn (key . clauses))
+$(fn (keyform . clauses))
 $(syntax clause (class-name . forms))")
 
 (defexpr set (environment definiend-tree value) dynamic-environment
