@@ -75,7 +75,7 @@ describe("JavaScript Interface", () => {
         assert.equal(1, vm.js_elt(array, vm.num(0)));
         assert.equal(2, vm.js_elt(array, vm.num(1)));
         assert.throws(() => vm.js_elt("foo", vm.num(1)), "Assertion failed");
-        assert.throws(() => vm.js_elt(array, vm.f()), "expected number");
+        assert.throws(() => vm.js_elt(array, vm.f()), "expected number got #f");
     });
 
     it("Test JS console output.", () => {

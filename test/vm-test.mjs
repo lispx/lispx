@@ -1037,7 +1037,7 @@ describe("assert_type()", () => {
         try {
             vm.assert_type(12, "string");
         } catch(e) {
-            assert.equal(e.message, "Type assertion failed: expected \"string\"");
+            assert.equal(e.message, "Type assertion failed: expected \"string\" got #<object>");
             assert.equal(e.lisp_slot_datum, 12);
             assert(vm.equal(e["lisp_slot_expected-type"], vm.str("string")));
             return;
@@ -1047,7 +1047,7 @@ describe("assert_type()", () => {
 
     it("Error messages contain the type spec.", () => {
         assert.throws(() => vm.assert_type(vm.nil(), vm.Cons),
-                      "Type assertion failed: expected cons");
+                      "Type assertion failed: expected cons got ()");
     });
 
     it("It supports ordinary, non-Lisp JS classes.", () => {

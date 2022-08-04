@@ -5517,7 +5517,10 @@ function init_vm(vm)
     {
         constructor(datum, expected_type)
         {
-            super("Type assertion failed: expected " + vm.write_to_js_string(expected_type));
+            super("Type assertion failed: expected "
+                  + vm.write_to_js_string(expected_type)
+                  + " got "
+                  + vm.write_to_js_string(datum));
             this.lisp_slot_datum = datum;
             this["lisp_slot_expected-type"] = expected_type;
         }
