@@ -4746,6 +4746,29 @@ function init_vm(vm)
     /*** Objects ***/
 
     /*
+     * Lisp objects are created by normal JavaScript constructor
+     * functions.  The JS class that each object is an instance of
+     * points to the corresponding class metaobject with
+     * prototype.lisp_class (see section on Classes below).  This
+     * means that every Lisp object also inherits this lisp_class
+     * property pointing to its Lisp class.
+     *
+     * JavaScript objects that do not have a lisp_class property are
+     * treated as being instances of the root class of the Lisp class
+     * hierarchy, OBJECT.  There is no further distinction between JS
+     * strings, numbers, etc when viewed from Lisp, they are all
+     * instances of OBJECT.
+     *
+     * Slots of standard objects are stored as JS properties prefixed
+     * with "lisp_slot_".  For example, instances of a class defined
+     * as (defclass point () (x y)) will have slots lisp_slot_x and
+     * lisp_slot_y.
+     *
+     * Methods are stored as JS properties of JS classes prefixed with
+     * "lisp_method_".
+     */
+
+    /*
      * The root class of the class hierarchy.
      */
     vm.Object = class Lisp_object
@@ -4783,6 +4806,18 @@ function init_vm(vm)
 
     /*
      * UTF-8 string.
+     *
+     * Lisp strings are UTF-8 strings, while JavaScript uses UTF-16
+     * natively.
+     *
+     * Lisp strings are stored as UTF-16 strings in a somewhat unusual
+     * encoding: every UTF-8 8-bit byte is stored as one UTF-16 16-bit
+     * code unit (not to be confused with Unicode code points).
+     *
+     * So the UTF-16 string for the Euro symbol, `"\u{20AC}"`, becomes
+     * `"\u{E2}\u{82}\u{AC}"` as a Lisp string.  The UTF-16 string has
+     * one code unit; the UTF-8 string has three code units, each
+     * corresponding to one UTF-8 byte.
      */
     vm.String = class Lisp_string extends vm.Object
     {
@@ -5270,6 +5305,40 @@ function init_vm(vm)
     }
 
     /*** Classes ***/
+
+    /*
+     * Every Lisp class is represented as two distinct JavaScript
+     * entities, called "JS class" and "class metaobject",
+     * respectively.
+     *
+     * The JS class is a usual JavaScript constructor function used to
+     * construct instances.  It can also be used for instanceof
+     * checks.
+     *
+     * The class metaobject is a Lisp object itself, and used to
+     * represent the class on the Lisp side.
+     *
+     * The two entities making up a Lisp class are bidirectionally
+     * linked, so having a reference to one lets you get the other:
+     * The prototype.lisp_class of a JS class points to the class
+     * metaobject; the js_class member of a class metaobject points to
+     * the JS class.
+     *
+     * Rationale
+     *
+     * We want to create Lisp objects with normal constructor
+     * functions, because these are presumably optimized by JS
+     * engines. They also let us do instanceof checks.  Having a named
+     * constructor function also aids with debugging as the name is
+     * displayed in some tools (e.g. the Chrome console) when looking
+     * at an object.
+     *
+     * At the same time, we want to have true class metaobjects on the
+     * Lisp side.  If we used just JS classes, these would appear as
+     * functions in Lisp.  By splitting a Lisp class into two pieces,
+     * and linking them, we can get both normal JS classes in JS and
+     * real Lisp classes in Lisp.
+     */
 
     /*
      * Superclass of all class metaobjects.
