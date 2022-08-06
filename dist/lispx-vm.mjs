@@ -1906,8 +1906,8 @@ function init_control(vm)
     /*** Root Prompt and Evaluation Entry Point ***/
 
     /*
-     * This prompt is pushed around all code evaluated by the VM.
-     * It is also pushed around the bodies of JS lambdas (see js.lispx).
+     * This prompt delimits all forms evaluated by the VM.
+     * It also delimits the bodies of JS lambdas (see js.lispx).
      *
      * Its purpose is to serve as a delimiter for stack traces.
      */
@@ -1921,7 +1921,7 @@ function init_control(vm)
      *
      * Pushes a continuation barrier (to prevent continuations from
      * escaping to JS) and the root prompt (to enable taking of stack
-     * traces) around the user-supplied form.
+     * traces).
      */
     vm.eval_form = (form, env = vm.get_environment()) =>
         vm.push_subcont_barrier(() =>
