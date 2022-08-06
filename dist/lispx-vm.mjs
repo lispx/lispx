@@ -2200,11 +2200,6 @@ function init_eval(vm)
          * Compute on the operand in the environment and return a result.
          */
         operate(operand, env) { vm.abstract_method(); }
-
-        /*
-         * Subclasses should override this with an informative result.
-         */
-        get_name() { return vm.sym("anonymous operator"); }
     };
 
     /*
@@ -2311,15 +2306,6 @@ function init_eval(vm)
         {
             return this.wrapped_operator;
         }
-
-        /*
-         * Returns the name of the function, which is the name
-         * of the underlying operator.
-         */
-        get_name()
-        {
-            return this.unwrap().get_name();
-        }
     };
 
     /*
@@ -2332,33 +2318,29 @@ function init_eval(vm)
      */
     vm.Built_in_operator = class Lisp_built_in_operator extends vm.Operator
     {
-        constructor(operate_function, name = "anonymous built-in operator")
+        constructor(operate_function)
         {
             super();
             vm.assert_type(operate_function, "function");
-            vm.assert_type(name, "string");
             this.operate_function = operate_function;
-            this.name = vm.sym(name);
         }
 
         operate(operands, env)
         {
             return this.operate_function(operands, env);
         }
-
-        get_name() { return this.name; }
     };
 
     /*
      * Creates a new built-in operator with the given underlying
      * JS function and name.
      */
-    vm.built_in_operator = (fun, name) => new vm.Built_in_operator(fun, name);
+    vm.built_in_operator = (fun) => new vm.Built_in_operator(fun);
 
     /*
      * Creates a new built-in function, that is, a wrapped built-in operator.
      */
-    vm.built_in_function = (fun, name) => vm.wrap(vm.built_in_operator(fun, name));
+    vm.built_in_function = (fun) => vm.wrap(vm.built_in_operator(fun));
 
     /*
      * Creates a new alien operator, a kind of built-in operator.
@@ -2379,14 +2361,14 @@ function init_eval(vm)
      * called JS functions for consistency.  But that would obviously
      * be highly confusing.
      */
-    vm.alien_operator = (fun, name) =>
+    vm.alien_operator = (fun) =>
     {
         vm.assert_type(fun, "function");
         function operate_function(operands, ignored_env)
         {
             return fun.apply(null, vm.list_to_array(operands));
         }
-        return vm.built_in_operator(operate_function, name);
+        return vm.built_in_operator(operate_function);
     };
 
     /*
@@ -2395,7 +2377,7 @@ function init_eval(vm)
      * Alien functions are the main mechanism for exposing JS
      * functions to Lisp.
      */
-    vm.alien_function = (fun, name) => vm.wrap(vm.alien_operator(fun, name));
+    vm.alien_function = (fun) => vm.wrap(vm.alien_operator(fun));
 
     /*** The Built-In Operators ***/
 
@@ -2590,7 +2572,7 @@ function init_eval(vm)
      */
     vm.define_built_in_operator = (name, fun) =>
     {
-        vm.define_operator(name, vm.built_in_operator(fun, name));
+        vm.define_operator(name, vm.built_in_operator(fun));
     };
 
     /*
@@ -2598,7 +2580,7 @@ function init_eval(vm)
      */
     vm.define_built_in_function = (name, js_fun) =>
     {
-        vm.define_operator(name, vm.built_in_function(js_fun, name));
+        vm.define_operator(name, vm.built_in_function(js_fun));
     };
 
     /*
@@ -2606,7 +2588,7 @@ function init_eval(vm)
      */
     vm.define_alien_function = (name, js_fun) =>
     {
-        vm.define_operator(name, vm.alien_function(js_fun, name));
+        vm.define_operator(name, vm.alien_function(js_fun));
     };
 
     /*** Lisp API ***/

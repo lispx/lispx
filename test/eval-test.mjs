@@ -52,7 +52,6 @@ describe("Evaluation & Operation", () => {
 
         for (const name of operators) {
             const op = vm.get_environment().lookup(vm.fsym(name));
-            assert.equal(op.get_name(), vm.sym(name));
             vm.assert_type(op, vm.Built_in_operator);
         }
 
@@ -116,7 +115,6 @@ describe("Evaluation & Operation", () => {
 
         for (const name of functions) {
             const op = vm.get_environment().lookup(vm.fsym(name));
-            assert.equal(op.get_name(), vm.sym(name));
             vm.assert_type(op, vm.Function);
         }
 
@@ -312,17 +310,6 @@ describe("Evaluation & Operation", () => {
 
 });
 
-describe("Fexprs", () => {
-
-    it("Fexprs are anonymous.", () => {
-
-        assert.equal(vm.eval_js_string("(%vau #ignore #ignore #ignore)").get_name(),
-                     vm.sym("anonymous operator"));
-
-    });
-
-});
-
 describe("%VAU", () => {
 
     it("%VAU constructs simple fexprs.", () => {
@@ -484,15 +471,6 @@ describe("%IF", () => {
 
 describe("Wrapping and unwrapping.", () => {
 
-    it("A function has the same name as its wrapped operator.", () => {
-
-        const wrapped = vm.alien_function(() => vm.t(), "foo");
-        const fun = vm.wrap(wrapped);
-        assert.equal(fun.get_name(), vm.sym("foo"));
-        assert.equal(vm.eval(vm.list(wrapped)), vm.t());
-
-    });
-
     it("Functions can be unwrapped.", () => {
 
         const wrapped = vm.alien_function(() => vm.t());
@@ -537,9 +515,8 @@ describe("Alien Operators", () => {
             assert.equal(b, vm.sym("y"));
             assert.equal(c, vm.sym("z"));
             return vm.t();
-        }, "foo");
+        });
 
-        assert(vm.equal(op.get_name(), vm.sym("foo")));
         assert(op instanceof vm.Built_in_operator);
 
         const result = vm.operate(op, vm.list(vm.sym("x"), vm.sym("y"), vm.sym("z")));
@@ -549,9 +526,8 @@ describe("Alien Operators", () => {
 
     it("Alien functions can be defined from JS functions.", () => {
 
-        const op = vm.alien_function((a, b, c) => a + b + c, "foo");
+        const op = vm.alien_function((a, b, c) => a + b + c);
 
-        assert(vm.equal(op.get_name(), vm.sym("foo")));
         assert(op instanceof vm.Function);
         assert(op.unwrap() instanceof vm.Built_in_operator);
 
@@ -561,16 +537,6 @@ describe("Alien Operators", () => {
         env.put(vm.sym("z"), 3);
         const result = vm.operate(op, vm.list(vm.sym("x"), vm.sym("y"), vm.sym("z")), env);
         assert(vm.equal(result, 6));
-
-    });
-
-    it("Alien operators and functions can be anonymous.", () => {
-
-        const op = vm.alien_operator(() => {});
-        assert(vm.equal(op.get_name(), vm.sym("anonymous built-in operator")));
-
-        const fun = vm.alien_function(() => {});
-        assert(vm.equal(op.get_name(), vm.sym("anonymous built-in operator")));
 
     });
 
