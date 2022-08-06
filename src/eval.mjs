@@ -294,8 +294,7 @@ export function init_eval(vm)
         operate(operands, env)
         {
             return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env),
-                           vm.trace(operands, env));
+                           (args) => vm.operate(this.wrapped_operator, args, env));
 
             function eval_args(todo, done)
             {

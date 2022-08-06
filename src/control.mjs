@@ -841,11 +841,9 @@ export function init_control(vm)
         do {
             if (k.trace)
                 lines.push(vm.write_to_string(k.trace.expr).to_js_string());
-            else
-                lines.push("[built-in]");
         } while((k = k.inner));
         lines.reverse();
-        lines.slice(33).forEach((line) => console.log(line));
+        lines.slice(28).forEach((line) => console.log(line));
     }
 
     vm.define_alien_function("%print-stacktrace", print_stacktrace);
