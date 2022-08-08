@@ -2424,7 +2424,7 @@ function init_eval(vm)
 
         return vm.bind(() => vm.eval(expression, env),
                        (result) => vm.match(definiend, result, env),
-                       vm.trace(operands, env));
+                       vm.trace(expression, env));
     }
 
     /*
