@@ -782,20 +782,19 @@ evaluated lazily, only when the OPTION? is nil."
       (eval default env)
       #void)))
 
-(defun optionals (list . defaults)
+(defexpr optionals (list . defaults) env
   "Similar to `optional', but provides DEFAULTS for any number of
 elements of LIST.  This is useful for implementing functions that take
-multiple optional arguments.  Currently, the DEFAULTS are always
-evaluated, but in the future, they might be evaluated lazily, so they
-should not be used for effect."
-  (loop-let -optionals- ((list list) (defaults defaults))
+multiple optional arguments.  Each default is evaluated lazily, only
+when needed."
+  (loop-let -optionals- ((list (eval list env)) (defaults defaults))
     (if (null list)
         (if (null defaults)
             #nil
-            (cons (car defaults) (-optionals- #nil (cdr defaults))))
+            (cons (eval (car defaults) env) (-optionals- #nil (cdr defaults))))
         (if (null defaults)
-            (cons (car list)     (-optionals- (cdr list) #nil))
-            (cons (car list)     (-optionals- (cdr list) (cdr defaults)))))))
+            (cons (car list)                (-optionals- (cdr list) #nil))
+            (cons (car list)                (-optionals- (cdr list) (cdr defaults)))))))
 
 (defun get-option (option?)
   "Returns the contents of the OPTION? or signals an error if it is nil."
