@@ -1222,6 +1222,11 @@ function init_control(vm)
         }
     };
 
+    /*
+     * A trace may be attached to a continuation frame for debugging
+     * purposes and showing the stack trace.  Traces are not needed
+     * operationally, and not all frames have traces.
+     */
     class Trace
     {
         constructor(expr, env)
@@ -1231,6 +1236,9 @@ function init_control(vm)
         }
     }
 
+    /*
+     * Construct a trace with the given expression and environment.
+     */
     vm.trace = (expr, env) => new Trace(expr, env);
 
     /*
@@ -1335,6 +1343,8 @@ function init_control(vm)
      *
      * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
+     *
+     * The trace is attached to the continuation frame for debugging.
      */
     vm.bind = (first, second, trace) =>
     {
@@ -1958,6 +1968,10 @@ function init_control(vm)
 
     vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
+    /*
+     * This really should go somewhere else and probably use streams
+     * but here we are.
+     */
     function print_stacktrace(k)
     {
         vm.assert_type(k, vm.Continuation);
@@ -1967,7 +1981,14 @@ function init_control(vm)
                 lines.push(vm.write_to_string(k.trace.expr).to_js_string());
         } while((k = k.inner));
         lines.reverse();
-        lines.slice(28).forEach((line) => console.log(line));
+        /*
+         * Drop_frames is the deterministically determined amount of
+         * stack frames to hide from a stack trace - i.e. the code of
+         * signal handling and debugger etc.  If the boot.lispx and
+         * related code changes, this needs to be updated, too.
+         */
+        const drop_frames = 28;
+        lines.slice(drop_frames).forEach((line) => console.log(line));
     }
 
     vm.define_alien_function("%print-stacktrace", print_stacktrace);
