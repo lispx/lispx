@@ -754,6 +754,13 @@ export function init_control(vm)
         }
     }
 
+    /*
+     * Second step of UNWIND-PROTECT.  We evaluate the cleanup
+     * expression, which of course may suspend, itself.
+     *
+     * Afterwards we either return the result of the protected
+     * expression, or rethrow the exception thrown by it.
+     */
     function do_unwind_protect_2(cleanup_expr, value, success, env, resumption = null)
     {
         let result;
