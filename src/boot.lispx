@@ -188,13 +188,20 @@ which bindings are looked up if they are not found."
   (%boundp symbol environment))
 
 (defun panic (error)
-  "Signal the ERROR in such a way that it cannot be handled and escapes
-the VM as a host language exception.  This unconditionally breaks out
-of Lisp, ignoring `handler-bind', `unwind-protect', `progv', and other
-operators that are normally invoked while signalling or unwinding.
-Therefore Lisp invariants might be invalid after calling this
-function, and the VM should be discarded."
+  "Mostly for internal use.  Signal the ERROR in such a way that it is
+hard to handle and will usually escape the VM as a host language
+exception.  In particular, signal handlers will not be invoked.
+However, intervening `unwind-protect' cleanup expressions and `progv'
+expressions are still triggered, so Lisp invariants are maintained."
   (%panic error))
+
+(defun invoke-debugger (condition)
+  "Invoke the debugger, which currently just means printing a stack trace
+and panicking, thereby escaping to JS."
+  (take-subcont +root-prompt+ k
+    (push-delim-subcont +root-prompt+ k
+      (%print-stacktrace k)
+      (panic condition))))
 
 ;;; Lexical Bindings
 
@@ -360,9 +367,8 @@ $(fn (block-name . value?))"
 
 (defmacro unwind-protect (protected-form . cleanup-forms)
   "Evaluate the PROTECTED-FORM and return its result.  Regardless of
-whether the protected form returns normally, or via a nonlocal exit,
-the CLEANUP-FORMS are evaluated after the protected form.  Note that
-the protected forms are not evaluated in case of `panic'."
+whether the protected form returns normally, or via a nonlocal exit or
+panic, the CLEANUP-FORMS are evaluated after the protected form."
   (list #'%unwind-protect protected-form (list* #'progn cleanup-forms)))
 
 (defexpr prog1 (form . forms) env

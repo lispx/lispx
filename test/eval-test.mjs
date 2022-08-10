@@ -596,14 +596,32 @@ describe("Panicking", () => {
 
     });
 
-    it("Panics do not trigger UNWIND-PROTECT.", () => {
+    it("Panics do trigger UNWIND-PROTECT.", () => {
 
         const env = make_child_environment();
         env.put(vm.sym("cause"), new Error("it happened"));
 
+        // Check that UW's cleanup expression runs and overrides the panic.
         assert.throws(() => vm.eval_js_string(`(unwind-protect (panic cause)
                                                  this-var-is-unbound)`, env),
+                      "LISP panic: Unbound variable: this-var-is-unbound");
+
+    });
+
+    it("Panics do trigger %PROGV.", () => {
+
+        const env = make_child_environment();
+        env.put(vm.sym("cause"), new Error("it happened"));
+
+        const old_stdout = vm.eval_js_string(`(dynamic *standard-output*)`);
+
+        // Temporarily bind stdout to 'foo and panic...
+        assert.throws(() => vm.eval_js_string(`(dynamic-let ((*standard-output* 'foo))
+                                                 (panic cause))`, env),
                       "LISP panic: it happened");
+
+        // Check that it has been rebound to old value even though we panicked.
+        assert.strictEqual(old_stdout, vm.eval_js_string(`(dynamic *standard-output*)`));
 
     });
 

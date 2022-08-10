@@ -527,7 +527,9 @@ export function init_eval(vm)
 
     /*
      * A panic is an error that is not caught by the usual exception
-     * trapping mechanism.
+     * trapping mechanism.  Note that panics still trigger
+     * UNWIND-PROTECT and the restoration of dynamically-bound
+     * variables -- otherwise Lisp invariants would get violated.
      */
     vm.Panic = class Panic extends Error
     {

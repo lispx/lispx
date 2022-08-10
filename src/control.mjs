@@ -693,13 +693,12 @@ export function init_control(vm)
      * returns its result.
      *
      * Regardless of whether the protected expression returns normally
-     * or via a nonlocal exit, the cleanup expression is evaluated
-     * (and its result discarded) after the protected expression.
+     * or via an exception (including nonlocal exits and panics), the
+     * cleanup expression is evaluated (and its result discarded)
+     * after the protected expression.
      *
      * The cleanup expression is not evaluated when the protected
-     * expression exits via a continuation capture or panic.  (A panic
-     * is a special kind of exception whose purpose is to
-     * unconditionally break out of Lisp and back into JS.)
+     * expression exits via a continuation capture.
      *
      * Cf. Common Lisp's UNWIND-PROTECT.
      */
@@ -715,12 +714,11 @@ export function init_control(vm)
      *
      * The first one evaluates the protected expression, which may (a)
      * return normally, or (b) exit nonlocally with an exception, or (c)
-     * capture a continuation, or (d) exit with a panic.
+     * capture a continuation.
      *
      * If it does capture, we'll have to restart at step 1 later.  If
      * it does not capture, we can go to step 2, but have to remember
-     * whether step 1 returned successfully or threw an exception.  If
-     * it panics, we just call it quits, too.
+     * whether step 1 returned successfully or threw an exception.
      *
      * The second work function, step 2, evaluates the cleanup
      * expression and afterwards either returns the result produced by
@@ -749,16 +747,10 @@ export function init_control(vm)
                 return do_unwind_protect_2(cleanup_expr, result, true, env);
         } catch (exception) {
             /*
-             * (d) Protected expression panicked.  Let the panic through.
+             * (b) Protected expression threw - go to step 2,
+             * remembering that step 1 failed.
              */
-            if (exception instanceof vm.Panic)
-                throw exception;
-            else
-                /*
-                 * (b) Protected expression threw - go to step 2,
-                 * remembering that step 1 failed.
-                 */
-                return do_unwind_protect_2(cleanup_expr, exception, false, env);
+            return do_unwind_protect_2(cleanup_expr, exception, false, env);
         }
     }
 
