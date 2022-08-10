@@ -20,16 +20,6 @@ module.exports = ";;;                                                     -*- Li
 
 /***/ }),
 
-/***/ "./src/debug.lispx":
-/*!*************************!*\
-  !*** ./src/debug.lispx ***!
-  \*************************/
-/***/ ((module) => {
-
-module.exports = "";
-
-/***/ }),
-
 /***/ "./src/js.lispx":
 /*!**********************!*\
   !*** ./src/js.lispx ***!
@@ -4465,12 +4455,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _print_mjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./print.mjs */ "./src/print.mjs");
 /* harmony import */ var _js_mjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./js.mjs */ "./src/js.mjs");
 /* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
-/* harmony import */ var _debug_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./debug.lispx */ "./src/debug.lispx");
-/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
-/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
-/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
-/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
-/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
+/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
+/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
+/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
+/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
+/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
 /*
  * LispX Virtual Machine
  * Copyright (c) 2021 Manuel J. Simoni
@@ -4500,7 +4489,6 @@ __webpack_require__.r(__webpack_exports__);
  * A build system contraption loads the contents of the files into the
  * variables as strings.
  */
-
 
 
 
@@ -4541,12 +4529,11 @@ class VM
          * Evaluate the bootstrap code.
          */
         this.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_8__);
-        this.eval_js_string(_debug_lispx__WEBPACK_IMPORTED_MODULE_9__);
-        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_10__);
-        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_11__);
-        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_12__);
-        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_13__);
-        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_14__);
+        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__);
+        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_10__);
+        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_11__);
+        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_12__);
+        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_13__);
     }
 
     /*
