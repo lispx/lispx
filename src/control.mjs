@@ -844,18 +844,20 @@ export function init_control(vm)
     vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
     /*
-     * This really should go somewhere else and probably use streams
-     * but here we are.
+     * Prints the frames of a continuation as a stack trace to
+     * *STANDARD-OUTPUT*.
+     *
+     * This should probably be implemented in Lisp but here we are.
      */
     function print_stacktrace(k)
     {
         vm.assert_type(k, vm.Continuation);
-        const lines = [];
+        const exprs = [];
         do {
             if (k.trace)
-                lines.push(vm.write_to_string(k.trace.expr).to_js_string());
+                exprs.push(k.trace.expr);
         } while((k = k.inner));
-        lines.reverse();
+        exprs.reverse();
         /*
          * Drop_frames is the deterministically determined amount of
          * stack frames to hide from a stack trace - i.e. the code of
@@ -863,7 +865,12 @@ export function init_control(vm)
          * related code changes, this needs to be updated, too.
          */
         const drop_frames = 28;
-        lines.slice(drop_frames).forEach((line) => console.log(line));
+        const stdout = vm.STANDARD_OUTPUT.get_value();
+        exprs.slice(drop_frames).forEach((expr) => {
+            stdout.fresh_line();
+            vm.write(expr, stdout);
+            stdout.force_output();
+        });
     }
 
     vm.define_alien_function("%print-stacktrace", print_stacktrace);
