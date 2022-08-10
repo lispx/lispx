@@ -260,3 +260,13 @@ with a `push-delim-subcont' that pushes an unused prompt."
              ((lambda (x) (+ (dynamic *p*) (dynamic *q*)))
               (shift 'p (lambda (f) f))))))))
     12))
+
+;;; Tests for single prompt coroutines
+
+(defsuite |Coroutines|
+
+  (deftest |Adapted from A Monadic Framework for Delimited Continuations|
+    (+ 2 (coroutine (if (yield k (+ (resume k #f) (resume k #t)))
+                        3
+                        4)))
+    9))

@@ -874,13 +874,22 @@ any continuations to the outside."
 ;;; Coroutines
 
 (defconstant +default-prompt+ 'default-prompt
-  "This prompt is used for general coroutine-like use of continuations.")
+  "This prompt is used for general coroutine-like use of
+continuations.")
 
 (defmacro coroutine forms
+  "Evaluate the FORMS in a context in which `yield' can be used to pause
+execution."
   (list* #'push-prompt '+default-prompt+ forms))
 
 (defmacro yield (name . forms)
+  "Pause the current coroutine.  In the place where the enclosing
+`coroutine' (or `resume') was called, evaluate the FORMS with NAME
+bound to the paused coroutine.  `resume' can later be used to restart
+execution inside the coroutine."
   (list* #'take-subcont '+default-prompt+ name forms))
 
 (defmacro resume (k . forms)
+  "Resume the paused coroutine K and evaluate FORMS in the place where
+`yield' was called in the coroutine."
   (list* #'push-delim-subcont '+default-prompt+ k forms))
