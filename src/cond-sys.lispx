@@ -80,7 +80,8 @@
 ;;
 ;;    is equivalent to:
 ;;
-;;    (restart-case ((continue (lambda () ...) :associated-conditions (list some-condition)))
+;;    (restart-case ((continue (lambda () ...)
+;;                             :associated-conditions (list some-condition)))
 ;;      (signal some-condition))
 ;;
 ;; 3) Every restart must have a non-nil name; anonymous restarts
