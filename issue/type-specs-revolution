@@ -1,0 +1,5 @@
+Maybe we need first-class type specs, or rather types.
+
+Every class would be a type.
+
+But there would also be non-class types, like OR-TYPE.
