@@ -1212,6 +1212,8 @@ function init_control(vm)
          * The inner continuation frame is null for the innermost
          * frame created by the %TAKE-SUBCONT expression that triggered
          * continuation capture.
+         *
+         * The trace is used to display stack traces, described below.
          */
         constructor(work_fun, inner, trace)
         {
@@ -1223,25 +1225,6 @@ function init_control(vm)
             this.trace = trace;
         }
     };
-
-    /*
-     * A trace may be attached to a continuation frame for debugging
-     * purposes and showing the stack trace.  Traces are not needed
-     * operationally, and not all frames have traces.
-     */
-    class Trace
-    {
-        constructor(expr, env)
-        {
-            this.expr = expr;
-            this.env = env;
-        }
-    }
-
-    /*
-     * Construct a trace with the given expression and environment.
-     */
-    vm.trace = (expr, env) => new Trace(expr, env);
 
     /*
      * A suspension is a helper object created during the capture
@@ -1335,6 +1318,28 @@ function init_control(vm)
             return continuation.work_fun(this);
         }
     };
+
+    /*
+     * A trace may be attached to a continuation frame for debugging
+     * purposes and showing the stack trace.  Traces are not needed
+     * operationally, and not all frames have traces. (Every frame
+     * could have a trace, but this would clutter the code.
+     * Experience has shown that having traces in just a couple of
+     * places (see eval.mjs) gives usable stack traces.)
+     */
+    class Trace
+    {
+        constructor(expr, env)
+        {
+            this.expr = expr;
+            this.env = env;
+        }
+    }
+
+    /*
+     * Construct a trace with the given expression and environment.
+     */
+    vm.trace = (expr, env) => new Trace(expr, env);
 
     /*** Bind ***/
 
@@ -1941,33 +1946,7 @@ function init_control(vm)
                            env),
             env);
 
-    /*** Lisp API ***/
-
-    vm.define_class("continuation", vm.Continuation);
-
-    vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
-
-    vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
-
-    vm.define_built_in_function("%take-subcont", TAKE_SUBCONT);
-
-    vm.define_built_in_function("%push-prompt", PUSH_PROMPT);
-
-    vm.define_built_in_function("%push-delim-subcont", PUSH_DELIM_SUBCONT);
-
-    vm.define_built_in_function("%push-subcont-barrier", PUSH_SUBCONT_BARRIER);
-
-    vm.define_built_in_function("%progv", PROGV);
-
-    vm.define_built_in_operator("%loop", LOOP);
-
-    vm.define_built_in_function("%catch", CATCH);
-
-    vm.define_built_in_function("%throw", THROW);
-
-    vm.define_built_in_operator("%unwind-protect", UNWIND_PROTECT);
-
-    vm.define_constant("+root-prompt+", ROOT_PROMPT);
+    /*** Stack Trace ***/
 
     /*
      * Prints the frames of a continuation as a stack trace to
@@ -1998,6 +1977,34 @@ function init_control(vm)
             stdout.force_output();
         });
     }
+
+    /*** Lisp API ***/
+
+    vm.define_class("continuation", vm.Continuation);
+
+    vm.define_class("dynamic", vm.Dynamic, vm.Standard_object, vm.Standard_class);
+
+    vm.define_condition("prompt-not-found-error", vm.Prompt_not_found_error, vm.Error);
+
+    vm.define_built_in_function("%take-subcont", TAKE_SUBCONT);
+
+    vm.define_built_in_function("%push-prompt", PUSH_PROMPT);
+
+    vm.define_built_in_function("%push-delim-subcont", PUSH_DELIM_SUBCONT);
+
+    vm.define_built_in_function("%push-subcont-barrier", PUSH_SUBCONT_BARRIER);
+
+    vm.define_built_in_function("%progv", PROGV);
+
+    vm.define_built_in_operator("%loop", LOOP);
+
+    vm.define_built_in_function("%catch", CATCH);
+
+    vm.define_built_in_function("%throw", THROW);
+
+    vm.define_built_in_operator("%unwind-protect", UNWIND_PROTECT);
+
+    vm.define_constant("+root-prompt+", ROOT_PROMPT);
 
     vm.define_alien_function("%print-stacktrace", print_stacktrace);
 
