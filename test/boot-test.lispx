@@ -1786,6 +1786,45 @@
       (mapc (lambda (x)) list))
     (list 1 2 3)))
 
+(defsuite mapcan
+
+  (deftest mapcan.1
+    (mapcar (lambda ()) ())
+    ())
+
+  (deftest mapcan.2
+    (mapcan #'list '("foo" "bar"))
+    '("foo" "bar"))
+
+  (deftest mapcan.3
+    (signals-error
+     (mapcan)
+     match-error))
+
+  (deftest mapcan.4
+    (signals-error
+     (mapcan #'list)
+     match-error))
+
+  (deftest mapcan.5
+    (signals-error
+     (mapcan #'list 12)
+     type-error :datum 12 :expected-type 'cons))
+
+  (deftest mapcan.6
+    (signals-error
+     (mapcan 12 '(1))
+     type-error :datum 12 :expected-type 'operator))
+
+  (deftest mapcan.7
+    (mapcan (lambda (x) (if (typep x #^number) (list x) #nil))
+            '(a 1 b c 3 4 d 5))
+    '(1 3 4 5))
+
+  (deftest mapcan.8
+    (mapcan (lambda (x) (list (+ x 10) 'x)) '(1 2 3 4))
+    '(11 x 12 x 13 x 14 x)))
+
 (defsuite dolist
 
   (deftest dolist.1
