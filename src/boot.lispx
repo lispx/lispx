@@ -493,9 +493,8 @@ times in succession."
 
 (defun mapcan (#'function list)
   "Apply the FUNCTION, which must return a list, to every element of the
-LIST, and append the results."
-  ;; Note: CL uses NCONC for this, but we don't have it yet, so I'm
-  ;; using APPEND.
+LIST, and append the results.  (Note: this currently uses `append',
+but might be changed to use `nconc' in the future, like Common Lisp.)"
   (if (null list)
       #nil
       (append (function (car list)) (mapcan #'function (cdr list)))))
