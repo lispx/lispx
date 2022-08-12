@@ -33,7 +33,6 @@ $(type fexpr)")
 that receives an operand and produces a form (by calling the expander
 with the operand as argument) that is then evaluated in place of the
 operand.
-
 $(fn (expander))
 $(type function)")
 
