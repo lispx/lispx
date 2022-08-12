@@ -25,14 +25,15 @@ $(type fexpr)")
 (%def #'lispx::make-macro
   (%wrap
    (%vau (expander) #ignore
-     (%vau form env
+     (%vau operand env
        (%eval
-        (%eval (%cons expander form) (%make-environment))
+        (%eval (%cons expander operand) (%make-environment))
         env))))
   "Create a macro from an EXPANDER operator.  A macro is an operator
-that receives a form and produces an expression (by calling the
-expander with the form as argument) that is then evaluated in place of
-the form.
+that receives an operand and produces a form (by calling the expander
+with the operand as argument) that is then evaluated in place of the
+operand.
+
 $(fn (expander))
 $(type function)")
 
