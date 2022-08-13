@@ -194,8 +194,8 @@ invoked, we return from the outer exit, ignoring the trampoline."
                                (list* name
                                       (lambda args
                                         (return-from trampoline
-                                          (lambda ()
-                                            (apply (eval function-form env) args))))
+                                                     (lambda ()
+                                                       (apply (eval function-form env) args))))
                                       properties))
                              handler-specs)
                      (list #'return-from exit (list* #'progn forms)))
