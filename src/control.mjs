@@ -41,7 +41,7 @@
  * To reinstate a continuation, a resumption helper object is created.
  * Analogous to how a suspension gets passed outwards from the point
  * of continuation capture to the prompt, a resumption gets passed
- * inwards from the point where continuation composition is triggered.
+ * inwards from the point where continuation composition is initiated.
  * A resumption contains the continuation frames that must be put back
  * from the heap onto the JS stack, as well as a user-supplied Lisp
  * handler function that is called inside the newly composed context
@@ -702,8 +702,8 @@ export function init_control(vm)
      * cleanup expression is evaluated (and its result discarded)
      * after the protected expression.
      *
-     * The cleanup expression is not evaluated when the protected
-     * expression exits via a continuation capture.
+     * Note that the cleanup expression is not evaluated when the
+     * protected expression exits via a continuation capture.
      *
      * Cf. Common Lisp's UNWIND-PROTECT.
      */
