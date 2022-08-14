@@ -528,21 +528,19 @@ INITIAL-VALUE is logically placed before the list."
       (reduce #'function (cdr list) :initial-value (function initial-value (car list)))))
 
 (defun member (item list . keywords)
-  "Search for ITEM in the LIST according to the TEST predicate (defaults
-to `eq').  Return the tail of the list starting with ITEM if found,
-nil otherwise.  The KEY function is applied to each list element
-before comparison (defaults to `identity').
+  "Search for ITEM in the LIST according to the TEST predicate
+(defaults to `eq').  Return the tail of the list starting with
+ITEM if found, nil otherwise.  The KEY function is applied to
+each list element before comparison (defaults to `identity').
 $(fn (item list &key test key))"
-  (labels ((member0 (item list #'test #'key)
-             (if (null list)
-                 #nil
-                 (if (test item (key (car list)))
-                     list
-                     (member0 item (cdr list) #'test #'key)))))
-    (member0 item
-             list
-             (optional (get? keywords :test) #'eq)
-             (optional (get? keywords :key) #'identity))))
+  (let ((#'test (optional (get? keywords :test) #'eq))
+        (#'key (optional (get? keywords :key) #'identity)))
+    (loop-let -member- ((items list))
+      (if (null items)
+          #nil
+          (if (test item (key (car items)))
+              items
+              (-member- (cdr items)))))))
 
 (defun remove-if (#'test list)
   "Return a new list from which the elements that satisfy the TEST
