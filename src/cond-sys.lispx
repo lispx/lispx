@@ -365,7 +365,7 @@ of its condition class."
           #t
           ;; ...or if the condition we are looking is one of the
           ;; handler's associated conditions.
-          (memberp condition a-cs :test #'eq)))
+          (consp (member condition a-cs))))
     ;; ...if we are not looking for restarts associated with a
     ;; particular condition then every handler is applicable.
     #t))

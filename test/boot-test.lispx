@@ -2269,45 +2269,69 @@
      (elt '(1 2) 2)
      type-error :datum '() :expected-type 'cons)))
 
-(defsuite memberp
+(defsuite member
 
-  (deftest memberp.1
+  (deftest member.1
     (signals-error
-     (memberp)
+     (member)
      match-error))
 
-  (deftest memberp.2
+  (deftest member.2
     (signals-error
-     (memberp 'a)
+     (member 'a)
      match-error))
 
-  (deftest memberp.3
-    (memberp 'a '() :test #'eq)
-    #f)
+  (deftest member.3
+    (member 'a '() :test #'eq)
+    #nil)
 
-  (deftest memberp.4
-    (memberp 'b '(a) :test #'eq)
-    #f)
+  (deftest member.3a
+    (member 'a '())
+    #nil)
 
-  (deftest memberp.5
-    (memberp 'b '(a b) :test #'eq)
-    #t)
+  (deftest member.4
+    (member 'b '(a) :test #'eq)
+    #nil)
 
-  (deftest memberp.5b
-    (memberp  'x '(a b) :test #'eq)
-    #f)
+  (deftest member.5
+    (member 'b '(a b) :test #'eq)
+    '(b))
 
-  (deftest memberp.6
-    (memberp 'b '(a b c) :test #'eq)
-    #t)
+  (deftest member.5b
+    (member  'x '(a b) :test #'eq)
+    #nil)
 
-  (deftest memberp.7
-    (memberp "b" '("a" "b" "c") :test #'eq)
-    #f)
+  (deftest member.6
+    (member 'b '(a b c) :test #'eq)
+    '(b c))
 
-  (deftest memberp.8
-    (memberp "b" '("a" "b" "c") :test #'=)
-    #t))
+  (deftest member.6a
+    (member 'b '(a b c))
+    '(b c))
+
+  (deftest member.7
+    (member "b" '("a" "b" "c") :test #'eq)
+    #nil)
+
+  (deftest member.7a
+    (member "b" '("a" "b" "c"))
+    #nil)
+
+  (deftest member.8
+    (member "b" '("a" "b" "c") :test #'=)
+    '("b" "c"))
+
+  (deftest member.9
+    (member 'b '((2 a) (1 b) (3 c)) :key #'cadr)
+    '((1 b) (3 c)))
+
+  (deftest member.9a
+    (member "b" '((2 "a") (1 "b") (3 "c")) :key #'cadr)
+    #nil)
+
+  (deftest member.9b
+    (member "b" '((2 "a") (1 "b") (3 "c")) :key #'cadr :test #'=)
+    '((1 "b") (3 "c"))))
 
 (defsuite remove-if
 
@@ -3909,7 +3933,7 @@
                         (lambda (e)
                           (let* ((handler (optional (find-restart? 'r e)))
                                  (a-cs (slot-value handler 'associated-conditions)))
-                            (assert (memberp e a-cs :test #'eq))
+                            (assert (consp (member e a-cs)))
                             (return-from ok)))))
           (signal-operator (make-simple-error "error!")
             (r (lambda () 1))))))))

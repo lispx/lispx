@@ -440,11 +440,19 @@ the value."
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
   (unless boolean (error (make-instance #^assertion-error))))
 
+(defun identity (x)
+  "Identity function."
+  x)
+
 ;;; Lists
 
 (defun null (object)
   "Return true if the OBJECT is nil, false otherwise."
   (eq object #nil))
+
+(defun consp (object)
+  "Return true if the OBJECT is a cons, false otherwise."
+  (typep object #^cons))
 
 (defun caar (cons)
   "Return the `car' of the `car' of the CONS."
@@ -519,14 +527,22 @@ INITIAL-VALUE is logically placed before the list."
       initial-value
       (reduce #'function (cdr list) :initial-value (function initial-value (car list)))))
 
-(defun memberp (element list :test #'test)
-  "Return true if the ELEMENT is contained in the LIST according to
-the TEST predicate, false otherwise."
-  (if (null list)
-      #f
-      (if (test element (car list))
-          #t
-          (memberp element (cdr list) :test #'test))))
+(defun member (item list . keywords)
+  "Search for ITEM in the LIST according to the TEST predicate (defaults
+to `eq').  Return the tail of the list starting with ITEM if found,
+nil otherwise.  The KEY function is applied to each list element
+before comparison (defaults to `identity').
+$(fn (item list &key test key))"
+  (labels ((member0 (item list #'test #'key)
+             (if (null list)
+                 #nil
+                 (if (test item (key (car list)))
+                     list
+                     (member0 item (cdr list) #'test #'key)))))
+    (member0 item
+             list
+             (optional (get? keywords :test) #'eq)
+             (optional (get? keywords :key) #'identity))))
 
 (defun remove-if (#'test list)
   "Return a new list from which the elements that satisfy the TEST
@@ -597,7 +613,7 @@ $(type function)")
 $(fn arguments)"
   (if (null args)
       #t
-      (if (memberp arg args :test #'=)
+      (if (consp (member arg args :test #'=))
           #f
           (apply #'/= args))))
 
