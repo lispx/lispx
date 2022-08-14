@@ -1707,6 +1707,25 @@
     (consp 1)
     #f))
 
+(defsuite identity
+
+  (deftest identity.1
+    (identity #nil)
+    #nil)
+
+  (deftest identity.2
+    (identity '(1))
+    '(1))
+
+  (deftest identity.3
+    (signals-error
+     (identity)
+     match-error))
+
+  (deftest identity.4
+    (identity (+ 1 1))
+    2))
+
 (defsuite mapcar
 
   (deftest mapcar.1
