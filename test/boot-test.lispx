@@ -1688,6 +1688,25 @@
     (null 1)
     #f))
 
+(defsuite consp
+
+  (deftest consp.1
+    (consp #nil)
+    #f)
+
+  (deftest consp.2
+    (consp '(1))
+    #t)
+
+  (deftest consp.3
+    (signals-error
+     (consp)
+     match-error))
+
+  (deftest consp.4
+    (consp 1)
+    #f))
+
 (defsuite mapcar
 
   (deftest mapcar.1
