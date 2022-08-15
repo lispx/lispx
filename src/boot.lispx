@@ -323,13 +323,13 @@ evaluated.  If there are no operands, return true."
 
 (defmacro dotimes ((var count-form . result-form?) . body-forms)
   "Cf. Common Lisp's DOTIMES."
-  (flet ((dotimes-impl (n #'body #'result)
+  (flet ((_dotimes_ (n #'body #'result)
            (let ((#'i (box 0)))
              (while (< (i) n)
                (body (i))
                (i (+ (i) 1)))
              (result (i)))))
-    (list #'dotimes-impl
+    (list #'_dotimes_
           count-form
           (list* #'lambda (list var) body-forms)
           (list* #'lambda (list var) result-form?))))
@@ -509,13 +509,13 @@ but might be changed to use `nconc' in the future, like Common Lisp.)"
 
 (defmacro dolist ((var list-form . result-form?) . body-forms)
   "Cf. Common Lisp's DOLIST."
-  (labels ((dolist-impl (list #'body #'result)
+  (labels ((_dolist_ (list #'body #'result)
              (if (null list)
                  (result list)
                  (progn
                    (body (car list))
-                   (dolist-impl (cdr list) #'body #'result)))))
-    (list #'dolist-impl
+                   (_dolist_ (cdr list) #'body #'result)))))
+    (list #'_dolist_
           list-form
           (list* #'lambda (list var) body-forms)
           (list* #'lambda (list var) result-form?))))
