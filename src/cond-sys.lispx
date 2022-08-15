@@ -247,8 +247,8 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
 
 (defun lispx::make-signal-with-restarts-operator (#'signal-operator)
   "Metaprogramming utility to create the `signal' / `error' operators
-that take restart handler-specs from the `lispx::signal-impl' /
-`lispx::error-impl' ones that don't."
+that take restart handler-specs from the `lispx::_signal_' /
+`lispx::_error_' ones that don't."
   (vau (condition . handler-specs) env
     (let ((c (eval condition env)))
       (flet ((append-associated-condition (handler-spec)
