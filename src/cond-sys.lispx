@@ -211,7 +211,7 @@ $(fn (handler-specs . forms))")
 $(type fexpr)
 $(fn (handler-specs . forms))")
 
-(defun lispx::_signal_ (condition)
+(defun _signal_ (condition)
   "Utility to signal the CONDITION.  If the signal is unhandled,
 return void.  See `signal'."
   (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))
@@ -239,7 +239,7 @@ in as the value of HANDLER-FRAME."
 with a list of ARGUMENTS."
   (apply (slot-value handler 'handler-function) arguments))
 
-(defun lispx::_error_ (condition)
+(defun _error_ (condition)
   "Utility to signal the CONDITION.  If the condition is unhandled,
 invoke the debugger.  Therefore never returns normally.  See `error'."
   (signal condition)
@@ -247,8 +247,8 @@ invoke the debugger.  Therefore never returns normally.  See `error'."
 
 (defun lispx::make-signal-with-restarts-operator (#'signal-operator)
   "Metaprogramming utility to create the `signal' / `error' operators
-that take restart handler-specs from the `lispx::_signal_' /
-`lispx::_error_' ones that don't."
+that take restart handler-specs from the `_signal_' / `_error_' ones
+that don't."
   (vau (condition . handler-specs) env
     (let ((c (eval condition env)))
       (flet ((append-associated-condition (handler-spec)
@@ -257,7 +257,7 @@ that take restart handler-specs from the `lispx::_signal_' /
                     (list #'signal-operator c))
               env)))))
 
-(def #'signal (lispx::make-signal-with-restarts-operator #'lispx::_signal_)
+(def #'signal (lispx::make-signal-with-restarts-operator #'_signal_)
   "Signal the CONDITION.  If the signal is unhandled, return void.
 Restart handlers that are associated with the condition can be bound
 as per `restart-case'.  The handlers should not specify the
@@ -265,7 +265,7 @@ as per `restart-case'.  The handlers should not specify the
 $(type fexpr)
 $(fn (condition . handler-specs))")
 
-(def #'error (lispx::make-signal-with-restarts-operator #'lispx::_error_)
+(def #'error (lispx::make-signal-with-restarts-operator #'_error_)
   "Signal the CONDITION.  If the condition is unhandled, invoke the
 debugger.  Therefore never returns normally.
 Restart handlers that are associated with the condition can be bound
