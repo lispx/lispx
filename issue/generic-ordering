@@ -1,0 +1,3 @@
+Make ordering of different types sort by class name first?
+
+Problem: different classes with same name (rare but still).
