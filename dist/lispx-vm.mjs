@@ -3215,8 +3215,9 @@ function init_print(vm)
     /*
      * Utility for abbreviating objects based on their nesting level.
      *
-     * Call the thunk if *PRINT-LEVEL* is false, or if
-     * *CURRENT-PRINT-LEVEL* is less than *PRINT-LEVEL*.
+     * Call the thunk if *PRINT-LEVEL?* is nil, or if
+     * *CURRENT-PRINT-LEVEL* is less than the contents of
+     * *PRINT-LEVEL?*.
      *
      * Otherwise, print "#" to the stream.
      */
