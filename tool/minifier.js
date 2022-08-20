@@ -1,27 +1,30 @@
 /*
  * A minifier for LispX files that plugs into Webpack as a loader.
  *
- * Removes comments, docstrings, and some whitespace from the Lisp
+ * Removes comments, docstrings, and most whitespace from the Lisp
  * source.
  */
 
 const VM = require("../dist/lispx-vm.umd.js").VM;
 const vm = new VM();
 
+/*
+ * Gets Lisp source string as input, returns minified string.
+ */
 module.exports = function (source)
 {
+    vm.assert_type(source, "string");
     const results = [];
     const stream = new vm.String_input_stream(vm.str(source));
     let form;
     while ((form = vm.read(stream, false)) !== vm.void()) {
         results.push(vm.write_to_js_string(minify(form)));
     }
-    // Need to add some space or otherwise two consecutive symbols at
-    // the toplevel would get concatenated.  Could be cleverer and
-    // take into consideration whether next form starts with
-    // terminating macro char, and drop the space if it does.  (We
-    // could also dive into nested forms and remove spaces from
-    // there).
+    // Need to add a space or otherwise two consecutive symbols at the
+    // toplevel would get concatenated.  Could be cleverer and take
+    // into consideration whether next form starts with terminating
+    // macro char, and drop the space if it does.  (We could also dive
+    // into nested forms and remove spaces from there).
     return results.join(" ");
 };
 
@@ -173,5 +176,5 @@ const expected = [
     `(defexpr foo () env 100 1000)`,
 ].join(" ");
 
-if (!(expected === module.exports(input)))
+if (expected !== module.exports(input))
     throw "minifier borken";
