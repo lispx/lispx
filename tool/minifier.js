@@ -15,7 +15,7 @@ module.exports = function (source)
     while ((form = vm.read(stream, false)) !== vm.void()) {
         results.push(vm.write_to_js_string(minify(form)));
     }
-    return results.join("");
+    return results.join(" ");
 };
 
 function minify(form)
