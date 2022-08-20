@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -eux
-# Node tests
+# Run the main test suite in Node.
 ./node_modules/mocha/bin/mocha.js --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js

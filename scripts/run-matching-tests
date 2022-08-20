@@ -2,10 +2,9 @@
 
 # ./scripts/run-matching-tests <pattern>
 #
-# Runs all tests whose name matches pattern.
+# Runs all tests whose name matches pattern in Node.
 #
-# Note: doesn't build the tests, so don't forget to call ./scripts/build
+# Note: doesn't build the tests, so don't forget to call ./scripts/build before.
 
 set -eux
-# Node tests
 ./node_modules/mocha/bin/mocha.js --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js --grep $1

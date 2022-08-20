@@ -1,100 +1,33 @@
-/******/ var __webpack_modules__ = ({
+/******/ // The require scope
+/******/ var __webpack_require__ = {};
+/******/ 
+/************************************************************************/
+/******/ /* webpack/runtime/define property getters */
+/******/ (() => {
+/******/ 	// define getter functions for harmony exports
+/******/ 	__webpack_require__.d = (exports, definition) => {
+/******/ 		for(var key in definition) {
+/******/ 			if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 			}
+/******/ 		}
+/******/ 	};
+/******/ })();
+/******/ 
+/******/ /* webpack/runtime/hasOwnProperty shorthand */
+/******/ (() => {
+/******/ 	__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ })();
+/******/ 
+/************************************************************************/
+var __webpack_exports__ = {};
 
-/***/ "./src/boot.lispx":
-/*!************************!*\
-  !*** ./src/boot.lispx ***!
-  \************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  "VM": () => (/* binding */ VM)
+});
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX Bootstrap\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; Core Forms\n\n(%def #'list\n  (%wrap (%vau arguments #ignore arguments))\n  \"Return the list of evaluated ARGUMENTS.\n$(fn (arguments))\n$(type function)\")\n\n(%def #'vau\n  (%vau (parameter-tree environment-parameter . forms) env\n    (%eval (list #'%vau parameter-tree environment-parameter\n                 (%list* #'%progn forms))\n           env))\n  \"Construct a fexpr with the given PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\n$(fn (parameter-tree environment-parameter . forms))\n$(type fexpr)\")\n\n(%def #'lispx::make-macro\n  (%wrap\n   (%vau (expander) #ignore\n     (%vau operand env\n       (%eval\n        (%eval (%cons expander operand) (%make-environment))\n        env))))\n  \"Create a macro from an EXPANDER operator.  A macro is an operator\nthat receives an operand and produces a form (by calling the expander\nwith the operand as argument) that is then evaluated in place of the\noperand.\n$(fn (expander))\n$(type function)\")\n\n(%def #'macro\n  (lispx::make-macro\n   (%vau (parameter-tree . forms) #ignore\n     (list #'lispx::make-macro\n           (%list* #'vau parameter-tree #ignore forms))))\n  \"Create an anonymous macro with the given PARAMETER-TREE and FORMS.\n$(fn (parameter-tree . forms))\n$(type macro)\")\n\n(%def #'defmacro\n  (macro (name parameter-tree . forms)\n    (list #'%def (%function-symbol name)\n          (%list* #'macro parameter-tree forms)))\n  \"Define a macro with the given NAME, PARAMETER-TREE, and FORMS.\n$(fn (name parameter-tree . forms))\n$(type macro)\")\n\n(defmacro defexpr (name parameter-tree environment-parameter . forms)\n  \"Define a fexpr with the given NAME, PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\"\n  (list #'%def (%function-symbol name)\n        (%list* #'vau parameter-tree environment-parameter forms)))\n\n(defmacro def (definiend-tree value . docstring?)\n  \"Match the DEFINIEND-TREE against the VALUE and place resulting\nbindings into the current environment.  The optional DOCSTRING? is\ncurrently ignored.\"\n  (list #'%def definiend-tree value))\n\n(defmacro defconstant (name value . docstring?)\n  \"Define a constant with the given NAME and VALUE.  This is mostly\nfor documentation purposes, as constants are still mutable.  The\noptional DOCSTRING? is currently ignored.\"\n  (list #'def name value))\n\n(defmacro lambda (parameter-tree . forms)\n  \"Create an anonymous function with the given PARAMETER-TREE and FORMS.\"\n  (list #'%wrap (%list* #'vau parameter-tree #ignore forms)))\n\n(defmacro defun (name parameter-tree . forms)\n  \"Define a function with the given NAME, PARAMETER-TREE, and FORMS.\"\n  (list #'def (%function-symbol name)\n        (%list* #'lambda parameter-tree forms)))\n\n;;; Built-Ins\n\n(defmacro progn forms\n  \"Sequentially evaluate FORMS, returning the value of the last one,\nor void if there are no forms.\"\n  (list* #'%progn forms))\n\n(defmacro if (test consequent alternative)\n  \"Evaluate the TEST which must yield a boolean.  Then evaluate either\nthe CONSEQUENT or ALTERNATIVE depending on whether the TEST yielded\ntrue or false.\"\n  (list #'%if test consequent alternative))\n\n(defmacro catch (tag . forms)\n  \"Establish a catch tag and evaluate FORMS as an implicit `progn'\ninside it.  The forms may use `throw' to nonlocally exit from the\ntag.  Usually, `block' should be preferred.\"\n  (list #'%catch tag (list* #'lambda () forms)))\n\n(defun throw (tag . result?)\n  \"Abort to a nesting catch tag established by `catch' and pass the\noptional RESULT? (defaults to void) to it.\"\n  (%throw tag (optional result?)))\n\n(defmacro loop forms\n  \"Evaluate the FORMS in an infinite loop.\"\n  (list #'%loop (list* #'progn forms)))\n\n(defun eq (a b)\n  \"Return true if the values A and B are pointer-identical, false otherwise.\"\n  (%eq a b))\n\n(defun class-of (object)\n  \"Return the class of the OBJECT.\"\n  (%class-of object))\n\n(defun typep (object class)\n  \"Return true if the OBJECT is an instance of the CLASS, false otherwise.\"\n  (%typep object class))\n\n(defun intern (string)\n  \"Get or create the unique symbol with STRING as name.\"\n  (%intern string))\n\n(defun symbol-name (symbol)\n  \"Return the name of the SYMBOL as a string.\"\n  (%symbol-name symbol))\n\n(defun variable-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the variable namespace.\"\n  (%variable-symbol symbol))\n\n(defun function-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the function namespace.\"\n  (%function-symbol symbol))\n\n(defun class-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the class namespace.\"\n  (%class-symbol symbol))\n\n(defun keyword-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the keyword namespace.\"\n  (%keyword-symbol symbol))\n\n(defun cons (car cdr)\n  \"Create a cons with the given CAR and CDR.\"\n  (%cons car cdr))\n\n(defun car (cons)\n  \"Return the contents of the address part of the register.\"\n  (%car cons))\n\n(defun cdr (cons)\n  \"Return the contents of the decrement part of the register.\"\n  (%cdr cons))\n\n(defun list* arguments\n  \"Create a list from the ARGUMENTS so that the last argument becomes\nthe `cdr' of the list.\"\n  (apply #'%list* arguments))\n\n(defun reverse (list)\n  \"Reverse the LIST.\"\n  (%reverse list))\n\n(defun wrap (operator)\n  \"Create a new function that wraps around an underlying OPERATOR, and\ninduces argument evaluation around it.\"\n  (%wrap operator))\n\n(defun unwrap (function)\n  \"Return the underlying operator of a FUNCTION.\"\n  (%unwrap function))\n\n(defun eval (form environment)\n  \"Evaluate the FORM in the ENVIRONMENT, returning its result.\"\n  (%eval form environment))\n\n(defun make-environment parent-environment?\n  \"Create a new environment with an optional PARENT-ENVIRONMENT? in\nwhich bindings are looked up if they are not found.\"\n  (apply #'%make-environment parent-environment?))\n\n(defun boundp (symbol environment)\n  \"Return true if the SYMBOL is bound in the ENVIRONMENT, false otherwise.\"\n  (%boundp symbol environment))\n\n(defun panic (error)\n  \"Mostly for internal use.  Signal the ERROR in such a way that it is\nhard to handle and will usually escape the VM as a host language\nexception.  In particular, signal handlers will not be invoked.\nHowever, intervening `unwind-protect' cleanup expressions and `progv'\nexpressions are still triggered, so Lisp invariants are maintained.\"\n  (%panic error))\n\n(defun invoke-debugger (condition)\n  \"Invoke the debugger, which currently just means printing a stack trace\nand panicking, thereby escaping to JS.\"\n  (take-subcont +root-prompt+ k\n    (push-delim-subcont +root-prompt+ k\n      (%print-stacktrace k)\n      (panic condition))))\n\n;;; Lexical Bindings\n\n(defmacro let (bindings . forms)\n  \"Establish BINDINGS parallelly during the evaluation of FORMS, so\nthat no binding can refer to the other ones.\n$(syntax binding (definiend-tree value))\"\n  (list* (list* #'lambda (mapcar #'car bindings)\n                forms)\n         (mapcar #'cadr bindings)))\n\n(defmacro let* (bindings . forms)\n  \"Establish BINDINGS serially during the evaluation of FORMS, so that\nevery binding can refer to previous ones.\n$(syntax binding (definiend-tree value))\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list #'let (list (car bindings))\n            (list* #'let* (cdr bindings) forms))))\n\n(defmacro lispx::letrec (bindings . forms)\n  \"Utility to establish BINDINGS recursively during the evaluation of\nFORMS.  Used by `labels'.\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list* #'let ()\n             (list #'def\n                   (mapcar #'car bindings)\n                   (list* #'list (mapcar #'cadr bindings)))\n             forms)))\n\n(defun lispx::make-function-binding ((name parameter-tree . forms))\n  \"Utility to turn a function binding as it appears in `flet' and\n`labels' into a binding for `let' or `lispx::letrec'.\"\n  (list (function-symbol name) (list* #'lambda parameter-tree forms)))\n\n(defmacro flet (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS parallelly during evaluation of FORMS,\nso that no function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'let (mapcar #'lispx::make-function-binding function-bindings) forms))\n\n(defmacro labels (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS recursively during evaluation of FORMS,\nso that every function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'lispx::letrec (mapcar #'lispx::make-function-binding function-bindings) forms))\n\n;;; Data and Control Flow\n\n(defexpr quote (operand) #ignore\n  \"Return the unevaluated OPERAND.\"\n  operand)\n\n(defexpr the-environment () environment\n  \"Return the current environment.\"\n  environment)\n\n(defun apply (function arguments)\n  \"Call the FUNCTION with a dynamically-supplied list of ARGUMENTS.\"\n  (eval (cons (unwrap function) arguments) (%make-environment)))\n\n(defmacro when (test . forms)\n  \"If TEST yields true, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test (list* #'progn forms) #void))\n\n(defmacro unless (test . forms)\n  \"If TEST yields false, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test #void (list* #'progn forms)))\n\n(defexpr cond clauses env\n  \"Multi-armed conditional.\nGo through the CLAUSES in order.  Evaluate the TEST.  If it yields\ntrue, evaluate the FORMS as an implicit `progn'.  If it yields false,\ngo to the next clause, or return void if there are no more clauses.\n$(syntax clause (test . forms))\"\n  (unless (null clauses)\n    (let ((((test . forms) . rest-clauses) clauses))\n      (if (eval test env)\n          (eval (cons #'progn forms) env)\n          (eval (cons #'cond rest-clauses) env)))))\n\n(defun not (boolean)\n  \"Invert the BOOLEAN.\"\n  (if boolean #f #t))\n\n(defexpr and operands env\n  \"Return true if all OPERANDS evaluate to true, false otherwise.  If\nan operand evaluates to false, later operands are not evaluated.  If\nthere are no operands, return false.\"\n  (cond ((null operands)           #t)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) (eval (cons #'and (cdr operands)) env))\n        (#t                        #f)))\n\n(defexpr or operands env\n  \"Return true if one of the OPERANDS evaluates to true, false\notherwise.  If an operand evaluates to true, later operands are not\nevaluated.  If there are no operands, return true.\"\n  (cond ((null operands)           #f)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) #t)\n        (#t                        (eval (cons #'or (cdr operands)) env))))\n\n(defexpr while (test-form . forms) env\n  \"Evaluate FORMS while TEST-FORM evaluates to true.\"\n  (let ((forms (list* #'progn forms)))\n    (block exit\n      (loop\n        (if (eval test-form env)\n            (eval forms env)\n            (return-from exit))))))\n\n(defmacro until (test-form . forms)\n  \"Evaluate FORMS until TEST-FORM evaluates to true.\"\n  (list* #'while (list #'not test-form) forms))\n\n(defmacro dotimes ((var count-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOTIMES.\"\n  (flet ((_dotimes_ (n #'body #'result)\n           (let ((#'i (box 0)))\n             (while (< (i) n)\n               (body (i))\n               (i (+ (i) 1)))\n             (result (i)))))\n    (list #'_dotimes_\n          count-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defmacro loop-let (name initializers . forms)\n  \"Labelled recursive loop, analogous to Scheme's named `let'.\nLexically bind a function named NAME with one PARAMETER for every\nINITIALIZER and the FORMS as body.  Then immediately apply the\nfunction to a list containing one VALUE for every INITIALIZER and\nreturn the result.  The function is bound per `labels' so it can\nrecursively refer to itself.\n$(syntax initializer (parameter value))\"\n  (list #'labels (list (list* name (mapcar #'car initializers) forms))\n        (list* name (mapcar #'cadr initializers))))\n\n(defexpr block (block-name . forms) env\n  \"Establish a block named BLOCK-NAME and evaluate the FORMS as an\nimplicit `progn' inside it.  The forms may use `return-from' to\nnonlocally exit from the block.\nNote that unlike in Common Lisp, there is no separate namespace for\nblock names; a block is named in the normal variable namespace.\"\n  (let ((tag (list #void))) ; cons up a fresh object as tag\n    (flet ((escape (value) (throw tag value)))\n      (catch tag\n        (eval (list (list* #'lambda (list block-name) forms)\n                    #'escape)\n              env)))))\n\n(defun return-from (#'block-name . value?)\n  \"Abort evaluation and return the optional VALUE? (which defaults to\nvoid) from the block named BLOCK-NAME.  It is an error to return from\na block whose dynamic extent has ended.\n$(fn (block-name . value?))\"\n  (block-name (optional value?)))\n\n(defmacro unwind-protect (protected-form . cleanup-forms)\n  \"Evaluate the PROTECTED-FORM and return its result.  Regardless of\nwhether the protected form returns normally, or via a nonlocal exit or\npanic, the CLEANUP-FORMS are evaluated after the protected form.\"\n  (list #'%unwind-protect protected-form (list* #'progn cleanup-forms)))\n\n(defexpr prog1 (form . forms) env\n  \"Evaluate FORM and any additional FORMS, and return the result of FORM.\"\n  (let ((result (eval form env)))\n    (eval (list* #'progn forms) env)\n    result))\n\n(defun lispx::make-typecase-with-default-function (#'default)\n  \"Metaprogramming utility used to create `typecase' and `etypecase'.\nIf no matching clause is found, the DEFAULT function is called with\nthe key.\"\n  (vau (keyform . clauses) env\n    (let ((key (eval keyform env)))\n      (loop-let -typecase- ((clauses clauses))\n        (if (null clauses)\n            (default key)\n            (let ((((class-name . forms) . rest-clauses) clauses))\n              (if (typep key (find-class class-name env))\n                  (eval (list* #'progn forms) env)\n                  (-typecase- rest-clauses))))))))\n\n(def #'typecase (lispx::make-typecase-with-default-function\n                 (lambda (#ignore) #void))\n  \"Multi-armed type test.\nEvaluate the KEYFORM.  Go through the CLAUSES.  If the result of\nevaluating KEYFORM is an instance of the class named by CLASS-NAME,\nevaluate the FORMS as an implicit `progn'.  Otherwise go to the next\nclause, or return void if there are no more clauses.\n$(type fexpr)\n$(fn (keyform . clauses))\n$(syntax clause (class-name . forms))\")\n\n(def #'etypecase (lispx::make-typecase-with-default-function\n                  ;; Note: we use #^object as :expected-type of the\n                  ;; type error which is somewhat nonsensical.  The\n                  ;; proper/CL way would be to use an OR type spec,\n                  ;; but they might get removed from the language.\n                  (lambda (key) (error (make-type-error key #^object))))\n  \"Like `typecase' but signal a `type-error' if no clause matches the KEYFORM.\n$(type fexpr)\n$(fn (keyform . clauses))\n$(syntax clause (class-name . forms))\")\n\n(defexpr set (environment definiend-tree value) dynamic-environment\n  \"Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,\ncreating or updating existing bindings.  Unlike Common Lisp (or\nScheme), we have no `setq' (or `set!') that allows updating arbitrary\nbindings -- you always need to know the environment a binding is in to\nchange it.  Therefore, we usually use boxes (see below) instead of\nmutating bindings directly.\"\n  (eval (list #'def definiend-tree\n              (list (unwrap #'eval) value dynamic-environment))\n        (eval environment dynamic-environment)))\n\n(defun box initial-value?\n  \"Create a new box with the optional INITIAL-VALUE?.  A box is a\nfunction that encapsulates a mutable value.  Calling the box without\narguments returns the value.  Calling the box with an argument sets\nthe value.\"\n  (def value (optional initial-value?))\n  (def env (the-environment))\n  (lambda new-value?\n    (if-option (new-value new-value?)\n      (set env value new-value)\n      value)))\n\n(defun assert (boolean)\n  \"Signal an error if the BOOLEAN is false.  Otherwise return void.\"\n  (unless boolean (error (make-instance #^assertion-error))))\n\n(defun compose (#'f #'g)\n  \"Compose two functions, creating a new function equivalent to (G (F ...)).\"\n  (lambda args (g (apply #'f args))))\n\n(defun identity (x)\n  \"Identity function.\"\n  x)\n\n;;; Lists\n\n(defun null (object)\n  \"Return true if the OBJECT is nil, false otherwise.\"\n  (eq object #nil))\n\n(defun consp (object)\n  \"Return true if the OBJECT is a cons, false otherwise.\"\n  (typep object #^cons))\n\n(defun caar (cons)\n  \"Return the `car' of the `car' of the CONS.\"\n  (car (car cons)))\n\n(defun cadr (cons)\n  \"Return the `car' of the `cdr' of the CONS.\"\n  (car (cdr cons)))\n\n(defun cdar (cons)\n  \"Return the `cdr' of the `car' of the CONS.\"\n  (cdr (car cons)))\n\n(defun cddr (cons)\n  \"Return the `cdr' of the `cdr' of the CONS.\"\n  (cdr (cdr cons)))\n\n(defun append (list1 list2)\n  \"Append two lists.  The first one must be proper and is copied.  The\nsecond one is not copied (and doesn't even have to be a list). It\nbecomes the `cdr' of the final cons of the first list, or is returned\ndirectly if the first list is empty.\"\n  (%append list1 list2))\n\n(defun nth (n list)\n  \"Return element number N of LIST, where the `car' is element zero.\"\n  (%nth n list))\n\n(defun nthcdr (n list)\n  \"Returns the tail of LIST that would be obtained by calling `cdr' N\ntimes in succession.\"\n  (%nthcdr n list))\n\n(defun mapcar (#'function list)\n  \"Create a new list by applying the FUNCTION to every element of the LIST.\"\n  (if (null list)\n      #nil\n      (cons (function (car list)) (mapcar #'function (cdr list)))))\n\n(defun mapc (#'function list)\n  \"Apply the FUNCTION to every element of the LIST for effect.  Return the list.\"\n  (unless (null list)\n    (function (car list))\n    (mapc #'function (cdr list)))\n  list)\n\n(defun mapcan (#'function list)\n  \"Apply the FUNCTION, which must return a list, to every element of the\nLIST, and append the results.  (Note: this currently uses `append',\nbut might be changed to use `nconc' in the future, like Common Lisp.)\"\n  (if (null list)\n      #nil\n      (append (function (car list)) (mapcan #'function (cdr list)))))\n\n(defmacro dolist ((var list-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOLIST.\"\n  (labels ((_dolist_ (list #'body #'result)\n             (if (null list)\n                 (result list)\n                 (progn\n                   (body (car list))\n                   (_dolist_ (cdr list) #'body #'result)))))\n    (list #'_dolist_\n          list-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defun reduce (#'function list :initial-value initial-value)\n  \"Use the binary FUNCTION to combine the elements of the LIST.  The\nINITIAL-VALUE is logically placed before the list.\"\n  (if (null list)\n      initial-value\n      (reduce #'function (cdr list) :initial-value (function initial-value (car list)))))\n\n(defun member (item list . keywords)\n  \"Search for ITEM in the LIST according to the TEST predicate\n(defaults to `eq').  Return the tail of the list starting with\nITEM if found, nil otherwise.  The KEY function is applied to\neach list element before comparison (defaults to `identity').\n$(fn (item list &key test key))\"\n  (let ((#'test (optional (get? keywords :test) #'eq))\n        (#'key (optional (get? keywords :key) #'identity)))\n    (loop-let -member- ((items list))\n      (if (null items)\n          #nil\n          (if (test item (key (car items)))\n              items\n              (-member- (cdr items)))))))\n\n(defun remove-if (#'test list)\n  \"Return a new list from which the elements that satisfy the TEST\nhave been removed.\"\n  (if (null list)\n      #nil\n      (if (test (car list))\n          (remove-if #'test (cdr list))\n          (cons (car list) (remove-if #'test (cdr list))))))\n\n(defun get? (plist indicator)\n  \"Search for the INDICATOR keyword in the property list PLIST (a list\nof alternating keywords and values) and return the found value as an\noption.\"\n  (if (null plist)\n      #nil\n      (let (((i v . plist) plist))\n        (if (eq i indicator)\n            (some v)\n            (get? plist indicator)))))\n\n;;; Relational Operators\n\n;; Note that unlike in Common Lisp, these operators currently require\n;; at least two arguments.  This will be improved in the future.\n\n(defun lispx::make-relational-operator (#'binary-operator)\n  \"Utility to create an n-ary relational operator from a BINARY-OPERATOR.\"\n  (labels ((operator (arg1 arg2 . rest)\n             (if (binary-operator arg1 arg2)\n                 (if (null rest)\n                     #t\n                     (apply #'operator (list* arg2 rest)))\n                 #f)))\n    #'operator))\n\n(def #'= (lispx::make-relational-operator #'%=)\n  \"Return true if all ARGUMENTS are equal, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'< (lispx::make-relational-operator #'%<)\n  \"Return true if the ARGUMENTS are in monotonically increasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'> (lispx::make-relational-operator #'%>)\n  \"Return true if the ARGUMENTS are in monotonically decreasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'<= (lispx::make-relational-operator #'%<=)\n  \"Return true if the ARGUMENTS are in monotonically nondecreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'>= (lispx::make-relational-operator #'%>=)\n  \"Return true if the ARGUMENTS are in monotonically nonincreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(defun /= (arg . args)\n  \"Return true if no two ARGUMENTS are the same, false otherwise.\n$(fn arguments)\"\n  (if (null args)\n      #t\n      (if (consp (member arg args :test #'=))\n          #f\n          (apply #'/= args))))\n\n;;; Numbers\n\n;; The terms thetic (for + and *) and lytic (for - and /) are due to Hankel.\n\n(defun lispx::make-thetic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary thetic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda args\n    (reduce #'binary-operator args :initial-value initial-value)))\n\n(def #'+ (lispx::make-thetic-operator #'%+ 0)\n  \"Return the sum of the ARGUMENTS, or 0 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(def #'* (lispx::make-thetic-operator #'%* 1)\n  \"Return the product of the ARGUMENTS, or 1 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(defun lispx::make-lytic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary lytic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda (arg1 . rest)\n    (if (null rest)\n        (binary-operator initial-value arg1)\n        (reduce #'binary-operator rest :initial-value arg1))))\n\n(def #'- (lispx::make-lytic-operator #'%- 0)\n  \"If only one number is supplied in the ARGUMENTS, return the\nnegation of that number. If more than one number is supplied, subtract\nall of the later ones from the first one and return the result.\n$(fn arguments)\n$(type function)\")\n\n(def #'/ (lispx::make-lytic-operator #'%/ 1)\n  \"If only one number is supplied in the ARGUMENTS, return the\nreciprocal of that number.  If more than one number is supplied,\ndivide the first one by all of the later ones and return the result.\n$(fn arguments)\n$(type function)\")\n\n;;; Classes\n\n(defmacro class (name)\n  \"Access a class by the (unevaluated) NAME symbol in the current\nenvironment.  This is required because classes have their own\nnamespace.\"\n  (class-symbol name))\n\n(defun find-class (name environment)\n  \"Look up a class based on its NAME symbol (evaluated) in the given ENVIRONMENT.\"\n  (eval (class-symbol name) environment))\n\n(defun class-name (class)\n  \"Return the name symbol of the CLASS.\"\n  (%class-name class))\n\n(defun subclassp (class superclass)\n  \"Return true if the CLASS is a subclass of the SUPERCLASS, false otherwise.\nA class is considered a subclass of itself.\"\n  (%subclassp class superclass))\n\n(defexpr defclass (name superclass? slot-specs . properties) env\n  \"Define a new `standard-class' with the given NAME, optional\nSUPERCLASS?, and SLOT-SPECS.  The superclass defaults to\n`standard-object'.  The SLOT-SPECS and PROPERTIES are currently\nignored.\n$(syntax slot-spec symbol)\n$(syntax property (:documentation docstring))\"\n  ;; Slot-specs are ignored for now, but check that they are symbols nevertheless.\n  (dolist (slot-spec slot-specs) (the symbol slot-spec))\n  (let ((class-name (class-symbol name))\n        (superclass (find-class (optional superclass? 'standard-object) env)))\n    (if (boundp class-name env)\n        (%reinitialize-standard-class (eval class-name env) superclass)\n        (eval (list #'def class-name (%make-standard-class name superclass)) env))))\n\n;;; Generic Functions\n\n(defexpr defgeneric (name (receiver . parameters) . properties) env\n  \"Define a new generic function with the given NAME.  The RECEIVER,\nPARAMETERS, and PROPERTIES are currently ignored.\n$(syntax property (:documentation docstring))\"\n  (flet ((generic args (apply (%find-method (class-of (car args)) name) args)))\n    (eval (list #'def (function-symbol name) #'generic) env)))\n\n(defexpr defmethod (name ((receiver class-name) . parameters) . forms) env\n  \"Add a new method to the generic function named by NAME specialized\nfor the class named by CLASS-NAME.\"\n  (let ((#'method (eval (list* #'lambda (list* receiver parameters) forms) env)))\n    (%add-method (find-class class-name env) name #'method)))\n\n;;; Standard Objects\n\n(defun make-instance (class . slot-inits)\n  \"Create a new instance of CLASS (that must be a `standard-class').\nThe SLOT-INITS must be of even length, and alternately contain slot\nnames (symbols, typically keywords) and values.\"\n  (apply #'%make-instance (cons class slot-inits)))\n\n(defun slot-value (object slot-name)\n  \"Return the value of the slot named SLOT-NAME of the OBJECT.\"\n  (%slot-value object slot-name))\n\n(defun set-slot-value (object slot-name value)\n  \"Set the value of the slot named SLOT-NAME of the OBJECT to VALUE.\"\n  (%set-slot-value object slot-name value))\n\n(defun slot-bound-p (object slot-name)\n  \"Return true if the slot named SLOT-NAME of the OBJECT is set, false otherwise.\"\n  (%slot-bound-p object slot-name))\n\n;;; Type Checks\n\n(defun make-type-error (datum expected-type)\n  \"Create a `type-error' with the given DATUM and EXPECTED-TYPE.\"\n  (make-instance #^type-error :datum datum :expected-type expected-type))\n\n(defun assert-type (object class)\n  \"Signal a `type-error' if the OBJECT is not an instance of the CLASS.\"\n  (if (typep object class)\n      object\n      (error (make-type-error object (class-name class)))))\n\n(defexpr the (class-name object) env\n  \"Shorthand for `assert-type'.  Signal a `type-error' if the OBJECT\nis not an instance of the class named by CLASS-NAME.\"\n  (assert-type (eval object env) (find-class class-name env)))\n\n;;; Sequences\n\n(defgeneric length (sequence)\n  (:documentation \"Return the number of elements in a sequence.\"))\n\n(defmethod length ((seq list))\n  (%list-length seq))\n\n(defgeneric elt (sequence index)\n  (:documentation \"Return the sequence element at the specified index.\"))\n\n(defmethod elt ((seq list) index)\n  (nth index seq))\n\n(defgeneric subseq (sequence start . end?)\n  (:documentation \"Create a sequence that is a copy of the subsequence\nof the SEQUENCE bounded by START and optional END?.  If END?  is not\nsupplied or void, the subsequence stretches until the end of the\nlist.\"))\n\n(defmethod subseq ((seq list) start . end?)\n  (%list-subseq seq start (optional end?)))\n\n(defmethod subseq ((seq string) start . end?)\n  (%string-subseq seq start (optional end?)))\n\n;;; Options\n\n;; An option is either nil (\"none\"), or a one-element list (\"some\").\n;; Variables holding options are conventionally suffixed with \"?\".\n\n(defun some (value)\n  \"Create a one-element list from the VALUE.\"\n  (list value))\n\n(defexpr if-option ((name option?) then else) env\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the THEN form\nwith the NAME bound to the contents of the option.  If it's nil,\nevaluate the ELSE form.\"\n  ;; (Idea from Taylor R. Campbell's blag.)\n  (let ((o? (eval option? env)))\n    (if (null o?)\n        (eval else env)\n        (eval (list (list #'vau (list name) #ignore then)\n                    (car o?))\n              env))))\n\n(defmacro when-option ((name option?) . forms)\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the FORMS with\nthe NAME bound to the contents of the option.  If it's nil, return nil.\"\n  (list #'if-option (list name option?) (list* #'progn forms) #nil))\n\n(defmacro unless-option (option? . forms)\n  \"Destructure the OPTION?.  If it's nil, evaluate the FORMS.  If it's\nnon-nil, return nil.\"\n  (list #'if-option (list #ignore option?) #nil (list* #'progn forms)))\n\n(defexpr optional (option? . default?) env\n  \"Return the contents of the OPTION?, or the DEFAULT? if the option\nis nil.  The default itself defaults to void.  The DEFAULT? is\nevaluated lazily, only when the OPTION? is nil.\"\n  (if-option (value (eval option? env))\n    value\n    (if-option (default default?)\n      (eval default env)\n      #void)))\n\n(defexpr optionals (list . defaults) env\n  \"Similar to `optional', but provides DEFAULTS for any number of\nelements of LIST.  This is useful for implementing functions that take\nmultiple optional arguments.  Each default is evaluated lazily, only\nwhen needed.\"\n  (loop-let -optionals- ((list (eval list env)) (defaults defaults))\n    (if (null list)\n        (if (null defaults)\n            #nil\n            (cons (eval (car defaults) env) (-optionals- #nil (cdr defaults))))\n        (if (null defaults)\n            (cons (car list)                (-optionals- (cdr list) #nil))\n            (cons (car list)                (-optionals- (cdr list) (cdr defaults)))))))\n\n(defun get-option (option?)\n  \"Returns the contents of the OPTION? or signals an error if it is nil.\"\n  (optional option? (simple-error \"Option is nil\")))\n\n;;; Dynamic Binding\n\n(defexpr defdynamic (name . value-and-docstring?) env\n  \"Define a new or update an existing dynamic variable with the given\nNAME and optional default VALUE. The optional DOCSTRING is currently\nignored.\n$(fn (name &optional value docstring))\"\n  (def value (eval (optional value-and-docstring?) env)) ; treating 2-elt list as option\n  (if (boundp name env)\n      (set-dynamic (eval name env) value)\n      (eval (list #'def name (make-instance #^dynamic :value value)) env)))\n\n(defun dynamic (dynamic-variable)\n  \"Return the current value of the DYNAMIC-VARIABLE.\"\n  (slot-value dynamic-variable 'value))\n\n(defun set-dynamic (dynamic-variable value)\n  \"Set the current value of the DYNAMIC-VARIABLE.\"\n  (set-slot-value dynamic-variable 'value value))\n\n(defexpr dynamic-let (bindings . forms) env\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established parallely\nas per `let'.\n$(syntax binding (dynamic-variable value))\"\n  (let ((dynamics (mapcar (lambda ((name #ignore)) (eval name env)) bindings))\n        (values (mapcar (lambda ((#ignore value)) (eval value env)) bindings))\n        (thunk (eval (list* #'lambda () forms) env)))\n    (%progv dynamics values thunk)))\n\n(defmacro dynamic-let* (bindings . forms)\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established serially as\nper `let*'.\"\n  (if (null bindings)\n      (list* #'progn forms)\n      (list #'dynamic-let (list (car bindings))\n            (list* #'dynamic-let* (cdr bindings) forms))))\n\n(defmacro progv (dynamic-variables values . forms)\n  \"Evaluate the FORMS with the list of DYNAMIC-VARIABLES temporarily\nbound to new VALUES.  The DYNAMIC-VARIABLES and VALUES lists must have\nthe same length.\"\n  (list #'%progv dynamic-variables values (list* #'lambda () forms)))\n\n;;; Delimited Control Operators\n\n;; These operators follow the API put forth in the delimcc library\n;; at URL `http://okmij.org/ftp/continuations/implementations.html'.\n\n(defmacro push-prompt (prompt . forms)\n  \"Push the PROMPT and evaluate the FORMS inside the prompt.  This\ndelimits the continuation.\"\n  (list #'%push-prompt prompt (list* #'lambda () forms)))\n\n(defmacro take-subcont (prompt name . forms)\n  \"Abort outwards to the PROMPT.  When the prompt is reached, evaluate\nthe FORMS with NAME bound to the captured continuation (which does not\ninclude the prompt).\"\n  (list #'%take-subcont prompt (list* #'lambda (list name) forms)))\n\n(defmacro push-delim-subcont (prompt continuation . forms)\n  \"Push the PROMPT and compose the previously captured CONTINUATION\ninside it.  The FORMS are then evaluated inside the new continuation.\"\n  (list #'%push-delim-subcont prompt continuation (list* #'lambda () forms)))\n\n(defmacro push-subcont-barrier forms\n  \"Push a continuation barrier that prevents the FORMS from capturing\nany continuations to the outside.\"\n  (list #'%push-subcont-barrier (list* #'lambda () forms)))\n\n;;; Coroutines\n\n(defconstant +default-prompt+ 'default-prompt\n  \"This prompt is used for general coroutine-like use of\ncontinuations.\")\n\n(defmacro coroutine forms\n  \"Evaluate the FORMS in a context in which `yield' can be used to pause\nexecution.\"\n  (list* #'push-prompt '+default-prompt+ forms))\n\n(defmacro yield (name . forms)\n  \"Pause the current coroutine.  In the place where the enclosing\n`coroutine' (or `resume') was called, evaluate the FORMS with NAME\nbound to the paused coroutine.  `resume' can later be used to restart\nexecution inside the coroutine.\"\n  (list* #'take-subcont '+default-prompt+ name forms))\n\n(defmacro resume (k . forms)\n  \"Resume the paused coroutine K and evaluate FORMS in the place where\n`yield' was called in the coroutine.\"\n  (list* #'push-delim-subcont '+default-prompt+ k forms))\n");
-
-/***/ }),
-
-/***/ "./src/cond-sys.lispx":
-/*!****************************!*\
-  !*** ./src/cond-sys.lispx ***!
-  \****************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX Condition System\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;; This file implements a condition system in the style of Common\n;; Lisp.\n;;\n;; Implementation Notes\n;; --------------------\n;;\n;; Condition handling and restart handling share some similarities\n;; while also being quite different in other respects.\n;;\n;; The main similarities between condition and restart handling are:\n;;\n;; * Both condition and restart handlers are arranged in\n;;   dynamically-bound handler chains, consisting of individual\n;;   handler frames.  Each frame binds a number of handlers.  We use\n;;   two dynamic variables, `*condition-handler-frame?*' and\n;;   `*restart-handler-frame?*', to point at the innermost frame of\n;;   each chain.  Note that the variables hold options, as indicated\n;;   by the question mark.\n;;\n;; * Signalling a condition and invoking a restart are very similar\n;;   operations, in that a handler is looked up in the chain, and\n;;   then its handler function is invoked.\n;;\n;; The main differences:\n;;\n;; * Conditions are classes organized in a type hierarchy\n;;   (e.g. `type-error' as subtype of `error'), whereas restarts are\n;;   plain names (e.g. `abort' and `continue').\n;;\n;; * A condition handler function always receives only a single\n;;   argument, the condition, whereas a restart handler function\n;;   receives any number of arguments passed to `invoke-restart'.\n;;\n;; * A condition handler function may decline handling a condition by\n;;   returning normally instead of performing a nonlocal exit; this\n;;   causes the search for a handler to continue.  In contrast, if a\n;;   restart handler function returns normally, the restart is\n;;   considered handled, and its result value is returned from\n;;   `invoke-restart'.\n;;\n;; * A restart handler may optionally have an interactive function\n;;   that prompts the user for arguments when the restart is invoked\n;;   by `invoke-restart-interactively'.\n;;\n;; * A restart handler may optionally be associated with a list of\n;;   conditions, to tell apart restarts belonging to different,\n;;   concurrently signalled conditions.\n;;\n;; We follow the Common Lisp condition system quite closely (including\n;; details like the condition firewall), with some minor differences:\n;;\n;; 1) For simplicity, the syntaxes of `handler-case' and\n;;    `restart-case' are equal to the syntaxes of the lower-level\n;;    `handler-bind' and `restart-bind' functions.  There is no extra\n;;    \"user interface\" processing for the higher-level functions.\n;;\n;;    Likewise, `signal' and `error' do not support creating simple\n;;    conditions from formatting strings and arguments, you must\n;;    always pass in a fully formed condition yourself.\n;;\n;; 2) There is no `with-condition-restarts'.  Instead there is an\n;;    additional keyword, `:associated-conditions', in the\n;;    handler-specs of `restart-bind' and `restart-case' that\n;;    establishes the associations.\n;;\n;;    Alternatively, `signal' and `error' also support the\n;;    establishment of restart handlers associated with the signalled\n;;    condition.\n;;\n;;    A call to `signal' (or `error') with restart handler specs like:\n;;\n;;    (signal some-condition\n;;      (continue (lambda () ...)))\n;;\n;;    is equivalent to:\n;;\n;;    (restart-case ((continue (lambda () ...)\n;;                             :associated-conditions (list some-condition)))\n;;      (signal some-condition))\n;;\n;; 3) Every restart must have a non-nil name; anonymous restarts\n;;    are not supported.\n\n(defclass handler-frame ()\n  (handlers\n   parent-frame?)\n  (:documentation \"Instances of this class make up the condition and\nrestart handler chains.  Each frame stores a list of HANDLERS and an\noptional PARENT-FRAME?.\"))\n\n(defclass condition-handler ()\n  (condition-class\n   handler-function)\n  (:documentation \"A condition handler is handling a particular\nCONDITION-CLASS (can be `object' to handle all conditions).  The\nHANDLER-FUNCTION receives a signalled condition as its single\nargument.\"))\n\n(defclass restart-handler ()\n  (restart-name\n   handler-function\n   interactive-function?\n   associated-conditions)\n  (:documentation \"A restart handler is handling a particular\nRESTART-NAME.  The HANDLER-FUNCTION receives the arguments passed to\n`invoke-restart'.  The optional INTERACTIVE-FUNCTION? is called by\n`invoke-restart-interactively' and should prompt the user for required\narguments.  The ASSOCIATED-CONDITIONS are a list of conditions with\nwhich this handler is associated.  If the list is empty, the handler\nis applicable to any condition.  If it's not empty, the handler is\napplicable only to conditions in the list.\"))\n\n(defdynamic *condition-handler-frame?* #nil\n  \"An option holding the innermost condition handler frame.\")\n\n(defdynamic *restart-handler-frame?* #nil\n  \"An option holding the innermost restart handler frame.\")\n\n(defun lispx::make-handler-bind-operator (#'handler-spec-parser handler-frame-dynamic)\n  \"Metaprogramming utility to create `handler-bind' and `restart-bind'.\nIt is parameterized by a function that parses the handler\nspecifications of the `handler-bind' and `restart-bind' forms and\nproduces handlers from them, as well as the dynamic variable holding\nthe handler chain (the variable itself as a first class object, not\nits value, so it can be used with `progv').\"\n  (vau (handler-specs . forms) env\n    (let ((handler-frame (make-instance\n                          #^handler-frame\n                          :handlers (mapcar (lambda (spec)\n                                              (handler-spec-parser spec env))\n                                            handler-specs)\n                          :parent-frame? (dynamic handler-frame-dynamic))))\n      (progv (list handler-frame-dynamic) (list (some handler-frame))\n        (eval (list* #'progn forms) env)))))\n\n(def #'handler-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((class-name function-form) env)\n     (make-instance #^condition-handler\n                    :condition-class\n                    (the class (find-class class-name env))\n                    :handler-function\n                    (the function (eval function-form env))))\n   *condition-handler-frame?*)\n  \"Establish condition handlers specified by HANDLER-SPECS around FORMS.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (condition-class handler-function))\")\n\n(def #'restart-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((restart-name function-form . properties) env)\n     (make-instance #^restart-handler\n                    :restart-name\n                    (the symbol restart-name)\n                    :handler-function\n                    (the function (eval function-form env))\n                    :interactive-function?\n                    (when-option (i-f-form (get? properties :interactive-function))\n                      (some (the function (eval i-f-form env))))\n                    :associated-conditions\n                    (when-option (a-cs-form (get? properties :associated-conditions))\n                      (the list (eval a-cs-form env)))))\n   *restart-handler-frame?*)\n  \"Establish restart handlers specified by HANDLER-SPECS around FORMS.\nYou should usually prefer `restart-case'.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (restart-name handler-function . properties))\n$(syntax properties (&key interactive-function associated-conditions))\")\n\n(defun lispx::make-handler-case-operator (#'handler-bind-operator)\n  \"Metaprogramming utility to create `handler-case' / `restart-case'\nfrom `handler-bind' / `restart-bind'.  The `*-case' operators unwind\nthe stack before a handler is called.  We do this with an outer exit\nand an inner trampoline, both wrapped around the original `*-bind'\noperator.  The original form's handler functions are replaced with\nfunctions that use the trampoline.  If a condition is signalled / a\nrestart is invoked during the evaluation of the body forms, they\nunwind the stack by jumping into the trampoline, and call the original\nhandler function there.  If no condition is signalled / no restart is\ninvoked, we return from the outer exit, ignoring the trampoline.\"\n  (vau (handler-specs . forms) env\n    (block exit\n      ((block trampoline\n         (eval (list #'handler-bind-operator\n                     (mapcar (lambda ((name function-form . properties))\n                               (list* name\n                                      (lambda args\n                                        (return-from trampoline\n                                                     (lambda ()\n                                                       (apply (eval function-form env) args))))\n                                      properties))\n                             handler-specs)\n                     (list #'return-from exit (list* #'progn forms)))\n               env))))))\n\n(def #'handler-case (lispx::make-handler-case-operator #'handler-bind)\n  \"Like `handler-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(def #'restart-case (lispx::make-handler-case-operator #'restart-bind)\n  \"Like `restart-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(defun _signal_ (condition)\n  \"Utility to signal the CONDITION.  If the signal is unhandled,\nreturn void.  See `signal'.\"\n  (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))\n    ;; Payload to `lispx::find-handler?' is always nil for condition handlers.\n    (if-option ((handler frame) (lispx::find-handler? condition handler-frame? #nil))\n      (progn\n        ;; Handler found; call it, passing along frame.\n        (lispx::call-condition-handler handler frame condition)\n        ;; Signal unhandled: continue search for handlers.\n        (-signal- (slot-value frame 'parent-frame?)))\n      ;; No handler found, return void.\n      #void)))\n\n(defun lispx::call-condition-handler (handler handler-frame condition)\n  \"Call a condition HANDLER's handler function with the given\nCONDITION.  During the call, the condition handler chain gets swapped\nto that chain that was active at the time the handler was established.\nThis is the so-called \\\"condition firewall\\\".  The chain gets passed\nin as the value of HANDLER-FRAME.\"\n  (dynamic-let ((*condition-handler-frame?* (slot-value handler-frame 'parent-frame?)))\n    (lispx::apply-handler-function handler (list condition))))\n\n(defun lispx::apply-handler-function (handler arguments)\n  \"Utility to call a condition or restart HANDLER's handler function\nwith a list of ARGUMENTS.\"\n  (apply (slot-value handler 'handler-function) arguments))\n\n(defun _error_ (condition)\n  \"Utility to signal the CONDITION.  If the condition is unhandled,\ninvoke the debugger.  Therefore never returns normally.  See `error'.\"\n  (signal condition)\n  (invoke-debugger condition))\n\n(defun lispx::make-signal-with-restarts-operator (#'signal-operator)\n  \"Metaprogramming utility to create the `signal' / `error' operators\nthat take restart handler-specs from the `_signal_' / `_error_' ones\nthat don't.\"\n  (vau (condition . handler-specs) env\n    (let ((c (eval condition env)))\n      (flet ((append-associated-condition (handler-spec)\n               (append handler-spec (list :associated-conditions (list #'list c)))))\n        (eval (list #'restart-case (mapcar #'append-associated-condition handler-specs)\n                    (list #'signal-operator c))\n              env)))))\n\n(def #'signal (lispx::make-signal-with-restarts-operator #'_signal_)\n  \"Signal the CONDITION.  If the signal is unhandled, return void.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(def #'error (lispx::make-signal-with-restarts-operator #'_error_)\n  \"Signal the CONDITION.  If the condition is unhandled, invoke the\ndebugger.  Therefore never returns normally.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(defun invoke-restart (restart-designator . arguments)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', with the given ARGUMENTS.  Signal an\nerror if the restart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (#ignore) arguments)))\n\n(defun invoke-restart-interactively (restart-designator)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', by prompting the user for arguments via\nthe restart's optional interactive function.  Signal an error if the\nrestart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (restart-handler)\n     (when-option (#'i-f (slot-value restart-handler 'interactive-function?))\n       (i-f)))))\n\n(defun lispx::invoke-restart-with-arguments-producing-function (restart-designator #'function)\n  \"Utility to invoke the restart designated by RESTART-DESIGNATOR,\nwhich can be a symbol or a `restart-handler', with an arguments list\nproduced by FUNCTION (which receives a `restart-handler' as argument).\"\n  (etypecase restart-designator\n    (symbol\n     (if-option (restart-handler (find-restart? restart-designator))\n       (lispx::apply-handler-function restart-handler (function restart-handler))\n       (error (make-restart-error restart-designator))))\n    (restart-handler\n     (lispx::apply-handler-function restart-designator (function restart-designator)))))\n\n(defun lispx::find-handler? (object handler-frame? payload?)\n  \"Utility to find both condition handlers and restart handlers.\nThe OBJECT can be either a condition or a restart name.  The\nHANDLER-FRAME? is the handler frame where the search should start\n(always the innermost handler frame at the start of the search).\n\nReturn an option of the found handler and the frame establishing it as\na two-element list.  The frame is needed so that we can access its\nparent in the implementation of the condition firewall (see\n`lispx::call-condition-handler').\n\nThe PAYLOAD? parameter can be used to pass in an optional condition if\nwe are looking for a restart handler (see `find-restart?').  If we are\nlooking for a condition handler, it is always nil.\"\n  (when-option (handler-frame handler-frame?)\n    (block found\n      (dolist (handler (slot-value handler-frame 'handlers))\n        (when (lispx::handler-applicable-p handler object payload?)\n          (return-from found (some (list handler handler-frame)))))\n      (lispx::find-handler? object (slot-value handler-frame 'parent-frame?) payload?))))\n\n(defun find-restart? (name . condition?)\n  \"Find a restart handler by NAME, optionally limited to restarts\nassociated with a particular CONDITION?.\"\n  (when-option ((handler #ignore) (lispx::find-handler?\n                                   name\n                                   (dynamic *restart-handler-frame?*)\n                                   condition?))\n    (some handler)))\n\n(defgeneric lispx::handler-applicable-p (handler object payload?)\n  (:documentation \"Return true if a condition or restart HANDLER is\napplicable, false otherwise.  The OBJECT can be a condition or a\nrestart name.  The PAYLOAD? is only used for restart handlers, and\nalways nil for condition handlers.\"))\n\n(defmethod lispx::handler-applicable-p ((handler condition-handler) condition #nil)\n  \"A condition handler is applicable if the condition is an instance\nof its condition class.\"\n  (typep condition (slot-value handler 'condition-class)))\n\n(defmethod lispx::handler-applicable-p ((handler restart-handler) restart-name condition?)\n  \"A restart handler is applicable to a restart name and optional condition...\"\n  ;; ...if the restart name matches the handler's restart name, and...\n  (and (eq restart-name (slot-value handler 'restart-name))\n       ;; ...the handler is applicable to the condition.\n       (lispx::restart-handler-applicable-to-condition-p handler condition?)))\n\n(defun lispx::restart-handler-applicable-to-condition-p (handler condition?)\n  \"A restart handler is applicable to an optional condition...\"\n  (if-option (condition condition?)\n    ;; ...if we are looking for restarts associated with a\n    ;; particular condition...\n    (let ((a-cs (slot-value handler 'associated-conditions)))\n      (if (null a-cs)\n          ;; ...if the restart handler is not associated with\n          ;; particular conditions,...\n          #t\n          ;; ...or if the condition we are looking is one of the\n          ;; handler's associated conditions.\n          (consp (member condition a-cs))))\n    ;; ...if we are not looking for restarts associated with a\n    ;; particular condition then every handler is applicable.\n    #t))\n\n(defun compute-restarts condition?\n  \"Return the list of currently active restarts, with most recently\nestablished ones first, optionally limited to those that are\nexplicitly associated with the supplied CONDITION? or not associated\nwith any condition.\"\n  (loop-let -compute-restarts- ((restarts '())\n                                (handler-frame? (dynamic *restart-handler-frame?*)))\n    (if-option (handler-frame handler-frame?)\n      (-compute-restarts- (append restarts\n                                  (remove-if\n                                   (lambda (restart)\n                                     (not (lispx::restart-handler-applicable-to-condition-p\n                                           restart condition?)))\n                                   (slot-value handler-frame 'handlers)))\n                          (slot-value handler-frame 'parent-frame?))\n      restarts)))\n\n(defclass restart-error (error)\n  (restart-name)\n  (:documentation \"Signalled when no handler for RESTART-NAME is found.\"))\n\n(defun make-restart-error (restart-name)\n  \"Create a new `restart-error' for the given RESTART-NAME.\"\n  (make-instance #^restart-error :restart-name restart-name))\n\n(defclass simple-error (error)\n  (message)\n  (:documentation \"Class for simple errors with a MESSAGE.\"))\n\n(defun make-simple-error (message)\n  \"Create a new simple error with a MESSAGE.\"\n  (make-instance #^simple-error :message message))\n\n(defun simple-error (message)\n  \"Signal a simple error with a MESSAGE.\"\n  (error (make-simple-error message)))\n");
-
-/***/ }),
-
-/***/ "./src/js.lispx":
-/*!**********************!*\
-  !*** ./src/js.lispx ***!
-  \**********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX JavaScript Interface\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun js-eq (a b)\n  \"Return true if the values A and B are equal per JavaScript's strict\nequality, false otherwise.\"\n  (eq a b))\n\n(defun apply-js-function (js-function arguments)\n  \"Call JS-FUNCTION with a list of ARGUMENTS.\"\n  (apply (to-lisp-function js-function) arguments))\n\n(defun call-js-function (js-function . arguments)\n  \"Call JS-FUNCTION with the rest ARGUMENTS.\"\n  (apply-js-function js-function arguments))\n\n(defmacro js-lambda (parameter-tree . forms)\n  \"Construct a lambda with the given PARAMETER-TREE and body FORMS\nthat's callable from JS.\"\n  (list #'to-js-function\n        (list #'lambda parameter-tree\n              ;; This mirrors eval_form() in control.mjs.\n              ;; Check the docs there for an explanation.\n              (list #'push-subcont-barrier\n                    (list* #'push-prompt '+root-prompt+\n                           forms)))))\n\n(defun js-global (name)\n  \"Access a JS global by NAME (a string).  Return undefined if the\nglobal doesn't exist.\"\n  (%js-global name))\n\n(defun js-new (constructor . arguments)\n  \"Call the JS CONSTRUCTOR function with ARGUMENTS.\"\n  (apply #'%js-new (cons constructor arguments)))\n\n(defun js-get (object name)\n  \"Access a property of a JS object by NAME (a string).\"\n  (%js-get object name))\n\n(defun to-lisp-boolean (js-boolean)\n  \"Convert the JS-BOOLEAN to a Lisp boolean.\"\n  (%to-lisp-boolean js-boolean))\n\n(defun to-js-boolean (lisp-boolean)\n  \"Convert the LISP-BOOLEAN to a JS boolean.\"\n  (%to-js-boolean lisp-boolean))\n\n(defun to-lisp-number (js-number)\n  \"Convert the JS-NUMBER to a Lisp number.\"\n  (%to-lisp-number js-number))\n\n(defun to-js-number (lisp-number)\n  \"Convert the LISP-NUMBER to a JS number.\"\n  (%to-js-number lisp-number))\n\n(defun to-lisp-string (js-string)\n  \"Convert the JS-STRING to a Lisp string.\"\n  (%to-lisp-string js-string))\n\n(defun to-js-string (lisp-string)\n  \"Convert the LISP-STRING to a JS string.\"\n  (%to-js-string lisp-string))\n\n(defun to-lisp-function (js-function)\n  \"Convert the JS-FUNCTION to a Lisp function.\"\n  (%to-lisp-function js-function))\n\n(defun to-js-function (lisp-operator)\n  \"Convert the LISP-OPERATOR to a JS function.\"\n  (%to-js-function lisp-operator))\n\n(defun list-to-js-array (list)\n  \"Turn a list into a JS array.\"\n  (%list-to-js-array list))\n\n(defun js-array-to-list (array)\n  \"Turn a JS array into a list.\"\n  (%js-array-to-list array))\n\n(defun js-array elements\n  \"Create a new JS array from the given elements.\"\n  (list-to-js-array elements))\n\n(defmethod elt ((seq object) index)\n  \"`elt' for JS arrays.  We must put the method on `object' because we\ndon't have a more precise type for them.\"\n  (if (or (< index 0) (>= index (length seq)))\n      (error (make-instance #^out-of-bounds-error))\n      (%js-elt seq index)))\n\n(defmethod length ((seq object))\n  \"`length' for JS arrays.\"\n  (to-lisp-number (js-get seq \"length\")))\n\n(defun apply-js-method (receiver name arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the list of ARGUMENTS.\"\n  (%apply-js-method receiver name arguments))\n\n(defun call-js-method (receiver name . arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the rest ARGUMENTS.\"\n  (apply #'apply-js-method (list receiver name arguments)))\n\n(defun js-method (method-name)\n  \"Create a function that when called will call the specified method.\"\n  (lambda (receiver . arguments)\n    (apply-js-method receiver method-name arguments)))\n\n(defmacro define-js-method (name method-name)\n  \"Define a new function with the given NAME (a symbol) that invokes a\nJS method named METHOD-NAME (a string).  The function takes one or\nmore arguments.  The first argument is the receiver of the method\ncall (\\\"this\\\"), the rest are the normal method arguments.\"\n  (list #'def (function-symbol name) (js-method method-name)))\n\n(defun js-undefined-option (value)\n  \"Turn a value that may be undefined into an option.\"\n  (if (eq value +js-undefined+)\n      #nil\n      (some value)))\n\n(defun js-null-option (value)\n  \"Turn a value that may be null into an option.\"\n  (if (eq value +js-null+)\n      #nil\n      (some value)))\n\n(defun await (promise)\n  \"Wait for the PROMISE to become fulfilled or rejected.\"\n  ;; Capture to the default prompt, and...\n  (yield k\n    ;; ...return a new promise there.  From the caller's perspective,\n    ;; we are now paused -- but from context's perspective, we are\n    ;; returning a promise.  See `deftest' for how this nicely\n    ;; interacts with promise-based test frameworks.\n    (call-js-method promise \"then\"\n                    (js-lambda (value)\n                      ;; When the original promise is fulfilled with a\n                      ;; value, reinstate the continuation, returning\n                      ;; the value where `await' was called.\n                      (resume k value))\n                    (js-lambda (error)\n                      ;; When the original promise is rejected,\n                      ;; reinstate the continuation, signalling an\n                      ;; error where `await' was called.\n                      (resume k (error error))))))\n\n(defun sync (#'fun)\n  \"Create a function that will await an underlying function.\"\n  (lambda args (await (apply #'fun args))))\n\n(defmacro define-js-method/sync (name method-name)\n  \"Like `define-js-method', but awaits the method result.\"\n  (list #'def (function-symbol name) (sync (js-method method-name))))\n\n(defun sleep (ms)\n  \"Sleep for some milliseconds.\"\n  (await (%sleep ms)))\n\n(defun js-log arguments\n  \"Log the ARGUMENTS to the JS console.\"\n  (apply #'%js-log arguments))\n");
-
-/***/ }),
-
-/***/ "./src/print.lispx":
-/*!*************************!*\
-  !*** ./src/print.lispx ***!
-  \*************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX Printer\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n$(fn (object &key stream))\"\n  (%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (print1 object)\n    (force-output)))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (uprint1 object)\n    (force-output)))\n");
-
-/***/ }),
-
-/***/ "./src/read.lispx":
-/*!************************!*\
-  !*** ./src/read.lispx ***!
-  \************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX Reader\n;;;\n\n;; Copyright (c) 2021 Manuel J. Simoni\n\n(defun read arguments\n  \"Reads an object from the STREAM (which defaults to\n`*standard-input*').  If EOF is reached, and `eof-error-p' is true\n(the default), `end-of-file' is signalled. If it is false, `eof-value'\nis returned (it defaults to void).\n$(fn (&optional stream eof-error-p eof-value))\"\n  (apply #'stream-read (optionals arguments (dynamic *standard-input*) #t #void)))\n\n;;; Unstable/Experimental API:\n\n(defgeneric stream-read (stream eof-error-p eof-value)\n  (:documentation \"Underlying, generic implementation of `read'.\nEvery stream class can provide a specialized method.\"))\n\n(defmethod stream-read ((stream input-stream) eof-error-p eof-value)\n  \"The default implementation of `stream-read' calls a built-in\nfunction written in JS.\"\n  (%read stream eof-error-p eof-value))\n");
-
-/***/ }),
-
-/***/ "./src/stream.lispx":
-/*!**************************!*\
-  !*** ./src/stream.lispx ***!
-  \**************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (";;;                                                     -*- Lisp -*-\n;;; LispX Streams\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; String Input Streams\n\n(defun make-string-input-stream (string)\n  \"Create a string input stream that reads from STRING.\"\n  (%make-string-input-stream string))\n\n(defexpr with-standard-input-from-string (string . forms) env\n  \"Evaluate FORMS with `*standard-input*' coming from STRING.\"\n  (let ((s (eval string env)))\n    (dynamic-let ((*standard-input* (make-string-input-stream s)))\n      (eval (list* #'progn forms) env))))\n\n;;; String Output Streams\n\n(defun make-string-output-stream ()\n  \"Construct an empty string output stream.\"\n  (%make-string-output-stream))\n\n(defun get-output-stream-string (stream)\n  \"Return the contents of the string output STREAM.\"\n  (%get-output-stream-string stream))\n\n(defexpr with-standard-output-to-string forms env\n  \"Evaluate FORMS with `*standard-output*' being collected in a string.\"\n  (dynamic-let ((*standard-output* (make-string-output-stream)))\n    (eval (list* #'progn forms) env)\n    (get-output-stream-string (dynamic *standard-output*))))\n\n;;; Miscellaneous\n\n(defun fresh-line stream?\n  \"Ensure that the following output appears on a new line by itself.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%fresh-line (optional stream? (dynamic *standard-output*))))\n\n(defun force-output stream?\n  \"Initiate the emptying of any internal buffers but don't wait for them to finish.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%force-output (optional stream? (dynamic *standard-output*))))\n");
-
-/***/ }),
-
-/***/ "./node_modules/big.js/big.mjs":
-/*!*************************************!*\
-  !*** ./node_modules/big.js/big.mjs ***!
-  \*************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Big": () => (/* binding */ Big),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
+;// CONCATENATED MODULE: ./node_modules/big.js/big.mjs
 /*
  *  big.js v6.2.1
  *  A small, fast, easy-to-use library for arbitrary-precision decimal arithmetic.
@@ -1121,21 +1054,727 @@ P.valueOf = function () {
 var Big = _Big_();
 
 /// <reference types="https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/big.js/index.d.ts" />
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Big);
+/* harmony default export */ const big_js_big = (Big);
 
+;// CONCATENATED MODULE: ./src/eval.mjs
+/*
+ * LispX Evaluation
+ * Copyright (c) 2021 Manuel J. Simoni
+ */
 
-/***/ }),
+/*
+ * Adds evaluation-related functions and classes to a virtual machine.
+ */
+function init_eval(vm)
+{
+    /*** Evaluation & Operation Core ***/
 
-/***/ "./src/control.mjs":
-/*!*************************!*\
-  !*** ./src/control.mjs ***!
-  \*************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+    /*
+     * Evaluate a form in an environment.  This is the core internal
+     * evaluation mechanism.
+     *
+     * The environment defaults to the VM's root environment.
+     *
+     * Unlike the main evaluation entry point eval_form() (in
+     * control.mjs), this may return a Suspension if the code attempts
+     * to capture a continuation to an outside prompt.
+     */
+    vm.eval = (form, env = vm.get_environment()) =>
+    {
+        /*
+         * All exceptions that happen during evaluation, except
+         * nonlocal exits and panics, are piped into the condition
+         * system.
+         */
+        return vm.trap_exceptions(() => {
+            vm.assert_type(env, vm.Environment);
+            if (form instanceof vm.Symbol)
+                return evaluate_symbol(form, env);
+            else if (form instanceof vm.Cons)
+                return evaluate_cons(form, env);
+            else
+                /*
+                 * If the form is neither a symbol nor a cons, it
+                 * evaluates to itself.
+                 */
+                return form;
+        });
+    };
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_control": () => (/* binding */ init_control)
-/* harmony export */ });
+    /*
+     * Symbols evaluate to themselves if they are keywords, or to the
+     * value they are bound to in the environment otherwise.
+     */
+    function evaluate_symbol(sym, env)
+    {
+        if (sym.get_namespace() === vm.KEYWORD_NAMESPACE)
+            return sym;
+        else
+            return env.lookup(sym);
+    }
+
+    /*
+     * Conses evaluate by first evaluating their car, which should
+     * result in an operator.
+     *
+     * Then they tell the operator to operate on their cdr.
+     */
+    function evaluate_cons(cons, env)
+    {
+        // (See control.mjs for the definition of vm.bind().)
+        return vm.bind(() => evaluate_operator(cons.car(), env),
+                       (operator) => vm.operate(operator, cons.cdr(), env),
+                       vm.trace(cons, env));
+    }
+
+    /*
+     * Evaluate the operator position (car) of a cons.
+     *
+     * If it's a symbol, look it up in the function namespace.
+     * This is the fundamental rule of Lisp-2 goodness.
+     *
+     * But if it's not a symbol, just evaluate it normally.
+     * This gives us the same convenience as a Lisp-1.
+     */
+    function evaluate_operator(operator_form, env)
+    {
+        if (operator_form instanceof vm.Symbol)
+            return env.lookup(operator_form.to_function_symbol());
+        else
+            return vm.eval(operator_form, env);
+    }
+
+    /*
+     * Cause an operator to operate on an operand in the given
+     * environment.
+     *
+     * The environment defaults to the VM's root environment.
+     */
+    vm.operate = (operator, operand, env = vm.get_environment()) =>
+    {
+        return vm.trap_exceptions(() => {
+            vm.assert_type(operator, vm.Operator);
+            vm.assert_type(operand, vm.TYPE_ANY);
+            vm.assert_type(env, vm.Environment);
+            return operator.operate(operand, env);
+        });
+    };
+
+    /*** Definiends ***/
+
+    /*
+     * A definiend is what appears on the left-hand side of a
+     * definition (DEF) or as a parameter in a fexpr or function.
+     *
+     * A plain definiend may either be a symbol or #IGNORE.
+     *
+     * A definiend tree allows arbitrary nesting of definiends.
+     */
+    const DEFINIEND = vm.type_or(vm.Symbol, vm.Ignore);
+    // We could OR DEFINIEND into this, but keeping it flat produces nicer type errors.
+    const DEFINIEND_TREE = vm.type_or(vm.Symbol, vm.Ignore, vm.List);
+
+    /*
+     * Matches a definiend ("left-hand side") against a value
+     * ("right-hand side") and places resulting bindings into the given
+     * environment.  This is used everywhere names are bound to values,
+     * such as in DEF, LET, fexpr and function parameters, etc.
+     *
+     * A non-keyword symbol as a definiend creates a new binding for
+     * the whole value.
+     *
+     * A keyword symbol as a definiend requires the value to be equal
+     * to itself, and does not produce a binding.  This yields a simple
+     * mechanism for passing keyword arguments to functions.
+     *
+     * A cons definiend's car and cdr are treated as nested definiends
+     * and recursively matched against the value's car and cdr, which
+     * must be a cons, too.
+     *
+     * #NIL as a definiend requires the value to be #NIL, too.
+     *
+     * #IGNORE as a definiend simply ignores the value.
+     *
+     * Using any other object as a definiend signals an error.
+     *
+     * Returns the value.
+     */
+    vm.match = (definiend, value, env) =>
+    {
+        if (definiend instanceof vm.Symbol) {
+            if (definiend.get_namespace() === vm.KEYWORD_NAMESPACE) {
+                if (definiend !== value) {
+                    throw new vm.Match_error(definiend, value);
+                }
+            } else {
+                env.put(definiend, value);
+            }
+        } else if (definiend instanceof vm.Cons) {
+            if (value instanceof vm.Cons) {
+                vm.match(definiend.car(), value.car(), env);
+                vm.match(definiend.cdr(), value.cdr(), env);
+            } else {
+                throw new vm.Match_error(definiend, value);
+            }
+        } else if (definiend === vm.nil()) {
+            if (value !== vm.nil()) {
+                throw new vm.Match_error(definiend, value);
+            }
+        } else if (definiend === vm.ignore()) {
+            // Ignore.
+        } else {
+            throw vm.make_type_error(definiend, DEFINIEND_TREE);
+        }
+        return value;
+    };
+
+    /*
+     * This error is signalled when a definiend cannot be matched
+     * against a value.
+     */
+    vm.Match_error = class Lisp_match_error extends vm.Error
+    {
+        constructor(definiend, value)
+        {
+            super("Match error: "
+                  + vm.write_to_js_string(definiend)
+                  + " vs "
+                  + vm.write_to_js_string(value));
+            this.lisp_slot_definiend = definiend;
+            this.lisp_slot_value = value;
+        }
+    };
+
+    /*** Operators ***/
+
+    /*
+     * Superclass of everything that computes.
+     *
+     * An operator receives an operand and should do something with it
+     * in some environment.  Usually, the operand will be a list, but
+     * this is not strictly required by the semantics.
+     *
+     * There are three types of operators:
+     *
+     * 1) Built-in operators that are written in JavaScript.
+     *
+     * 2) Fexprs that are written in Lisp.
+     *
+     * 3) Functions that wrap around an underlying operator.
+     */
+    vm.Operator = class Lisp_operator extends vm.Object
+    {
+        /*
+         * Compute on the operand in the environment and return a result.
+         */
+        operate(operand, env) { vm.abstract_method(); }
+    };
+
+    /*
+     * A fexpr is an operator that does not evaluate its operand by
+     * default.
+     */
+    vm.Fexpr = class Lisp_fexpr extends vm.Operator
+    {
+        /*
+         * Constructs a new fexpr with the given parameter tree,
+         * environment parameter, body form, and definition environment.
+         *
+         * The parameter tree is used to destructure the operand.
+         *
+         * The environment parameter is bound to the lexical environment
+         * in which the fexpr is called (aka the "dynamic environment").
+         *
+         * The body form is the expression that gets evaluated.
+         *
+         * The definition environment remembers the lexical environment
+         * in which the fexpr was created (aka the "static environment").
+         * The body form gets evaluated in a child environment of the
+         * definition environment.
+         */
+        constructor(param_tree, env_param, body_form, def_env)
+        {
+            super();
+            this.param_tree = vm.assert_type(param_tree, DEFINIEND_TREE);
+            this.env_param = vm.assert_type(env_param, DEFINIEND);
+            this.body_form = vm.assert_type(body_form, vm.TYPE_ANY);
+            this.def_env = vm.assert_type(def_env, vm.Environment);;
+        }
+
+        /*
+         * The body form of a fexpr gets evaluated in a fresh child
+         * environment of the static environment in which the fexpr
+         * was defined (this gives the usual lexical scope semantics
+         * where the form can access bindings from outer
+         * environments).
+         *
+         * The operand gets matched against the fexpr's parameter
+         * tree.  The dynamic environment in which the fexpr is called
+         * gets matched against the fexpr's environment parameter.
+         * Resulting bindings are placed into the child environment.
+         */
+        operate(operand, dyn_env)
+        {
+            const child_env = vm.make_environment(this.def_env);
+            vm.match(this.param_tree, operand, child_env);
+            vm.match(this.env_param, dyn_env, child_env);
+            return vm.eval(this.body_form, child_env);
+        }
+    };
+
+    /*
+     * A function is an operator what wraps around another operator
+     * (typically a built-in-operator or fexpr, but another function
+     * is also possible), and evaluates the operands before passing
+     * them on to the wrapped operator.
+     *
+     * The evaluated operands of a function are called arguments.
+     *
+     * Note that a function's operand must be a list, while this
+     * is not required for operators in general.
+     */
+    vm.Function = class Lisp_function extends vm.Operator
+    {
+        /*
+         * Constructs a new function with the given underlying operator.
+         */
+        constructor(operator)
+        {
+            super();
+            vm.assert_type(operator, vm.Operator);
+            this.wrapped_operator = operator;
+        }
+
+        /*
+         * Evaluate the operands to yield a list of arguments, and
+         * then call the underlying, wrapped operator with the
+         * arguments.
+         */
+        operate(operands, env)
+        {
+            return vm.bind(() => eval_args(operands, vm.nil()),
+                           (args) => vm.operate(this.wrapped_operator, args, env));
+
+            function eval_args(todo, done)
+            {
+                if (todo === vm.nil())
+                    return vm.reverse(done);
+                else
+                    return vm.bind(() => vm.eval(todo.car(), env),
+                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)),
+                                   vm.trace(todo.car(), env));
+            }
+        }
+
+        /*
+         * Returns the wrapped operator underlying the function.
+         */
+        unwrap()
+        {
+            return this.wrapped_operator;
+        }
+    };
+
+    /*
+     * Wraps a function around an operator.
+     */
+    vm.wrap = (operator) => new vm.Function(operator);
+
+    /*
+     * Built-in operators are operators that are implemented in JS.
+     */
+    vm.Built_in_operator = class Lisp_built_in_operator extends vm.Operator
+    {
+        constructor(operate_function)
+        {
+            super();
+            vm.assert_type(operate_function, "function");
+            this.operate_function = operate_function;
+        }
+
+        operate(operands, env)
+        {
+            return this.operate_function(operands, env);
+        }
+    };
+
+    /*
+     * Creates a new built-in operator with the given underlying
+     * JS function and name.
+     */
+    vm.built_in_operator = (fun) => new vm.Built_in_operator(fun);
+
+    /*
+     * Creates a new built-in function, that is, a wrapped built-in operator.
+     */
+    vm.built_in_function = (fun) => vm.wrap(vm.built_in_operator(fun));
+
+    /*
+     * Creates a new alien operator, a kind of built-in operator.
+     *
+     * Despite their name, alien operators are just a slight variation
+     * on built-in operators.
+     *
+     * Their underlying JS function does not, as in the case with
+     * normal operators, receive the operand and environment as its
+     * two JS arguments, but rather receives the whole list of
+     * operands as its JS arguments.  It does not receive the
+     * environment as an argument.
+     *
+     * ---
+     *
+     * Why aren't alien operators just called JS operators?  Well, we
+     * also need alien functions (see below), which would need to be
+     * called JS functions for consistency.  But that would obviously
+     * be highly confusing.
+     */
+    vm.alien_operator = (fun) =>
+    {
+        vm.assert_type(fun, "function");
+        function operate_function(operands, ignored_env)
+        {
+            return fun.apply(null, vm.list_to_array(operands));
+        }
+        return vm.built_in_operator(operate_function);
+    };
+
+    /*
+     * Creates a new alien function, that is, a wrapped alien operator.
+     *
+     * Alien functions are the main mechanism for exposing JS
+     * functions to Lisp.
+     */
+    vm.alien_function = (fun) => vm.wrap(vm.alien_operator(fun));
+
+    /*** The Built-In Operators ***/
+
+    /*
+     * (%vau param-tree env-param body-form) => fexpr
+     *
+     * Built-in operator that creates a new fexpr with the given
+     * parameter tree, environment parameter, and body form.
+     *
+     * The dynamic environment of the call to %VAU becomes
+     * the static environment of the created fexpr.
+     */
+    function VAU(operands, dyn_env)
+    {
+        const param_tree = vm.elt(operands, 0);
+        const env_param = vm.elt(operands, 1);
+        const body_form = vm.elt(operands, 2);
+        const def_env = dyn_env;
+        return new vm.Fexpr(param_tree, env_param, body_form, def_env);
+    }
+
+    /*
+     * (%def definiend expression) => result
+     *
+     * Built-in operator that evaluates the expression and matches the
+     * definiend against the result value.  Bindings are placed into
+     * the dynamic environment in which %DEF is called.
+     *
+     * Returns the value.
+     */
+    function DEF(operands, env)
+    {
+        const definiend = vm.elt(operands, 0);
+        const expression = vm.elt(operands, 1);
+
+        return vm.bind(() => vm.eval(expression, env),
+                       (result) => vm.match(definiend, result, env),
+                       vm.trace(expression, env));
+    }
+
+    /*
+     * (%progn . forms) => result
+     *
+     * Built-in operator that evaluates the forms from left to right
+     * and returns the result of the last one.
+     *
+     * Returns #VOID if there are no forms.
+     */
+    function PROGN(forms, env)
+    {
+        if (forms === vm.nil())
+            return vm.void();
+        else
+            return progn(forms);
+
+        function progn(forms)
+        {
+            return vm.bind(() => vm.eval(forms.car(), env),
+                           (result) => {
+                               if (forms.cdr() === vm.nil())
+                                   return result;
+                               else
+                                   return progn(forms.cdr());
+                           },
+                           vm.trace(forms.car(), env));
+        }
+    }
+
+    /*
+     * (%if test consequent alternative) => result
+     *
+     * First, evaluates the test expression which must yield a
+     * boolean.
+     *
+     * Then, evaluates either the consequent or alternative expression
+     * depending on the result of the test expression, and returns its
+     * result.
+     */
+    function IF(operands, env)
+    {
+        const test = vm.elt(operands, 0);
+        const consequent = vm.elt(operands, 1);
+        const alternative = vm.elt(operands, 2);
+
+        return vm.bind(() => vm.eval(test, env),
+                       (result) => {
+                           vm.assert_type(result, vm.Boolean);
+                           if (result == vm.t())
+                               return vm.eval(consequent, env);
+                           else
+                               return vm.eval(alternative, env);
+                       },
+                       vm.trace(test, env));
+    }
+
+    /*** Exception Trapping and Panicking ***/
+
+    /*
+     * All exceptions - except nonlocal exits (see control.mjs) and
+     * panics (see below) - that happen during evaluation are caught
+     * by this function.
+     *
+     * If the user defined error handler, ERROR, is defined in the
+     * VM's root environment, it is called with the exception as
+     * argument.  This unifies the JS exception system and the Lisp
+     * condition system.
+     *
+     * If the user defined error handler is not defined (as is the
+     * case during boot), the exception gets wrapped in a panic and
+     * rethrown.
+     */
+    vm.trap_exceptions = (thunk) =>
+    {
+        try {
+            return thunk();
+        } catch (e) {
+            if ((e instanceof vm.Nonlocal_exit) || (e instanceof vm.Panic))
+                throw e;
+            else
+                return vm.call_user_error_handler(e);
+        }
+    };
+
+    /*
+     * Calls the user error handler function, ERROR, defined in Lisp
+     * with an exception, or panics with the exception if it is not
+     * defined.
+     */
+    vm.call_user_error_handler = (exception) =>
+    {
+        const env = vm.get_environment();
+        const sym = vm.fsym("error");
+        if (env.is_bound(sym)) {
+            return vm.operate(env.lookup(sym), vm.list(exception), vm.make_environment());
+        } else {
+            vm.panic(exception);
+        }
+    };
+
+    /*
+     * A panic is an error that is not caught by the usual exception
+     * trapping mechanism.  Note that panics still trigger
+     * UNWIND-PROTECT and the restoration of dynamically-bound
+     * variables -- otherwise Lisp invariants would get violated.
+     */
+    vm.Panic = class Panic extends Error
+    {
+        constructor(cause)
+        {
+            if (cause && cause.message)
+                super("LISP panic: " + cause.message);
+            else
+                super("LISP panic!");
+            this.cause = cause;
+        }
+    };
+
+    /*
+     * Throws a new panic with the given exception as cause.
+     */
+    vm.panic = (exception) =>
+    {
+        throw new vm.Panic(exception);
+    };
+
+    /*** Definition Utilities ***/
+
+    /*
+     * Registers a global variable in the VM's root environment.
+     */
+    vm.define_variable = (name, object) =>
+    {
+        vm.get_environment().put(vm.sym(name), object);
+    };
+
+    /*
+     * Registers a constant in the VM's root environment.
+     */
+    vm.define_constant = (name, object) =>
+    {
+        vm.define_variable(name, object);
+    };
+
+    /*
+     * Registers an operator in the VM's root environment.
+     */
+    vm.define_operator = (name, operator) =>
+    {
+        vm.get_environment().put(vm.fsym(name), operator);
+    };
+
+    /*
+     * Shorthand for registering a built-in operator in the VM's root environment.
+     */
+    vm.define_built_in_operator = (name, fun) =>
+    {
+        vm.define_operator(name, vm.built_in_operator(fun));
+    };
+
+    /*
+     * Shorthand for registering a built-in function in the VM's root environment.
+     */
+    vm.define_built_in_function = (name, js_fun) =>
+    {
+        vm.define_operator(name, vm.built_in_function(js_fun));
+    };
+
+    /*
+     * Shorthand for registering an alien function in the VM's root environment.
+     */
+    vm.define_alien_function = (name, js_fun) =>
+    {
+        vm.define_operator(name, vm.alien_function(js_fun));
+    };
+
+    /*** Lisp API ***/
+
+    vm.define_class("operator", vm.Operator);
+
+    vm.define_class("built-in-operator", vm.Built_in_operator, vm.Operator);
+
+    vm.define_class("fexpr", vm.Fexpr, vm.Operator);
+
+    vm.define_class("function", vm.Function, vm.Operator);
+
+    vm.define_condition("match-error", vm.Match_error, vm.Error);
+
+    vm.define_built_in_operator("%vau", VAU);
+
+    vm.define_built_in_operator("%def", DEF);
+
+    vm.define_built_in_operator("%progn", PROGN);
+
+    vm.define_built_in_operator("%if", IF);
+
+    vm.define_alien_function("%wrap", (operator) => vm.wrap(operator));
+
+    vm.define_alien_function("%unwrap", (fun) => vm.assert_type(fun, vm.Function).unwrap());
+
+    vm.define_alien_function("%eval", (expr, env) => vm.eval(expr, env));
+
+    vm.define_alien_function("%eq", (a, b) => vm.to_lisp_boolean(a === b));
+
+    vm.define_alien_function("%=", (a, b) => vm.to_lisp_boolean(vm.equal(a, b)));
+
+    vm.define_alien_function("%<", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) < 0));
+
+    vm.define_alien_function("%>", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) > 0));
+
+    vm.define_alien_function("%<=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) <= 0));
+
+    vm.define_alien_function("%>=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) >= 0));
+
+    vm.define_alien_function("%+", (a, b) => vm.add(a, b));
+
+    vm.define_alien_function("%-", (a, b) => vm.subtract(a, b));
+
+    vm.define_alien_function("%*", (a, b) => vm.multiply(a, b));
+
+    vm.define_alien_function("%/", (a, b) => vm.divide(a, b));
+
+    vm.define_alien_function("%cons", (car, cdr) => vm.cons(car, cdr));
+
+    vm.define_alien_function("%car", (cons) => vm.assert_type(cons, vm.Cons).car());
+
+    vm.define_alien_function("%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
+
+    vm.define_alien_function("%intern", (string) => vm.intern(string));
+
+    vm.define_alien_function("%symbol-name", (sym) =>
+        vm.assert_type(sym, vm.Symbol).get_string());
+
+    vm.define_alien_function("%variable-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_variable_symbol());
+
+    vm.define_alien_function("%function-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_function_symbol());
+
+    vm.define_alien_function("%class-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_class_symbol());
+
+    vm.define_alien_function("%keyword-symbol", (sym) =>
+        vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
+
+    vm.define_alien_function("%make-environment", (parent = null) =>
+        vm.make_environment(parent));
+
+    vm.define_alien_function("%boundp", (sym, env) =>
+        vm.to_lisp_boolean(vm.assert_type(env, vm.Environment).is_bound(sym)));
+
+    vm.define_alien_function("%class-of", (obj) => vm.class_of(obj));
+
+    vm.define_alien_function("%typep", (obj, cls) =>
+        vm.to_lisp_boolean(vm.is_subclass(vm.class_of(obj), cls)));
+
+    vm.define_alien_function("%make-instance", (cls, ...slot_inits) =>
+        vm.make_instance(cls, ...slot_inits));
+
+    vm.define_alien_function("%slot-value", (obj, slot_name) =>
+        vm.assert_type(obj, vm.Standard_object).slot_value(slot_name));
+
+    vm.define_alien_function("%set-slot-value", (obj, slot_name, slot_value) =>
+        vm.assert_type(obj, vm.Standard_object).set_slot_value(slot_name, slot_value));
+
+    vm.define_alien_function("%slot-bound-p", (obj, slot_name) =>
+        vm.to_lisp_boolean(vm.assert_type(obj, vm.Standard_object).is_slot_bound(slot_name)));
+
+    vm.define_alien_function("%add-method", (cls, name, method) =>
+        vm.assert_type(cls, vm.Class).add_method(name, method));
+
+    vm.define_alien_function("%find-method", (cls, name) =>
+        vm.assert_type(cls, vm.Class).find_method(name));
+
+    vm.define_alien_function("%make-standard-class", (name, lisp_super) =>
+        vm.make_standard_class(name, lisp_super));
+
+    vm.define_alien_function("%reinitialize-standard-class", (lisp_class, lisp_super) =>
+        vm.reinitialize_standard_class(lisp_class, lisp_super));
+
+    vm.define_alien_function("%class-name", (cls) =>
+        vm.assert_type(cls, vm.Class).get_name());
+
+    vm.define_alien_function("%subclassp", (sub_cls, super_cls) =>
+        vm.to_lisp_boolean(vm.is_subclass(sub_cls, super_cls)));
+
+    vm.define_alien_function("%panic", (exception) => vm.panic(exception));
+
+};
+
+;// CONCATENATED MODULE: ./src/control.mjs
 /*
  * LispX Delimited Control
  * Copyright (c) 2021 Manuel J. Simoni
@@ -2022,1278 +2661,498 @@ function init_control(vm)
 
 };
 
-
-/***/ }),
-
-/***/ "./src/eval.mjs":
-/*!**********************!*\
-  !*** ./src/eval.mjs ***!
-  \**********************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_eval": () => (/* binding */ init_eval)
-/* harmony export */ });
+;// CONCATENATED MODULE: ./src/seq.mjs
 /*
- * LispX Evaluation
- * Copyright (c) 2021 Manuel J. Simoni
+ * LispX Sequence and List Processing Utilities
+ * Copyright (c) 2021, 2022 Manuel J. Simoni
  */
 
 /*
- * Adds evaluation-related functions and classes to a virtual machine.
+ * Adds sequence and list processing utilities to a VM.
+ *
+ * These are not needed for the internal functioning of the VM, and
+ * could be implemented in Lisp, so they reside in their own module.
  */
-function init_eval(vm)
+function init_seq(vm)
 {
-    /*** Evaluation & Operation Core ***/
-
     /*
-     * Evaluate a form in an environment.  This is the core internal
-     * evaluation mechanism.
-     *
-     * The environment defaults to the VM's root environment.
-     *
-     * Unlike the main evaluation entry point eval_form() (in
-     * control.mjs), this may return a Suspension if the code attempts
-     * to capture a continuation to an outside prompt.
+     * Creates a list from its arguments so that the last argument
+     * becomes the list's final cdr.  Cf. Common Lisp's LIST*.
      */
-    vm.eval = (form, env = vm.get_environment()) =>
+    vm.list_star = (...objects) =>
     {
-        /*
-         * All exceptions that happen during evaluation, except
-         * nonlocal exits and panics, are piped into the condition
-         * system.
-         */
-        return vm.trap_exceptions(() => {
-            vm.assert_type(env, vm.Environment);
-            if (form instanceof vm.Symbol)
-                return evaluate_symbol(form, env);
-            else if (form instanceof vm.Cons)
-                return evaluate_cons(form, env);
-            else
-                /*
-                 * If the form is neither a symbol nor a cons, it
-                 * evaluates to itself.
-                 */
-                return form;
-        });
+        const len = objects.length;
+        let list = (len >= 1) ? objects[len - 1] : vm.nil();
+        for (let i = len - 1; i > 0; i--)
+            list = vm.cons(objects[i - 1], list);
+        return list;
     };
 
     /*
-     * Symbols evaluate to themselves if they are keywords, or to the
-     * value they are bound to in the environment otherwise.
+     * Concatenate two lists.  The first one must be proper and is
+     * copied.  The second one is not copied (and doesn't even have to
+     * be a list). It becomes the cdr of the final cons of the first
+     * list, or is returned directly if the first list is empty.
      */
-    function evaluate_symbol(sym, env)
+    vm.append = (list1, list2) =>
     {
-        if (sym.get_namespace() === vm.KEYWORD_NAMESPACE)
-            return sym;
+        vm.assert_type(list1, vm.List);
+        if (list1 === vm.nil())
+            return list2;
         else
-            return env.lookup(sym);
-    }
-
-    /*
-     * Conses evaluate by first evaluating their car, which should
-     * result in an operator.
-     *
-     * Then they tell the operator to operate on their cdr.
-     */
-    function evaluate_cons(cons, env)
-    {
-        // (See control.mjs for the definition of vm.bind().)
-        return vm.bind(() => evaluate_operator(cons.car(), env),
-                       (operator) => vm.operate(operator, cons.cdr(), env),
-                       vm.trace(cons, env));
-    }
-
-    /*
-     * Evaluate the operator position (car) of a cons.
-     *
-     * If it's a symbol, look it up in the function namespace.
-     * This is the fundamental rule of Lisp-2 goodness.
-     *
-     * But if it's not a symbol, just evaluate it normally.
-     * This gives us the same convenience as a Lisp-1.
-     */
-    function evaluate_operator(operator_form, env)
-    {
-        if (operator_form instanceof vm.Symbol)
-            return env.lookup(operator_form.to_function_symbol());
-        else
-            return vm.eval(operator_form, env);
-    }
-
-    /*
-     * Cause an operator to operate on an operand in the given
-     * environment.
-     *
-     * The environment defaults to the VM's root environment.
-     */
-    vm.operate = (operator, operand, env = vm.get_environment()) =>
-    {
-        return vm.trap_exceptions(() => {
-            vm.assert_type(operator, vm.Operator);
-            vm.assert_type(operand, vm.TYPE_ANY);
-            vm.assert_type(env, vm.Environment);
-            return operator.operate(operand, env);
-        });
+            return vm.cons(list1.car(), vm.append(list1.cdr(), list2));
     };
 
-    /*** Definiends ***/
-
     /*
-     * A definiend is what appears on the left-hand side of a
-     * definition (DEF) or as a parameter in a fexpr or function.
-     *
-     * A plain definiend may either be a symbol or #IGNORE.
-     *
-     * A definiend tree allows arbitrary nesting of definiends.
+     * Returns the length of a list.
      */
-    const DEFINIEND = vm.type_or(vm.Symbol, vm.Ignore);
-    // We could OR DEFINIEND into this, but keeping it flat produces nicer type errors.
-    const DEFINIEND_TREE = vm.type_or(vm.Symbol, vm.Ignore, vm.List);
-
-    /*
-     * Matches a definiend ("left-hand side") against a value
-     * ("right-hand side") and places resulting bindings into the given
-     * environment.  This is used everywhere names are bound to values,
-     * such as in DEF, LET, fexpr and function parameters, etc.
-     *
-     * A non-keyword symbol as a definiend creates a new binding for
-     * the whole value.
-     *
-     * A keyword symbol as a definiend requires the value to be equal
-     * to itself, and does not produce a binding.  This yields a simple
-     * mechanism for passing keyword arguments to functions.
-     *
-     * A cons definiend's car and cdr are treated as nested definiends
-     * and recursively matched against the value's car and cdr, which
-     * must be a cons, too.
-     *
-     * #NIL as a definiend requires the value to be #NIL, too.
-     *
-     * #IGNORE as a definiend simply ignores the value.
-     *
-     * Using any other object as a definiend signals an error.
-     *
-     * Returns the value.
-     */
-    vm.match = (definiend, value, env) =>
+    vm.list_length = (list) =>
     {
-        if (definiend instanceof vm.Symbol) {
-            if (definiend.get_namespace() === vm.KEYWORD_NAMESPACE) {
-                if (definiend !== value) {
-                    throw new vm.Match_error(definiend, value);
-                }
-            } else {
-                env.put(definiend, value);
-            }
-        } else if (definiend instanceof vm.Cons) {
-            if (value instanceof vm.Cons) {
-                vm.match(definiend.car(), value.car(), env);
-                vm.match(definiend.cdr(), value.cdr(), env);
-            } else {
-                throw new vm.Match_error(definiend, value);
-            }
-        } else if (definiend === vm.nil()) {
-            if (value !== vm.nil()) {
-                throw new vm.Match_error(definiend, value);
-            }
-        } else if (definiend === vm.ignore()) {
-            // Ignore.
+        vm.assert_type(list, vm.List);
+        if (list === vm.nil())
+            return 0;
+        else
+            return 1 + vm.list_length(list.cdr());
+    };
+
+    /*
+     * Returns the tail of list that would be obtained by calling cdr
+     * n times in succession.
+     */
+    vm.nthcdr = (n, list) =>
+    {
+        vm.assert_type(list, vm.List);
+        if (n === 0) {
+            return list;
         } else {
-            throw vm.make_type_error(definiend, DEFINIEND_TREE);
-        }
-        return value;
-    };
-
-    /*
-     * This error is signalled when a definiend cannot be matched
-     * against a value.
-     */
-    vm.Match_error = class Lisp_match_error extends vm.Error
-    {
-        constructor(definiend, value)
-        {
-            super("Match error: "
-                  + vm.write_to_js_string(definiend)
-                  + " vs "
-                  + vm.write_to_js_string(value));
-            this.lisp_slot_definiend = definiend;
-            this.lisp_slot_value = value;
-        }
-    };
-
-    /*** Operators ***/
-
-    /*
-     * Superclass of everything that computes.
-     *
-     * An operator receives an operand and should do something with it
-     * in some environment.  Usually, the operand will be a list, but
-     * this is not strictly required by the semantics.
-     *
-     * There are three types of operators:
-     *
-     * 1) Built-in operators that are written in JavaScript.
-     *
-     * 2) Fexprs that are written in Lisp.
-     *
-     * 3) Functions that wrap around an underlying operator.
-     */
-    vm.Operator = class Lisp_operator extends vm.Object
-    {
-        /*
-         * Compute on the operand in the environment and return a result.
-         */
-        operate(operand, env) { vm.abstract_method(); }
-    };
-
-    /*
-     * A fexpr is an operator that does not evaluate its operand by
-     * default.
-     */
-    vm.Fexpr = class Lisp_fexpr extends vm.Operator
-    {
-        /*
-         * Constructs a new fexpr with the given parameter tree,
-         * environment parameter, body form, and definition environment.
-         *
-         * The parameter tree is used to destructure the operand.
-         *
-         * The environment parameter is bound to the lexical environment
-         * in which the fexpr is called (aka the "dynamic environment").
-         *
-         * The body form is the expression that gets evaluated.
-         *
-         * The definition environment remembers the lexical environment
-         * in which the fexpr was created (aka the "static environment").
-         * The body form gets evaluated in a child environment of the
-         * definition environment.
-         */
-        constructor(param_tree, env_param, body_form, def_env)
-        {
-            super();
-            this.param_tree = vm.assert_type(param_tree, DEFINIEND_TREE);
-            this.env_param = vm.assert_type(env_param, DEFINIEND);
-            this.body_form = vm.assert_type(body_form, vm.TYPE_ANY);
-            this.def_env = vm.assert_type(def_env, vm.Environment);;
-        }
-
-        /*
-         * The body form of a fexpr gets evaluated in a fresh child
-         * environment of the static environment in which the fexpr
-         * was defined (this gives the usual lexical scope semantics
-         * where the form can access bindings from outer
-         * environments).
-         *
-         * The operand gets matched against the fexpr's parameter
-         * tree.  The dynamic environment in which the fexpr is called
-         * gets matched against the fexpr's environment parameter.
-         * Resulting bindings are placed into the child environment.
-         */
-        operate(operand, dyn_env)
-        {
-            const child_env = vm.make_environment(this.def_env);
-            vm.match(this.param_tree, operand, child_env);
-            vm.match(this.env_param, dyn_env, child_env);
-            return vm.eval(this.body_form, child_env);
+            if (list === vm.nil())
+                throw new vm.Out_of_bounds_error();
+            else
+                return vm.nthcdr(n - 1, list.cdr());
         }
     };
 
     /*
-     * A function is an operator what wraps around another operator
-     * (typically a built-in-operator or fexpr, but another function
-     * is also possible), and evaluates the operands before passing
-     * them on to the wrapped operator.
-     *
-     * The evaluated operands of a function are called arguments.
-     *
-     * Note that a function's operand must be a list, while this
-     * is not required for operators in general.
+     * Creates a new list by calling a function on every element of a list.
      */
-    vm.Function = class Lisp_function extends vm.Operator
+    vm.mapcar = (fun, list) =>
     {
-        /*
-         * Constructs a new function with the given underlying operator.
-         */
-        constructor(operator)
-        {
-            super();
-            vm.assert_type(operator, vm.Operator);
-            this.wrapped_operator = operator;
+        if (list === vm.nil())
+            return vm.nil();
+        else
+            return vm.cons(fun(list.car()), vm.mapcar(fun, list.cdr()));
+    };
+
+    /*
+     * Calls a function on every list element for effect.
+     */
+    vm.mapc = (fun, list) =>
+    {
+        if (list !== vm.nil()) {
+            fun(list.car());
+            vm.mapc(fun, list.cdr());
         }
+        return list;
+    };
 
-        /*
-         * Evaluate the operands to yield a list of arguments, and
-         * then call the underlying, wrapped operator with the
-         * arguments.
-         */
-        operate(operands, env)
+    /*** Common Lisp's SUBSEQ ***/
+
+    /*
+     * SUBSEQ for lists.
+     */
+    vm.list_subseq = (list, start, end = undefined) =>
+    {
+        vm.assert_type(list, vm.List);
+        vm.assert_type(start, "number");
+
+        const tail = vm.nthcdr(start, list);
+        if (end === undefined)
+            return tail;
+        else
+            return take_n(tail, end - start);
+
+        function take_n(list, n)
         {
-            return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env));
-
-            function eval_args(todo, done)
-            {
-                if (todo === vm.nil())
-                    return vm.reverse(done);
+            if (n === 0) {
+                return vm.nil();
+            } else {
+                if (list === vm.nil())
+                    throw new vm.Out_of_bounds_error();
                 else
-                    return vm.bind(() => vm.eval(todo.car(), env),
-                                   (arg) => eval_args(todo.cdr(), vm.cons(arg, done)),
-                                   vm.trace(todo.car(), env));
+                    return vm.cons(list.car(), take_n(list.cdr(), n - 1));
             }
         }
-
-        /*
-         * Returns the wrapped operator underlying the function.
-         */
-        unwrap()
-        {
-            return this.wrapped_operator;
-        }
     };
 
     /*
-     * Wraps a function around an operator.
+     * SUBSEQ for strings.
      */
-    vm.wrap = (operator) => new vm.Function(operator);
-
-    /*
-     * Built-in operators are operators that are implemented in JS.
-     */
-    vm.Built_in_operator = class Lisp_built_in_operator extends vm.Operator
+    vm.string_subseq = (string, start, end = undefined) =>
     {
-        constructor(operate_function)
-        {
-            super();
-            vm.assert_type(operate_function, "function");
-            this.operate_function = operate_function;
-        }
-
-        operate(operands, env)
-        {
-            return this.operate_function(operands, env);
-        }
+        vm.assert_type(string, vm.String);
+        const utf8_bytes = string.get_utf8_bytes();
+        return new vm.String(vm.slice_subseq(utf8_bytes, start, end));
     };
 
     /*
-     * Creates a new built-in operator with the given underlying
-     * JS function and name.
+     * Implements SUBSEQ for objects that have a .length property and
+     * a slice() method, like JS strings, arrays, and TypedArrays.
      */
-    vm.built_in_operator = (fun) => new vm.Built_in_operator(fun);
-
-    /*
-     * Creates a new built-in function, that is, a wrapped built-in operator.
-     */
-    vm.built_in_function = (fun) => vm.wrap(vm.built_in_operator(fun));
-
-    /*
-     * Creates a new alien operator, a kind of built-in operator.
-     *
-     * Despite their name, alien operators are just a slight variation
-     * on built-in operators.
-     *
-     * Their underlying JS function does not, as in the case with
-     * normal operators, receive the operand and environment as its
-     * two JS arguments, but rather receives the whole list of
-     * operands as its JS arguments.  It does not receive the
-     * environment as an argument.
-     *
-     * ---
-     *
-     * Why aren't alien operators just called JS operators?  Well, we
-     * also need alien functions (see below), which would need to be
-     * called JS functions for consistency.  But that would obviously
-     * be highly confusing.
-     */
-    vm.alien_operator = (fun) =>
+    vm.slice_subseq = (sliceable, start, end = undefined) =>
     {
-        vm.assert_type(fun, "function");
-        function operate_function(operands, ignored_env)
-        {
-            return fun.apply(null, vm.list_to_array(operands));
-        }
-        return vm.built_in_operator(operate_function);
-    };
-
-    /*
-     * Creates a new alien function, that is, a wrapped alien operator.
-     *
-     * Alien functions are the main mechanism for exposing JS
-     * functions to Lisp.
-     */
-    vm.alien_function = (fun) => vm.wrap(vm.alien_operator(fun));
-
-    /*** The Built-In Operators ***/
-
-    /*
-     * (%vau param-tree env-param body-form) => fexpr
-     *
-     * Built-in operator that creates a new fexpr with the given
-     * parameter tree, environment parameter, and body form.
-     *
-     * The dynamic environment of the call to %VAU becomes
-     * the static environment of the created fexpr.
-     */
-    function VAU(operands, dyn_env)
-    {
-        const param_tree = vm.elt(operands, 0);
-        const env_param = vm.elt(operands, 1);
-        const body_form = vm.elt(operands, 2);
-        const def_env = dyn_env;
-        return new vm.Fexpr(param_tree, env_param, body_form, def_env);
-    }
-
-    /*
-     * (%def definiend expression) => result
-     *
-     * Built-in operator that evaluates the expression and matches the
-     * definiend against the result value.  Bindings are placed into
-     * the dynamic environment in which %DEF is called.
-     *
-     * Returns the value.
-     */
-    function DEF(operands, env)
-    {
-        const definiend = vm.elt(operands, 0);
-        const expression = vm.elt(operands, 1);
-
-        return vm.bind(() => vm.eval(expression, env),
-                       (result) => vm.match(definiend, result, env),
-                       vm.trace(expression, env));
-    }
-
-    /*
-     * (%progn . forms) => result
-     *
-     * Built-in operator that evaluates the forms from left to right
-     * and returns the result of the last one.
-     *
-     * Returns #VOID if there are no forms.
-     */
-    function PROGN(forms, env)
-    {
-        if (forms === vm.nil())
-            return vm.void();
-        else
-            return progn(forms);
-
-        function progn(forms)
-        {
-            return vm.bind(() => vm.eval(forms.car(), env),
-                           (result) => {
-                               if (forms.cdr() === vm.nil())
-                                   return result;
-                               else
-                                   return progn(forms.cdr());
-                           },
-                           vm.trace(forms.car(), env));
-        }
-    }
-
-    /*
-     * (%if test consequent alternative) => result
-     *
-     * First, evaluates the test expression which must yield a
-     * boolean.
-     *
-     * Then, evaluates either the consequent or alternative expression
-     * depending on the result of the test expression, and returns its
-     * result.
-     */
-    function IF(operands, env)
-    {
-        const test = vm.elt(operands, 0);
-        const consequent = vm.elt(operands, 1);
-        const alternative = vm.elt(operands, 2);
-
-        return vm.bind(() => vm.eval(test, env),
-                       (result) => {
-                           vm.assert_type(result, vm.Boolean);
-                           if (result == vm.t())
-                               return vm.eval(consequent, env);
-                           else
-                               return vm.eval(alternative, env);
-                       },
-                       vm.trace(test, env));
-    }
-
-    /*** Exception Trapping and Panicking ***/
-
-    /*
-     * All exceptions - except nonlocal exits (see control.mjs) and
-     * panics (see below) - that happen during evaluation are caught
-     * by this function.
-     *
-     * If the user defined error handler, ERROR, is defined in the
-     * VM's root environment, it is called with the exception as
-     * argument.  This unifies the JS exception system and the Lisp
-     * condition system.
-     *
-     * If the user defined error handler is not defined (as is the
-     * case during boot), the exception gets wrapped in a panic and
-     * rethrown.
-     */
-    vm.trap_exceptions = (thunk) =>
-    {
-        try {
-            return thunk();
-        } catch (e) {
-            if ((e instanceof vm.Nonlocal_exit) || (e instanceof vm.Panic))
-                throw e;
-            else
-                return vm.call_user_error_handler(e);
-        }
-    };
-
-    /*
-     * Calls the user error handler function, ERROR, defined in Lisp
-     * with an exception, or panics with the exception if it is not
-     * defined.
-     */
-    vm.call_user_error_handler = (exception) =>
-    {
-        const env = vm.get_environment();
-        const sym = vm.fsym("error");
-        if (env.is_bound(sym)) {
-            return vm.operate(env.lookup(sym), vm.list(exception), vm.make_environment());
+        vm.assert_type(start, "number");
+        if (start > sliceable.length) throw new vm.Out_of_bounds_error();
+        if (end === undefined) {
+            return sliceable.slice(start);
         } else {
-            vm.panic(exception);
+            if (end > sliceable.length) throw new vm.Out_of_bounds_error();
+            return sliceable.slice(start, end);
         }
     };
 
     /*
-     * A panic is an error that is not caught by the usual exception
-     * trapping mechanism.  Note that panics still trigger
-     * UNWIND-PROTECT and the restoration of dynamically-bound
-     * variables -- otherwise Lisp invariants would get violated.
+     * Produces an option (one-element list) holding the object.
      */
-    vm.Panic = class Panic extends Error
+    vm.some = (object) =>
     {
-        constructor(cause)
+        return vm.list(object);
+    };
+
+    /*
+     * Extract the contents of an option, or if it is nil, call a
+     * thunk to obtain a default value.  If no thunk is specified,
+     * produce void.
+     */
+    vm.optional = (option, default_thunk = () => vm.void()) =>
+    {
+        if (option === vm.nil())
+            return default_thunk();
+        else
+            return vm.elt(option, 0);
+    };
+
+    /*
+     * Signalled when an indexing operation is out of bounds.
+     */
+    vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error
+    {
+        constructor()
         {
-            if (cause && cause.message)
-                super("LISP panic: " + cause.message);
-            else
-                super("LISP panic!");
-            this.cause = cause;
+            super("Out of bounds");
         }
     };
 
     /*
-     * Throws a new panic with the given exception as cause.
+     * Utility for turning the end argument to Lisp SUBSEQ into a JS
+     * number or undefined.
      */
-    vm.panic = (exception) =>
-    {
-        throw new vm.Panic(exception);
-    };
+    function canonicalize_end(end) {
+        if (end === vm.void()) return undefined;
+        else return vm.assert_type(end, vm.Number).to_js_number();
+    }
 
-    /*** Definition Utilities ***/
+    vm.define_alien_function("%list*", (...objects) => vm.list_star(...objects));
 
-    /*
-     * Registers a global variable in the VM's root environment.
-     */
-    vm.define_variable = (name, object) =>
-    {
-        vm.get_environment().put(vm.sym(name), object);
-    };
+    vm.define_alien_function("%append", (list1, list2) => vm.append(list1, list2));
 
-    /*
-     * Registers a constant in the VM's root environment.
-     */
-    vm.define_constant = (name, object) =>
-    {
-        vm.define_variable(name, object);
-    };
+    vm.define_alien_function("%list-length", (list) => vm.num(vm.list_length(list)));
 
-    /*
-     * Registers an operator in the VM's root environment.
-     */
-    vm.define_operator = (name, operator) =>
-    {
-        vm.get_environment().put(vm.fsym(name), operator);
-    };
+    vm.define_alien_function("%nth", (num, list) =>
+        vm.elt(list, vm.assert_type(num, vm.Number).to_js_number()));
 
-    /*
-     * Shorthand for registering a built-in operator in the VM's root environment.
-     */
-    vm.define_built_in_operator = (name, fun) =>
-    {
-        vm.define_operator(name, vm.built_in_operator(fun));
-    };
+    vm.define_alien_function("%nthcdr", (num, list) =>
+        vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
 
-    /*
-     * Shorthand for registering a built-in function in the VM's root environment.
-     */
-    vm.define_built_in_function = (name, js_fun) =>
-    {
-        vm.define_operator(name, vm.built_in_function(js_fun));
-    };
+    vm.define_alien_function("%list-subseq", (list, start, end) =>
+        vm.list_subseq(list,
+                       vm.assert_type(start, vm.Number).to_js_number(),
+                       canonicalize_end(end)));
 
-    /*
-     * Shorthand for registering an alien function in the VM's root environment.
-     */
-    vm.define_alien_function = (name, js_fun) =>
-    {
-        vm.define_operator(name, vm.alien_function(js_fun));
-    };
+    vm.define_alien_function("%string-subseq", (string, start, end) =>
+        vm.string_subseq(string,
+                         vm.assert_type(start, vm.Number).to_js_number(),
+                         canonicalize_end(end)));
 
-    /*** Lisp API ***/
+    vm.define_alien_function("%reverse", (list) => vm.reverse(list));
 
-    vm.define_class("operator", vm.Operator);
-
-    vm.define_class("built-in-operator", vm.Built_in_operator, vm.Operator);
-
-    vm.define_class("fexpr", vm.Fexpr, vm.Operator);
-
-    vm.define_class("function", vm.Function, vm.Operator);
-
-    vm.define_condition("match-error", vm.Match_error, vm.Error);
-
-    vm.define_built_in_operator("%vau", VAU);
-
-    vm.define_built_in_operator("%def", DEF);
-
-    vm.define_built_in_operator("%progn", PROGN);
-
-    vm.define_built_in_operator("%if", IF);
-
-    vm.define_alien_function("%wrap", (operator) => vm.wrap(operator));
-
-    vm.define_alien_function("%unwrap", (fun) => vm.assert_type(fun, vm.Function).unwrap());
-
-    vm.define_alien_function("%eval", (expr, env) => vm.eval(expr, env));
-
-    vm.define_alien_function("%eq", (a, b) => vm.to_lisp_boolean(a === b));
-
-    vm.define_alien_function("%=", (a, b) => vm.to_lisp_boolean(vm.equal(a, b)));
-
-    vm.define_alien_function("%<", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) < 0));
-
-    vm.define_alien_function("%>", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) > 0));
-
-    vm.define_alien_function("%<=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) <= 0));
-
-    vm.define_alien_function("%>=", (a, b) => vm.to_lisp_boolean(vm.compare(a, b) >= 0));
-
-    vm.define_alien_function("%+", (a, b) => vm.add(a, b));
-
-    vm.define_alien_function("%-", (a, b) => vm.subtract(a, b));
-
-    vm.define_alien_function("%*", (a, b) => vm.multiply(a, b));
-
-    vm.define_alien_function("%/", (a, b) => vm.divide(a, b));
-
-    vm.define_alien_function("%cons", (car, cdr) => vm.cons(car, cdr));
-
-    vm.define_alien_function("%car", (cons) => vm.assert_type(cons, vm.Cons).car());
-
-    vm.define_alien_function("%cdr", (cons) => vm.assert_type(cons, vm.Cons).cdr());
-
-    vm.define_alien_function("%intern", (string) => vm.intern(string));
-
-    vm.define_alien_function("%symbol-name", (sym) =>
-        vm.assert_type(sym, vm.Symbol).get_string());
-
-    vm.define_alien_function("%variable-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_variable_symbol());
-
-    vm.define_alien_function("%function-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_function_symbol());
-
-    vm.define_alien_function("%class-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_class_symbol());
-
-    vm.define_alien_function("%keyword-symbol", (sym) =>
-        vm.assert_type(sym, vm.Symbol).to_keyword_symbol());
-
-    vm.define_alien_function("%make-environment", (parent = null) =>
-        vm.make_environment(parent));
-
-    vm.define_alien_function("%boundp", (sym, env) =>
-        vm.to_lisp_boolean(vm.assert_type(env, vm.Environment).is_bound(sym)));
-
-    vm.define_alien_function("%class-of", (obj) => vm.class_of(obj));
-
-    vm.define_alien_function("%typep", (obj, cls) =>
-        vm.to_lisp_boolean(vm.is_subclass(vm.class_of(obj), cls)));
-
-    vm.define_alien_function("%make-instance", (cls, ...slot_inits) =>
-        vm.make_instance(cls, ...slot_inits));
-
-    vm.define_alien_function("%slot-value", (obj, slot_name) =>
-        vm.assert_type(obj, vm.Standard_object).slot_value(slot_name));
-
-    vm.define_alien_function("%set-slot-value", (obj, slot_name, slot_value) =>
-        vm.assert_type(obj, vm.Standard_object).set_slot_value(slot_name, slot_value));
-
-    vm.define_alien_function("%slot-bound-p", (obj, slot_name) =>
-        vm.to_lisp_boolean(vm.assert_type(obj, vm.Standard_object).is_slot_bound(slot_name)));
-
-    vm.define_alien_function("%add-method", (cls, name, method) =>
-        vm.assert_type(cls, vm.Class).add_method(name, method));
-
-    vm.define_alien_function("%find-method", (cls, name) =>
-        vm.assert_type(cls, vm.Class).find_method(name));
-
-    vm.define_alien_function("%make-standard-class", (name, lisp_super) =>
-        vm.make_standard_class(name, lisp_super));
-
-    vm.define_alien_function("%reinitialize-standard-class", (lisp_class, lisp_super) =>
-        vm.reinitialize_standard_class(lisp_class, lisp_super));
-
-    vm.define_alien_function("%class-name", (cls) =>
-        vm.assert_type(cls, vm.Class).get_name());
-
-    vm.define_alien_function("%subclassp", (sub_cls, super_cls) =>
-        vm.to_lisp_boolean(vm.is_subclass(sub_cls, super_cls)));
-
-    vm.define_alien_function("%panic", (exception) => vm.panic(exception));
+    vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
 
 };
 
-
-/***/ }),
-
-/***/ "./src/js.mjs":
-/*!********************!*\
-  !*** ./src/js.mjs ***!
-  \********************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_js": () => (/* binding */ init_js)
-/* harmony export */ });
+;// CONCATENATED MODULE: ./src/stream.mjs
 /*
- * LispX JavaScript Interface
+ * LispX Input and Output Streams
  * Copyright (c) 2021 Manuel J. Simoni
  */
 
 /*
- * Adds JS interface functionality to a virtual machine.
+ * Adds stream-related functionality to a VM.
  */
-function init_js(vm)
+function init_stream(vm)
 {
-    /*
-     * Accesses a global variable by name.
-     */
-    vm.js_global = (name) =>
-    {
-        vm.assert_type(name, vm.String);
-        return globalThis[name.to_js_string()];
-    };
+    /*** Input Streams ***/
 
     /*
-     * Calls a JS constructor with arguments.
+     * Abstract superclass of byte input streams.
      *
-     * Note that this is not a fat arrow function because we need
-     * access to the arguments object (although it's probably possible
-     * to use ... syntax and make this a fat arrow function).
+     * The API is inspired by Common Lisp's READ-BYTE and UNREAD-BYTE.
+     *
+     * Bytes are represented as JS strings with one code unit.
      */
-    vm.js_new = function(constructor /* , arg1, ..., argN */)
+    vm.Input_stream = class Lisp_input_stream extends vm.Object
     {
-        vm.assert_type(constructor, "function");
         /*
-         * See https://stackoverflow.com/a/23190790
+         * Attempts to read one byte from the stream.
+         *
+         * If no more bytes are available, and eof_error_p is true,
+         * throws an error.  If false, returns eof_value.
+         *
+         * eof_error_p defaults to true.  eof_value defaults to #VOID.
          */
-        const factory_function = constructor.bind.apply(constructor, arguments);
-        return new factory_function();
-    };
+        read_byte(eof_error_p, eof_value) { vm.abstract_method(); }
 
-    /*
-     * Returns a named property of an object.
-     */
-    vm.js_get = (object, prop_name) =>
-    {
-        vm.assert_type(prop_name, vm.String);
-        return object[prop_name.to_js_string()];
-    };
-
-    /*
-     * Returns an indexed element of a JS array.
-     */
-    vm.js_elt = (js_array, index) =>
-    {
-        vm.assert(Array.isArray(js_array));
-        vm.assert_type(index, vm.Number);
-        return js_array[index.to_js_number()];
-    };
-
-    /*
-     * Invokes a JS method on an object from Lisp.
-     */
-    vm.apply_js_method = (receiver, method_name, args) =>
-    {
-        vm.assert_type(method_name, vm.String);
-        vm.assert_type(args, vm.List);
         /*
-         * Could throw a more helpful error here if the method isn't found.
+         * Puts the most recently read byte back into the stream.
+         *
+         * The rules surrounding unreading aren't clearly defined at
+         * the moment (see Common Lisp's UNREAD-BYTE for inspiration).
+         * To stay on the safe side, always put back only one byte.
          */
-        const method = vm.assert_type(receiver[method_name.to_js_string()], "function");
-        return method.apply(receiver, vm.list_to_array(args))
-    };
+        unread_byte(b) { vm.abstract_method(); }
 
-    /*
-     * Transforms a JS boolean into a Lisp one.
-     */
-    vm.to_lisp_boolean = (js_bool) =>
-    {
-        return vm.assert_type(js_bool, "boolean") ? vm.t() : vm.f();
-    };
-
-    /*
-     * Makes a JS function callable as a Lisp one.
-     */
-    vm.to_lisp_function = (js_fun) =>
-    {
-        return vm.alien_function(js_fun, "anonymous JS function");
-    };
-
-    /*
-     * Makes a Lisp operator callable as a JS function.
-     */
-    vm.to_js_function = (operator) =>
-    {
-        vm.assert_type(operator, vm.Operator);
-        return function()
+        /*
+         * Obtains the next byte in the stream without actually
+         * reading it, thus leaving the byte to be read at a
+         * later time.
+         *
+         * If peek_type is true, skips over whitespace.  If false,
+         * not.
+         */
+        peek_byte(peek_type = false, eof_error_p = true, eof_value = vm.void())
         {
-            var args = vm.array_to_list(Array.prototype.slice.call(arguments));
-            return vm.operate(operator, args, vm.make_environment());
-        };
+            const b = peek_type ? vm.skip_whitespace(this, false) : this.read_byte(false);
+            if (b === vm.void()) {
+                return vm.eof(eof_error_p, eof_value);
+            } else {
+                this.unread_byte(b);
+                return b;
+            }
+        }
     };
 
     /*
-     * Output stream that prints to the JS console.
-     *
-     * The JS console does not allow appending to the current line --
-     * it only supports outputting a full line by itself.  This means
-     * that sometimes, such as when the user does a FORCE-OUTPUT and
-     * there is some buffered data, we will have to output a full
-     * line, even though there might be no newline in the actual data
-     * written by the user.
-     *
-     * The code currently does not specifically handle CR or LF
-     * output, so printing those might lead to weird results.
-     *
-     * The code currently does not force the output by itself, so
-     * FORCE-OUTPUT (or a function that calls it, like PRINT) must be
-     * called from time to time.
+     * Input stream that reads UTF-8 bytes from a string in memory.
      */
-    vm.JS_console_output_stream = class Lisp_js_console_output_stream extends vm.Output_stream
+    vm.String_input_stream = class Lisp_string_input_stream extends vm.Input_stream
     {
         /*
-         * The output_function can be overridden for testing.
+         * Constructs a new string input stream from a Lisp string.
          */
-        constructor(output_function = console.log)
+        constructor(string)
         {
             super();
-            this.buffer = "";
-            this.output_function = output_function;
+            vm.assert_type(string, vm.String);
+            this.bytes = string.get_utf8_bytes();
+            this.pos = -1;
         }
 
         /*
-         * See stream.mjs for the documentation of the output stream API
-         * methods.
+         * See Input_stream.
          */
+        read_byte(eof_error_p = true, eof_value = vm.void())
+        {
+            vm.assert_type(eof_error_p, "boolean");
+            vm.assert_type(eof_value, vm.TYPE_ANY);
+            if ((this.pos + 1) < this.bytes.length) {
+                this.pos++;
+                return this.byte_at_pos(this.pos);
+            } else {
+                return vm.eof(eof_error_p, eof_value);
+            }
+        }
 
+        /*
+         * See Input_stream.
+         */
+        unread_byte(b)
+        {
+            vm.assert_type(b, "string");
+            if ((this.pos >= 0) && (this.byte_at_pos(this.pos) === b))
+                this.pos--;
+            else
+                throw new vm.Stream_error("Cannot unread byte");
+        }
+
+        /*
+         * Returns the byte at the given position as a JS string.
+         */
+        byte_at_pos(pos)
+        {
+            return this.bytes[pos];
+        }
+    };
+
+    /*** Output Streams ***/
+
+    /*
+     * Abstract superclass of byte output streams.
+     *
+     * Bytes are represented as JS strings with one code unit.
+     */
+    vm.Output_stream = class Lisp_output_stream extends vm.Object
+    {
+        /*
+         * Attempts to write one byte to the stream.
+         */
+        write_byte(b) { vm.abstract_method(); }
+
+        /*
+         * Attempts to write the bytes from a string to the stream.
+         */
+        write_string(str)
+        {
+            vm.assert_type(str, vm.String);
+            const bytes = str.get_utf8_bytes();
+            for (let i = 0; i < bytes.length; i++)
+                this.write_byte(bytes[i]);
+            return str;
+        }
+
+        /*
+         * Initiates the emptying of any internal buffers but does not
+         * wait for completion or acknowledgment to return.
+         */
+        force_output()
+        {
+            /* Default implementation does nothing. */
+            return vm.void();
+        }
+
+        /*
+         * Ensure that the following output appears on a new line by
+         * itself.  Return true if a newline character was printed,
+         * false otherwise.
+         */
+        fresh_line()
+        {
+            /* Default implementation always writes newline. */
+            this.write_byte("\n");
+            return vm.t();
+        }
+    };
+
+    /*
+     * Output stream that writes UTF-8 bytes to a string in memory.
+     */
+    vm.String_output_stream = class Lisp_string_output_stream extends vm.Output_stream
+    {
+        /*
+         * Constructs a new empty string output stream.
+         */
+        constructor()
+        {
+            super();
+            this.bytes = "";
+        }
+
+        /*
+         * Attempts to write one byte to the stream.
+         */
         write_byte(b)
         {
             vm.assert_type(b, "string");
             vm.assert(b.length === 1);
-            this.buffer += b;
+            this.bytes += b;
             return b;
         }
 
-        fresh_line()
-        {
-            /*
-             * If the buffer is empty, or the last byte is a newline,
-             * we don't need to do anything.
-             */
-            if ((this.buffer.length === 0)
-                || (this.buffer[this.buffer.length - 1] === "\n")) {
-                return vm.f();
-            } else {
-                this.write_byte("\n");
-                return vm.t();
-            }
-        }
-
-        force_output()
-        {
-            if (this.buffer.length > 0) {
-                this.output_function(vm.utf8_decode(this.buffer));
-                this.buffer = "";
-            }
-            return vm.void();
-        }
-    };
-
-    /*** Lisp API ***/
-
-    vm.define_constant("+js-true+", true);
-
-    vm.define_constant("+js-false+", false);
-
-    vm.define_constant("+js-null+", null);
-
-    vm.define_constant("+js-undefined+", undefined);
-
-    vm.define_alien_function("%js-global", vm.js_global);
-
-    vm.define_alien_function("%js-new", vm.js_new);
-
-    vm.define_alien_function("%js-get", vm.js_get);
-
-    vm.define_alien_function("%js-elt", vm.js_elt);
-
-    vm.define_alien_function("%to-lisp-boolean", vm.to_lisp_boolean);
-
-    vm.define_alien_function("%to-js-boolean", (bool) =>
-        vm.assert_type(bool, vm.Boolean).to_js_boolean());
-
-    vm.define_alien_function("%to-lisp-number", (js_num) =>
-        vm.num(vm.assert_type(js_num, "number")));
-
-    vm.define_alien_function("%to-js-number", (num) =>
-        vm.assert_type(num, vm.Number).to_js_number());
-
-    vm.define_alien_function("%to-lisp-string", (js_str) =>
-        vm.str(vm.assert_type(js_str, "string")));
-
-    vm.define_alien_function("%to-js-string", (str) =>
-        vm.assert_type(str, vm.String).to_js_string());
-
-    vm.define_alien_function("%to-lisp-function", vm.to_lisp_function);
-
-    vm.define_alien_function("%to-js-function", vm.to_js_function);
-
-    vm.define_alien_function("%list-to-js-array", vm.list_to_array);
-
-    vm.define_alien_function("%js-array-to-list", vm.array_to_list);
-
-    vm.define_alien_function("%apply-js-method", vm.apply_js_method);
-
-    vm.define_alien_function("%js-log", (...objects) => console.log(...objects));
-
-    vm.define_alien_function("%sleep", (ms) => {
-        vm.assert_type(ms, vm.Number);
-        return new Promise(resolve => setTimeout(resolve, ms.to_js_number()));
-    });
-
-    vm.define_class("js-console-output-stream", vm.JS_console_output_stream, vm.Output_stream);
-
-    /*
-     * Register a JS console output stream as standard output.
-     */
-    vm.STANDARD_OUTPUT.set_value(new vm.JS_console_output_stream());
-
-};
-
-
-/***/ }),
-
-/***/ "./src/print.mjs":
-/*!***********************!*\
-  !*** ./src/print.mjs ***!
-  \***********************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_print": () => (/* binding */ init_print)
-/* harmony export */ });
-/*
- * LispX Printer
- * Copyright (c) 2021 Manuel J. Simoni
- */
-
-/*
- * Adds printing functionality to a virtual machine.
- */
-function init_print(vm)
-{
-    /*** Printer Algorithm ***/
-
-    /*
-     * If true, objects are printed so that they can be read back in
-     * by READ. If false, objects are printed so that they look good
-     * on the teletype.
-     */
-    vm.PRINT_ESCAPE = vm.make_dynamic(vm.t());
-
-    /*
-     * How many levels should be printed before abbreviating with "#"?
-     * (Option.)
-     *
-     * If nil, do not abbreviate.
-     */
-    vm.PRINT_LEVEL_OPTION = vm.make_dynamic(vm.nil());
-
-    /*
-     * The current level we are printing at, to be compared against
-     * *PRINT-LEVEL?*.  Increased every time WRITE is entered, so
-     * effectively starts at 0 for the outermost object.
-     */
-    vm.CURRENT_PRINT_LEVEL = vm.make_dynamic(vm.num(-1));
-
-    /*
-     * Write object to stream.  Main printer entry point.
-     */
-    vm.write = (object, stream) =>
-    {
-        vm.assert_type(object, vm.TYPE_ANY);
-        vm.assert_type(stream, vm.Output_stream);
-        call_with_increased_current_print_level(() => {
-            if (vm.is_lisp_object(object))
-                object.write_object(stream);
-            else
-                vm.write_js_object(object, stream);
-        });
-        return object;
-
         /*
-         * On every call to WRITE, increase the current print level.
+         * Get the current stream contents as a string.
          */
-        function call_with_increased_current_print_level(thunk)
+        get_string()
         {
-            const new_level = vm.add(vm.CURRENT_PRINT_LEVEL.get_value(), vm.num(1));
-            vm.progv([vm.CURRENT_PRINT_LEVEL], [new_level], thunk);
+            return new vm.String(this.bytes);
         }
     };
+
+    /*** Errors ***/
 
     /*
-     * All non-Lisp objects print as "#<object>" for now.
+     * Throws an EOF error or returns the eof_value, depending
+     * on eof_error_p.
      */
-    vm.write_js_object = (object, stream) =>
+    vm.eof = (eof_error_p, eof_value) =>
     {
-        vm.write_unreadable_object(object, stream);
-    };
-
-    /*
-     * Write an unreadable object.  If thunk is non-null, it can
-     * print extra stuff, cf. CL's PRINT-UNREADABLE-OBJECT.
-     */
-    vm.write_unreadable_object = (object, stream, thunk = null) =>
-    {
-        vm.assert_type(object, vm.TYPE_ANY);
-        vm.assert_type(stream, vm.Output_stream);
-        stream.write_string(vm.str("#<"));
-        stream.write_string(vm.class_of(object).get_name().get_string());
-        if (thunk !== null) {
-            thunk();
-        }
-        stream.write_byte(">");
-    };
-
-    /*** Built-In Object Writing Functions ***/
-
-    vm.Object.prototype.write_object = function(stream)
-    {
-        vm.write_unreadable_object(this, stream);
-    };
-
-    vm.Boolean.prototype.write_object = function(stream)
-    {
-        stream.write_string((this === vm.t()) ? vm.str("#t") : vm.str("#f"));
-    };
-
-    vm.Nil.prototype.write_object = function(stream)
-    {
-        stream.write_string(vm.str("()"));
-    };
-
-    vm.Void.prototype.write_object = function(stream)
-    {
-        stream.write_string(vm.str("#void"));
-    };
-
-    vm.Ignore.prototype.write_object = function(stream)
-    {
-        stream.write_string(vm.str("#ignore"));
-    };
-
-    vm.Number.prototype.write_object = function(stream)
-    {
-        stream.write_string(this.to_string());
-    };
-
-    vm.Symbol.prototype.write_object = function(stream)
-    {
-        if (vm.PRINT_ESCAPE.get_value() === vm.t()) {
-            stream.write_string(get_symbol_prefix(this));
-            if (symbol_needs_escaping(this)) {
-                write_delimited(this.get_string(), stream, "|");
-            } else {
-                stream.write_string(this.get_string());
-            }
-        } else {
-            stream.write_string(this.get_string());
-        }
-    };
-
-    vm.String.prototype.write_object = function(stream)
-    {
-        if (vm.PRINT_ESCAPE.get_value() === vm.t()) {
-            write_delimited(this, stream, "\"");
-        } else {
-            stream.write_string(this);
-        }
-    };
-
-    /*
-     * Writes the contents of strings and escaped symbols.
-     */
-    function write_delimited(string, stream, delimiter)
-    {
-        stream.write_byte(delimiter);
-        const bytes = string.get_utf8_bytes();
-        for (let i = 0; i < bytes.length; i++) {
-            const b = bytes[i];
-            if ((b === delimiter) || (b === "\\")) {
-                stream.write_byte("\\");
-                stream.write_byte(b);
-            } else {
-                stream.write_byte(b);
-            }
-        }
-        stream.write_byte(delimiter);
-    }
-
-    /*
-     * Returns the prefix identifying the namespace of the symbol.
-     */
-    function get_symbol_prefix(sym)
-    {
-        switch (sym.get_namespace()) {
-        case vm.VARIABLE_NAMESPACE: return vm.str("");
-        case vm.FUNCTION_NAMESPACE: return vm.str("#'");
-        case vm.CLASS_NAMESPACE: return vm.str("#^");
-        case vm.KEYWORD_NAMESPACE: return vm.str(":");
-        default: vm.panic("Unknown symbol namespace");
-        }
-    }
-
-    /*
-     * A symbol needs escaping if it could be parsed as a number, or
-     * if it contains whitespace or terminating characters, or the
-     * escape character '\'.
-     */
-    function symbol_needs_escaping(sym)
-    {
-        const bytes = sym.get_string().get_utf8_bytes();
-        if (vm.parses_as_number(bytes))
-            return true;
+        if (eof_error_p)
+            throw new vm.End_of_file();
         else
-            for (let i = 0; i < bytes.length; i++) {
-                const b = bytes[i];
-                if (vm.is_whitespace(b)
-                    || vm.is_terminating_character(b)
-                    || b === "\\")
-                    return true;
-            }
-        return false;
-    }
-
-    vm.Cons.prototype.write_object = function(stream)
-    {
-        function write_cons(cons, stream)
-        {
-            if (cons.cdr() === vm.nil()) {
-                vm.write(cons.car(), stream);
-            } else if (cons.cdr() instanceof vm.Cons) {
-                vm.write(cons.car(), stream);
-                stream.write_byte(" ");
-                write_cons(cons.cdr(), stream);
-            } else {
-                vm.write(cons.car(), stream);
-                stream.write_string(vm.str(" . "));
-                vm.write(cons.cdr(), stream);
-            }
-        }
-        maybe_abbreviate_object_based_on_current_print_level(stream, () => {
-            stream.write_byte("(");
-            write_cons(this, stream);
-            stream.write_byte(")");
-        });
-    };
-
-    vm.Standard_object.prototype.write_object = function(stream)
-    {
-        const prefix = "lisp_slot_";
-        maybe_abbreviate_object_based_on_current_print_level(stream, () => {
-            vm.write_unreadable_object(this, stream, () => {
-                for (const name of Object.getOwnPropertyNames(this).sort()) {
-                    if (name.startsWith(prefix)) {
-                        stream.write_byte(" ");
-                        vm.write(vm.kwd(name.slice(prefix.length)), stream);
-                        stream.write_byte(" ");
-                        vm.write(this[name], stream);
-                    }
-                }
-            });
-        });
+            return eof_value;
     };
 
     /*
-     * Utility for abbreviating objects based on their nesting level.
-     *
-     * Call the thunk if *PRINT-LEVEL?* is nil, or if
-     * *CURRENT-PRINT-LEVEL* is less than the contents of
-     * *PRINT-LEVEL?*.
-     *
-     * Otherwise, print "#" to the stream.
+     * Signalled when a stream-related error occurs.
      */
-    function maybe_abbreviate_object_based_on_current_print_level(stream, thunk)
+    vm.Stream_error = class Lisp_stream_error extends vm.Error
     {
-        const print_level_option = vm.PRINT_LEVEL_OPTION.get_value();
-        const current_print_level = vm.CURRENT_PRINT_LEVEL.get_value();
-        if ((print_level_option === vm.nil())
-            || (vm.compare(current_print_level, print_level_option.car()) < 0)) {
-            thunk();
-        } else {
-            stream.write_byte("#");
+        constructor(message)
+        {
+            super(message);
         }
-    }
-
-    /*** Utilities ***/
-
-    vm.write_to_string = (object) =>
-    {
-        const st = new vm.String_output_stream();
-        vm.write(object, st);
-        return st.get_string();
     };
 
-    vm.write_to_js_string = (object) =>
+    /*
+     * Signalled on EOF.
+     */
+    vm.End_of_file = class Lisp_end_of_file extends vm.Stream_error
     {
-        return vm.write_to_string(object).to_js_string();
+        constructor()
+        {
+            super("EOF");
+        }
     };
+
+    /*** Standard Streams ***/
+
+    vm.STANDARD_INPUT = vm.make_dynamic(vm.void());
+
+    vm.STANDARD_OUTPUT = vm.make_dynamic(vm.void());
 
     /*** Lisp API ***/
 
-    vm.define_variable("*print-escape*", vm.PRINT_ESCAPE);
+    vm.define_class("input-stream", vm.Input_stream);
 
-    vm.define_variable("*print-level?*", vm.PRINT_LEVEL_OPTION);
+    vm.define_class("string-input-stream", vm.String_input_stream, vm.Input_stream);
 
-    vm.define_alien_function("%write", (object, stream) => vm.write(object, stream));
+    vm.define_class("output-stream", vm.Output_stream);
+
+    vm.define_class("string-output-stream", vm.String_output_stream, vm.Output_stream);
+
+    vm.define_condition("stream-error", vm.Stream_error, vm.Error);
+
+    vm.define_condition("end-of-file", vm.End_of_file, vm.Stream_error);
+
+    vm.define_variable("*standard-input*", vm.STANDARD_INPUT);
+
+    vm.define_variable("*standard-output*", vm.STANDARD_OUTPUT);
+
+    vm.define_alien_function("%make-string-input-stream", (string) =>
+        new vm.String_input_stream(string));
+
+    vm.define_alien_function("%make-string-output-stream", () =>
+        new vm.String_output_stream());
+
+    vm.define_alien_function("%get-output-stream-string", (sos) =>
+        vm.assert_type(sos, vm.String_output_stream).get_string());
+
+    vm.define_alien_function("%fresh-line", (stream) =>
+        vm.assert_type(stream, vm.Output_stream).fresh_line());
+
+    vm.define_alien_function("%force-output", (stream) =>
+        vm.assert_type(stream, vm.Output_stream).force_output());
 
 };
 
-
-/***/ }),
-
-/***/ "./src/read.mjs":
-/*!**********************!*\
-  !*** ./src/read.mjs ***!
-  \**********************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_read": () => (/* binding */ init_read)
-/* harmony export */ });
+;// CONCATENATED MODULE: ./src/read.mjs
 /*
  * LispX Reader
  * Copyright (c) 2021 Manuel J. Simoni
@@ -3908,604 +3767,524 @@ function init_read(vm)
  * used.  I am ignoring this.
  */
 
-
-/***/ }),
-
-/***/ "./src/seq.mjs":
-/*!*********************!*\
-  !*** ./src/seq.mjs ***!
-  \*********************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_seq": () => (/* binding */ init_seq)
-/* harmony export */ });
+;// CONCATENATED MODULE: ./src/print.mjs
 /*
- * LispX Sequence and List Processing Utilities
- * Copyright (c) 2021, 2022 Manuel J. Simoni
- */
-
-/*
- * Adds sequence and list processing utilities to a VM.
- *
- * These are not needed for the internal functioning of the VM, and
- * could be implemented in Lisp, so they reside in their own module.
- */
-function init_seq(vm)
-{
-    /*
-     * Creates a list from its arguments so that the last argument
-     * becomes the list's final cdr.  Cf. Common Lisp's LIST*.
-     */
-    vm.list_star = (...objects) =>
-    {
-        const len = objects.length;
-        let list = (len >= 1) ? objects[len - 1] : vm.nil();
-        for (let i = len - 1; i > 0; i--)
-            list = vm.cons(objects[i - 1], list);
-        return list;
-    };
-
-    /*
-     * Concatenate two lists.  The first one must be proper and is
-     * copied.  The second one is not copied (and doesn't even have to
-     * be a list). It becomes the cdr of the final cons of the first
-     * list, or is returned directly if the first list is empty.
-     */
-    vm.append = (list1, list2) =>
-    {
-        vm.assert_type(list1, vm.List);
-        if (list1 === vm.nil())
-            return list2;
-        else
-            return vm.cons(list1.car(), vm.append(list1.cdr(), list2));
-    };
-
-    /*
-     * Returns the length of a list.
-     */
-    vm.list_length = (list) =>
-    {
-        vm.assert_type(list, vm.List);
-        if (list === vm.nil())
-            return 0;
-        else
-            return 1 + vm.list_length(list.cdr());
-    };
-
-    /*
-     * Returns the tail of list that would be obtained by calling cdr
-     * n times in succession.
-     */
-    vm.nthcdr = (n, list) =>
-    {
-        vm.assert_type(list, vm.List);
-        if (n === 0) {
-            return list;
-        } else {
-            if (list === vm.nil())
-                throw new vm.Out_of_bounds_error();
-            else
-                return vm.nthcdr(n - 1, list.cdr());
-        }
-    };
-
-    /*
-     * Creates a new list by calling a function on every element of a list.
-     */
-    vm.mapcar = (fun, list) =>
-    {
-        if (list === vm.nil())
-            return vm.nil();
-        else
-            return vm.cons(fun(list.car()), vm.mapcar(fun, list.cdr()));
-    };
-
-    /*
-     * Calls a function on every list element for effect.
-     */
-    vm.mapc = (fun, list) =>
-    {
-        if (list !== vm.nil()) {
-            fun(list.car());
-            vm.mapc(fun, list.cdr());
-        }
-        return list;
-    };
-
-    /*** Common Lisp's SUBSEQ ***/
-
-    /*
-     * SUBSEQ for lists.
-     */
-    vm.list_subseq = (list, start, end = undefined) =>
-    {
-        vm.assert_type(list, vm.List);
-        vm.assert_type(start, "number");
-
-        const tail = vm.nthcdr(start, list);
-        if (end === undefined)
-            return tail;
-        else
-            return take_n(tail, end - start);
-
-        function take_n(list, n)
-        {
-            if (n === 0) {
-                return vm.nil();
-            } else {
-                if (list === vm.nil())
-                    throw new vm.Out_of_bounds_error();
-                else
-                    return vm.cons(list.car(), take_n(list.cdr(), n - 1));
-            }
-        }
-    };
-
-    /*
-     * SUBSEQ for strings.
-     */
-    vm.string_subseq = (string, start, end = undefined) =>
-    {
-        vm.assert_type(string, vm.String);
-        const utf8_bytes = string.get_utf8_bytes();
-        return new vm.String(vm.slice_subseq(utf8_bytes, start, end));
-    };
-
-    /*
-     * Implements SUBSEQ for objects that have a .length property and
-     * a slice() method, like JS strings, arrays, and TypedArrays.
-     */
-    vm.slice_subseq = (sliceable, start, end = undefined) =>
-    {
-        vm.assert_type(start, "number");
-        if (start > sliceable.length) throw new vm.Out_of_bounds_error();
-        if (end === undefined) {
-            return sliceable.slice(start);
-        } else {
-            if (end > sliceable.length) throw new vm.Out_of_bounds_error();
-            return sliceable.slice(start, end);
-        }
-    };
-
-    /*
-     * Produces an option (one-element list) holding the object.
-     */
-    vm.some = (object) =>
-    {
-        return vm.list(object);
-    };
-
-    /*
-     * Extract the contents of an option, or if it is nil, call a
-     * thunk to obtain a default value.  If no thunk is specified,
-     * produce void.
-     */
-    vm.optional = (option, default_thunk = () => vm.void()) =>
-    {
-        if (option === vm.nil())
-            return default_thunk();
-        else
-            return vm.elt(option, 0);
-    };
-
-    /*
-     * Signalled when an indexing operation is out of bounds.
-     */
-    vm.Out_of_bounds_error = class Lisp_out_of_bounds_error extends vm.Error
-    {
-        constructor()
-        {
-            super("Out of bounds");
-        }
-    };
-
-    /*
-     * Utility for turning the end argument to Lisp SUBSEQ into a JS
-     * number or undefined.
-     */
-    function canonicalize_end(end) {
-        if (end === vm.void()) return undefined;
-        else return vm.assert_type(end, vm.Number).to_js_number();
-    }
-
-    vm.define_alien_function("%list*", (...objects) => vm.list_star(...objects));
-
-    vm.define_alien_function("%append", (list1, list2) => vm.append(list1, list2));
-
-    vm.define_alien_function("%list-length", (list) => vm.num(vm.list_length(list)));
-
-    vm.define_alien_function("%nth", (num, list) =>
-        vm.elt(list, vm.assert_type(num, vm.Number).to_js_number()));
-
-    vm.define_alien_function("%nthcdr", (num, list) =>
-        vm.nthcdr(vm.assert_type(num, vm.Number).to_js_number(), list));
-
-    vm.define_alien_function("%list-subseq", (list, start, end) =>
-        vm.list_subseq(list,
-                       vm.assert_type(start, vm.Number).to_js_number(),
-                       canonicalize_end(end)));
-
-    vm.define_alien_function("%string-subseq", (string, start, end) =>
-        vm.string_subseq(string,
-                         vm.assert_type(start, vm.Number).to_js_number(),
-                         canonicalize_end(end)));
-
-    vm.define_alien_function("%reverse", (list) => vm.reverse(list));
-
-    vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
-
-};
-
-
-/***/ }),
-
-/***/ "./src/stream.mjs":
-/*!************************!*\
-  !*** ./src/stream.mjs ***!
-  \************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "init_stream": () => (/* binding */ init_stream)
-/* harmony export */ });
-/*
- * LispX Input and Output Streams
+ * LispX Printer
  * Copyright (c) 2021 Manuel J. Simoni
  */
 
 /*
- * Adds stream-related functionality to a VM.
+ * Adds printing functionality to a virtual machine.
  */
-function init_stream(vm)
+function init_print(vm)
 {
-    /*** Input Streams ***/
+    /*** Printer Algorithm ***/
 
     /*
-     * Abstract superclass of byte input streams.
-     *
-     * The API is inspired by Common Lisp's READ-BYTE and UNREAD-BYTE.
-     *
-     * Bytes are represented as JS strings with one code unit.
+     * If true, objects are printed so that they can be read back in
+     * by READ. If false, objects are printed so that they look good
+     * on the teletype.
      */
-    vm.Input_stream = class Lisp_input_stream extends vm.Object
-    {
-        /*
-         * Attempts to read one byte from the stream.
-         *
-         * If no more bytes are available, and eof_error_p is true,
-         * throws an error.  If false, returns eof_value.
-         *
-         * eof_error_p defaults to true.  eof_value defaults to #VOID.
-         */
-        read_byte(eof_error_p, eof_value) { vm.abstract_method(); }
-
-        /*
-         * Puts the most recently read byte back into the stream.
-         *
-         * The rules surrounding unreading aren't clearly defined at
-         * the moment (see Common Lisp's UNREAD-BYTE for inspiration).
-         * To stay on the safe side, always put back only one byte.
-         */
-        unread_byte(b) { vm.abstract_method(); }
-
-        /*
-         * Obtains the next byte in the stream without actually
-         * reading it, thus leaving the byte to be read at a
-         * later time.
-         *
-         * If peek_type is true, skips over whitespace.  If false,
-         * not.
-         */
-        peek_byte(peek_type = false, eof_error_p = true, eof_value = vm.void())
-        {
-            const b = peek_type ? vm.skip_whitespace(this, false) : this.read_byte(false);
-            if (b === vm.void()) {
-                return vm.eof(eof_error_p, eof_value);
-            } else {
-                this.unread_byte(b);
-                return b;
-            }
-        }
-    };
+    vm.PRINT_ESCAPE = vm.make_dynamic(vm.t());
 
     /*
-     * Input stream that reads UTF-8 bytes from a string in memory.
+     * How many levels should be printed before abbreviating with "#"?
+     * (Option.)
+     *
+     * If nil, do not abbreviate.
      */
-    vm.String_input_stream = class Lisp_string_input_stream extends vm.Input_stream
+    vm.PRINT_LEVEL_OPTION = vm.make_dynamic(vm.nil());
+
+    /*
+     * The current level we are printing at, to be compared against
+     * *PRINT-LEVEL?*.  Increased every time WRITE is entered, so
+     * effectively starts at 0 for the outermost object.
+     */
+    vm.CURRENT_PRINT_LEVEL = vm.make_dynamic(vm.num(-1));
+
+    /*
+     * Write object to stream.  Main printer entry point.
+     */
+    vm.write = (object, stream) =>
     {
-        /*
-         * Constructs a new string input stream from a Lisp string.
-         */
-        constructor(string)
-        {
-            super();
-            vm.assert_type(string, vm.String);
-            this.bytes = string.get_utf8_bytes();
-            this.pos = -1;
-        }
-
-        /*
-         * See Input_stream.
-         */
-        read_byte(eof_error_p = true, eof_value = vm.void())
-        {
-            vm.assert_type(eof_error_p, "boolean");
-            vm.assert_type(eof_value, vm.TYPE_ANY);
-            if ((this.pos + 1) < this.bytes.length) {
-                this.pos++;
-                return this.byte_at_pos(this.pos);
-            } else {
-                return vm.eof(eof_error_p, eof_value);
-            }
-        }
-
-        /*
-         * See Input_stream.
-         */
-        unread_byte(b)
-        {
-            vm.assert_type(b, "string");
-            if ((this.pos >= 0) && (this.byte_at_pos(this.pos) === b))
-                this.pos--;
+        vm.assert_type(object, vm.TYPE_ANY);
+        vm.assert_type(stream, vm.Output_stream);
+        call_with_increased_current_print_level(() => {
+            if (vm.is_lisp_object(object))
+                object.write_object(stream);
             else
-                throw new vm.Stream_error("Cannot unread byte");
-        }
+                vm.write_js_object(object, stream);
+        });
+        return object;
 
         /*
-         * Returns the byte at the given position as a JS string.
+         * On every call to WRITE, increase the current print level.
          */
-        byte_at_pos(pos)
+        function call_with_increased_current_print_level(thunk)
         {
-            return this.bytes[pos];
+            const new_level = vm.add(vm.CURRENT_PRINT_LEVEL.get_value(), vm.num(1));
+            vm.progv([vm.CURRENT_PRINT_LEVEL], [new_level], thunk);
         }
     };
 
-    /*** Output Streams ***/
+    /*
+     * All non-Lisp objects print as "#<object>" for now.
+     */
+    vm.write_js_object = (object, stream) =>
+    {
+        vm.write_unreadable_object(object, stream);
+    };
 
     /*
-     * Abstract superclass of byte output streams.
+     * Write an unreadable object.  If thunk is non-null, it can
+     * print extra stuff, cf. CL's PRINT-UNREADABLE-OBJECT.
+     */
+    vm.write_unreadable_object = (object, stream, thunk = null) =>
+    {
+        vm.assert_type(object, vm.TYPE_ANY);
+        vm.assert_type(stream, vm.Output_stream);
+        stream.write_string(vm.str("#<"));
+        stream.write_string(vm.class_of(object).get_name().get_string());
+        if (thunk !== null) {
+            thunk();
+        }
+        stream.write_byte(">");
+    };
+
+    /*** Built-In Object Writing Functions ***/
+
+    vm.Object.prototype.write_object = function(stream)
+    {
+        vm.write_unreadable_object(this, stream);
+    };
+
+    vm.Boolean.prototype.write_object = function(stream)
+    {
+        stream.write_string((this === vm.t()) ? vm.str("#t") : vm.str("#f"));
+    };
+
+    vm.Nil.prototype.write_object = function(stream)
+    {
+        stream.write_string(vm.str("()"));
+    };
+
+    vm.Void.prototype.write_object = function(stream)
+    {
+        stream.write_string(vm.str("#void"));
+    };
+
+    vm.Ignore.prototype.write_object = function(stream)
+    {
+        stream.write_string(vm.str("#ignore"));
+    };
+
+    vm.Number.prototype.write_object = function(stream)
+    {
+        stream.write_string(this.to_string());
+    };
+
+    vm.Symbol.prototype.write_object = function(stream)
+    {
+        if (vm.PRINT_ESCAPE.get_value() === vm.t()) {
+            stream.write_string(get_symbol_prefix(this));
+            if (symbol_needs_escaping(this)) {
+                write_delimited(this.get_string(), stream, "|");
+            } else {
+                stream.write_string(this.get_string());
+            }
+        } else {
+            stream.write_string(this.get_string());
+        }
+    };
+
+    vm.String.prototype.write_object = function(stream)
+    {
+        if (vm.PRINT_ESCAPE.get_value() === vm.t()) {
+            write_delimited(this, stream, "\"");
+        } else {
+            stream.write_string(this);
+        }
+    };
+
+    /*
+     * Writes the contents of strings and escaped symbols.
+     */
+    function write_delimited(string, stream, delimiter)
+    {
+        stream.write_byte(delimiter);
+        const bytes = string.get_utf8_bytes();
+        for (let i = 0; i < bytes.length; i++) {
+            const b = bytes[i];
+            if ((b === delimiter) || (b === "\\")) {
+                stream.write_byte("\\");
+                stream.write_byte(b);
+            } else {
+                stream.write_byte(b);
+            }
+        }
+        stream.write_byte(delimiter);
+    }
+
+    /*
+     * Returns the prefix identifying the namespace of the symbol.
+     */
+    function get_symbol_prefix(sym)
+    {
+        switch (sym.get_namespace()) {
+        case vm.VARIABLE_NAMESPACE: return vm.str("");
+        case vm.FUNCTION_NAMESPACE: return vm.str("#'");
+        case vm.CLASS_NAMESPACE: return vm.str("#^");
+        case vm.KEYWORD_NAMESPACE: return vm.str(":");
+        default: vm.panic("Unknown symbol namespace");
+        }
+    }
+
+    /*
+     * A symbol needs escaping if it could be parsed as a number, or
+     * if it contains whitespace or terminating characters, or the
+     * escape character '\'.
+     */
+    function symbol_needs_escaping(sym)
+    {
+        const bytes = sym.get_string().get_utf8_bytes();
+        if (vm.parses_as_number(bytes))
+            return true;
+        else
+            for (let i = 0; i < bytes.length; i++) {
+                const b = bytes[i];
+                if (vm.is_whitespace(b)
+                    || vm.is_terminating_character(b)
+                    || b === "\\")
+                    return true;
+            }
+        return false;
+    }
+
+    vm.Cons.prototype.write_object = function(stream)
+    {
+        function write_cons(cons, stream)
+        {
+            if (cons.cdr() === vm.nil()) {
+                vm.write(cons.car(), stream);
+            } else if (cons.cdr() instanceof vm.Cons) {
+                vm.write(cons.car(), stream);
+                stream.write_byte(" ");
+                write_cons(cons.cdr(), stream);
+            } else {
+                vm.write(cons.car(), stream);
+                stream.write_string(vm.str(" . "));
+                vm.write(cons.cdr(), stream);
+            }
+        }
+        maybe_abbreviate_object_based_on_current_print_level(stream, () => {
+            stream.write_byte("(");
+            write_cons(this, stream);
+            stream.write_byte(")");
+        });
+    };
+
+    vm.Standard_object.prototype.write_object = function(stream)
+    {
+        const prefix = "lisp_slot_";
+        maybe_abbreviate_object_based_on_current_print_level(stream, () => {
+            vm.write_unreadable_object(this, stream, () => {
+                for (const name of Object.getOwnPropertyNames(this).sort()) {
+                    if (name.startsWith(prefix)) {
+                        stream.write_byte(" ");
+                        vm.write(vm.kwd(name.slice(prefix.length)), stream);
+                        stream.write_byte(" ");
+                        vm.write(this[name], stream);
+                    }
+                }
+            });
+        });
+    };
+
+    /*
+     * Utility for abbreviating objects based on their nesting level.
      *
-     * Bytes are represented as JS strings with one code unit.
+     * Call the thunk if *PRINT-LEVEL?* is nil, or if
+     * *CURRENT-PRINT-LEVEL* is less than the contents of
+     * *PRINT-LEVEL?*.
+     *
+     * Otherwise, print "#" to the stream.
      */
-    vm.Output_stream = class Lisp_output_stream extends vm.Object
+    function maybe_abbreviate_object_based_on_current_print_level(stream, thunk)
     {
-        /*
-         * Attempts to write one byte to the stream.
-         */
-        write_byte(b) { vm.abstract_method(); }
-
-        /*
-         * Attempts to write the bytes from a string to the stream.
-         */
-        write_string(str)
-        {
-            vm.assert_type(str, vm.String);
-            const bytes = str.get_utf8_bytes();
-            for (let i = 0; i < bytes.length; i++)
-                this.write_byte(bytes[i]);
-            return str;
+        const print_level_option = vm.PRINT_LEVEL_OPTION.get_value();
+        const current_print_level = vm.CURRENT_PRINT_LEVEL.get_value();
+        if ((print_level_option === vm.nil())
+            || (vm.compare(current_print_level, print_level_option.car()) < 0)) {
+            thunk();
+        } else {
+            stream.write_byte("#");
         }
+    }
 
-        /*
-         * Initiates the emptying of any internal buffers but does not
-         * wait for completion or acknowledgment to return.
-         */
-        force_output()
-        {
-            /* Default implementation does nothing. */
-            return vm.void();
-        }
+    /*** Utilities ***/
 
-        /*
-         * Ensure that the following output appears on a new line by
-         * itself.  Return true if a newline character was printed,
-         * false otherwise.
-         */
-        fresh_line()
-        {
-            /* Default implementation always writes newline. */
-            this.write_byte("\n");
-            return vm.t();
-        }
+    vm.write_to_string = (object) =>
+    {
+        const st = new vm.String_output_stream();
+        vm.write(object, st);
+        return st.get_string();
+    };
+
+    vm.write_to_js_string = (object) =>
+    {
+        return vm.write_to_string(object).to_js_string();
+    };
+
+    /*** Lisp API ***/
+
+    vm.define_variable("*print-escape*", vm.PRINT_ESCAPE);
+
+    vm.define_variable("*print-level?*", vm.PRINT_LEVEL_OPTION);
+
+    vm.define_alien_function("%write", (object, stream) => vm.write(object, stream));
+
+};
+
+;// CONCATENATED MODULE: ./src/js.mjs
+/*
+ * LispX JavaScript Interface
+ * Copyright (c) 2021 Manuel J. Simoni
+ */
+
+/*
+ * Adds JS interface functionality to a virtual machine.
+ */
+function init_js(vm)
+{
+    /*
+     * Accesses a global variable by name.
+     */
+    vm.js_global = (name) =>
+    {
+        vm.assert_type(name, vm.String);
+        return globalThis[name.to_js_string()];
     };
 
     /*
-     * Output stream that writes UTF-8 bytes to a string in memory.
+     * Calls a JS constructor with arguments.
+     *
+     * Note that this is not a fat arrow function because we need
+     * access to the arguments object (although it's probably possible
+     * to use ... syntax and make this a fat arrow function).
      */
-    vm.String_output_stream = class Lisp_string_output_stream extends vm.Output_stream
+    vm.js_new = function(constructor /* , arg1, ..., argN */)
+    {
+        vm.assert_type(constructor, "function");
+        /*
+         * See https://stackoverflow.com/a/23190790
+         */
+        const factory_function = constructor.bind.apply(constructor, arguments);
+        return new factory_function();
+    };
+
+    /*
+     * Returns a named property of an object.
+     */
+    vm.js_get = (object, prop_name) =>
+    {
+        vm.assert_type(prop_name, vm.String);
+        return object[prop_name.to_js_string()];
+    };
+
+    /*
+     * Returns an indexed element of a JS array.
+     */
+    vm.js_elt = (js_array, index) =>
+    {
+        vm.assert(Array.isArray(js_array));
+        vm.assert_type(index, vm.Number);
+        return js_array[index.to_js_number()];
+    };
+
+    /*
+     * Invokes a JS method on an object from Lisp.
+     */
+    vm.apply_js_method = (receiver, method_name, args) =>
+    {
+        vm.assert_type(method_name, vm.String);
+        vm.assert_type(args, vm.List);
+        /*
+         * Could throw a more helpful error here if the method isn't found.
+         */
+        const method = vm.assert_type(receiver[method_name.to_js_string()], "function");
+        return method.apply(receiver, vm.list_to_array(args))
+    };
+
+    /*
+     * Transforms a JS boolean into a Lisp one.
+     */
+    vm.to_lisp_boolean = (js_bool) =>
+    {
+        return vm.assert_type(js_bool, "boolean") ? vm.t() : vm.f();
+    };
+
+    /*
+     * Makes a JS function callable as a Lisp one.
+     */
+    vm.to_lisp_function = (js_fun) =>
+    {
+        return vm.alien_function(js_fun, "anonymous JS function");
+    };
+
+    /*
+     * Makes a Lisp operator callable as a JS function.
+     */
+    vm.to_js_function = (operator) =>
+    {
+        vm.assert_type(operator, vm.Operator);
+        return function()
+        {
+            var args = vm.array_to_list(Array.prototype.slice.call(arguments));
+            return vm.operate(operator, args, vm.make_environment());
+        };
+    };
+
+    /*
+     * Output stream that prints to the JS console.
+     *
+     * The JS console does not allow appending to the current line --
+     * it only supports outputting a full line by itself.  This means
+     * that sometimes, such as when the user does a FORCE-OUTPUT and
+     * there is some buffered data, we will have to output a full
+     * line, even though there might be no newline in the actual data
+     * written by the user.
+     *
+     * The code currently does not specifically handle CR or LF
+     * output, so printing those might lead to weird results.
+     *
+     * The code currently does not force the output by itself, so
+     * FORCE-OUTPUT (or a function that calls it, like PRINT) must be
+     * called from time to time.
+     */
+    vm.JS_console_output_stream = class Lisp_js_console_output_stream extends vm.Output_stream
     {
         /*
-         * Constructs a new empty string output stream.
+         * The output_function can be overridden for testing.
          */
-        constructor()
+        constructor(output_function = console.log)
         {
             super();
-            this.bytes = "";
+            this.buffer = "";
+            this.output_function = output_function;
         }
 
         /*
-         * Attempts to write one byte to the stream.
+         * See stream.mjs for the documentation of the output stream API
+         * methods.
          */
+
         write_byte(b)
         {
             vm.assert_type(b, "string");
             vm.assert(b.length === 1);
-            this.bytes += b;
+            this.buffer += b;
             return b;
         }
 
-        /*
-         * Get the current stream contents as a string.
-         */
-        get_string()
+        fresh_line()
         {
-            return new vm.String(this.bytes);
+            /*
+             * If the buffer is empty, or the last byte is a newline,
+             * we don't need to do anything.
+             */
+            if ((this.buffer.length === 0)
+                || (this.buffer[this.buffer.length - 1] === "\n")) {
+                return vm.f();
+            } else {
+                this.write_byte("\n");
+                return vm.t();
+            }
+        }
+
+        force_output()
+        {
+            if (this.buffer.length > 0) {
+                this.output_function(vm.utf8_decode(this.buffer));
+                this.buffer = "";
+            }
+            return vm.void();
         }
     };
-
-    /*** Errors ***/
-
-    /*
-     * Throws an EOF error or returns the eof_value, depending
-     * on eof_error_p.
-     */
-    vm.eof = (eof_error_p, eof_value) =>
-    {
-        if (eof_error_p)
-            throw new vm.End_of_file();
-        else
-            return eof_value;
-    };
-
-    /*
-     * Signalled when a stream-related error occurs.
-     */
-    vm.Stream_error = class Lisp_stream_error extends vm.Error
-    {
-        constructor(message)
-        {
-            super(message);
-        }
-    };
-
-    /*
-     * Signalled on EOF.
-     */
-    vm.End_of_file = class Lisp_end_of_file extends vm.Stream_error
-    {
-        constructor()
-        {
-            super("EOF");
-        }
-    };
-
-    /*** Standard Streams ***/
-
-    vm.STANDARD_INPUT = vm.make_dynamic(vm.void());
-
-    vm.STANDARD_OUTPUT = vm.make_dynamic(vm.void());
 
     /*** Lisp API ***/
 
-    vm.define_class("input-stream", vm.Input_stream);
+    vm.define_constant("+js-true+", true);
 
-    vm.define_class("string-input-stream", vm.String_input_stream, vm.Input_stream);
+    vm.define_constant("+js-false+", false);
 
-    vm.define_class("output-stream", vm.Output_stream);
+    vm.define_constant("+js-null+", null);
 
-    vm.define_class("string-output-stream", vm.String_output_stream, vm.Output_stream);
+    vm.define_constant("+js-undefined+", undefined);
 
-    vm.define_condition("stream-error", vm.Stream_error, vm.Error);
+    vm.define_alien_function("%js-global", vm.js_global);
 
-    vm.define_condition("end-of-file", vm.End_of_file, vm.Stream_error);
+    vm.define_alien_function("%js-new", vm.js_new);
 
-    vm.define_variable("*standard-input*", vm.STANDARD_INPUT);
+    vm.define_alien_function("%js-get", vm.js_get);
 
-    vm.define_variable("*standard-output*", vm.STANDARD_OUTPUT);
+    vm.define_alien_function("%js-elt", vm.js_elt);
 
-    vm.define_alien_function("%make-string-input-stream", (string) =>
-        new vm.String_input_stream(string));
+    vm.define_alien_function("%to-lisp-boolean", vm.to_lisp_boolean);
 
-    vm.define_alien_function("%make-string-output-stream", () =>
-        new vm.String_output_stream());
+    vm.define_alien_function("%to-js-boolean", (bool) =>
+        vm.assert_type(bool, vm.Boolean).to_js_boolean());
 
-    vm.define_alien_function("%get-output-stream-string", (sos) =>
-        vm.assert_type(sos, vm.String_output_stream).get_string());
+    vm.define_alien_function("%to-lisp-number", (js_num) =>
+        vm.num(vm.assert_type(js_num, "number")));
 
-    vm.define_alien_function("%fresh-line", (stream) =>
-        vm.assert_type(stream, vm.Output_stream).fresh_line());
+    vm.define_alien_function("%to-js-number", (num) =>
+        vm.assert_type(num, vm.Number).to_js_number());
 
-    vm.define_alien_function("%force-output", (stream) =>
-        vm.assert_type(stream, vm.Output_stream).force_output());
+    vm.define_alien_function("%to-lisp-string", (js_str) =>
+        vm.str(vm.assert_type(js_str, "string")));
+
+    vm.define_alien_function("%to-js-string", (str) =>
+        vm.assert_type(str, vm.String).to_js_string());
+
+    vm.define_alien_function("%to-lisp-function", vm.to_lisp_function);
+
+    vm.define_alien_function("%to-js-function", vm.to_js_function);
+
+    vm.define_alien_function("%list-to-js-array", vm.list_to_array);
+
+    vm.define_alien_function("%js-array-to-list", vm.array_to_list);
+
+    vm.define_alien_function("%apply-js-method", vm.apply_js_method);
+
+    vm.define_alien_function("%js-log", (...objects) => console.log(...objects));
+
+    vm.define_alien_function("%sleep", (ms) => {
+        vm.assert_type(ms, vm.Number);
+        return new Promise(resolve => setTimeout(resolve, ms.to_js_number()));
+    });
+
+    vm.define_class("js-console-output-stream", vm.JS_console_output_stream, vm.Output_stream);
+
+    /*
+     * Register a JS console output stream as standard output.
+     */
+    vm.STANDARD_OUTPUT.set_value(new vm.JS_console_output_stream());
 
 };
 
-
-/***/ })
-
-/******/ });
-/************************************************************************/
-/******/ // The module cache
-/******/ var __webpack_module_cache__ = {};
-/******/ 
-/******/ // The require function
-/******/ function __webpack_require__(moduleId) {
-/******/ 	// Check if module is in cache
-/******/ 	var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 	if (cachedModule !== undefined) {
-/******/ 		return cachedModule.exports;
-/******/ 	}
-/******/ 	// Create a new module (and put it into the cache)
-/******/ 	var module = __webpack_module_cache__[moduleId] = {
-/******/ 		// no module.id needed
-/******/ 		// no module.loaded needed
-/******/ 		exports: {}
-/******/ 	};
-/******/ 
-/******/ 	// Execute the module function
-/******/ 	__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 
-/******/ 	// Return the exports of the module
-/******/ 	return module.exports;
-/******/ }
-/******/ 
-/************************************************************************/
-/******/ /* webpack/runtime/define property getters */
-/******/ (() => {
-/******/ 	// define getter functions for harmony exports
-/******/ 	__webpack_require__.d = (exports, definition) => {
-/******/ 		for(var key in definition) {
-/******/ 			if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 				Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 			}
-/******/ 		}
-/******/ 	};
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/hasOwnProperty shorthand */
-/******/ (() => {
-/******/ 	__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ })();
-/******/ 
-/******/ /* webpack/runtime/make namespace object */
-/******/ (() => {
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = (exports) => {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/ })();
-/******/ 
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
-/*!********************!*\
-  !*** ./src/vm.mjs ***!
-  \********************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "VM": () => (/* binding */ VM)
-/* harmony export */ });
-/* harmony import */ var big_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! big.js */ "./node_modules/big.js/big.mjs");
-/* harmony import */ var _eval_mjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eval.mjs */ "./src/eval.mjs");
-/* harmony import */ var _control_mjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./control.mjs */ "./src/control.mjs");
-/* harmony import */ var _seq_mjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./seq.mjs */ "./src/seq.mjs");
-/* harmony import */ var _stream_mjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./stream.mjs */ "./src/stream.mjs");
-/* harmony import */ var _read_mjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./read.mjs */ "./src/read.mjs");
-/* harmony import */ var _print_mjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./print.mjs */ "./src/print.mjs");
-/* harmony import */ var _js_mjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./js.mjs */ "./src/js.mjs");
-/* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
-/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
-/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
-/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
-/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
-/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
+;// CONCATENATED MODULE: ./src/boot.lispx
+/* harmony default export */ const boot_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX Bootstrap\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; Core Forms\n\n(%def #'list\n  (%wrap (%vau arguments #ignore arguments))\n  \"Return the list of evaluated ARGUMENTS.\n$(fn (arguments))\n$(type function)\")\n\n(%def #'vau\n  (%vau (parameter-tree environment-parameter . forms) env\n    (%eval (list #'%vau parameter-tree environment-parameter\n                 (%list* #'%progn forms))\n           env))\n  \"Construct a fexpr with the given PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\n$(fn (parameter-tree environment-parameter . forms))\n$(type fexpr)\")\n\n(%def #'lispx::make-macro\n  (%wrap\n   (%vau (expander) #ignore\n     (%vau operand env\n       (%eval\n        (%eval (%cons expander operand) (%make-environment))\n        env))))\n  \"Create a macro from an EXPANDER operator.  A macro is an operator\nthat receives an operand and produces a form (by calling the expander\nwith the operand as argument) that is then evaluated in place of the\noperand.\n$(fn (expander))\n$(type function)\")\n\n(%def #'macro\n  (lispx::make-macro\n   (%vau (parameter-tree . forms) #ignore\n     (list #'lispx::make-macro\n           (%list* #'vau parameter-tree #ignore forms))))\n  \"Create an anonymous macro with the given PARAMETER-TREE and FORMS.\n$(fn (parameter-tree . forms))\n$(type macro)\")\n\n(%def #'defmacro\n  (macro (name parameter-tree . forms)\n    (list #'%def (%function-symbol name)\n          (%list* #'macro parameter-tree forms)))\n  \"Define a macro with the given NAME, PARAMETER-TREE, and FORMS.\n$(fn (name parameter-tree . forms))\n$(type macro)\")\n\n(defmacro defexpr (name parameter-tree environment-parameter . forms)\n  \"Define a fexpr with the given NAME, PARAMETER-TREE,\nENVIRONMENT-PARAMETER, and FORMS.\"\n  (list #'%def (%function-symbol name)\n        (%list* #'vau parameter-tree environment-parameter forms)))\n\n(defmacro def (definiend-tree value . docstring?)\n  \"Match the DEFINIEND-TREE against the VALUE and place resulting\nbindings into the current environment.  The optional DOCSTRING? is\ncurrently ignored.\"\n  (list #'%def definiend-tree value))\n\n(defmacro defconstant (name value . docstring?)\n  \"Define a constant with the given NAME and VALUE.  This is mostly\nfor documentation purposes, as constants are still mutable.  The\noptional DOCSTRING? is currently ignored.\"\n  (list #'def name value))\n\n(defmacro lambda (parameter-tree . forms)\n  \"Create an anonymous function with the given PARAMETER-TREE and FORMS.\"\n  (list #'%wrap (%list* #'vau parameter-tree #ignore forms)))\n\n(defmacro defun (name parameter-tree . forms)\n  \"Define a function with the given NAME, PARAMETER-TREE, and FORMS.\"\n  (list #'def (%function-symbol name)\n        (%list* #'lambda parameter-tree forms)))\n\n;;; Built-Ins\n\n(defmacro progn forms\n  \"Sequentially evaluate FORMS, returning the value of the last one,\nor void if there are no forms.\"\n  (list* #'%progn forms))\n\n(defmacro if (test consequent alternative)\n  \"Evaluate the TEST which must yield a boolean.  Then evaluate either\nthe CONSEQUENT or ALTERNATIVE depending on whether the TEST yielded\ntrue or false.\"\n  (list #'%if test consequent alternative))\n\n(defmacro catch (tag . forms)\n  \"Establish a catch tag and evaluate FORMS as an implicit `progn'\ninside it.  The forms may use `throw' to nonlocally exit from the\ntag.  Usually, `block' should be preferred.\"\n  (list #'%catch tag (list* #'lambda () forms)))\n\n(defun throw (tag . result?)\n  \"Abort to a nesting catch tag established by `catch' and pass the\noptional RESULT? (defaults to void) to it.\"\n  (%throw tag (optional result?)))\n\n(defmacro loop forms\n  \"Evaluate the FORMS in an infinite loop.\"\n  (list #'%loop (list* #'progn forms)))\n\n(defun eq (a b)\n  \"Return true if the values A and B are pointer-identical, false otherwise.\"\n  (%eq a b))\n\n(defun class-of (object)\n  \"Return the class of the OBJECT.\"\n  (%class-of object))\n\n(defun typep (object class)\n  \"Return true if the OBJECT is an instance of the CLASS, false otherwise.\"\n  (%typep object class))\n\n(defun intern (string)\n  \"Get or create the unique symbol with STRING as name.\"\n  (%intern string))\n\n(defun symbol-name (symbol)\n  \"Return the name of the SYMBOL as a string.\"\n  (%symbol-name symbol))\n\n(defun variable-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the variable namespace.\"\n  (%variable-symbol symbol))\n\n(defun function-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the function namespace.\"\n  (%function-symbol symbol))\n\n(defun class-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the class namespace.\"\n  (%class-symbol symbol))\n\n(defun keyword-symbol (symbol)\n  \"Return the symbol with the same name as SYMBOL, but in the keyword namespace.\"\n  (%keyword-symbol symbol))\n\n(defun cons (car cdr)\n  \"Create a cons with the given CAR and CDR.\"\n  (%cons car cdr))\n\n(defun car (cons)\n  \"Return the contents of the address part of the register.\"\n  (%car cons))\n\n(defun cdr (cons)\n  \"Return the contents of the decrement part of the register.\"\n  (%cdr cons))\n\n(defun list* arguments\n  \"Create a list from the ARGUMENTS so that the last argument becomes\nthe `cdr' of the list.\"\n  (apply #'%list* arguments))\n\n(defun reverse (list)\n  \"Reverse the LIST.\"\n  (%reverse list))\n\n(defun wrap (operator)\n  \"Create a new function that wraps around an underlying OPERATOR, and\ninduces argument evaluation around it.\"\n  (%wrap operator))\n\n(defun unwrap (function)\n  \"Return the underlying operator of a FUNCTION.\"\n  (%unwrap function))\n\n(defun eval (form environment)\n  \"Evaluate the FORM in the ENVIRONMENT, returning its result.\"\n  (%eval form environment))\n\n(defun make-environment parent-environment?\n  \"Create a new environment with an optional PARENT-ENVIRONMENT? in\nwhich bindings are looked up if they are not found.\"\n  (apply #'%make-environment parent-environment?))\n\n(defun boundp (symbol environment)\n  \"Return true if the SYMBOL is bound in the ENVIRONMENT, false otherwise.\"\n  (%boundp symbol environment))\n\n(defun panic (error)\n  \"Mostly for internal use.  Signal the ERROR in such a way that it is\nhard to handle and will usually escape the VM as a host language\nexception.  In particular, signal handlers will not be invoked.\nHowever, intervening `unwind-protect' cleanup expressions and `progv'\nexpressions are still triggered, so Lisp invariants are maintained.\"\n  (%panic error))\n\n(defun invoke-debugger (condition)\n  \"Invoke the debugger, which currently just means printing a stack trace\nand panicking, thereby escaping to JS.\"\n  (take-subcont +root-prompt+ k\n    (push-delim-subcont +root-prompt+ k\n      (%print-stacktrace k)\n      (panic condition))))\n\n;;; Lexical Bindings\n\n(defmacro let (bindings . forms)\n  \"Establish BINDINGS parallelly during the evaluation of FORMS, so\nthat no binding can refer to the other ones.\n$(syntax binding (definiend-tree value))\"\n  (list* (list* #'lambda (mapcar #'car bindings)\n                forms)\n         (mapcar #'cadr bindings)))\n\n(defmacro let* (bindings . forms)\n  \"Establish BINDINGS serially during the evaluation of FORMS, so that\nevery binding can refer to previous ones.\n$(syntax binding (definiend-tree value))\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list #'let (list (car bindings))\n            (list* #'let* (cdr bindings) forms))))\n\n(defmacro lispx::letrec (bindings . forms)\n  \"Utility to establish BINDINGS recursively during the evaluation of\nFORMS.  Used by `labels'.\"\n  (if (null bindings)\n      (list* #'let () forms) ; Always introduce a new scope.\n      (list* #'let ()\n             (list #'def\n                   (mapcar #'car bindings)\n                   (list* #'list (mapcar #'cadr bindings)))\n             forms)))\n\n(defun lispx::make-function-binding ((name parameter-tree . forms))\n  \"Utility to turn a function binding as it appears in `flet' and\n`labels' into a binding for `let' or `lispx::letrec'.\"\n  (list (function-symbol name) (list* #'lambda parameter-tree forms)))\n\n(defmacro flet (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS parallelly during evaluation of FORMS,\nso that no function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'let (mapcar #'lispx::make-function-binding function-bindings) forms))\n\n(defmacro labels (function-bindings . forms)\n  \"Establish FUNCTION-BINDINGS recursively during evaluation of FORMS,\nso that every function can refer to the other ones.\n$(syntax function-binding (name parameter-tree . forms))\"\n  (list* #'lispx::letrec (mapcar #'lispx::make-function-binding function-bindings) forms))\n\n;;; Data and Control Flow\n\n(defexpr quote (operand) #ignore\n  \"Return the unevaluated OPERAND.\"\n  operand)\n\n(defexpr the-environment () environment\n  \"Return the current environment.\"\n  environment)\n\n(defun apply (function arguments)\n  \"Call the FUNCTION with a dynamically-supplied list of ARGUMENTS.\"\n  (eval (cons (unwrap function) arguments) (%make-environment)))\n\n(defmacro when (test . forms)\n  \"If TEST yields true, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test (list* #'progn forms) #void))\n\n(defmacro unless (test . forms)\n  \"If TEST yields false, evaluate the FORMS as an implicit `progn'.\nOtherwise, return void.\"\n  (list #'if test #void (list* #'progn forms)))\n\n(defexpr cond clauses env\n  \"Multi-armed conditional.\nGo through the CLAUSES in order.  Evaluate the TEST.  If it yields\ntrue, evaluate the FORMS as an implicit `progn'.  If it yields false,\ngo to the next clause, or return void if there are no more clauses.\n$(syntax clause (test . forms))\"\n  (unless (null clauses)\n    (let ((((test . forms) . rest-clauses) clauses))\n      (if (eval test env)\n          (eval (cons #'progn forms) env)\n          (eval (cons #'cond rest-clauses) env)))))\n\n(defun not (boolean)\n  \"Invert the BOOLEAN.\"\n  (if boolean #f #t))\n\n(defexpr and operands env\n  \"Return true if all OPERANDS evaluate to true, false otherwise.  If\nan operand evaluates to false, later operands are not evaluated.  If\nthere are no operands, return false.\"\n  (cond ((null operands)           #t)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) (eval (cons #'and (cdr operands)) env))\n        (#t                        #f)))\n\n(defexpr or operands env\n  \"Return true if one of the OPERANDS evaluates to true, false\notherwise.  If an operand evaluates to true, later operands are not\nevaluated.  If there are no operands, return true.\"\n  (cond ((null operands)           #f)\n        ((null (cdr operands))     (the boolean (eval (car operands) env)))\n        ((eval (car operands) env) #t)\n        (#t                        (eval (cons #'or (cdr operands)) env))))\n\n(defexpr while (test-form . forms) env\n  \"Evaluate FORMS while TEST-FORM evaluates to true.\"\n  (let ((forms (list* #'progn forms)))\n    (block exit\n      (loop\n        (if (eval test-form env)\n            (eval forms env)\n            (return-from exit))))))\n\n(defmacro until (test-form . forms)\n  \"Evaluate FORMS until TEST-FORM evaluates to true.\"\n  (list* #'while (list #'not test-form) forms))\n\n(defmacro dotimes ((var count-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOTIMES.\"\n  (flet ((_dotimes_ (n #'body #'result)\n           (let ((#'i (box 0)))\n             (while (< (i) n)\n               (body (i))\n               (i (+ (i) 1)))\n             (result (i)))))\n    (list #'_dotimes_\n          count-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defmacro loop-let (name initializers . forms)\n  \"Labelled recursive loop, analogous to Scheme's named `let'.\nLexically bind a function named NAME with one PARAMETER for every\nINITIALIZER and the FORMS as body.  Then immediately apply the\nfunction to a list containing one VALUE for every INITIALIZER and\nreturn the result.  The function is bound per `labels' so it can\nrecursively refer to itself.\n$(syntax initializer (parameter value))\"\n  (list #'labels (list (list* name (mapcar #'car initializers) forms))\n        (list* name (mapcar #'cadr initializers))))\n\n(defexpr block (block-name . forms) env\n  \"Establish a block named BLOCK-NAME and evaluate the FORMS as an\nimplicit `progn' inside it.  The forms may use `return-from' to\nnonlocally exit from the block.\nNote that unlike in Common Lisp, there is no separate namespace for\nblock names; a block is named in the normal variable namespace.\"\n  (let ((tag (list #void))) ; cons up a fresh object as tag\n    (flet ((escape (value) (throw tag value)))\n      (catch tag\n        (eval (list (list* #'lambda (list block-name) forms)\n                    #'escape)\n              env)))))\n\n(defun return-from (#'block-name . value?)\n  \"Abort evaluation and return the optional VALUE? (which defaults to\nvoid) from the block named BLOCK-NAME.  It is an error to return from\na block whose dynamic extent has ended.\n$(fn (block-name . value?))\"\n  (block-name (optional value?)))\n\n(defmacro unwind-protect (protected-form . cleanup-forms)\n  \"Evaluate the PROTECTED-FORM and return its result.  Regardless of\nwhether the protected form returns normally, or via a nonlocal exit or\npanic, the CLEANUP-FORMS are evaluated after the protected form.\"\n  (list #'%unwind-protect protected-form (list* #'progn cleanup-forms)))\n\n(defexpr prog1 (form . forms) env\n  \"Evaluate FORM and any additional FORMS, and return the result of FORM.\"\n  (let ((result (eval form env)))\n    (eval (list* #'progn forms) env)\n    result))\n\n(defun lispx::make-typecase-with-default-function (#'default)\n  \"Metaprogramming utility used to create `typecase' and `etypecase'.\nIf no matching clause is found, the DEFAULT function is called with\nthe key.\"\n  (vau (keyform . clauses) env\n    (let ((key (eval keyform env)))\n      (loop-let -typecase- ((clauses clauses))\n        (if (null clauses)\n            (default key)\n            (let ((((class-name . forms) . rest-clauses) clauses))\n              (if (typep key (find-class class-name env))\n                  (eval (list* #'progn forms) env)\n                  (-typecase- rest-clauses))))))))\n\n(def #'typecase (lispx::make-typecase-with-default-function\n                 (lambda (#ignore) #void))\n  \"Multi-armed type test.\nEvaluate the KEYFORM.  Go through the CLAUSES.  If the result of\nevaluating KEYFORM is an instance of the class named by CLASS-NAME,\nevaluate the FORMS as an implicit `progn'.  Otherwise go to the next\nclause, or return void if there are no more clauses.\n$(type fexpr)\n$(fn (keyform . clauses))\n$(syntax clause (class-name . forms))\")\n\n(def #'etypecase (lispx::make-typecase-with-default-function\n                  ;; Note: we use #^object as :expected-type of the\n                  ;; type error which is somewhat nonsensical.  The\n                  ;; proper/CL way would be to use an OR type spec,\n                  ;; but they might get removed from the language.\n                  (lambda (key) (error (make-type-error key #^object))))\n  \"Like `typecase' but signal a `type-error' if no clause matches the KEYFORM.\n$(type fexpr)\n$(fn (keyform . clauses))\n$(syntax clause (class-name . forms))\")\n\n(defexpr set (environment definiend-tree value) dynamic-environment\n  \"Match the DEFINIEND-TREE against the VALUE in the ENVIRONMENT,\ncreating or updating existing bindings.  Unlike Common Lisp (or\nScheme), we have no `setq' (or `set!') that allows updating arbitrary\nbindings -- you always need to know the environment a binding is in to\nchange it.  Therefore, we usually use boxes (see below) instead of\nmutating bindings directly.\"\n  (eval (list #'def definiend-tree\n              (list (unwrap #'eval) value dynamic-environment))\n        (eval environment dynamic-environment)))\n\n(defun box initial-value?\n  \"Create a new box with the optional INITIAL-VALUE?.  A box is a\nfunction that encapsulates a mutable value.  Calling the box without\narguments returns the value.  Calling the box with an argument sets\nthe value.\"\n  (def value (optional initial-value?))\n  (def env (the-environment))\n  (lambda new-value?\n    (if-option (new-value new-value?)\n      (set env value new-value)\n      value)))\n\n(defun assert (boolean)\n  \"Signal an error if the BOOLEAN is false.  Otherwise return void.\"\n  (unless boolean (error (make-instance #^assertion-error))))\n\n(defun compose (#'f #'g)\n  \"Compose two functions, creating a new function equivalent to (G (F ...)).\"\n  (lambda args (g (apply #'f args))))\n\n(defun identity (x)\n  \"Identity function.\"\n  x)\n\n;;; Lists\n\n(defun null (object)\n  \"Return true if the OBJECT is nil, false otherwise.\"\n  (eq object #nil))\n\n(defun consp (object)\n  \"Return true if the OBJECT is a cons, false otherwise.\"\n  (typep object #^cons))\n\n(defun caar (cons)\n  \"Return the `car' of the `car' of the CONS.\"\n  (car (car cons)))\n\n(defun cadr (cons)\n  \"Return the `car' of the `cdr' of the CONS.\"\n  (car (cdr cons)))\n\n(defun cdar (cons)\n  \"Return the `cdr' of the `car' of the CONS.\"\n  (cdr (car cons)))\n\n(defun cddr (cons)\n  \"Return the `cdr' of the `cdr' of the CONS.\"\n  (cdr (cdr cons)))\n\n(defun append (list1 list2)\n  \"Append two lists.  The first one must be proper and is copied.  The\nsecond one is not copied (and doesn't even have to be a list). It\nbecomes the `cdr' of the final cons of the first list, or is returned\ndirectly if the first list is empty.\"\n  (%append list1 list2))\n\n(defun nth (n list)\n  \"Return element number N of LIST, where the `car' is element zero.\"\n  (%nth n list))\n\n(defun nthcdr (n list)\n  \"Returns the tail of LIST that would be obtained by calling `cdr' N\ntimes in succession.\"\n  (%nthcdr n list))\n\n(defun mapcar (#'function list)\n  \"Create a new list by applying the FUNCTION to every element of the LIST.\"\n  (if (null list)\n      #nil\n      (cons (function (car list)) (mapcar #'function (cdr list)))))\n\n(defun mapc (#'function list)\n  \"Apply the FUNCTION to every element of the LIST for effect.  Return the list.\"\n  (unless (null list)\n    (function (car list))\n    (mapc #'function (cdr list)))\n  list)\n\n(defun mapcan (#'function list)\n  \"Apply the FUNCTION, which must return a list, to every element of the\nLIST, and append the results.  (Note: this currently uses `append',\nbut might be changed to use `nconc' in the future, like Common Lisp.)\"\n  (if (null list)\n      #nil\n      (append (function (car list)) (mapcan #'function (cdr list)))))\n\n(defmacro dolist ((var list-form . result-form?) . body-forms)\n  \"Cf. Common Lisp's DOLIST.\"\n  (labels ((_dolist_ (list #'body #'result)\n             (if (null list)\n                 (result list)\n                 (progn\n                   (body (car list))\n                   (_dolist_ (cdr list) #'body #'result)))))\n    (list #'_dolist_\n          list-form\n          (list* #'lambda (list var) body-forms)\n          (list* #'lambda (list var) result-form?))))\n\n(defun reduce (#'function list :initial-value initial-value)\n  \"Use the binary FUNCTION to combine the elements of the LIST.  The\nINITIAL-VALUE is logically placed before the list.\"\n  (if (null list)\n      initial-value\n      (reduce #'function (cdr list) :initial-value (function initial-value (car list)))))\n\n(defun member (item list . keywords)\n  \"Search for ITEM in the LIST according to the TEST predicate\n(defaults to `eq').  Return the tail of the list starting with\nITEM if found, nil otherwise.  The KEY function is applied to\neach list element before comparison (defaults to `identity').\n$(fn (item list &key test key))\"\n  (let ((#'test (optional (get? keywords :test) #'eq))\n        (#'key (optional (get? keywords :key) #'identity)))\n    (loop-let -member- ((items list))\n      (if (null items)\n          #nil\n          (if (test item (key (car items)))\n              items\n              (-member- (cdr items)))))))\n\n(defun remove-if (#'test list)\n  \"Return a new list from which the elements that satisfy the TEST\nhave been removed.\"\n  (if (null list)\n      #nil\n      (if (test (car list))\n          (remove-if #'test (cdr list))\n          (cons (car list) (remove-if #'test (cdr list))))))\n\n(defun get? (plist indicator)\n  \"Search for the INDICATOR keyword in the property list PLIST (a list\nof alternating keywords and values) and return the found value as an\noption.\"\n  (if (null plist)\n      #nil\n      (let (((i v . plist) plist))\n        (if (eq i indicator)\n            (some v)\n            (get? plist indicator)))))\n\n;;; Relational Operators\n\n;; Note that unlike in Common Lisp, these operators currently require\n;; at least two arguments.  This will be improved in the future.\n\n(defun lispx::make-relational-operator (#'binary-operator)\n  \"Utility to create an n-ary relational operator from a BINARY-OPERATOR.\"\n  (labels ((operator (arg1 arg2 . rest)\n             (if (binary-operator arg1 arg2)\n                 (if (null rest)\n                     #t\n                     (apply #'operator (list* arg2 rest)))\n                 #f)))\n    #'operator))\n\n(def #'= (lispx::make-relational-operator #'%=)\n  \"Return true if all ARGUMENTS are equal, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'< (lispx::make-relational-operator #'%<)\n  \"Return true if the ARGUMENTS are in monotonically increasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'> (lispx::make-relational-operator #'%>)\n  \"Return true if the ARGUMENTS are in monotonically decreasing order,\nfalse otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'<= (lispx::make-relational-operator #'%<=)\n  \"Return true if the ARGUMENTS are in monotonically nondecreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(def #'>= (lispx::make-relational-operator #'%>=)\n  \"Return true if the ARGUMENTS are in monotonically nonincreasing\norder, false otherwise.\n$(fn arguments)\n$(type function)\")\n\n(defun /= (arg . args)\n  \"Return true if no two ARGUMENTS are the same, false otherwise.\n$(fn arguments)\"\n  (if (null args)\n      #t\n      (if (consp (member arg args :test #'=))\n          #f\n          (apply #'/= args))))\n\n;;; Numbers\n\n;; The terms thetic (for + and *) and lytic (for - and /) are due to Hankel.\n\n(defun lispx::make-thetic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary thetic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda args\n    (reduce #'binary-operator args :initial-value initial-value)))\n\n(def #'+ (lispx::make-thetic-operator #'%+ 0)\n  \"Return the sum of the ARGUMENTS, or 0 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(def #'* (lispx::make-thetic-operator #'%* 1)\n  \"Return the product of the ARGUMENTS, or 1 if no arguments are supplied.\n$(fn arguments)\n$(type function)\")\n\n(defun lispx::make-lytic-operator (#'binary-operator initial-value)\n  \"Utility to create an n-ary lytic operator from a BINARY-OPERATOR and INITIAL-VALUE.\"\n  (lambda (arg1 . rest)\n    (if (null rest)\n        (binary-operator initial-value arg1)\n        (reduce #'binary-operator rest :initial-value arg1))))\n\n(def #'- (lispx::make-lytic-operator #'%- 0)\n  \"If only one number is supplied in the ARGUMENTS, return the\nnegation of that number. If more than one number is supplied, subtract\nall of the later ones from the first one and return the result.\n$(fn arguments)\n$(type function)\")\n\n(def #'/ (lispx::make-lytic-operator #'%/ 1)\n  \"If only one number is supplied in the ARGUMENTS, return the\nreciprocal of that number.  If more than one number is supplied,\ndivide the first one by all of the later ones and return the result.\n$(fn arguments)\n$(type function)\")\n\n;;; Classes\n\n(defmacro class (name)\n  \"Access a class by the (unevaluated) NAME symbol in the current\nenvironment.  This is required because classes have their own\nnamespace.\"\n  (class-symbol name))\n\n(defun find-class (name environment)\n  \"Look up a class based on its NAME symbol (evaluated) in the given ENVIRONMENT.\"\n  (eval (class-symbol name) environment))\n\n(defun class-name (class)\n  \"Return the name symbol of the CLASS.\"\n  (%class-name class))\n\n(defun subclassp (class superclass)\n  \"Return true if the CLASS is a subclass of the SUPERCLASS, false otherwise.\nA class is considered a subclass of itself.\"\n  (%subclassp class superclass))\n\n(defexpr defclass (name superclass? slot-specs . properties) env\n  \"Define a new `standard-class' with the given NAME, optional\nSUPERCLASS?, and SLOT-SPECS.  The superclass defaults to\n`standard-object'.  The SLOT-SPECS and PROPERTIES are currently\nignored.\n$(syntax slot-spec symbol)\n$(syntax property (:documentation docstring))\"\n  ;; Slot-specs are ignored for now, but check that they are symbols nevertheless.\n  (dolist (slot-spec slot-specs) (the symbol slot-spec))\n  (let ((class-name (class-symbol name))\n        (superclass (find-class (optional superclass? 'standard-object) env)))\n    (if (boundp class-name env)\n        (%reinitialize-standard-class (eval class-name env) superclass)\n        (eval (list #'def class-name (%make-standard-class name superclass)) env))))\n\n;;; Generic Functions\n\n(defexpr defgeneric (name (receiver . parameters) . properties) env\n  \"Define a new generic function with the given NAME.  The RECEIVER,\nPARAMETERS, and PROPERTIES are currently ignored.\n$(syntax property (:documentation docstring))\"\n  (flet ((generic args (apply (%find-method (class-of (car args)) name) args)))\n    (eval (list #'def (function-symbol name) #'generic) env)))\n\n(defexpr defmethod (name ((receiver class-name) . parameters) . forms) env\n  \"Add a new method to the generic function named by NAME specialized\nfor the class named by CLASS-NAME.\"\n  (let ((#'method (eval (list* #'lambda (list* receiver parameters) forms) env)))\n    (%add-method (find-class class-name env) name #'method)))\n\n;;; Standard Objects\n\n(defun make-instance (class . slot-inits)\n  \"Create a new instance of CLASS (that must be a `standard-class').\nThe SLOT-INITS must be of even length, and alternately contain slot\nnames (symbols, typically keywords) and values.\"\n  (apply #'%make-instance (cons class slot-inits)))\n\n(defun slot-value (object slot-name)\n  \"Return the value of the slot named SLOT-NAME of the OBJECT.\"\n  (%slot-value object slot-name))\n\n(defun set-slot-value (object slot-name value)\n  \"Set the value of the slot named SLOT-NAME of the OBJECT to VALUE.\"\n  (%set-slot-value object slot-name value))\n\n(defun slot-bound-p (object slot-name)\n  \"Return true if the slot named SLOT-NAME of the OBJECT is set, false otherwise.\"\n  (%slot-bound-p object slot-name))\n\n;;; Type Checks\n\n(defun make-type-error (datum expected-type)\n  \"Create a `type-error' with the given DATUM and EXPECTED-TYPE.\"\n  (make-instance #^type-error :datum datum :expected-type expected-type))\n\n(defun assert-type (object class)\n  \"Signal a `type-error' if the OBJECT is not an instance of the CLASS.\"\n  (if (typep object class)\n      object\n      (error (make-type-error object (class-name class)))))\n\n(defexpr the (class-name object) env\n  \"Shorthand for `assert-type'.  Signal a `type-error' if the OBJECT\nis not an instance of the class named by CLASS-NAME.\"\n  (assert-type (eval object env) (find-class class-name env)))\n\n;;; Sequences\n\n(defgeneric length (sequence)\n  (:documentation \"Return the number of elements in a sequence.\"))\n\n(defmethod length ((seq list))\n  (%list-length seq))\n\n(defgeneric elt (sequence index)\n  (:documentation \"Return the sequence element at the specified index.\"))\n\n(defmethod elt ((seq list) index)\n  (nth index seq))\n\n(defgeneric subseq (sequence start . end?)\n  (:documentation \"Create a sequence that is a copy of the subsequence\nof the SEQUENCE bounded by START and optional END?.  If END?  is not\nsupplied or void, the subsequence stretches until the end of the\nlist.\"))\n\n(defmethod subseq ((seq list) start . end?)\n  (%list-subseq seq start (optional end?)))\n\n(defmethod subseq ((seq string) start . end?)\n  (%string-subseq seq start (optional end?)))\n\n;;; Options\n\n;; An option is either nil (\"none\"), or a one-element list (\"some\").\n;; Variables holding options are conventionally suffixed with \"?\".\n\n(defun some (value)\n  \"Create a one-element list from the VALUE.\"\n  (list value))\n\n(defexpr if-option ((name option?) then else) env\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the THEN form\nwith the NAME bound to the contents of the option.  If it's nil,\nevaluate the ELSE form.\"\n  ;; (Idea from Taylor R. Campbell's blag.)\n  (let ((o? (eval option? env)))\n    (if (null o?)\n        (eval else env)\n        (eval (list (list #'vau (list name) #ignore then)\n                    (car o?))\n              env))))\n\n(defmacro when-option ((name option?) . forms)\n  \"Destructure the OPTION?.  If it's non-nil, evaluate the FORMS with\nthe NAME bound to the contents of the option.  If it's nil, return nil.\"\n  (list #'if-option (list name option?) (list* #'progn forms) #nil))\n\n(defmacro unless-option (option? . forms)\n  \"Destructure the OPTION?.  If it's nil, evaluate the FORMS.  If it's\nnon-nil, return nil.\"\n  (list #'if-option (list #ignore option?) #nil (list* #'progn forms)))\n\n(defexpr optional (option? . default?) env\n  \"Return the contents of the OPTION?, or the DEFAULT? if the option\nis nil.  The default itself defaults to void.  The DEFAULT? is\nevaluated lazily, only when the OPTION? is nil.\"\n  (if-option (value (eval option? env))\n    value\n    (if-option (default default?)\n      (eval default env)\n      #void)))\n\n(defexpr optionals (list . defaults) env\n  \"Similar to `optional', but provides DEFAULTS for any number of\nelements of LIST.  This is useful for implementing functions that take\nmultiple optional arguments.  Each default is evaluated lazily, only\nwhen needed.\"\n  (loop-let -optionals- ((list (eval list env)) (defaults defaults))\n    (if (null list)\n        (if (null defaults)\n            #nil\n            (cons (eval (car defaults) env) (-optionals- #nil (cdr defaults))))\n        (if (null defaults)\n            (cons (car list)                (-optionals- (cdr list) #nil))\n            (cons (car list)                (-optionals- (cdr list) (cdr defaults)))))))\n\n(defun get-option (option?)\n  \"Returns the contents of the OPTION? or signals an error if it is nil.\"\n  (optional option? (simple-error \"Option is nil\")))\n\n;;; Dynamic Binding\n\n(defexpr defdynamic (name . value-and-docstring?) env\n  \"Define a new or update an existing dynamic variable with the given\nNAME and optional default VALUE. The optional DOCSTRING is currently\nignored.\n$(fn (name &optional value docstring))\"\n  (def value (eval (optional value-and-docstring?) env)) ; treating 2-elt list as option\n  (if (boundp name env)\n      (set-dynamic (eval name env) value)\n      (eval (list #'def name (make-instance #^dynamic :value value)) env)))\n\n(defun dynamic (dynamic-variable)\n  \"Return the current value of the DYNAMIC-VARIABLE.\"\n  (slot-value dynamic-variable 'value))\n\n(defun set-dynamic (dynamic-variable value)\n  \"Set the current value of the DYNAMIC-VARIABLE.\"\n  (set-slot-value dynamic-variable 'value value))\n\n(defexpr dynamic-let (bindings . forms) env\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established parallely\nas per `let'.\n$(syntax binding (dynamic-variable value))\"\n  (let ((dynamics (mapcar (lambda ((name #ignore)) (eval name env)) bindings))\n        (values (mapcar (lambda ((#ignore value)) (eval value env)) bindings))\n        (thunk (eval (list* #'lambda () forms) env)))\n    (%progv dynamics values thunk)))\n\n(defmacro dynamic-let* (bindings . forms)\n  \"Evaluate the FORMS with the dynamic variables specified by BINDINGS\ntemporarily bound to new values.  Bindings are established serially as\nper `let*'.\"\n  (if (null bindings)\n      (list* #'progn forms)\n      (list #'dynamic-let (list (car bindings))\n            (list* #'dynamic-let* (cdr bindings) forms))))\n\n(defmacro progv (dynamic-variables values . forms)\n  \"Evaluate the FORMS with the list of DYNAMIC-VARIABLES temporarily\nbound to new VALUES.  The DYNAMIC-VARIABLES and VALUES lists must have\nthe same length.\"\n  (list #'%progv dynamic-variables values (list* #'lambda () forms)))\n\n;;; Delimited Control Operators\n\n;; These operators follow the API put forth in the delimcc library\n;; at URL `http://okmij.org/ftp/continuations/implementations.html'.\n\n(defmacro push-prompt (prompt . forms)\n  \"Push the PROMPT and evaluate the FORMS inside the prompt.  This\ndelimits the continuation.\"\n  (list #'%push-prompt prompt (list* #'lambda () forms)))\n\n(defmacro take-subcont (prompt name . forms)\n  \"Abort outwards to the PROMPT.  When the prompt is reached, evaluate\nthe FORMS with NAME bound to the captured continuation (which does not\ninclude the prompt).\"\n  (list #'%take-subcont prompt (list* #'lambda (list name) forms)))\n\n(defmacro push-delim-subcont (prompt continuation . forms)\n  \"Push the PROMPT and compose the previously captured CONTINUATION\ninside it.  The FORMS are then evaluated inside the new continuation.\"\n  (list #'%push-delim-subcont prompt continuation (list* #'lambda () forms)))\n\n(defmacro push-subcont-barrier forms\n  \"Push a continuation barrier that prevents the FORMS from capturing\nany continuations to the outside.\"\n  (list #'%push-subcont-barrier (list* #'lambda () forms)))\n\n;;; Coroutines\n\n(defconstant +default-prompt+ 'default-prompt\n  \"This prompt is used for general coroutine-like use of\ncontinuations.\")\n\n(defmacro coroutine forms\n  \"Evaluate the FORMS in a context in which `yield' can be used to pause\nexecution.\"\n  (list* #'push-prompt '+default-prompt+ forms))\n\n(defmacro yield (name . forms)\n  \"Pause the current coroutine.  In the place where the enclosing\n`coroutine' (or `resume') was called, evaluate the FORMS with NAME\nbound to the paused coroutine.  `resume' can later be used to restart\nexecution inside the coroutine.\"\n  (list* #'take-subcont '+default-prompt+ name forms))\n\n(defmacro resume (k . forms)\n  \"Resume the paused coroutine K and evaluate FORMS in the place where\n`yield' was called in the coroutine.\"\n  (list* #'push-delim-subcont '+default-prompt+ k forms))\n");
+;// CONCATENATED MODULE: ./src/cond-sys.lispx
+/* harmony default export */ const cond_sys_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX Condition System\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;; This file implements a condition system in the style of Common\n;; Lisp.\n;;\n;; Implementation Notes\n;; --------------------\n;;\n;; Condition handling and restart handling share some similarities\n;; while also being quite different in other respects.\n;;\n;; The main similarities between condition and restart handling are:\n;;\n;; * Both condition and restart handlers are arranged in\n;;   dynamically-bound handler chains, consisting of individual\n;;   handler frames.  Each frame binds a number of handlers.  We use\n;;   two dynamic variables, `*condition-handler-frame?*' and\n;;   `*restart-handler-frame?*', to point at the innermost frame of\n;;   each chain.  Note that the variables hold options, as indicated\n;;   by the question mark.\n;;\n;; * Signalling a condition and invoking a restart are very similar\n;;   operations, in that a handler is looked up in the chain, and\n;;   then its handler function is invoked.\n;;\n;; The main differences:\n;;\n;; * Conditions are classes organized in a type hierarchy\n;;   (e.g. `type-error' as subtype of `error'), whereas restarts are\n;;   plain names (e.g. `abort' and `continue').\n;;\n;; * A condition handler function always receives only a single\n;;   argument, the condition, whereas a restart handler function\n;;   receives any number of arguments passed to `invoke-restart'.\n;;\n;; * A condition handler function may decline handling a condition by\n;;   returning normally instead of performing a nonlocal exit; this\n;;   causes the search for a handler to continue.  In contrast, if a\n;;   restart handler function returns normally, the restart is\n;;   considered handled, and its result value is returned from\n;;   `invoke-restart'.\n;;\n;; * A restart handler may optionally have an interactive function\n;;   that prompts the user for arguments when the restart is invoked\n;;   by `invoke-restart-interactively'.\n;;\n;; * A restart handler may optionally be associated with a list of\n;;   conditions, to tell apart restarts belonging to different,\n;;   concurrently signalled conditions.\n;;\n;; We follow the Common Lisp condition system quite closely (including\n;; details like the condition firewall), with some minor differences:\n;;\n;; 1) For simplicity, the syntaxes of `handler-case' and\n;;    `restart-case' are equal to the syntaxes of the lower-level\n;;    `handler-bind' and `restart-bind' functions.  There is no extra\n;;    \"user interface\" processing for the higher-level functions.\n;;\n;;    Likewise, `signal' and `error' do not support creating simple\n;;    conditions from formatting strings and arguments, you must\n;;    always pass in a fully formed condition yourself.\n;;\n;; 2) There is no `with-condition-restarts'.  Instead there is an\n;;    additional keyword, `:associated-conditions', in the\n;;    handler-specs of `restart-bind' and `restart-case' that\n;;    establishes the associations.\n;;\n;;    Alternatively, `signal' and `error' also support the\n;;    establishment of restart handlers associated with the signalled\n;;    condition.\n;;\n;;    A call to `signal' (or `error') with restart handler specs like:\n;;\n;;    (signal some-condition\n;;      (continue (lambda () ...)))\n;;\n;;    is equivalent to:\n;;\n;;    (restart-case ((continue (lambda () ...)\n;;                             :associated-conditions (list some-condition)))\n;;      (signal some-condition))\n;;\n;; 3) Every restart must have a non-nil name; anonymous restarts\n;;    are not supported.\n\n(defclass handler-frame ()\n  (handlers\n   parent-frame?)\n  (:documentation \"Instances of this class make up the condition and\nrestart handler chains.  Each frame stores a list of HANDLERS and an\noptional PARENT-FRAME?.\"))\n\n(defclass condition-handler ()\n  (condition-class\n   handler-function)\n  (:documentation \"A condition handler is handling a particular\nCONDITION-CLASS (can be `object' to handle all conditions).  The\nHANDLER-FUNCTION receives a signalled condition as its single\nargument.\"))\n\n(defclass restart-handler ()\n  (restart-name\n   handler-function\n   interactive-function?\n   associated-conditions)\n  (:documentation \"A restart handler is handling a particular\nRESTART-NAME.  The HANDLER-FUNCTION receives the arguments passed to\n`invoke-restart'.  The optional INTERACTIVE-FUNCTION? is called by\n`invoke-restart-interactively' and should prompt the user for required\narguments.  The ASSOCIATED-CONDITIONS are a list of conditions with\nwhich this handler is associated.  If the list is empty, the handler\nis applicable to any condition.  If it's not empty, the handler is\napplicable only to conditions in the list.\"))\n\n(defdynamic *condition-handler-frame?* #nil\n  \"An option holding the innermost condition handler frame.\")\n\n(defdynamic *restart-handler-frame?* #nil\n  \"An option holding the innermost restart handler frame.\")\n\n(defun lispx::make-handler-bind-operator (#'handler-spec-parser handler-frame-dynamic)\n  \"Metaprogramming utility to create `handler-bind' and `restart-bind'.\nIt is parameterized by a function that parses the handler\nspecifications of the `handler-bind' and `restart-bind' forms and\nproduces handlers from them, as well as the dynamic variable holding\nthe handler chain (the variable itself as a first class object, not\nits value, so it can be used with `progv').\"\n  (vau (handler-specs . forms) env\n    (let ((handler-frame (make-instance\n                          #^handler-frame\n                          :handlers (mapcar (lambda (spec)\n                                              (handler-spec-parser spec env))\n                                            handler-specs)\n                          :parent-frame? (dynamic handler-frame-dynamic))))\n      (progv (list handler-frame-dynamic) (list (some handler-frame))\n        (eval (list* #'progn forms) env)))))\n\n(def #'handler-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((class-name function-form) env)\n     (make-instance #^condition-handler\n                    :condition-class\n                    (the class (find-class class-name env))\n                    :handler-function\n                    (the function (eval function-form env))))\n   *condition-handler-frame?*)\n  \"Establish condition handlers specified by HANDLER-SPECS around FORMS.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (condition-class handler-function))\")\n\n(def #'restart-bind\n  (lispx::make-handler-bind-operator\n   (lambda ((restart-name function-form . properties) env)\n     (make-instance #^restart-handler\n                    :restart-name\n                    (the symbol restart-name)\n                    :handler-function\n                    (the function (eval function-form env))\n                    :interactive-function?\n                    (when-option (i-f-form (get? properties :interactive-function))\n                      (some (the function (eval i-f-form env))))\n                    :associated-conditions\n                    (when-option (a-cs-form (get? properties :associated-conditions))\n                      (the list (eval a-cs-form env)))))\n   *restart-handler-frame?*)\n  \"Establish restart handlers specified by HANDLER-SPECS around FORMS.\nYou should usually prefer `restart-case'.\n$(type fexpr)\n$(fn (handler-specs . forms))\n$(syntax handler-spec (restart-name handler-function . properties))\n$(syntax properties (&key interactive-function associated-conditions))\")\n\n(defun lispx::make-handler-case-operator (#'handler-bind-operator)\n  \"Metaprogramming utility to create `handler-case' / `restart-case'\nfrom `handler-bind' / `restart-bind'.  The `*-case' operators unwind\nthe stack before a handler is called.  We do this with an outer exit\nand an inner trampoline, both wrapped around the original `*-bind'\noperator.  The original form's handler functions are replaced with\nfunctions that use the trampoline.  If a condition is signalled / a\nrestart is invoked during the evaluation of the body forms, they\nunwind the stack by jumping into the trampoline, and call the original\nhandler function there.  If no condition is signalled / no restart is\ninvoked, we return from the outer exit, ignoring the trampoline.\"\n  (vau (handler-specs . forms) env\n    (block exit\n      ((block trampoline\n         (eval (list #'handler-bind-operator\n                     (mapcar (lambda ((name function-form . properties))\n                               (list* name\n                                      (lambda args\n                                        (return-from trampoline\n                                                     (lambda ()\n                                                       (apply (eval function-form env) args))))\n                                      properties))\n                             handler-specs)\n                     (list #'return-from exit (list* #'progn forms)))\n               env))))))\n\n(def #'handler-case (lispx::make-handler-case-operator #'handler-bind)\n  \"Like `handler-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(def #'restart-case (lispx::make-handler-case-operator #'restart-bind)\n  \"Like `restart-bind', but the stack is unwound before a handler function is called.\n$(type fexpr)\n$(fn (handler-specs . forms))\")\n\n(defun _signal_ (condition)\n  \"Utility to signal the CONDITION.  If the signal is unhandled,\nreturn void.  See `signal'.\"\n  (loop-let -signal- ((handler-frame? (dynamic *condition-handler-frame?*)))\n    ;; Payload to `lispx::find-handler?' is always nil for condition handlers.\n    (if-option ((handler frame) (lispx::find-handler? condition handler-frame? #nil))\n      (progn\n        ;; Handler found; call it, passing along frame.\n        (lispx::call-condition-handler handler frame condition)\n        ;; Signal unhandled: continue search for handlers.\n        (-signal- (slot-value frame 'parent-frame?)))\n      ;; No handler found, return void.\n      #void)))\n\n(defun lispx::call-condition-handler (handler handler-frame condition)\n  \"Call a condition HANDLER's handler function with the given\nCONDITION.  During the call, the condition handler chain gets swapped\nto that chain that was active at the time the handler was established.\nThis is the so-called \\\"condition firewall\\\".  The chain gets passed\nin as the value of HANDLER-FRAME.\"\n  (dynamic-let ((*condition-handler-frame?* (slot-value handler-frame 'parent-frame?)))\n    (lispx::apply-handler-function handler (list condition))))\n\n(defun lispx::apply-handler-function (handler arguments)\n  \"Utility to call a condition or restart HANDLER's handler function\nwith a list of ARGUMENTS.\"\n  (apply (slot-value handler 'handler-function) arguments))\n\n(defun _error_ (condition)\n  \"Utility to signal the CONDITION.  If the condition is unhandled,\ninvoke the debugger.  Therefore never returns normally.  See `error'.\"\n  (signal condition)\n  (invoke-debugger condition))\n\n(defun lispx::make-signal-with-restarts-operator (#'signal-operator)\n  \"Metaprogramming utility to create the `signal' / `error' operators\nthat take restart handler-specs from the `_signal_' / `_error_' ones\nthat don't.\"\n  (vau (condition . handler-specs) env\n    (let ((c (eval condition env)))\n      (flet ((append-associated-condition (handler-spec)\n               (append handler-spec (list :associated-conditions (list #'list c)))))\n        (eval (list #'restart-case (mapcar #'append-associated-condition handler-specs)\n                    (list #'signal-operator c))\n              env)))))\n\n(def #'signal (lispx::make-signal-with-restarts-operator #'_signal_)\n  \"Signal the CONDITION.  If the signal is unhandled, return void.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(def #'error (lispx::make-signal-with-restarts-operator #'_error_)\n  \"Signal the CONDITION.  If the condition is unhandled, invoke the\ndebugger.  Therefore never returns normally.\nRestart handlers that are associated with the condition can be bound\nas per `restart-case'.  The handlers should not specify the\n`:associated-conditions' property, as it will be set automatically.\n$(type fexpr)\n$(fn (condition . handler-specs))\")\n\n(defun invoke-restart (restart-designator . arguments)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', with the given ARGUMENTS.  Signal an\nerror if the restart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (#ignore) arguments)))\n\n(defun invoke-restart-interactively (restart-designator)\n  \"Invoke the restart designated by RESTART-DESIGNATOR, which can be a\nsymbol or a `restart-handler', by prompting the user for arguments via\nthe restart's optional interactive function.  Signal an error if the\nrestart is not found.\"\n  (lispx::invoke-restart-with-arguments-producing-function\n   restart-designator\n   (lambda (restart-handler)\n     (when-option (#'i-f (slot-value restart-handler 'interactive-function?))\n       (i-f)))))\n\n(defun lispx::invoke-restart-with-arguments-producing-function (restart-designator #'function)\n  \"Utility to invoke the restart designated by RESTART-DESIGNATOR,\nwhich can be a symbol or a `restart-handler', with an arguments list\nproduced by FUNCTION (which receives a `restart-handler' as argument).\"\n  (etypecase restart-designator\n    (symbol\n     (if-option (restart-handler (find-restart? restart-designator))\n       (lispx::apply-handler-function restart-handler (function restart-handler))\n       (error (make-restart-error restart-designator))))\n    (restart-handler\n     (lispx::apply-handler-function restart-designator (function restart-designator)))))\n\n(defun lispx::find-handler? (object handler-frame? payload?)\n  \"Utility to find both condition handlers and restart handlers.\nThe OBJECT can be either a condition or a restart name.  The\nHANDLER-FRAME? is the handler frame where the search should start\n(always the innermost handler frame at the start of the search).\n\nReturn an option of the found handler and the frame establishing it as\na two-element list.  The frame is needed so that we can access its\nparent in the implementation of the condition firewall (see\n`lispx::call-condition-handler').\n\nThe PAYLOAD? parameter can be used to pass in an optional condition if\nwe are looking for a restart handler (see `find-restart?').  If we are\nlooking for a condition handler, it is always nil.\"\n  (when-option (handler-frame handler-frame?)\n    (block found\n      (dolist (handler (slot-value handler-frame 'handlers))\n        (when (lispx::handler-applicable-p handler object payload?)\n          (return-from found (some (list handler handler-frame)))))\n      (lispx::find-handler? object (slot-value handler-frame 'parent-frame?) payload?))))\n\n(defun find-restart? (name . condition?)\n  \"Find a restart handler by NAME, optionally limited to restarts\nassociated with a particular CONDITION?.\"\n  (when-option ((handler #ignore) (lispx::find-handler?\n                                   name\n                                   (dynamic *restart-handler-frame?*)\n                                   condition?))\n    (some handler)))\n\n(defgeneric lispx::handler-applicable-p (handler object payload?)\n  (:documentation \"Return true if a condition or restart HANDLER is\napplicable, false otherwise.  The OBJECT can be a condition or a\nrestart name.  The PAYLOAD? is only used for restart handlers, and\nalways nil for condition handlers.\"))\n\n(defmethod lispx::handler-applicable-p ((handler condition-handler) condition #nil)\n  \"A condition handler is applicable if the condition is an instance\nof its condition class.\"\n  (typep condition (slot-value handler 'condition-class)))\n\n(defmethod lispx::handler-applicable-p ((handler restart-handler) restart-name condition?)\n  \"A restart handler is applicable to a restart name and optional condition...\"\n  ;; ...if the restart name matches the handler's restart name, and...\n  (and (eq restart-name (slot-value handler 'restart-name))\n       ;; ...the handler is applicable to the condition.\n       (lispx::restart-handler-applicable-to-condition-p handler condition?)))\n\n(defun lispx::restart-handler-applicable-to-condition-p (handler condition?)\n  \"A restart handler is applicable to an optional condition...\"\n  (if-option (condition condition?)\n    ;; ...if we are looking for restarts associated with a\n    ;; particular condition...\n    (let ((a-cs (slot-value handler 'associated-conditions)))\n      (if (null a-cs)\n          ;; ...if the restart handler is not associated with\n          ;; particular conditions,...\n          #t\n          ;; ...or if the condition we are looking is one of the\n          ;; handler's associated conditions.\n          (consp (member condition a-cs))))\n    ;; ...if we are not looking for restarts associated with a\n    ;; particular condition then every handler is applicable.\n    #t))\n\n(defun compute-restarts condition?\n  \"Return the list of currently active restarts, with most recently\nestablished ones first, optionally limited to those that are\nexplicitly associated with the supplied CONDITION? or not associated\nwith any condition.\"\n  (loop-let -compute-restarts- ((restarts '())\n                                (handler-frame? (dynamic *restart-handler-frame?*)))\n    (if-option (handler-frame handler-frame?)\n      (-compute-restarts- (append restarts\n                                  (remove-if\n                                   (lambda (restart)\n                                     (not (lispx::restart-handler-applicable-to-condition-p\n                                           restart condition?)))\n                                   (slot-value handler-frame 'handlers)))\n                          (slot-value handler-frame 'parent-frame?))\n      restarts)))\n\n(defclass restart-error (error)\n  (restart-name)\n  (:documentation \"Signalled when no handler for RESTART-NAME is found.\"))\n\n(defun make-restart-error (restart-name)\n  \"Create a new `restart-error' for the given RESTART-NAME.\"\n  (make-instance #^restart-error :restart-name restart-name))\n\n(defclass simple-error (error)\n  (message)\n  (:documentation \"Class for simple errors with a MESSAGE.\"))\n\n(defun make-simple-error (message)\n  \"Create a new simple error with a MESSAGE.\"\n  (make-instance #^simple-error :message message))\n\n(defun simple-error (message)\n  \"Signal a simple error with a MESSAGE.\"\n  (error (make-simple-error message)))\n");
+;// CONCATENATED MODULE: ./src/stream.lispx
+/* harmony default export */ const stream_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX Streams\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n;;; String Input Streams\n\n(defun make-string-input-stream (string)\n  \"Create a string input stream that reads from STRING.\"\n  (%make-string-input-stream string))\n\n(defexpr with-standard-input-from-string (string . forms) env\n  \"Evaluate FORMS with `*standard-input*' coming from STRING.\"\n  (let ((s (eval string env)))\n    (dynamic-let ((*standard-input* (make-string-input-stream s)))\n      (eval (list* #'progn forms) env))))\n\n;;; String Output Streams\n\n(defun make-string-output-stream ()\n  \"Construct an empty string output stream.\"\n  (%make-string-output-stream))\n\n(defun get-output-stream-string (stream)\n  \"Return the contents of the string output STREAM.\"\n  (%get-output-stream-string stream))\n\n(defexpr with-standard-output-to-string forms env\n  \"Evaluate FORMS with `*standard-output*' being collected in a string.\"\n  (dynamic-let ((*standard-output* (make-string-output-stream)))\n    (eval (list* #'progn forms) env)\n    (get-output-stream-string (dynamic *standard-output*))))\n\n;;; Miscellaneous\n\n(defun fresh-line stream?\n  \"Ensure that the following output appears on a new line by itself.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%fresh-line (optional stream? (dynamic *standard-output*))))\n\n(defun force-output stream?\n  \"Initiate the emptying of any internal buffers but don't wait for them to finish.\nThe optional STREAM? defaults to `*standard-output*'.\"\n  (%force-output (optional stream? (dynamic *standard-output*))))\n");
+;// CONCATENATED MODULE: ./src/read.lispx
+/* harmony default export */ const read_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX Reader\n;;;\n\n;; Copyright (c) 2021 Manuel J. Simoni\n\n(defun read arguments\n  \"Reads an object from the STREAM (which defaults to\n`*standard-input*').  If EOF is reached, and `eof-error-p' is true\n(the default), `end-of-file' is signalled. If it is false, `eof-value'\nis returned (it defaults to void).\n$(fn (&optional stream eof-error-p eof-value))\"\n  (apply #'stream-read (optionals arguments (dynamic *standard-input*) #t #void)))\n\n;;; Unstable/Experimental API:\n\n(defgeneric stream-read (stream eof-error-p eof-value)\n  (:documentation \"Underlying, generic implementation of `read'.\nEvery stream class can provide a specialized method.\"))\n\n(defmethod stream-read ((stream input-stream) eof-error-p eof-value)\n  \"The default implementation of `stream-read' calls a built-in\nfunction written in JS.\"\n  (%read stream eof-error-p eof-value))\n");
+;// CONCATENATED MODULE: ./src/print.lispx
+/* harmony default export */ const print_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX Printer\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun write (object . keywords)\n  \"Write OBJECT to STREAM (defaults to `*standard-output*').  Main\nprinter entry point.\n$(fn (object &key stream))\"\n  (%write object (optional (get? keywords :stream) (dynamic *standard-output*))))\n\n(defun write-to-string (object)\n  \"Create a string consisting of the printed representation of object.\"\n  (with-standard-output-to-string (write object)))\n\n(defun print1 (object)\n  \"Print OBJECT readably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #t))\n    (write object)))\n\n(defun uprint1 (object)\n  \"Print OBJECT unreadably on the current line.  May or may not force\nthe output.\"\n  (dynamic-let ((*print-escape* #f))\n    (write object)))\n\n(defun print (object)\n  \"Print OBJECT readably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (print1 object)\n    (force-output)))\n\n(defun uprint (object)\n  \"Print OBJECT unreadably on a fresh line and force the output.\"\n  (fresh-line)\n  (prog1 (uprint1 object)\n    (force-output)))\n");
+;// CONCATENATED MODULE: ./src/js.lispx
+/* harmony default export */ const js_lispx = (";;;                                                     -*- Lisp -*-\n;;; LispX JavaScript Interface\n;;;\n\n;; Copyright (c) 2021, 2022 Manuel J. Simoni\n\n(defun js-eq (a b)\n  \"Return true if the values A and B are equal per JavaScript's strict\nequality, false otherwise.\"\n  (eq a b))\n\n(defun apply-js-function (js-function arguments)\n  \"Call JS-FUNCTION with a list of ARGUMENTS.\"\n  (apply (to-lisp-function js-function) arguments))\n\n(defun call-js-function (js-function . arguments)\n  \"Call JS-FUNCTION with the rest ARGUMENTS.\"\n  (apply-js-function js-function arguments))\n\n(defmacro js-lambda (parameter-tree . forms)\n  \"Construct a lambda with the given PARAMETER-TREE and body FORMS\nthat's callable from JS.\"\n  (list #'to-js-function\n        (list #'lambda parameter-tree\n              ;; This mirrors eval_form() in control.mjs.\n              ;; Check the docs there for an explanation.\n              (list #'push-subcont-barrier\n                    (list* #'push-prompt '+root-prompt+\n                           forms)))))\n\n(defun js-global (name)\n  \"Access a JS global by NAME (a string).  Return undefined if the\nglobal doesn't exist.\"\n  (%js-global name))\n\n(defun js-new (constructor . arguments)\n  \"Call the JS CONSTRUCTOR function with ARGUMENTS.\"\n  (apply #'%js-new (cons constructor arguments)))\n\n(defun js-get (object name)\n  \"Access a property of a JS object by NAME (a string).\"\n  (%js-get object name))\n\n(defun to-lisp-boolean (js-boolean)\n  \"Convert the JS-BOOLEAN to a Lisp boolean.\"\n  (%to-lisp-boolean js-boolean))\n\n(defun to-js-boolean (lisp-boolean)\n  \"Convert the LISP-BOOLEAN to a JS boolean.\"\n  (%to-js-boolean lisp-boolean))\n\n(defun to-lisp-number (js-number)\n  \"Convert the JS-NUMBER to a Lisp number.\"\n  (%to-lisp-number js-number))\n\n(defun to-js-number (lisp-number)\n  \"Convert the LISP-NUMBER to a JS number.\"\n  (%to-js-number lisp-number))\n\n(defun to-lisp-string (js-string)\n  \"Convert the JS-STRING to a Lisp string.\"\n  (%to-lisp-string js-string))\n\n(defun to-js-string (lisp-string)\n  \"Convert the LISP-STRING to a JS string.\"\n  (%to-js-string lisp-string))\n\n(defun to-lisp-function (js-function)\n  \"Convert the JS-FUNCTION to a Lisp function.\"\n  (%to-lisp-function js-function))\n\n(defun to-js-function (lisp-operator)\n  \"Convert the LISP-OPERATOR to a JS function.\"\n  (%to-js-function lisp-operator))\n\n(defun list-to-js-array (list)\n  \"Turn a list into a JS array.\"\n  (%list-to-js-array list))\n\n(defun js-array-to-list (array)\n  \"Turn a JS array into a list.\"\n  (%js-array-to-list array))\n\n(defun js-array elements\n  \"Create a new JS array from the given elements.\"\n  (list-to-js-array elements))\n\n(defmethod elt ((seq object) index)\n  \"`elt' for JS arrays.  We must put the method on `object' because we\ndon't have a more precise type for them.\"\n  (if (or (< index 0) (>= index (length seq)))\n      (error (make-instance #^out-of-bounds-error))\n      (%js-elt seq index)))\n\n(defmethod length ((seq object))\n  \"`length' for JS arrays.\"\n  (to-lisp-number (js-get seq \"length\")))\n\n(defun apply-js-method (receiver name arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the list of ARGUMENTS.\"\n  (%apply-js-method receiver name arguments))\n\n(defun call-js-method (receiver name . arguments)\n  \"Invoke a JS method by NAME (a string) on the RECEIVER object,\npassing along the rest ARGUMENTS.\"\n  (apply #'apply-js-method (list receiver name arguments)))\n\n(defun js-method (method-name)\n  \"Create a function that when called will call the specified method.\"\n  (lambda (receiver . arguments)\n    (apply-js-method receiver method-name arguments)))\n\n(defmacro define-js-method (name method-name)\n  \"Define a new function with the given NAME (a symbol) that invokes a\nJS method named METHOD-NAME (a string).  The function takes one or\nmore arguments.  The first argument is the receiver of the method\ncall (\\\"this\\\"), the rest are the normal method arguments.\"\n  (list #'def (function-symbol name) (js-method method-name)))\n\n(defun js-undefined-option (value)\n  \"Turn a value that may be undefined into an option.\"\n  (if (eq value +js-undefined+)\n      #nil\n      (some value)))\n\n(defun js-null-option (value)\n  \"Turn a value that may be null into an option.\"\n  (if (eq value +js-null+)\n      #nil\n      (some value)))\n\n(defun await (promise)\n  \"Wait for the PROMISE to become fulfilled or rejected.\"\n  ;; Capture to the default prompt, and...\n  (yield k\n    ;; ...return a new promise there.  From the caller's perspective,\n    ;; we are now paused -- but from context's perspective, we are\n    ;; returning a promise.  See `deftest' for how this nicely\n    ;; interacts with promise-based test frameworks.\n    (call-js-method promise \"then\"\n                    (js-lambda (value)\n                      ;; When the original promise is fulfilled with a\n                      ;; value, reinstate the continuation, returning\n                      ;; the value where `await' was called.\n                      (resume k value))\n                    (js-lambda (error)\n                      ;; When the original promise is rejected,\n                      ;; reinstate the continuation, signalling an\n                      ;; error where `await' was called.\n                      (resume k (error error))))))\n\n(defun sync (#'fun)\n  \"Create a function that will await an underlying function.\"\n  (lambda args (await (apply #'fun args))))\n\n(defmacro define-js-method/sync (name method-name)\n  \"Like `define-js-method', but awaits the method result.\"\n  (list #'def (function-symbol name) (sync (js-method method-name))))\n\n(defun sleep (ms)\n  \"Sleep for some milliseconds.\"\n  (await (%sleep ms)))\n\n(defun js-log arguments\n  \"Log the ARGUMENTS to the JS console.\"\n  (apply #'%js-log arguments))\n");
+;// CONCATENATED MODULE: ./src/vm.mjs
 /*
  * LispX Virtual Machine
  * Copyright (c) 2021 Manuel J. Simoni
@@ -4563,23 +4342,23 @@ class VM
         /*
          * Load modules.
          */
-        (0,_eval_mjs__WEBPACK_IMPORTED_MODULE_1__.init_eval)(this);
-        (0,_control_mjs__WEBPACK_IMPORTED_MODULE_2__.init_control)(this);
-        (0,_seq_mjs__WEBPACK_IMPORTED_MODULE_3__.init_seq)(this);
-        (0,_stream_mjs__WEBPACK_IMPORTED_MODULE_4__.init_stream)(this);
-        (0,_read_mjs__WEBPACK_IMPORTED_MODULE_5__.init_read)(this);
-        (0,_print_mjs__WEBPACK_IMPORTED_MODULE_6__.init_print)(this);
-        (0,_js_mjs__WEBPACK_IMPORTED_MODULE_7__.init_js)(this);
+        init_eval(this);
+        init_control(this);
+        init_seq(this);
+        init_stream(this);
+        init_read(this);
+        init_print(this);
+        init_js(this);
 
         /*
          * Evaluate the bootstrap code.
          */
-        this.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_8__["default"]);
-        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__["default"]);
-        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_10__["default"]);
-        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_11__["default"]);
-        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_12__["default"]);
-        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_13__["default"]);
+        this.eval_js_string(boot_lispx);
+        this.eval_js_string(cond_sys_lispx);
+        this.eval_js_string(stream_lispx);
+        this.eval_js_string(read_lispx);
+        this.eval_js_string(print_lispx);
+        this.eval_js_string(js_lispx);
     }
 
     /*
@@ -4647,7 +4426,7 @@ class VM
     num(js_string_or_number)
     {
         this.assert_type(js_string_or_number, this.type_or("string", "number"));
-        return new this.Number(new big_js__WEBPACK_IMPORTED_MODULE_0__["default"](js_string_or_number));
+        return new this.Number(new big_js_big(js_string_or_number));
     }
 
     /*
@@ -5042,7 +4821,7 @@ function init_vm(vm)
         constructor(big)
         {
             super();
-            vm.assert_type(big, big_js__WEBPACK_IMPORTED_MODULE_0__["default"]);
+            vm.assert_type(big, big_js_big);
             this.big = big;
         }
 
@@ -6028,8 +5807,6 @@ function init_vm(vm)
     vm.define_condition("assertion-error", vm.Assertion_error, vm.Error);
 
 };
-
-})();
 
 var __webpack_exports__VM = __webpack_exports__.VM;
 export { __webpack_exports__VM as VM };
