@@ -94,7 +94,7 @@ $(function() {
     {
         input_buffer.add_line(vm.str(line + "\n"));
         /*
-         * Force all output after each evaluation.
+         * Force any available output after each input.
          */
         vm.STANDARD_OUTPUT.get_value().force_output();
     }
