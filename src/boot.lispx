@@ -440,6 +440,10 @@ the value."
   "Signal an error if the BOOLEAN is false.  Otherwise return void."
   (unless boolean (error (make-instance #^assertion-error))))
 
+(defun compose (#'f #'g)
+  "Compose two functions, creating a new function equivalent to (G (F ...))."
+  (lambda args (g (apply #'f args))))
+
 (defun identity (x)
   "Identity function."
   x)
