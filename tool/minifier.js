@@ -106,3 +106,71 @@ function minify_defclass(form)
 {
     return vm.list_subseq(form, 0, 4);
 }
+
+/*
+ * Self-test -- this should really be run from somewhere else but I
+ * don't know where atm (since it's Node code), so we just always run
+ * it "in prod".
+ */
+const input = `
+(defun foo ())
+(defun bar () "Not a docstring") ; a comment
+(defun quux () "A docstring" 100 1000)
+(def x 1 "A docstring")
+(def x 2) (def x 3)
+(%def x 1 "A docstring")
+x
+y
+(defdynamic x)
+12
+(foo)
+(defdynamic y 2)
+; a comment
+(defdynamic z 3 "A docstring")
+(defclass a () ())
+
+; Some whitespace
+                    x
+
+         (defclass a () () (:documentation "A docstring"))
+
+(defgeneric foo (self) (:documentation "A docstring"))
+(defgeneric foo (self))
+(defmethod foo ((self a)) "A docstring" 12)
+(defmethod foo ((self a)) "Not a docstring")
+(defmethod foo ((self a)))
+(defexpr foo () env)
+(defexpr foo () env "Not a docstring")
+(defexpr foo () env "A docstring" 100 1000)
+`;
+
+const expected = [
+    `(defun foo ())`,
+    `(defun bar () "Not a docstring")`,
+    `(defun quux () 100 1000)`,
+    `(def x 1)`,
+    `(def x 2)`,
+    `(def x 3)`,
+    `(%def x 1)`,
+    `x`,
+    `y`,
+    `(defdynamic x)`,
+    `12`,
+    `(foo)`,
+    `(defdynamic y 2)`,
+    `(defdynamic z 3)`,
+    `(defclass a () ())`,
+    `x`,
+    `(defclass a () ())`,
+    `(defgeneric foo (self))`,
+    `(defgeneric foo (self))`,
+    `(defmethod foo ((self a)) 12)`,
+    `(defmethod foo ((self a)) "Not a docstring")`,
+    `(defmethod foo ((self a)))`,
+    `(defexpr foo () env)`,
+    `(defexpr foo () env "Not a docstring")`,
+    `(defexpr foo () env 100 1000)`,
+].join(" ");
+
+if (!(expected === module.exports(input)))
+    throw "minifier borken";
