@@ -13,8 +13,10 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = [
     /*
-     * Build unminimized main outputs.
+     * Build main outputs.
      */
+    make_entry_umd(true),
+    make_entry_esm(true),
     make_entry_umd(false),
     make_entry_esm(false),
     /*
@@ -33,6 +35,12 @@ module.exports = [
  */
 function make_entry(filename, libraryTarget, minimize)
 {
+    const lisp_loaders = [ { loader: "raw-loader" } ];
+    /*
+     * Run our custom minifier.
+     */
+    if (minimize)
+        lisp_loaders.push({ loader: "./tool/minifier.js" });
     return {
         entry: "./src/vm.mjs",
         output: {
@@ -44,8 +52,7 @@ function make_entry(filename, libraryTarget, minimize)
             rules: [
                 {
                     test: /\.lispx$/,
-                    use: [ { loader: "raw-loader" },
-                           { loader: "./tool/minifier.js" } ]
+                    use: lisp_loaders
                 }
             ]
         },
@@ -66,14 +73,16 @@ function make_entry(filename, libraryTarget, minimize)
 
 function make_entry_umd(minimize)
 {
-    const entry = make_entry("lispx-vm.umd.js", "umd", minimize);
+    const name = minimize ? "lispx-vm.umd.min.js" : "lispx-vm.umd.js";
+    const entry = make_entry(name, "umd", minimize);
     entry.output.library = "lispx-vm";
     return entry;
 }
 
 function make_entry_esm(minimize)
 {
-    const entry = make_entry("lispx-vm.mjs", "module", minimize);
+    const name = minimize ? "lispx-vm.min.mjs" : "lispx-vm.mjs";
+    const entry = make_entry(name, "module", minimize);
     entry.experiments = {
         outputModule: true
     };
@@ -139,7 +148,7 @@ function make_test_entry_node()
     const entry = make_test_entry("lispx-test-node",
                                   "test/lispx-test-node.umd.js");
     entry.externals = {
-        "lispx-vm": "../lispx-vm.umd.js"
+        "lispx-vm": "../lispx-vm.umd.min.js"
     };
     return entry;
 }

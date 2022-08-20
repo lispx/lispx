@@ -8,13 +8,13 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("../lispx-vm.umd.js"));
+		module.exports = factory(require("../lispx-vm.umd.min.js"));
 	else if(typeof define === 'function' && define.amd)
-		define(["../lispx-vm.umd.js"], factory);
+		define(["../lispx-vm.umd.min.js"], factory);
 	else if(typeof exports === 'object')
-		exports["lispx-test-node"] = factory(require("../lispx-vm.umd.js"));
+		exports["lispx-test-node"] = factory(require("../lispx-vm.umd.min.js"));
 	else
-		root["lispx-test-node"] = factory(root["../lispx-vm.umd.js"]);
+		root["lispx-test-node"] = factory(root["../lispx-vm.umd.min.js"]);
 })(this, (__WEBPACK_EXTERNAL_MODULE_lispx_vm__) => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
@@ -535,9 +535,9 @@ eval("(function (global, factory) {\n\t true ? module.exports = factory() :\n\t0
 /***/ }),
 
 /***/ "lispx-vm":
-/*!*************************************!*\
-  !*** external "../lispx-vm.umd.js" ***!
-  \*************************************/
+/*!*****************************************!*\
+  !*** external "../lispx-vm.umd.min.js" ***!
+  \*****************************************/
 /***/ ((module) => {
 
 "use strict";

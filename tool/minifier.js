@@ -9,5 +9,11 @@ const vm = new VM();
 
 module.exports = function (source)
 {
-    return source;
+    const results = [];
+    const stream = new vm.String_input_stream(vm.str(source));
+    let form;
+    while ((form = vm.read(stream, false)) !== vm.void()) {
+        results.push(vm.write_to_js_string(form));
+    }
+    return results.join("");
 };
