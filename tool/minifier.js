@@ -16,8 +16,9 @@ module.exports = function (source)
     vm.assert_type(source, "string");
     const results = [];
     const stream = new vm.String_input_stream(vm.str(source));
+    const eof = {};
     let form;
-    while ((form = vm.read(stream, false)) !== vm.void()) {
+    while ((form = vm.read(stream, false, eof)) !== eof) {
         results.push(vm.write_to_js_string(minify(form)));
     }
     // Need to add a space or otherwise two consecutive symbols at the
