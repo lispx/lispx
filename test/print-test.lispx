@@ -3,14 +3,14 @@
 (defsuite *print-escape*
 
   (deftest *print-escape*.defined
-    (and (typep *print-escape* (class dynamic))
-         (typep (dynamic *print-escape*) (class boolean)))))
+    (and (typep *print-escape* #^dynamic)
+         (typep (dynamic *print-escape*) #^boolean))))
 
 (defsuite *print-level?*
 
   (deftest *print-level?*.defined
-    (and (typep *print-level?* (class dynamic))
-         (typep (dynamic *print-level?*) (class list))))
+    (and (typep *print-level?* #^dynamic)
+         (typep (dynamic *print-level?*) #^list)))
 
   (defun write-with-level (object level)
     (dynamic-let ((*print-level?* (some level)))
@@ -32,7 +32,7 @@
   (deftest *print-level?*.standard-object
     (progn
       (defclass a () (slot))
-      (defun make-a (slot) (make-instance (class a) :slot slot))
+      (defun make-a (slot) (make-instance #^a :slot slot))
       (def a (make-a (make-a (make-a 12))))
       (assert (= "#" (write-with-level a 0)))
       (assert (= "#<a :slot #>" (write-with-level a 1)))

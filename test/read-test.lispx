@@ -47,7 +47,7 @@
   (deftest read.3a
     (signals-error
      (with-standard-input-from-string "" (read 'not-a-stream))
-     unbound-method-error :class (class symbol) :method-name 'stream-read))
+     unbound-method-error :class #^symbol :method-name 'stream-read))
 
   (deftest read.3b
     (signals-error

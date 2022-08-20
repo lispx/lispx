@@ -1485,26 +1485,6 @@
      (apply 12 '())
      type-error :datum 12 :expected-type 'function)))
 
-(defsuite class
-
-  (deftest class.1
-    (eq (class string) (class-of "foo")))
-
-  (deftest class.2
-    (signals-error
-     (class)
-     match-error))
-
-  (deftest class.3
-    (signals-error
-     (class "string")
-     type-error :datum "string" :expected-type 'symbol))
-
-  (deftest class.4
-    (signals-error
-     (class does-not-exist)
-     unbound-symbol-error :symbol (class-symbol 'does-not-exist))))
-
 (defsuite find-class
 
   (deftest find-class.1

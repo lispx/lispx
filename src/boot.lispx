@@ -661,12 +661,6 @@ $(type function)")
 
 ;;; Classes
 
-(defmacro class (name)
-  "Access a class by the (unevaluated) NAME symbol in the current
-environment.  This is required because classes have their own
-namespace."
-  (class-symbol name))
-
 (defun find-class (name environment)
   "Look up a class based on its NAME symbol (evaluated) in the given ENVIRONMENT."
   (eval (class-symbol name) environment))
