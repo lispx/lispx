@@ -235,7 +235,7 @@ FORMS.  Used by `labels'."
 
 (defun lispx::make-function-binding ((name parameter-tree . forms))
   "Utility to turn a function binding as it appears in `flet' and
-`labels' into a binding for `let' or `%letrec'."
+`labels' into a binding for `let' or `lispx::letrec'."
   (list (function-symbol name) (list* #'lambda parameter-tree forms)))
 
 (defmacro flet (function-bindings . forms)

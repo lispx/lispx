@@ -44,7 +44,8 @@ function make_entry(filename, libraryTarget, minimize)
             rules: [
                 {
                     test: /\.lispx$/,
-                    type: "asset/source"
+                    use: [ { loader: "raw-loader" },
+                           { loader: "./tool/minifier.js" } ]
                 }
             ]
         },
@@ -101,7 +102,7 @@ function make_test_entry(library, filename)
             rules: [
                 {
                     test: /\.lispx$/,
-                    type: "asset/source"
+                    use: [ { loader: "raw-loader" }
                 }
             ]
         },
