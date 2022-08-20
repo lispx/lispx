@@ -17,10 +17,11 @@ module.exports = function (source)
         results.push(vm.write_to_js_string(minify(form)));
     }
     // Need to add some space or otherwise two consecutive symbols at
-    // the toplevel would concatenated.  Could be cleverer and take
-    // into consideration whether next form starts with terminating
-    // macro char, and drop the space if it does.  (We could also dive
-    // into nested forms and remove spaces from there).
+    // the toplevel would get concatenated.  Could be cleverer and
+    // take into consideration whether next form starts with
+    // terminating macro char, and drop the space if it does.  (We
+    // could also dive into nested forms and remove spaces from
+    // there).
     return results.join(" ");
 };
 
