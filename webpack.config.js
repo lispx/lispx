@@ -102,7 +102,7 @@ function make_test_entry(library, filename)
             rules: [
                 {
                     test: /\.lispx$/,
-                    use: [ { loader: "raw-loader" }
+                    use: [ { loader: "raw-loader" } ]
                 }
             ]
         },
