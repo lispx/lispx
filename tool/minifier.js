@@ -1,7 +1,8 @@
 /*
  * A minifier for LispX files that plugs into Webpack as a loader.
  *
- * Removes comments, docstrings, and whitespace from the Lisp source.
+ * Removes comments, docstrings, and some whitespace from the Lisp
+ * source.
  */
 
 const VM = require("../dist/lispx-vm.umd.js").VM;
@@ -15,6 +16,11 @@ module.exports = function (source)
     while ((form = vm.read(stream, false)) !== vm.void()) {
         results.push(vm.write_to_js_string(minify(form)));
     }
+    // Need to add some space or otherwise two consecutive symbols at
+    // the toplevel would concatenated.  Could be cleverer and take
+    // into consideration whether next form starts with terminating
+    // macro char, and drop the space if it does.  (We could also dive
+    // into nested forms and remove spaces from there).
     return results.join(" ");
 };
 
@@ -40,7 +46,9 @@ const MINIFIERS = {
     "defun": minify_defun,
     "defmacro": minify_defun,
     "defmethod": minify_defun,
-    "defexpr": minify_defexpr
+    "defexpr": minify_defexpr,
+    "defgeneric": minify_defgeneric,
+    "defclass": minify_defclass
 };
 
 // (def name value docstring?)
@@ -83,4 +91,18 @@ function minify_defunlike_form(form, docstring_idx)
     } else {
         return form;
     }
+}
+
+// (defgeneric name (args) . properties)
+//  0          1    2        3
+function minify_defgeneric(form)
+{
+    return vm.list_subseq(form, 0, 3);
+}
+
+// (defclass name   (superclass?) slot-specs . properties)
+//  0        1      2             3            4
+function minify_defclass(form)
+{
+    return vm.list_subseq(form, 0, 4);
 }
