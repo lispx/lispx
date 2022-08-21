@@ -33,7 +33,7 @@ const REPL_CODE = `
 (defun repl:print-banner (condition k)
   (uprint "Debugger invoked on condition:")
   (print condition)
-  (uprint "Available restarts (use (invoke-restart 'name) to invoke):")
+  (uprint "Available restarts (use (invoke-restart 'name ...) to invoke):")
   (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
         (compute-restarts condition))
   (uprint "Backtrace:")
@@ -122,9 +122,8 @@ $(function() {
     });
     term.set_prompt(PROMPT);
 
-    const stdout = new vm.REPL_output_stream(function (output) {
-        term.echo(output.to_js_string(), { newline: false });
-    });
+    const stdout = new vm.REPL_output_stream((output) =>
+        term.echo(output.to_js_string(), { newline: false }));
     vm.STANDARD_OUTPUT.set_value(stdout);
 
     const stdin = new vm.REPL_input_buffer();
