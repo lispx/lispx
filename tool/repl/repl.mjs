@@ -2,9 +2,6 @@ import { VM } from "../../dist/lispx-vm.min.mjs";
 import { init_repl_stream } from "./repl_stream.mjs";
 
 const REPL_CODE = `
-(defconstant repl:+root-prompt+ 'repl:root-prompt
-  "The prompt used for blocking on IO.")
-
 (defconstant repl:+environment+ (the-environment)
   "The environment in which REPL expressions are evaluated.")
 
@@ -45,7 +42,7 @@ const REPL_CODE = `
 
 (defun repl:run ()
   "Run the REPL."
-  (push-prompt repl:+root-prompt+
+  (push-prompt +root-prompt+
     (repl:repl)))
 
 (defun repl:repl ()
@@ -86,11 +83,11 @@ when the input stream is a 'repl:input-buffer'."
                              ;; and save continuation in wake-up function.
                              (return-from trampoline
                                (lambda ()
-                                 (take-subcont repl:+root-prompt+ k
+                                 (take-subcont +root-prompt+ k
                                    (repl:%set-input-buffer-wake-up-function
                                     (dynamic *standard-input*)
                                     (lambda ()
-                                      (push-delim-subcont repl:+root-prompt+ k))))))))
+                                      (push-delim-subcont +root-prompt+ k))))))))
                           (reader-error
                            (lambda (e)
                              ;; We got a READER-ERROR -- assume the
