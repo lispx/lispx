@@ -1170,7 +1170,7 @@ function init_eval(vm)
              *
              * It's important to create such a context here, or
              * otherwise a symbol lookup error here would return from
-             * the "parent" context in evaluate_cons().
+             * the "parent" context in vm.eval().
              */
             return vm.trap_exceptions(() => {
                 return env.lookup(operator_form.to_function_symbol());
