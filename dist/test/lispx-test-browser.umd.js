@@ -14548,8 +14548,8 @@ describe("Printer", () => {
             // Standard objects
             "#<error>":
             new print_test_vm.Error(),
-            "#<type-error :datum 12 :expected-type boolean>":
-            new print_test_vm.Type_error(print_test_vm.num(12), print_test_vm.sym("boolean")),
+            "#<unbound-symbol-error :environment #<environment> :message \"Unbound variable: x\" :symbol x>":
+            new print_test_vm.Unbound_symbol_error(print_test_vm.sym("x"), print_test_vm.make_environment()),
             // Constants
             "#t": print_test_vm.t(),
             "#f": print_test_vm.f(),

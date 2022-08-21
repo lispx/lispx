@@ -27,7 +27,7 @@ describe("Printer", () => {
             // Standard objects
             "#<error>":
             new vm.Error(),
-            `#<unbound-symbol-error :environment #<environment> :message "Unbound variable: x" :symbol x>`:
+            "#<unbound-symbol-error :environment #<environment> :message \"Unbound variable: x\" :symbol x>":
             new vm.Unbound_symbol_error(vm.sym("x"), vm.make_environment()),
             // Constants
             "#t": vm.t(),
