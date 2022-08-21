@@ -33,7 +33,7 @@ const REPL_CODE = `
 (defun repl:print-banner (condition k)
   (uprint "Debugger invoked on condition:")
   (print condition)
-  (uprint "Available restarts:")
+  (uprint "Available restarts (use (invoke-restart 'name) to invoke):")
   (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
         (compute-restarts condition))
   (uprint "Backtrace:")
@@ -93,7 +93,10 @@ when the input stream is a 'repl:input-buffer'."
                                       (push-delim-subcont repl:+root-prompt+ k))))))))
                           (reader-error
                            (lambda (e)
-                             ;; We got a reader error... clear input buffer...
+                             ;; We got a READER-ERROR -- assume the
+                             ;; input was faulty, so clear the input
+                             ;; buffer to not cause any further
+                             ;; confusion...
                              (repl:%clear-input-buffer (dynamic *standard-input*))
                              ;; ...and re-signal it.
                              (error e))))
@@ -115,7 +118,7 @@ $(function() {
     init_repl_stream(vm);
 
     const term = $('#terminal').terminal(input_handler, {
-        greetings: vm.write_to_js_string(vm.eval_js_string(`"Welcome to Nybble Lisp!"`))
+        greetings: "Welcome to Nybble Lisp!"
     });
     term.set_prompt(PROMPT);
 
