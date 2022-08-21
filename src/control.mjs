@@ -839,12 +839,12 @@ export function init_control(vm)
         exprs.reverse();
         /*
          * Drop_frames is the empirically determined amount of stack
-         * frames to hide from a stack trace - i.e. the code of signal
-         * handling and debugger etc.  If the boot.lispx and related
-         * code changes, this needs to be updated, too.
+         * inner frames to hide from a stack trace - i.e. the code of
+         * signal handling and debugger itself etc.  If the boot.lispx
+         * and related code changes, this needs to be updated, too.
          */
         const drop_frames = 28;
-        const show_frames = 16;
+        const show_frames = 10;
         const stdout = vm.STANDARD_OUTPUT.get_value();
         exprs.slice(drop_frames, drop_frames + (show_frames - 1)).forEach((expr) => {
             stdout.fresh_line();

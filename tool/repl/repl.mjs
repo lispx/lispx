@@ -2,25 +2,33 @@ import { VM } from "../../dist/lispx-vm.min.mjs";
 import { init_repl_stream } from "./repl_stream.mjs";
 
 const REPL_CODE = `
-;; This code expects that 'repl:+input-buffer+' as well as related
-;; functions are provided by JS.  See the file 'repl_stream.js'.
-;;
-;; 'repl:%%exit' which must also be provided is called to quit the REPL.
-
 (defconstant repl:+root-prompt+ 'repl:root-prompt
   "The prompt used for blocking on IO.")
 
 (defconstant repl:+environment+ (the-environment)
   "The environment in which REPL expressions are evaluated.")
 
+(defun invoke-debugger (condition)
+  (take-subcont +root-prompt+ k
+    (push-delim-subcont +root-prompt+ k
+      (restart-case ((abort (lambda () (uprint "Leaving debugger") #void)))
+        (uprint "Debugger invoked on condition:")
+        (print condition)
+        (uprint "Available restarts:")
+        (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
+              (compute-restarts condition))
+        (uprint "Backtrace:")
+        (%print-stacktrace k)
+        (loop
+          (fresh-line)
+          (print (eval (read) repl:+environment+)))))))
+
 (defun repl:run ()
   "Run the REPL."
   (push-prompt repl:+root-prompt+
-    (restart-case ((repl:quit (lambda () (repl:%%exit))))
-      (loop
-        (fresh-line)
-        (repl:%%display-waiting-for-input-sign repl:+input-buffer+)
-        (print (eval (read) repl:+environment+))))))
+    (loop
+      (fresh-line)
+      (print (eval (read) repl:+environment+)))))
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
@@ -46,61 +54,55 @@ when the input stream is a 'repl:input-buffer'."
       ;; Use a trampoline to avoid stack build-up.
       ((block trampoline
          ;; Get a stream containing the current contents of the input buffer.
-         (let ((stream (repl:%%make-input-buffer-stream repl:+input-buffer+)))
+         (let ((stream (repl:%make-input-buffer-stream (dynamic *standard-input*))))
            (handler-case ((end-of-file
                            (lambda #ignore
                              ;; We got an end-of-file error: jump into trampoline
                              ;; and save continuation in wake-up function.
                              (return-from trampoline
-                                          (lambda ()
-                                            (take-subcont repl:+root-prompt+ k
-                                              (repl:%%set-input-buffer-wake-up-function
-                                               repl:+input-buffer+
-                                               (lambda ()
-                                                 (push-delim-subcont
-                                                  repl:+root-prompt+ k)))))))))
+                               (lambda ()
+                                 (take-subcont repl:+root-prompt+ k
+                                   (repl:%set-input-buffer-wake-up-function
+                                    (dynamic *standard-input*)
+                                    (lambda ()
+                                      (push-delim-subcont repl:+root-prompt+ k)))))))))
                ;; Call built-in, non-blocking 'read' on the stream.
                ;; This calls the built-in because the stream is a
                ;; 'string-input-stream'.
                (let ((form (read stream)))
                  ;; We've successfully read an object: remove the
                  ;; input we've consumed from the input buffer.
-                 (repl:%%truncate-input-buffer repl:+input-buffer+ stream)
+                 (repl:%truncate-input-buffer (dynamic *standard-input*) stream)
                  (return-from exit form)))))))))
-
-(defun repl:quit ()
-  "Quits the REPL."
-  (invoke-restart 'repl:quit))
 `;
 
 $(function() {
 
     const vm = new VM();
     init_repl_stream(vm);
-    vm.eval_js_string(REPL_CODE);
 
-    const term = $('#terminal').terminal(command_interpreter, {
+    const term = $('#terminal').terminal(input_handler, {
         greetings: vm.write_to_js_string(vm.eval_js_string(`"Welcome to Nybble Lisp!"`))
     });
 
-    vm.STANDARD_OUTPUT.set_value(new vm.REPL_output_stream(function (output) {
+    const stdout = new vm.REPL_output_stream(function (output) {
         term.echo(output.to_js_string(), { newline: false });
-    }));
+    });
+    vm.STANDARD_OUTPUT.set_value(stdout);
 
-    const input_buffer = new vm.REPL_input_buffer();
-    vm.STANDARD_INPUT.set_value(input_buffer);
+    const stdin = new vm.REPL_input_buffer();
+    vm.STANDARD_INPUT.set_value(stdin);
 
-    function command_interpreter(line)
+    function input_handler(line)
     {
-        input_buffer.add_line(vm.str(line + "\n"));
+        stdin.add_line(vm.str(line + "\n"));
         /*
          * Force any available output after each input.
          */
-        vm.STANDARD_OUTPUT.get_value().force_output();
+        stdout.force_output();
     }
 
-    vm.define_constant("repl:+input-buffer+", input_buffer);
-    vm.define_alien_function("repl:%%exit", () => exit(0));
+    vm.eval_js_string(REPL_CODE);
     vm.eval_js_string("(repl:run)");
 
 });

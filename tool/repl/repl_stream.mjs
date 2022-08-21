@@ -105,16 +105,10 @@ export function init_repl_stream(vm)
     {
         /*
          * Construct a new input buffer.
-         *
-         * Lisp will call the provided display input function when it
-         * is ready to read a form.  It should display a prompt
-         * symbol like ">" or "*" on the console.
          */
-        constructor(display_input_function = () => null)
+        constructor()
         {
             super();
-            vm.assert_type(display_input_function, "function");
-            this.display_input_function = display_input_function;
             this.buffer = "";
             this.wake_up_function = null;
         }
@@ -178,16 +172,13 @@ export function init_repl_stream(vm)
 
     vm.define_class("repl:input-buffer", vm.REPL_input_buffer, vm.Object);
 
-    vm.define_alien_function("repl:%%set-input-buffer-wake-up-function",
+    vm.define_alien_function("repl:%set-input-buffer-wake-up-function",
                              (buffer, fun) => buffer.set_wake_up_function(fun));
 
-    vm.define_alien_function("repl:%%make-input-buffer-stream",
+    vm.define_alien_function("repl:%make-input-buffer-stream",
                              (buffer) => buffer.get_input_stream());
 
-    vm.define_alien_function("repl:%%truncate-input-buffer",
+    vm.define_alien_function("repl:%truncate-input-buffer",
                              (buffer, stream) => buffer.truncate_input_buffer(stream));
-
-    vm.define_alien_function("repl:%%display-waiting-for-input-sign",
-                             (buffer) => buffer.display_input_function());
 
 }
