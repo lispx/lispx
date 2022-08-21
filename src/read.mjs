@@ -59,14 +59,9 @@ export function init_read(vm)
         vm.assert_type(eof_value, vm.TYPE_ANY);
 
         /*
-         * The reason for this dance with a unique EOF value is quite
-         * nerdy, which, given the fact that we are talking about a
-         * Lisp interpreter, is really nerdy.
-         *
-         * Why can't we just check that the read object isn't the dot?
-         * Well, because the luser might have passed in the dot symbol
-         * as their eof_value.  Unlikely?  Heckin yes.  But we're not
-         * from New Jersey.
+         * Why do we need a unique EOF object can't just check that
+         * the read object isn't the dot?  Because the user might have
+         * passed in the dot symbol as their eof_value.
          */
         const unique_eof = {};
         const obj = read_allowing_dot(stream, false, unique_eof);

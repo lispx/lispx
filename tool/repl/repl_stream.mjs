@@ -98,7 +98,7 @@ export function init_repl_stream(vm)
      * standard input on the Lisp side, even though it doesn't even
      * implement vm.Input_stream!  But it's no problem, because we
      * don't expose methods like READ-BYTE to Lisp yet, just READ.
-     * And READ internally calls the READ-STREAM method, which we
+     * And READ internally calls the STREAM-READ method, which we
      * specialize for the input buffer class.
      */
     vm.REPL_input_buffer = class REPL_input_buffer extends vm.Object

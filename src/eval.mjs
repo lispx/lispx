@@ -341,7 +341,7 @@ export function init_eval(vm)
 
     /*
      * Creates a new built-in operator with the given underlying
-     * JS function and name.
+     * JS function.
      */
     vm.built_in_operator = (fun) => new vm.Built_in_operator(fun);
 

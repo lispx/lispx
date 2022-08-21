@@ -1400,7 +1400,7 @@ function init_eval(vm)
 
     /*
      * Creates a new built-in operator with the given underlying
-     * JS function and name.
+     * JS function.
      */
     vm.built_in_operator = (fun) => new vm.Built_in_operator(fun);
 
@@ -2615,14 +2615,15 @@ function init_control(vm)
         } while((k = k.inner));
         exprs.reverse();
         /*
-         * Drop_frames is the deterministically determined amount of
-         * stack frames to hide from a stack trace - i.e. the code of
-         * signal handling and debugger etc.  If the boot.lispx and
-         * related code changes, this needs to be updated, too.
+         * Drop_frames is the empirically determined amount of stack
+         * frames to hide from a stack trace - i.e. the code of signal
+         * handling and debugger etc.  If the boot.lispx and related
+         * code changes, this needs to be updated, too.
          */
         const drop_frames = 28;
+        const show_frames = 16;
         const stdout = vm.STANDARD_OUTPUT.get_value();
-        exprs.slice(drop_frames).forEach((expr) => {
+        exprs.slice(drop_frames, drop_frames + (show_frames - 1)).forEach((expr) => {
             stdout.fresh_line();
             vm.write(expr, stdout);
             stdout.force_output();
@@ -3214,14 +3215,9 @@ function init_read(vm)
         vm.assert_type(eof_value, vm.TYPE_ANY);
 
         /*
-         * The reason for this dance with a unique EOF value is quite
-         * nerdy, which, given the fact that we are talking about a
-         * Lisp interpreter, is really nerdy.
-         *
-         * Why can't we just check that the read object isn't the dot?
-         * Well, because the luser might have passed in the dot symbol
-         * as their eof_value.  Unlikely?  Heckin yes.  But we're not
-         * from New Jersey.
+         * Why do we need a unique EOF object can't just check that
+         * the read object isn't the dot?  Because the user might have
+         * passed in the dot symbol as their eof_value.
          */
         const unique_eof = {};
         const obj = read_allowing_dot(stream, false, unique_eof);
