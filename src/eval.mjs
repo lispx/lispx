@@ -79,10 +79,21 @@ export function init_eval(vm)
      */
     function evaluate_operator(operator_form, env)
     {
-        if (operator_form instanceof vm.Symbol)
-            return env.lookup(operator_form.to_function_symbol());
-        else
+        if (operator_form instanceof vm.Symbol) {
+            /*
+             * A call to trap_exceptions() establishes a context from
+             * which we can return with a restart.
+             *
+             * It's important to create such a context here, or
+             * otherwise a symbol lookup error here would return from
+             * the "parent" context in evaluate_cons().
+             */
+            return vm.trap_exceptions(() => {
+                return env.lookup(operator_form.to_function_symbol());
+            });
+        } else {
             return vm.eval(operator_form, env);
+        }
     }
 
     /*

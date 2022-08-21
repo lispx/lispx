@@ -11,16 +11,28 @@ const REPL_CODE = `
 (defun invoke-debugger (condition)
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
-      (uprint "Debugger invoked on condition:")
-      (print condition)
-      (uprint "Available restarts:")
-      (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
-            (compute-restarts condition))
-      (uprint "Backtrace:")
-      (%print-stacktrace k)
-      (loop
-        (fresh-line)
-        (print (eval (read) repl:+environment+))))))
+      (typecase condition
+        (unbound-symbol-error
+         (let ((symbol (slot-value condition 'symbol))
+               (env (slot-value condition 'environment)))
+           (restart-case ((continue (lambda () (eval symbol env)))
+                          (use-value (lambda (value) value))
+                          (store-value (lambda (value) (eval (list #'def symbol value) env))))
+             (repl:run-debugger-loop condition k))))
+        (object
+         (repl:run-debugger-loop condition k))))))
+
+(defun repl:run-debugger-loop (condition k)
+  (uprint "Debugger invoked on condition:")
+  (print condition)
+  (uprint "Available restarts:")
+  (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
+        (compute-restarts condition))
+  (uprint "Backtrace:")
+  (%print-stacktrace k)
+  (loop
+    (fresh-line)
+    (print (eval (read) repl:+environment+))))
 
 (defun repl:run ()
   "Run the REPL."
