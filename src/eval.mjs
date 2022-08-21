@@ -65,7 +65,7 @@ export function init_eval(vm)
         // (See control.mjs for the definition of vm.bind().)
         return vm.bind(() => evaluate_operator(cons.car(), env),
                        (operator) => vm.operate(operator, cons.cdr(), env),
-                       vm.trace(cons, env));
+                       vm.trace(cons.car(), env));
     }
 
     /*
@@ -305,7 +305,8 @@ export function init_eval(vm)
         operate(operands, env)
         {
             return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env));
+                           (args) => vm.operate(this.wrapped_operator, args, env),
+                           vm.trace(vm.cons(this, operands), env));
 
             function eval_args(todo, done)
             {

@@ -196,8 +196,10 @@ expressions are still triggered, so Lisp invariants are maintained."
   (%panic error))
 
 (defun invoke-debugger (condition)
-  "Invoke the debugger, which currently just means printing a stack trace
-and panicking, thereby escaping to JS."
+  "Invoke the debugger, which as a default just prints a stack trace
+and panics, thereby throwing an exception to JS.  When running in the
+REPL, this function gets replaced with a different one that runs a
+nested debug loop."
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
       (%print-stacktrace k)

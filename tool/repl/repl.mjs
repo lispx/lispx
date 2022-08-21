@@ -14,22 +14,21 @@ const REPL_CODE = `
 (defun invoke-debugger (condition)
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
-      (restart-case ((abort (lambda ())))
-        (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1)))
-          (repl:%set-debug-level (dynamic repl:*debug-level*))
-          (typecase condition
-            (unbound-symbol-error
-             (let ((symbol (slot-value condition 'symbol))
-                   (env (slot-value condition 'environment)))
-               (restart-case ((continue (lambda () (eval symbol env))
-                                        :associated-conditions (list condition))
-                              (use-value (lambda (value) value)
-                                         :associated-conditions (list condition))
-                              (store-value (lambda (value) (eval (list #'def symbol value) env))
-                                           :associated-conditions (list condition)))
-                 (repl:run-debugger-loop condition k))))
-            (object
-             (repl:run-debugger-loop condition k))))))))
+      (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1)))
+        (repl:%set-debug-level (dynamic repl:*debug-level*))
+        (typecase condition
+          (unbound-symbol-error
+           (let ((symbol (slot-value condition 'symbol))
+                 (env (slot-value condition 'environment)))
+             (restart-case ((continue (lambda () (eval symbol env))
+                                      :associated-conditions (list condition))
+                            (use-value (lambda (value) value)
+                                       :associated-conditions (list condition))
+                            (store-value (lambda (value) (eval (list #'def symbol value) env))
+                                         :associated-conditions (list condition)))
+               (repl:run-debugger-loop condition k))))
+          (object
+           (repl:run-debugger-loop condition k)))))))
 
 (defun repl:print-banner (condition k)
   (uprint "Debugger invoked on condition:")
@@ -50,10 +49,11 @@ const REPL_CODE = `
     (repl:repl)))
 
 (defun repl:repl ()
-  (loop
-    (fresh-line)
-    (repl:%set-debug-level (dynamic repl:*debug-level*))
-    (print (eval (read) repl:+environment+))))
+  (restart-case ((abort (lambda ())))
+    (loop
+      (fresh-line)
+      (repl:%set-debug-level (dynamic repl:*debug-level*))
+      (print (eval (read) repl:+environment+)))))
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
