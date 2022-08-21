@@ -5411,6 +5411,9 @@ function init_vm(vm)
                     const desc = Object.getOwnPropertyDescriptor(error, name);
                     Object.defineProperty(this, name, desc);
                 });
+
+            if (typeof(message) === "string")
+                this.lisp_slot_message = vm.str(message);
         }
     };
 

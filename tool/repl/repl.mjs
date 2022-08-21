@@ -49,8 +49,8 @@ const REPL_CODE = `
     (repl:repl)))
 
 (defun repl:repl ()
-  (restart-case ((abort (lambda ())))
-    (loop
+  (loop
+    (restart-case ((abort (lambda ())))
       (fresh-line)
       (repl:%set-debug-level (dynamic repl:*debug-level*))
       (print (eval (read) repl:+environment+)))))
@@ -90,7 +90,13 @@ when the input stream is a 'repl:input-buffer'."
                                    (repl:%set-input-buffer-wake-up-function
                                     (dynamic *standard-input*)
                                     (lambda ()
-                                      (push-delim-subcont repl:+root-prompt+ k)))))))))
+                                      (push-delim-subcont repl:+root-prompt+ k))))))))
+                          (reader-error
+                           (lambda (e)
+                             ;; We got a reader error... clear input buffer...
+                             (repl:%clear-input-buffer (dynamic *standard-input*))
+                             ;; ...and re-signal it.
+                             (error e))))
                ;; Call built-in, non-blocking 'read' on the stream.
                ;; This calls the built-in because the stream is a
                ;; 'string-input-stream'.

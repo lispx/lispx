@@ -164,6 +164,15 @@ export function init_repl_stream(vm)
             vm.assert(input_stream.pos > 0);
             this.buffer = this.buffer.slice(input_stream.pos + 1);
         }
+
+        /*
+         * Remove all bytes from of the buffer.  Called by Lisp
+         * when it gets a READER-ERROR.
+         */
+        clear_input_buffer()
+        {
+            this.buffer = "";
+        }
     };
 
     /*
@@ -180,5 +189,8 @@ export function init_repl_stream(vm)
 
     vm.define_alien_function("repl:%truncate-input-buffer",
                              (buffer, stream) => buffer.truncate_input_buffer(stream));
+
+    vm.define_alien_function("repl:%clear-input-buffer",
+                             (buffer, stream) => buffer.clear_input_buffer(stream));
 
 }
