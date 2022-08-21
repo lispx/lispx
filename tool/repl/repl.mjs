@@ -11,24 +11,24 @@ const REPL_CODE = `
 (defun invoke-debugger (condition)
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
-      (restart-case ((abort (lambda () (uprint "Leaving debugger") #void)))
-        (uprint "Debugger invoked on condition:")
-        (print condition)
-        (uprint "Available restarts:")
-        (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
-              (compute-restarts condition))
-        (uprint "Backtrace:")
-        (%print-stacktrace k)
-        (loop
-          (fresh-line)
-          (print (eval (read) repl:+environment+)))))))
+      (uprint "Debugger invoked on condition:")
+      (print condition)
+      (uprint "Available restarts:")
+      (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
+            (compute-restarts condition))
+      (uprint "Backtrace:")
+      (%print-stacktrace k)
+      (loop
+        (fresh-line)
+        (print (eval (read) repl:+environment+))))))
 
 (defun repl:run ()
   "Run the REPL."
   (push-prompt repl:+root-prompt+
     (loop
-      (fresh-line)
-      (print (eval (read) repl:+environment+)))))
+      (restart-case ((abort (lambda ())))
+        (fresh-line)
+        (print (eval (read) repl:+environment+))))))
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
