@@ -8,19 +8,15 @@ const REPL_CODE = `
 (defconstant repl:+environment+ (the-environment)
   "The environment in which REPL expressions are evaluated.")
 
-(defdynamic repl:*debug-level* 0)
+(defdynamic repl:*debug-level* 0
+  "Current debug level.  0 if we are not in the debugger.")
 
 (defun invoke-debugger (condition)
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
-      (restart-case ((abort (lambda ()
-                              (if (> (dynamic repl:*debug-level*) 0)
-                                  (progn
-                                    (uprint1 "You are back to a previous debug level:")
-                                    (repl:print-banner condition k))
-                                  (uprint "You are back at the main REPL"))
-                              #void)))
+      (restart-case ((abort (lambda ())))
         (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1)))
+          (repl:%set-debug-level (dynamic repl:*debug-level*))
           (typecase condition
             (unbound-symbol-error
              (let ((symbol (slot-value condition 'symbol))
@@ -36,10 +32,7 @@ const REPL_CODE = `
              (repl:run-debugger-loop condition k))))))))
 
 (defun repl:print-banner (condition k)
-  (fresh-line)
-  (uprint1 "Debugger invoked on condition: (debug level ")
-  (uprint1 (dynamic repl:*debug-level*))
-  (uprint1 ")")
+  (uprint "Debugger invoked on condition:")
   (print condition)
   (uprint "Available restarts:")
   (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
@@ -49,16 +42,18 @@ const REPL_CODE = `
 
 (defun repl:run-debugger-loop (condition k)
   (repl:print-banner condition k)
-  (loop
-    (fresh-line)
-    (print (eval (read) repl:+environment+))))
+  (repl:repl))
 
 (defun repl:run ()
   "Run the REPL."
   (push-prompt repl:+root-prompt+
-    (loop
-      (fresh-line)
-      (print (eval (read) repl:+environment+)))))
+    (repl:repl)))
+
+(defun repl:repl ()
+  (loop
+    (fresh-line)
+    (repl:%set-debug-level (dynamic repl:*debug-level*))
+    (print (eval (read) repl:+environment+))))
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
@@ -106,6 +101,8 @@ when the input stream is a 'repl:input-buffer'."
                  (return-from exit form)))))))))
 `;
 
+const PROMPT = "* ";
+
 $(function() {
 
     const vm = new VM();
@@ -114,6 +111,7 @@ $(function() {
     const term = $('#terminal').terminal(input_handler, {
         greetings: vm.write_to_js_string(vm.eval_js_string(`"Welcome to Nybble Lisp!"`))
     });
+    term.set_prompt(PROMPT);
 
     const stdout = new vm.REPL_output_stream(function (output) {
         term.echo(output.to_js_string(), { newline: false });
@@ -131,6 +129,12 @@ $(function() {
          */
         stdout.force_output();
     }
+
+    vm.define_alien_function("repl:%set-debug-level", (level) => {
+        const lvl = vm.assert_type(level, vm.Number).to_js_number();
+        if (lvl === 0) term.set_prompt(PROMPT);
+        else term.set_prompt("[" + lvl + "] ");
+    });
 
     vm.eval_js_string(REPL_CODE);
     vm.eval_js_string("(repl:run)");
