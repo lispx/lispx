@@ -11,20 +11,23 @@ export function init_repl_stream(vm)
 {
     /*
      * A REPL input buffer asynchronously receives lines from the
-     * user, On the Lisp side, we want to have a blocking, synchronous
-     * READ function so we can write our REPL in direct style, as
-     * +DEITY+ intended.
+     * user.  But on the Lisp side, we want to have a blocking,
+     * synchronous READ function so we can write our REPL in direct
+     * style, as +DEITY+ intended.
      *
-     * Every time new data arrives, a wake-up function set by Lisp is
-     * called.  It contains a saved continuation.
+     * Here's how we do it:
      *
-     * Lisp gets a fresh input stream to read the current contents
-     * of the input buffer.
+     * Every time a new line of data arrives, a wake-up function set
+     * by Lisp is called.  It contains a saved continuation so Lisp
+     * knows where to continue again.
+     *
+     * Lisp then obtains a fresh string input stream that contains the
+     * current contents of the input buffer.
      *
      * Once an object has been successfully read, the input buffer
      * is truncated by the amount of data read from the stream.
      *
-     * If an object can't be read because there isn't enough data in
+     * But if an object can't be read because there isn't enough data in
      * the buffer yet, Lisp saves the continuation in the wake-up
      * function again, and we start over.
      *
