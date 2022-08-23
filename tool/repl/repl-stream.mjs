@@ -10,9 +10,10 @@
 export function init_repl_stream(vm)
 {
     /*
-     * A REPL input buffer asynchronously receives lines from the user,
-     * for example via Node's readline module.  On the Lisp side,
-     * we want to have a blocking, synchronous READ function.
+     * A REPL input buffer asynchronously receives lines from the
+     * user, On the Lisp side, we want to have a blocking, synchronous
+     * READ function so we can write our REPL in direct style, as
+     * +DEITY+ intended.
      *
      * Every time new data arrives, a wake-up function set by Lisp is
      * called.  It contains a saved continuation.
@@ -21,10 +22,10 @@ export function init_repl_stream(vm)
      * of the input buffer.
      *
      * Once an object has been successfully read, the input buffer
-     * is truncated by the amount of data read.
+     * is truncated by the amount of data read from the stream.
      *
      * If an object can't be read because there isn't enough data in
-     * the buffer yet, Lisp saves the new continuation in the wake-up
+     * the buffer yet, Lisp saves the continuation in the wake-up
      * function again, and we start over.
      *
      * Note that we set an instance of this input buffer class as
@@ -112,7 +113,7 @@ export function init_repl_stream(vm)
      * Lisp API
      */
 
-    vm.define_class("repl:input-buffer", vm.REPL_input_buffer, vm.Object);
+    vm.define_class("repl:input-buffer", vm.REPL_input_buffer);
 
     vm.define_alien_function("repl:%set-input-buffer-wake-up-function",
                              (buffer, fun) => buffer.set_wake_up_function(fun));
