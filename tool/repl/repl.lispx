@@ -11,8 +11,9 @@
 (defun repl:run ()
   "Run a REPL."
   (loop
-    ;; The internal REPL-ABORT restart just causes the loop to begin
-    ;; from the start again.  The user actually used ABORT, described below.
+    ;; The internal REPL-ABORT restart causes the loop to begin from
+    ;; the start again.  The user actually uses ABORT, described
+    ;; below.
     (restart-case ((repl-abort (lambda () #| nothing to do here, just unwind |#)))
       (repl:%set-debug-level (dynamic repl:*debug-level*))
       (fresh-line)
