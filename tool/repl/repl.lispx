@@ -21,8 +21,8 @@
 
 (defun repl:run-debugger-loop (condition k)
   "Run a debug REPL.  Prints a banner and then runs a normal REPL."
-  (uprint "> Debugger invoked on condition")
-  (failsafe-print condition)
+  (uprint "> Debugger invoked on condition:")
+  (print condition)
   (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
   (mapc (lambda (restart)
           ;; Don't print our internal REPL-ABORT restart.
@@ -67,11 +67,3 @@
                  (repl:run-debugger-loop condition k))))
             (object
              (repl:run-debugger-loop condition k))))))))
-
-(defun failsafe-print (obj)
-  "Print any object, incl. JS objects, as usefully as possible while
-never failing."
-  (let ((#'failsafe-to-string (to-lisp-function (js-global "String"))))
-    (if (eq (class-of obj) #^object)
-        (uprint (to-lisp-string (failsafe-to-string obj)))
-        (print obj))))

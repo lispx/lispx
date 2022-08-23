@@ -15,13 +15,13 @@ describe("Printer", () => {
 
         const examples = {
             // JS objects write stupidly for now
-            "#<object>": undefined,
-            "#<object>": null,
-            "#<object>": true,
-            "#<object>": 12,
-            "#<object>": "foo",
-            "#<object>": {},
-            "#<object>": [],
+            "#<<js undefined undefined>>": undefined,
+            "#<<js object null>>": null,
+            "#<<js boolean true>>": true,
+            "#<<js number 12>>": 12,
+            "#<<js string foo>>": "foo",
+            "#<<js object [object Object]>>": {},
+            "#<<js object >>": [],
             // Unreadable objects
             "#<string-output-stream>": string_output_stream(),
             // Standard objects

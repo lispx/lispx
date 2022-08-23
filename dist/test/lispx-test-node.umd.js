@@ -12941,7 +12941,7 @@ describe("assert_type()", () => {
         try {
             vm.assert_type(12, "string");
         } catch(e) {
-            assert.equal(e.message, "Type assertion failed: expected \"string\" got #<object>");
+            assert.equal(e.message, "Type assertion failed: expected \"string\" got #<<js number 12>>");
             assert.equal(e.lisp_slot_datum, 12);
             assert(vm.equal(e["lisp_slot_expected-type"], vm.str("string")));
             return;
@@ -14536,13 +14536,13 @@ describe("Printer", () => {
 
         const examples = {
             // JS objects write stupidly for now
-            "#<object>": undefined,
-            "#<object>": null,
-            "#<object>": true,
-            "#<object>": 12,
-            "#<object>": "foo",
-            "#<object>": {},
-            "#<object>": [],
+            "#<<js undefined undefined>>": undefined,
+            "#<<js object null>>": null,
+            "#<<js boolean true>>": true,
+            "#<<js number 12>>": 12,
+            "#<<js string foo>>": "foo",
+            "#<<js object [object Object]>>": {},
+            "#<<js object >>": [],
             // Unreadable objects
             "#<string-output-stream>": print_test_string_output_stream(),
             // Standard objects

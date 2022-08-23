@@ -3836,11 +3836,15 @@ function init_print(vm)
     };
 
     /*
-     * All non-Lisp objects print as "#<object>" for now.
+     * Print a non-Lisp JS object.
      */
     vm.write_js_object = (object, stream) =>
     {
-        vm.write_unreadable_object(object, stream);
+        stream.write_string(vm.str("#<<js "
+                                   + typeof(object)
+                                   + " "
+                                   + String(object)
+                                   + ">>"));
     };
 
     /*
