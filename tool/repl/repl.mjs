@@ -9,48 +9,64 @@ const REPL_CODE = `
   "Current debug level.  0 if we are not in the debugger.")
 
 (defun invoke-debugger (condition)
+  ;; Immediately grab the stack trace, so we don't include any of the
+  ;; below frames in it.
   (take-subcont +root-prompt+ k
     (push-delim-subcont +root-prompt+ k
+      ;; Increase debug level.
       (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1)))
         (repl:%set-debug-level (dynamic repl:*debug-level*))
-        (typecase condition
-          (unbound-symbol-error
-           (let ((symbol (slot-value condition 'symbol))
-                 (env (slot-value condition 'environment)))
-             (restart-case ((continue (lambda () (eval symbol env))
-                                      :associated-conditions (list condition))
-                            (use-value (lambda (value) value)
-                                       :associated-conditions (list condition))
-                            (store-value (lambda (value) (eval (list #'def symbol value) env))
-                                         :associated-conditions (list condition)))
-               (repl:run-debugger-loop condition k))))
-          (object
-           (repl:run-debugger-loop condition k)))))))
-
-(defun repl:print-banner (condition k)
-  (uprint "Debugger invoked on condition:")
-  (print condition)
-  (uprint "Available restarts (use (invoke-restart 'name ...) to invoke):")
-  (mapc (lambda (restart) (print (slot-value restart 'restart-name)))
-        (compute-restarts condition))
-  (uprint "Backtrace:")
-  (%print-stacktrace k))
+        ;; We use a system of two restarts to abort.  The user invokes
+        ;; the ABORT restart to break out of a nested debug level.
+        ;; Internally this invokes the REPL-ABORT restart which lands
+        ;; us back in the containing REPL, see below in REPL:REPL.
+        ;; This two-restart approach is needed because otherwise
+        ;; REPL-ABORT would land the user back in the debug loop they
+        ;; came from.
+        (restart-case ((abort (lambda () (invoke-restart 'repl-abort))))
+          ;; Add some extra restarts to UNBOUND-SYMBOL-ERROR because
+          ;; it demos well and makes designers of other languages
+          ;; squirt blood from their eyes.
+          (typecase condition
+            (unbound-symbol-error
+             (let ((symbol (slot-value condition 'symbol))
+                   (env (slot-value condition 'environment)))
+               (restart-case ((continue (lambda () (eval symbol env))
+                                        :associated-conditions (list condition))
+                              (use-value (lambda (value) value)
+                                         :associated-conditions (list condition))
+                              (store-value (lambda (value) (eval (list #'def symbol value) env))
+                                           :associated-conditions (list condition)))
+                 (repl:run-debugger-loop condition k))))
+            (object
+             (repl:run-debugger-loop condition k))))))))
 
 (defun repl:run-debugger-loop (condition k)
-  (repl:print-banner condition k)
+  "Run a debug REPL.  Prints a banner and then runs a normal REPL."
+  (uprint "> Debugger invoked on condition:")
+  (print condition)
+  (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
+  (mapc (lambda (restart)
+          ;; Don't print our internal REPL-ABORT restart.
+          (unless (eq (slot-value restart 'restart-name) 'repl-abort)
+            (print (slot-value restart 'restart-name))))
+        (compute-restarts condition))
+  (uprint "> Backtrace:")
+  (%print-stacktrace k)
   (repl:repl))
 
-(defun repl:run ()
-  "Run the REPL."
+(defun repl:repl ()
+  "Run a REPL."
+  (loop
+    (restart-case ((repl-abort (lambda ())))
+      (repl:%set-debug-level (dynamic repl:*debug-level*))
+      (fresh-line)
+      (print (eval (read) repl:+environment+)))))
+
+(defun repl:main ()
+  "Main entrypoint."
   (push-prompt +root-prompt+
     (repl:repl)))
-
-(defun repl:repl ()
-  (loop
-    (restart-case ((abort (lambda ())))
-      (fresh-line)
-      (repl:%set-debug-level (dynamic repl:*debug-level*))
-      (print (eval (read) repl:+environment+)))))
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
@@ -142,6 +158,6 @@ $(function() {
     });
 
     vm.eval_js_string(REPL_CODE);
-    vm.eval_js_string("(repl:run)");
+    vm.eval_js_string("(repl:main)");
 
 });
