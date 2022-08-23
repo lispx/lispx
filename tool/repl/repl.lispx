@@ -33,16 +33,6 @@
   (%print-stacktrace k)
   (repl:run))
 
-(def #'failsafe-to-string (to-lisp-function (js-global "String"))
-  "A safe way to turn any JS object into a (JS) string.")
-
-(defun failsafe-print (obj)
-  "Print any object, incl. JS objects, as usefully as possible while
-never failing."
-  (if (eq (class-of condition) #^object)
-      (uprint (to-lisp-string (failsafe-to-string condition)))
-      (print condition)))
-
 ;; Overwrite built-in `invoke-debugger'.  This gets called for all
 ;; unhandled conditions.
 (defun invoke-debugger (condition)
@@ -77,3 +67,11 @@ never failing."
                  (repl:run-debugger-loop condition k))))
             (object
              (repl:run-debugger-loop condition k))))))))
+
+(defun failsafe-print (obj)
+  "Print any object, incl. JS objects, as usefully as possible while
+never failing."
+  (let ((#'failsafe-to-string (to-lisp-function (js-global "String"))))
+    (if (eq (class-of obj) #^object)
+        (uprint (to-lisp-string (failsafe-to-string obj)))
+        (print obj))))
