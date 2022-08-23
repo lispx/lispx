@@ -23,7 +23,11 @@ module.exports = [
      * Build test outputs.
      */
     make_test_entry_browser(),
-    make_test_entry_node()
+    make_test_entry_node(),
+    /*
+     * Build REPL.
+     */
+    make_repl_entry()
 ];
 
 /*
@@ -149,6 +153,41 @@ function make_test_entry_node()
                                   "test/lispx-test-node.umd.js");
     entry.externals = {
         "lispx-vm": "../lispx-vm.umd.min.js"
+    };
+    return entry;
+}
+
+/*
+ * REPL
+ */
+function make_repl_entry()
+{
+    const entry = {
+        entry: "./tool/repl/repl.mjs",
+        output: {
+            library: "lispx-repl",
+            libraryTarget: "umd",
+            filename: "repl/repl.umd.js",
+            globalObject: "this"
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.lispx$/,
+                    use: [ { loader: "raw-loader" }, { loader: "./tool/minifier.js" } ]
+                }
+            ]
+        },
+        externalsType: "umd",
+        resolve: {
+            fallback: {
+                util: require.resolve("util/")
+            }
+        },
+        optimization: {
+            minimize: true,
+            minimizer: [ new TerserPlugin() ]
+        }
     };
     return entry;
 }
