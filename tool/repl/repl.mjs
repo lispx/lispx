@@ -11,7 +11,7 @@ $(function() {
     init_repl_stream(vm);
 
     const term = $('#terminal').terminal(input_handler, {
-        greetings: "Welcome to Nybble Lisp!"
+        greetings: "Welcome to LispX!"
     });
     term.set_prompt(PROMPT);
 
