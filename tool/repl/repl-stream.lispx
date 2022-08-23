@@ -1,4 +1,6 @@
-;; Companion Lisp code to repl_stream.mjs
+;;;                                                     -*- Lisp -*-
+;;; Companion Lisp code to repl-stream.mjs
+;;;
 
 (defmethod stream-read ((stream repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
