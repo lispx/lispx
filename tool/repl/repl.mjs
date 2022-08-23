@@ -11,7 +11,9 @@ $(function() {
     init_repl_stream(vm);
 
     const term = $('#terminal').terminal(input_handler, {
-        greetings: "Welcome to LispX!"
+        greetings: "Welcome to LispX!",
+        keydown: keydown,
+        keypress: keypress
     });
     term.set_prompt(PROMPT);
 
@@ -44,3 +46,50 @@ $(function() {
     vm.eval_js_string("(repl:run)");
 
 });
+
+// Paren matching code adapted from https://terminal.jcubic.pl/examples.php#parenthesis
+let position;
+let timer;
+
+function keydown() {
+    if (position) {
+        this.set_position(position);
+        position = false;
+    }
+}
+
+function keypress(e) {
+    var term = this;
+    if (e.key == ')') {
+        setTimeout(function() {
+            position = term.get_position();
+            var command = term.before_cursor();
+            var count = 1;
+            var close_pos = position - 1;
+            var c;
+            while (count > 0) {
+                c = command[--close_pos];
+                if (!c) {
+                    return;
+                }
+                if (c === '(') {
+                    count--;
+                } else if (c == ')') {
+                    count++;
+                }
+            }
+            if (c == '(') {
+                clearTimeout(timer);
+                setTimeout(function() {
+                    term.set_position(close_pos);
+                    timer = setTimeout(function() {
+                        term.set_position(position)
+                        position = false;
+                    }, 200);
+                }, 0);
+            }
+        }, 0);
+    } else {
+        position = false;
+    }
+}
