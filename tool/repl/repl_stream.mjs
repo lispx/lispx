@@ -1,81 +1,14 @@
 /*
- * REPL Input and Output Streams
+ * REPL Input Streams
  * Copyright (c) 2021 Manuel Simoni
  */
 
 /*
- * Adds REPL streams to the VM.
+ * Special module for treating asynchronous line based input as
+ * synchronous.
  */
 export function init_repl_stream(vm)
 {
-    /*
-     * Output stream that buffers incoming bytes and sends them to an
-     * output function when forced or when a newline is printed.
-     */
-    vm.REPL_output_stream = class REPL_output_stream extends vm.Output_stream
-    {
-        /*
-         * Constructs a new REPL output stream that outputs to the
-         * given function.
-         */
-        constructor(output_function)
-        {
-            super();
-            this.output_function = vm.assert_type(output_function, "function");
-            this.buffer = "";
-            /*
-             * This variable keeps track of whether we are at the beginning
-             * of a fresh line for purposes of fresh_line().
-             */
-            this.line_is_fresh = true;
-        }
-
-        /*
-         * Accumulate a byte.  When a newline is written, force the
-         * current buffer contents to the output function.
-         */
-        write_byte(b)
-        {
-            vm.assert_type(b, "string");
-            vm.assert(b.length === 1);
-            this.buffer += b;
-            if (b === "\n") {
-                this.line_is_fresh = true;
-                this.force_output();
-            } else {
-                this.line_is_fresh = false;
-            }
-            return b;
-        }
-
-        /*
-         * If the buffer is non-empty, send it to the output function.
-         */
-        force_output()
-        {
-            if (this.buffer !== "") {
-                const buffer = this.buffer;
-                this.buffer = "";
-                this.output_function(new vm.String(buffer));
-            }
-            return vm.void();
-        }
-
-        /*
-         * Output stream standard method to print a newline if we
-         * aren't already on a fresh line.
-         */
-        fresh_line()
-        {
-            if (!this.line_is_fresh) {
-                this.write_byte("\n");
-                return vm.t();
-            } else {
-                return vm.f();
-            }
-        }
-    };
-
     /*
      * A REPL input buffer asynchronously receives lines from the user,
      * for example via Node's readline module.  On the Lisp side,

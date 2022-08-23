@@ -4213,6 +4213,7 @@ function init_js(vm)
 
         write_byte(b)
         {
+            console.log(b);
             vm.assert_type(b, "string");
             vm.assert(b.length === 1);
             this.buffer += b;
@@ -4221,6 +4222,7 @@ function init_js(vm)
 
         fresh_line()
         {
+            console.log("fresh");
             /*
              * If the buffer is empty, or the last byte is a newline,
              * we don't need to do anything.
@@ -4236,6 +4238,7 @@ function init_js(vm)
 
         force_output()
         {
+            console.log("ofrcr");
             if (this.buffer.length > 0) {
                 this.output_function(vm.utf8_decode(this.buffer));
                 this.buffer = "";

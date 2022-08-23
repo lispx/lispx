@@ -135,8 +135,7 @@ $(function() {
     });
     term.set_prompt(PROMPT);
 
-    const stdout = new vm.REPL_output_stream((output) =>
-        term.echo(output.to_js_string(), { newline: false }));
+    const stdout = new vm.JS_console_output_stream(term.echo);
     vm.STANDARD_OUTPUT.set_value(stdout);
 
     const stdin = new vm.REPL_input_buffer();
