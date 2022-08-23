@@ -4197,7 +4197,9 @@ function init_js(vm)
     vm.JS_console_output_stream = class Lisp_js_console_output_stream extends vm.Output_stream
     {
         /*
-         * The output_function can be overridden for testing.
+         * The output_function can be overridden for testing and
+         * printing to other line-based systems, such as the REPL
+         * terminal.
          */
         constructor(output_function = console.log)
         {
@@ -4213,7 +4215,6 @@ function init_js(vm)
 
         write_byte(b)
         {
-            console.log(b);
             vm.assert_type(b, "string");
             vm.assert(b.length === 1);
             this.buffer += b;
@@ -4222,7 +4223,6 @@ function init_js(vm)
 
         fresh_line()
         {
-            console.log("fresh");
             /*
              * If the buffer is empty, or the last byte is a newline,
              * we don't need to do anything.
@@ -4238,7 +4238,6 @@ function init_js(vm)
 
         force_output()
         {
-            console.log("ofrcr");
             if (this.buffer.length > 0) {
                 this.output_function(vm.utf8_decode(this.buffer));
                 this.buffer = "";

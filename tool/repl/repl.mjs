@@ -15,6 +15,7 @@ $(function() {
     });
     term.set_prompt(PROMPT);
 
+    // Re-use the JS console output stream with our custom output function.
     const stdout = new vm.JS_console_output_stream(term.echo);
     vm.STANDARD_OUTPUT.set_value(stdout);
 
