@@ -21,9 +21,8 @@
 
 (defun repl:run-debugger-loop (condition k)
   "Run a debug REPL.  Prints a banner and then runs a normal REPL."
-  (uprint "> Debugger invoked on condition:")
-  (print condition)
-  (js-log condition)
+  (uprint "> Debugger invoked on condition")
+  (failsafe-print condition)
   (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
   (mapc (lambda (restart)
           ;; Don't print our internal REPL-ABORT restart.
@@ -33,6 +32,16 @@
   (uprint "> Backtrace:")
   (%print-stacktrace k)
   (repl:run))
+
+(def #'failsafe-to-string (to-lisp-function (js-global "String"))
+  "A safe way to turn any JS object into a (JS) string.")
+
+(defun failsafe-print (obj)
+  "Print any object, incl. JS objects, as usefully as possible while
+never failing."
+  (if (eq (class-of condition) #^object)
+      (uprint (to-lisp-string (failsafe-to-string condition)))
+      (print condition)))
 
 ;; Overwrite built-in `invoke-debugger'.  This gets called for all
 ;; unhandled conditions.
