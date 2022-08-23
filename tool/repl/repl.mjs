@@ -1,6 +1,6 @@
 import { VM } from "../../dist/lispx-vm.min.mjs";
-import { init_repl_stream } from "./repl_stream.mjs";
-import repl_stream_code from "./repl_stream.lispx";
+import { init_repl_stream } from "./repl-stream.mjs";
+import repl_stream_code from "./repl-stream.lispx";
 import repl_code from "./repl.lispx";
 
 const PROMPT = "* ";

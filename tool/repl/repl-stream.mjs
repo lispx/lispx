@@ -5,7 +5,7 @@
 
 /*
  * Special module for treating asynchronous line based input as
- * synchronous.  See companion code in repl_stream.lispx
+ * synchronous.  See companion code in repl-stream.lispx
  */
 export function init_repl_stream(vm)
 {
