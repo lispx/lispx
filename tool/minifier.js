@@ -105,8 +105,8 @@ function minify_defgeneric(form)
     return vm.list_subseq(form, 0, 3);
 }
 
-// (defclass name   (superclass?) slot-specs . properties)
-//  0        1      2             3            4
+// (defclass name (superclass?) slot-specs . properties)
+//  0        1    2             3            4
 function minify_defclass(form)
 {
     return vm.list_subseq(form, 0, 4);
@@ -114,8 +114,9 @@ function minify_defclass(form)
 
 /*
  * Self-test -- this should really be run from somewhere else but I
- * don't know where atm (since it's Node code), so we just always run
- * it "in prod".
+ * don't know where atm (since it's Node code, and the normal test
+ * suite is usually run in the browser only), so we just always run it
+ * "in prod".
  */
 const input = `
 (defun foo ())
