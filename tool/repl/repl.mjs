@@ -41,6 +41,6 @@ $(function() {
 
     vm.eval_js_string(repl_stream_code);
     vm.eval_js_string(repl_code);
-    vm.eval_js_string("(repl:main)");
+    vm.eval_js_string("(repl:run)");
 
 });

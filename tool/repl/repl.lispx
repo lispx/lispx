@@ -8,7 +8,32 @@
 (defdynamic repl:*debug-level* 0
   "Current debug level.  0 if we are not in the debugger.")
 
-;; Overwrite built-in `invoke-debugger'.
+(defun repl:run ()
+  "Run a REPL."
+  (loop
+    ;; The internal REPL-ABORT restart just causes the loop to begin
+    ;; from the start again.  The user actually used ABORT, described below.
+    (restart-case ((repl-abort (lambda () #| nothing to do here, just unwind |#)))
+      (repl:%set-debug-level (dynamic repl:*debug-level*))
+      (fresh-line)
+      (print (eval (read) repl:+environment+)))))
+
+(defun repl:run-debugger-loop (condition k)
+  "Run a debug REPL.  Prints a banner and then runs a normal REPL."
+  (uprint "> Debugger invoked on condition:")
+  (print condition)
+  (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
+  (mapc (lambda (restart)
+          ;; Don't print our internal REPL-ABORT restart.
+          (unless (eq (slot-value restart 'restart-name) 'repl-abort)
+            (print (slot-value restart 'restart-name))))
+        (compute-restarts condition))
+  (uprint "> Backtrace:")
+  (%print-stacktrace k)
+  (repl:run))
+
+;; Overwrite built-in `invoke-debugger'.  This gets called for all
+;; unhandled conditions.
 (defun invoke-debugger (condition)
   ;; Immediately grab the stack trace, so we don't include any of the
   ;; below frames in it.
@@ -20,10 +45,10 @@
         ;; We use a system of two restarts to abort.  The user invokes
         ;; the ABORT restart to break out of a nested debug level.
         ;; Internally this invokes the REPL-ABORT restart which lands
-        ;; us back in the containing REPL, see below in `repl:repl'.
-        ;; This two-restart approach is needed because otherwise
-        ;; REPL-ABORT would land the user back in the debug loop they
-        ;; came from.
+        ;; us back in the containing REPL, see `repl:run'.  This
+        ;; two-restart approach is needed because otherwise REPL-ABORT
+        ;; would land the user back in the debug loop they came from.
+        ;; Maybe there's a simpler solution but I haven't found one.
         (restart-case ((abort (lambda () (invoke-restart 'repl-abort))))
           ;; Add some extra restarts to `unbound-symbol-error' because
           ;; it demos well and makes designers of other languages
@@ -41,31 +66,3 @@
                  (repl:run-debugger-loop condition k))))
             (object
              (repl:run-debugger-loop condition k))))))))
-
-(defun repl:run-debugger-loop (condition k)
-  "Run a debug REPL.  Prints a banner and then runs a normal REPL."
-  (uprint "> Debugger invoked on condition:")
-  (print condition)
-  (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
-  (mapc (lambda (restart)
-          ;; Don't print our internal REPL-ABORT restart.
-          (unless (eq (slot-value restart 'restart-name) 'repl-abort)
-            (print (slot-value restart 'restart-name))))
-        (compute-restarts condition))
-  (uprint "> Backtrace:")
-  (%print-stacktrace k)
-  (repl:repl))
-
-(defun repl:repl ()
-  "Run a REPL."
-  (loop
-    ;; The REPL-ABORT restart just causes the loop to begin from the start again.
-    (restart-case ((repl-abort (lambda () #| nothing to do here, just unwind |#)))
-      (repl:%set-debug-level (dynamic repl:*debug-level*))
-      (fresh-line)
-      (print (eval (read) repl:+environment+)))))
-
-(defun repl:main ()
-  "Main entrypoint."
-  (push-prompt +root-prompt+
-    (repl:repl)))
