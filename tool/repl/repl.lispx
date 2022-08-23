@@ -23,6 +23,7 @@
   "Run a debug REPL.  Prints a banner and then runs a normal REPL."
   (uprint "> Debugger invoked on condition:")
   (print condition)
+  (js-log condition)
   (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
   (mapc (lambda (restart)
           ;; Don't print our internal REPL-ABORT restart.
