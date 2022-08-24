@@ -1,0 +1,2 @@
+The minifier requires a previously built .umd.js to run, which
+introduces circularity issues.
