@@ -1,0 +1,2 @@
+The REPL fails in Firefox unless I increase
+javascript.options.main_thread_stack_quota_cap in about:config.
