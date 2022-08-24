@@ -2092,8 +2092,8 @@ function init_control(vm)
      */
     function TAKE_SUBCONT(args, env)
     {
-        var prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
-        var handler = vm.assert_type(vm.elt(args, 1), vm.Function);
+        const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const handler = vm.assert_type(vm.elt(args, 1), vm.Function);
 
         /*
          * Create the suspension.
@@ -2745,6 +2745,8 @@ function init_seq(vm)
         }
     };
 
+    /*** Mapping functions (for use from JS, not from Lisp) ***/
+
     /*
      * Creates a new list by calling a function on every element of a list.
      */
@@ -2889,6 +2891,8 @@ function init_seq(vm)
     vm.define_alien_function("%reverse", (list) => vm.reverse(list));
 
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
+
+
 
 };
 

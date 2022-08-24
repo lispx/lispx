@@ -303,8 +303,8 @@ export function init_control(vm)
      */
     function TAKE_SUBCONT(args, env)
     {
-        var prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
-        var handler = vm.assert_type(vm.elt(args, 1), vm.Function);
+        const prompt = vm.assert_type(vm.elt(args, 0), vm.TYPE_ANY);
+        const handler = vm.assert_type(vm.elt(args, 1), vm.Function);
 
         /*
          * Create the suspension.
