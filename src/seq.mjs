@@ -68,6 +68,8 @@ export function init_seq(vm)
         }
     };
 
+    /*** Mapping functions (for use from JS, not from Lisp) ***/
+
     /*
      * Creates a new list by calling a function on every element of a list.
      */
@@ -212,5 +214,40 @@ export function init_seq(vm)
     vm.define_alien_function("%reverse", (list) => vm.reverse(list));
 
     vm.define_condition("out-of-bounds-error", vm.Out_of_bounds_error, vm.Error);
+
+    function MAPCAR(args, env)
+    {
+        const fun = vm.assert_type(vm.elt(args, 0), vm.Operator);
+        const list = vm.assert_type(vm.elt(args, 1), vm.List);
+
+        if (list === vm.nil())
+            return vm.nil();
+        else
+            return do_mapcar(fun, list, env, vm.nil());
+    }
+
+    function do_mapcar(fun, list, env, acc, resumption = null)
+    {
+        vm.assert_type(list, vm.Cons);
+        let first = true;
+        do {
+            let value;
+            if (first && (resumption instanceof vm.Resumption)) {
+                first = false;
+                value = resumption.resume();
+            } else {
+                value = vm.operate(fun.unwrap(), vm.list(list.car()), env);
+            }
+            if (value instanceof vm.Suspension) {
+                return value.suspend((resumption) =>
+                    do_mapcar(fun, list, env, acc, resumption));
+            } else {
+                acc = vm.cons(value, acc);
+            }
+        } while ((list = list.cdr()) !== vm.nil());
+        return vm.reverse(acc);
+    }
+
+    vm.define_built_in_function("%mapcar", MAPCAR);
 
 };
