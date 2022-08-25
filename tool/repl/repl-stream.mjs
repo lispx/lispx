@@ -60,6 +60,10 @@ export function init_repl_stream(vm)
             if (this.wake_up_function === null) {
                 this.wake_up_function = wake_up_function;
             } else {
+                /*
+                 * This happens if a coroutine tries to read while
+                 * some other code is already waiting for input.
+                 */
                 vm.panic(new vm.Error("Concurrent access detected"));
             }
         }

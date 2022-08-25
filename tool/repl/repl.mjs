@@ -12,6 +12,7 @@ $(function() {
 
     const term = $('#terminal').terminal(input_handler, {
         greetings: "Welcome to LispX!",
+        historySize: 1024,
         keydown: keydown,
         keypress: keypress
     });
