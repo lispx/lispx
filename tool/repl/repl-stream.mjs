@@ -57,7 +57,11 @@ export function init_repl_stream(vm)
         set_wake_up_function(wake_up_function)
         {
             vm.assert_type(wake_up_function, vm.Function);
-            this.wake_up_function = wake_up_function;
+            if (this.wake_up_function === null) {
+                this.wake_up_function = wake_up_function;
+            } else {
+                vm.panic(new vm.Error("Concurrent access detected"));
+            }
         }
 
         /*
@@ -77,7 +81,7 @@ export function init_repl_stream(vm)
                 this.wake_up_function = null;
                 vm.eval_form(vm.list(wuf));
             } else {
-                console.log("No wakeup function - Lisp crashed?");
+                vm.panic(new vm.Error("No wakeup function - Lisp crashed?"));
             }
         }
 
