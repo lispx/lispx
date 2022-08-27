@@ -1,5 +1,5 @@
 /*
- * A minifier for LispX files that plugs into Webpack as a loader.
+ * A minifier for LispX files.  Used from Webpack.
  *
  * Removes comments, docstrings, and most whitespace from the Lisp
  * source.

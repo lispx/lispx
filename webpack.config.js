@@ -163,11 +163,11 @@ function make_test_entry_node()
 function make_repl_entry()
 {
     const entry = {
-        entry: "./tool/repl/repl.mjs",
+        entry: "./tool/repl/web/repl.mjs",
         output: {
             library: "lispx-repl",
             libraryTarget: "umd",
-            filename: "repl/repl.umd.js",
+            filename: "repl/web/repl.umd.js",
             globalObject: "this"
         },
         module: {

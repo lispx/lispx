@@ -1,7 +1,7 @@
-import { VM } from "../../src/vm.mjs";
-import { init_repl_stream } from "./repl-stream.mjs";
-import repl_stream_code from "./repl-stream.lispx";
-import repl_code from "./repl.lispx";
+import { VM } from "../../../src/vm.mjs";
+import { init_repl_stream } from "../repl-stream.mjs";
+import repl_stream_code from "../repl-stream.lispx";
+import repl_code from "../repl.lispx";
 
 const PROMPT = "* ";
 

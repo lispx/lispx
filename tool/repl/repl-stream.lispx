@@ -2,7 +2,7 @@
 ;;; Companion Lisp code to repl-stream.mjs
 ;;;
 
-(defmethod stream-read ((stream repl:input-buffer) . #ignore)
+(defmethod stream-read ((input-buffer repl:input-buffer) . #ignore)
   "Blocking input function for the REPL input buffer.  This gets
 called from `read' when the input stream is a `repl:input-buffer'.
 
@@ -26,7 +26,7 @@ when the input stream is a `repl:input-buffer'."
       ;; Use a trampoline to avoid stack build-up.
       ((block trampoline
          ;; Get a stream containing the current contents of the input buffer.
-         (let ((stream (repl:%make-input-buffer-stream (dynamic *standard-input*))))
+         (let ((stream (repl:%make-input-buffer-stream input-buffer)))
            (handler-case ((end-of-file
                            (lambda #ignore
                              ;; We got an end-of-file error: jump into trampoline
@@ -35,7 +35,7 @@ when the input stream is a `repl:input-buffer'."
                                (lambda ()
                                  (take-subcont +root-prompt+ k
                                    (repl:%set-input-buffer-wake-up-function
-                                    (dynamic *standard-input*)
+                                    input-buffer
                                     (lambda ()
                                       (push-delim-subcont +root-prompt+ k))))))))
                           (reader-error
@@ -44,7 +44,7 @@ when the input stream is a `repl:input-buffer'."
                              ;; input was faulty, so clear the input
                              ;; buffer to not cause any further
                              ;; confusion...
-                             (repl:%clear-input-buffer (dynamic *standard-input*))
+                             (repl:%clear-input-buffer input-buffer)
                              ;; ...and re-signal it.
                              (error e))))
                ;; Call built-in, non-blocking `read' on the stream.
@@ -54,5 +54,5 @@ when the input stream is a `repl:input-buffer'."
                  ;; We've successfully read an object: remove the
                  ;; input we've consumed from the input buffer,
                  ;; and return the object.
-                 (repl:%truncate-input-buffer (dynamic *standard-input*) stream)
+                 (repl:%truncate-input-buffer input-buffer stream)
                  (return-from exit form)))))))))
