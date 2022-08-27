@@ -25,9 +25,10 @@ module.exports = [
     make_test_entry_browser(),
     make_test_entry_node(),
     /*
-     * Build REPL.
+     * Build REPLs.
      */
-    make_repl_entry()
+    make_web_repl_entry(),
+    make_node_repl_entry()
 ];
 
 /*
@@ -158,11 +159,11 @@ function make_test_entry_node()
 }
 
 /*
- * REPL
+ * Web REPL.
  */
-function make_repl_entry()
+function make_web_repl_entry()
 {
-    const entry = {
+    return {
         entry: "./tool/repl/web/repl.mjs",
         output: {
             library: "lispx-repl",
@@ -189,5 +190,27 @@ function make_repl_entry()
             minimizer: [ new TerserPlugin() ]
         }
     };
-    return entry;
+}
+
+/*
+ * Node REPL.
+ */
+function make_node_repl_entry()
+{
+    return {
+        entry: "./tool/repl/node/repl.mjs",
+        target: "node",
+        module: {
+            rules: [
+                {
+                    test: /\.lispx$/,
+                    use: [ { loader: "raw-loader" }, { loader: "./tool/minifier.js" } ]
+                }
+            ]
+        },
+        optimization: {
+            minimize: false,
+            minimizer: [ new TerserPlugin() ]
+        }
+    };
 }
