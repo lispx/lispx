@@ -200,6 +200,9 @@ function make_node_repl_entry()
     return {
         entry: "./tool/repl/node/repl.mjs",
         target: "node",
+        output: {
+            filename: "repl/node/repl.umd.js",
+        },
         module: {
             rules: [
                 {
@@ -209,7 +212,7 @@ function make_node_repl_entry()
             ]
         },
         optimization: {
-            minimize: false,
+            minimize: true,
             minimizer: [ new TerserPlugin() ]
         }
     };
