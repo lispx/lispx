@@ -13013,6 +13013,11 @@ describe("utf8_decode()", () => {
 const eval_test_vm = time("Boot LispX", () => new external_lispx_vm_.VM());
 
 /*
+ * This stream is used to prevent stack traces being printed for some tests.
+ */
+const MUFFLED_STREAM = new eval_test_vm.JS_console_output_stream(() => null);
+
+/*
  * Utilities.
  */
 
@@ -13389,8 +13394,10 @@ describe("%DEF", () => {
 
     it("%DEF passes on errors from the expression.", () => {
 
-        assert.throws(() => eval_test_vm.eval_js_string("(%def #ignore x)"),
-                      "Unbound variable: x");
+        eval_test_vm.progv([eval_test_vm.STANDARD_OUTPUT], [MUFFLED_STREAM], () => {
+            assert.throws(() => eval_test_vm.eval_js_string("(%def #ignore x1)"),
+                          "Unbound variable: x1");
+        });
 
     });
 
@@ -13416,8 +13423,10 @@ describe("%PROGN", () => {
 
     it("%PROGN passes on errors from the operands.", () => {
 
-        assert.throws(() => eval_test_vm.eval_js_string("(%progn 1 x 2)"),
-                      "Unbound variable: x");
+        eval_test_vm.progv([eval_test_vm.STANDARD_OUTPUT], [MUFFLED_STREAM], () => {
+            assert.throws(() => eval_test_vm.eval_js_string("(%progn 1 x2 2)"),
+                          "Unbound variable: x2");
+        });
 
     });
 
@@ -13449,12 +13458,14 @@ describe("%IF", () => {
 
     it("%IF passes on errors from evaluating the subexpressions.", () => {
 
-        assert.throws(() => eval_test_vm.eval_js_string("(%if x 2 3)"),
-                      "Unbound variable: x");
-        assert.throws(() => eval_test_vm.eval_js_string("(%if #t y 3)"),
-                      "Unbound variable: y");
-        assert.throws(() => eval_test_vm.eval_js_string("(%if #f 2 z)"),
-                      "Unbound variable: z");
+        eval_test_vm.progv([eval_test_vm.STANDARD_OUTPUT], [MUFFLED_STREAM], () => {
+            assert.throws(() => eval_test_vm.eval_js_string("(%if x4 2 3)"),
+                          "Unbound variable: x4");
+            assert.throws(() => eval_test_vm.eval_js_string("(%if #t y3 3)"),
+                          "Unbound variable: y3");
+            assert.throws(() => eval_test_vm.eval_js_string("(%if #f 2 z3)"),
+                          "Unbound variable: z3");
+        });
 
     });
 
@@ -13600,10 +13611,13 @@ describe("Panicking", () => {
         const env = make_child_environment();
         env.put(eval_test_vm.sym("cause"), new Error("it happened"));
 
-        // Check that UW's cleanup expression runs and overrides the panic.
-        assert.throws(() => eval_test_vm.eval_js_string(`(unwind-protect (panic cause)
-                                                 this-var-is-unbound)`, env),
-                      "LISP panic: Unbound variable: this-var-is-unbound");
+        eval_test_vm.progv([eval_test_vm.STANDARD_OUTPUT], [MUFFLED_STREAM], () => {
+            // Check that UW's cleanup expression runs and overrides the panic.
+            assert.throws(() => eval_test_vm.eval_js_string(`(unwind-protect (panic cause)
+                                                      this-var-is-unbound)`,
+                                                  env),
+                          "LISP panic: Unbound variable: this-var-is-unbound");
+        });
 
     });
 
