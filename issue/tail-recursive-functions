@@ -1,0 +1,7 @@
+Currently, most functions like MAPCAR are written in the most simple
+way, leading to stack growth.
+
+This is fine for small data sizes, but might be problem for bigger ones.
+
+We might define an optional optimization module that replaces those
+functions with tail-recursive ones.

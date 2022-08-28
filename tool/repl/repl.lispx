@@ -21,15 +21,15 @@
 
 (defun repl:run-debugger-loop (condition k)
   "Run a debug REPL.  Prints a banner and then runs a normal REPL."
-  (uprint "> Debugger invoked on condition:")
+  (uprint "Debugger invoked on condition:")
   (print condition)
-  (uprint "> Available restarts -- use (invoke-restart 'name ...) to invoke:")
+  (uprint "Available restarts -- use (invoke-restart 'name ...) to invoke:")
   (mapc (lambda (restart)
           ;; Don't print our internal REPL-ABORT restart.
           (unless (eq (slot-value restart 'restart-name) 'repl-abort)
             (print (slot-value restart 'restart-name))))
         (compute-restarts condition))
-  (uprint "> Backtrace:")
+  (uprint "Backtrace:")
   (%print-stacktrace k)
   (repl:run))
 
