@@ -16,7 +16,6 @@
     ;; below.
     (restart-case ((repl-abort (lambda () #| nothing to do here, just unwind |#)))
       (repl:%display-prompt (dynamic repl:*debug-level*))
-      (fresh-line)
       (print (eval (read) repl:+environment+)))))
 
 (defun repl:run-debugger-loop (condition k)
