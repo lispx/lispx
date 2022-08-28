@@ -1,8 +1,8 @@
 import fs from "fs";
 import readline from "readline";
 import { VM } from "../../../src/vm.mjs";
-import { init_repl_stream } from "../repl-stream.mjs";
-import repl_stream_code from "../repl-stream.lispx";
+import { init_repl_input_buffer } from "../repl-input-buffer.mjs";
+import repl_input_buffer_code from "../repl-input-buffer.lispx";
 import repl_code from "../repl.lispx";
 
 /*
@@ -12,7 +12,7 @@ import repl_code from "../repl.lispx";
 const PROMPT = "* ";
 
 var vm = new VM();
-init_repl_stream(vm);
+init_repl_input_buffer(vm);
 
 /*
  * Set up Lisp standard output to print to the Node stdout.
@@ -57,5 +57,5 @@ vm.define_alien_function("repl:%display-prompt", (level) => {
 process.stdout.write("Welcome to Nybble Lisp!\n");
 
 vm.eval_js_string(repl_code);
-vm.eval_js_string(repl_stream_code);
+vm.eval_js_string(repl_input_buffer_code);
 vm.eval_js_string("(repl:run)");
