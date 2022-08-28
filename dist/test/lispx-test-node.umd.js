@@ -13013,7 +13013,8 @@ describe("utf8_decode()", () => {
 const eval_test_vm = time("Boot LispX", () => new external_lispx_vm_umd_min_js_.VM());
 
 /*
- * This stream is used to prevent stack traces being printed for some tests.
+ * This stream is used to prevent stack traces being printed for some
+ * tests that cause panics (via INVOKE-DEBUGGER).
  */
 const MUFFLED_STREAM = new eval_test_vm.JS_console_output_stream(() => null);
 

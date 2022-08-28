@@ -14,7 +14,8 @@ import hierarchy_test_code from "./hierarchy-test.lispx";
 const vm = time("Boot LispX", () => new VM());
 
 /*
- * This stream is used to prevent stack traces being printed for some tests.
+ * This stream is used to prevent stack traces being printed for some
+ * tests that cause panics (via INVOKE-DEBUGGER).
  */
 const MUFFLED_STREAM = new vm.JS_console_output_stream(() => null);
 
