@@ -36,7 +36,7 @@ $(function() {
     }
 
     // Adapt REPL prompt based on debug level.
-    vm.define_alien_function("repl:%set-debug-level", (level) => {
+    vm.define_alien_function("repl:%display-prompt", (level) => {
         const lvl = vm.assert_type(level, vm.Number).to_js_number();
         if (lvl === 0) term.set_prompt(PROMPT);
         else term.set_prompt("[" + lvl + "] ");

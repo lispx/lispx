@@ -32,7 +32,7 @@ var rl = readline.createInterface({
     prompt: PROMPT
 });
 
-const input_buffer = new vm.REPL_input_buffer(() => rl.prompt());
+const input_buffer = new vm.REPL_input_buffer();
 vm.STANDARD_INPUT.set_value(input_buffer);
 
 rl.on("line", function(line) {
@@ -47,11 +47,14 @@ rl.on("line", function(line) {
  * Run the REPL.
  */
 
-vm.define_alien_function("repl:%set-debug-level", (level) => {
+vm.define_alien_function("repl:%display-prompt", (level) => {
     const lvl = vm.assert_type(level, vm.Number).to_js_number();
     if (lvl === 0) rl.setPrompt(PROMPT);
     else rl.setPrompt("[" + lvl + "] ");
+    rl.prompt();
 });
+
+process.stdout.write("Welcome to Nybble Lisp!\n");
 
 vm.eval_js_string(repl_code);
 vm.eval_js_string(repl_stream_code);

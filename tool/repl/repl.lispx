@@ -15,7 +15,7 @@
     ;; the start again.  The user actually uses ABORT, described
     ;; below.
     (restart-case ((repl-abort (lambda () #| nothing to do here, just unwind |#)))
-      (repl:%set-debug-level (dynamic repl:*debug-level*))
+      (repl:%display-prompt (dynamic repl:*debug-level*))
       (fresh-line)
       (print (eval (read) repl:+environment+)))))
 
@@ -42,7 +42,6 @@
     (push-delim-subcont +root-prompt+ k
       ;; Increase debug level.
       (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1)))
-        (repl:%set-debug-level (dynamic repl:*debug-level*))
         ;; We use a system of two restarts to abort.  The user invokes
         ;; the ABORT restart to break out of a nested debug level.
         ;; Internally this invokes the REPL-ABORT restart which lands

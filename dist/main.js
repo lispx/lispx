@@ -5950,7 +5950,7 @@ function init_repl_stream(vm)
 ;// CONCATENATED MODULE: ./tool/repl/repl-stream.lispx
 /* harmony default export */ const repl_stream_lispx = ("(defmethod stream-read ((input-buffer repl:input-buffer) . #ignore) (block exit (loop ((block trampoline (let ((stream (repl:%make-input-buffer-stream input-buffer))) (handler-case ((end-of-file (lambda #ignore (return-from trampoline (lambda () (take-subcont +root-prompt+ k (repl:%set-input-buffer-wake-up-function input-buffer (lambda () (push-delim-subcont +root-prompt+ k)))))))) (reader-error (lambda (e) (repl:%clear-input-buffer input-buffer) (error e)))) (let ((form (read stream))) (repl:%truncate-input-buffer input-buffer stream) (return-from exit form)))))))))");
 ;// CONCATENATED MODULE: ./tool/repl/repl.lispx
-/* harmony default export */ const repl_lispx = ("(defconstant repl:+environment+ (the-environment) \"The environment in which REPL expressions are evaluated.\") (defdynamic repl:*debug-level* 0) (defun repl:run () (loop (restart-case ((repl-abort (lambda ()))) (repl:%set-debug-level (dynamic repl:*debug-level*)) (fresh-line) (print (eval (read) repl:+environment+))))) (defun repl:run-debugger-loop (condition k) (uprint \"> Debugger invoked on condition:\") (print condition) (uprint \"> Available restarts -- use (invoke-restart 'name ...) to invoke:\") (mapc (lambda (restart) (unless (eq (slot-value restart (quote restart-name)) (quote repl-abort)) (print (slot-value restart (quote restart-name))))) (compute-restarts condition)) (uprint \"> Backtrace:\") (%print-stacktrace k) (repl:run)) (defun invoke-debugger (condition) (take-subcont +root-prompt+ k (push-delim-subcont +root-prompt+ k (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1))) (repl:%set-debug-level (dynamic repl:*debug-level*)) (restart-case ((abort (lambda () (invoke-restart (quote repl-abort))))) (typecase condition (unbound-symbol-error (let ((symbol (slot-value condition (quote symbol))) (env (slot-value condition (quote environment)))) (restart-case ((continue (lambda () (eval symbol env)) :associated-conditions (list condition)) (use-value (lambda (value) value) :associated-conditions (list condition)) (store-value (lambda (value) (eval (list #'def symbol value) env)) :associated-conditions (list condition))) (repl:run-debugger-loop condition k)))) (object (repl:run-debugger-loop condition k))))))))");
+/* harmony default export */ const repl_lispx = ("(defconstant repl:+environment+ (the-environment) \"The environment in which REPL expressions are evaluated.\") (defdynamic repl:*debug-level* 0) (defun repl:run () (loop (restart-case ((repl-abort (lambda ()))) (repl:%display-prompt (dynamic repl:*debug-level*)) (fresh-line) (print (eval (read) repl:+environment+))))) (defun repl:run-debugger-loop (condition k) (uprint \"> Debugger invoked on condition:\") (print condition) (uprint \"> Available restarts -- use (invoke-restart 'name ...) to invoke:\") (mapc (lambda (restart) (unless (eq (slot-value restart (quote restart-name)) (quote repl-abort)) (print (slot-value restart (quote restart-name))))) (compute-restarts condition)) (uprint \"> Backtrace:\") (%print-stacktrace k) (repl:run)) (defun invoke-debugger (condition) (take-subcont +root-prompt+ k (push-delim-subcont +root-prompt+ k (dynamic-let ((repl:*debug-level* (+ (dynamic repl:*debug-level*) 1))) (restart-case ((abort (lambda () (invoke-restart (quote repl-abort))))) (typecase condition (unbound-symbol-error (let ((symbol (slot-value condition (quote symbol))) (env (slot-value condition (quote environment)))) (restart-case ((continue (lambda () (eval symbol env)) :associated-conditions (list condition)) (use-value (lambda (value) value) :associated-conditions (list condition)) (store-value (lambda (value) (eval (list #'def symbol value) env)) :associated-conditions (list condition))) (repl:run-debugger-loop condition k)))) (object (repl:run-debugger-loop condition k))))))))");
 ;// CONCATENATED MODULE: ./tool/repl/node/repl.mjs
 
 
@@ -5986,7 +5986,7 @@ var rl = external_readline_namespaceObject.createInterface({
     prompt: PROMPT
 });
 
-const input_buffer = new vm.REPL_input_buffer(() => rl.prompt());
+const input_buffer = new vm.REPL_input_buffer();
 vm.STANDARD_INPUT.set_value(input_buffer);
 
 rl.on("line", function(line) {
@@ -6001,11 +6001,14 @@ rl.on("line", function(line) {
  * Run the REPL.
  */
 
-vm.define_alien_function("repl:%set-debug-level", (level) => {
+vm.define_alien_function("repl:%display-prompt", (level) => {
     const lvl = vm.assert_type(level, vm.Number).to_js_number();
     if (lvl === 0) rl.setPrompt(PROMPT);
     else rl.setPrompt("[" + lvl + "] ");
+    rl.prompt();
 });
+
+process.stdout.write("Welcome to Nybble Lisp!\n");
 
 vm.eval_js_string(repl_lispx);
 vm.eval_js_string(repl_stream_lispx);
