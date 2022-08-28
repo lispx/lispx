@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-set -eu
-node dist/repl/node/repl.umd.js

@@ -1876,13 +1876,14 @@ function init_control(vm)
          * frame created by the %TAKE-SUBCONT expression that triggered
          * continuation capture.
          *
-         * The trace is used to display stack traces, described below.
+         * The optional trace is used to display stack traces, described below.
          */
         constructor(work_fun, inner, trace)
         {
             super();
             vm.assert_type(work_fun, "function");
             vm.assert_type(inner, vm.type_or(vm.TYPE_NULL, vm.Continuation));
+            vm.assert_type(trace, vm.type_or(vm.TYPE_NULL, vm.Trace));
             this.work_fun = work_fun;
             this.inner = inner;
             this.trace = trace;
@@ -1928,10 +1929,11 @@ function init_control(vm)
          * Destructively adds a new outer continuation frame with the
          * given work function to the suspension as we move outwards
          * during continuation creation.
+         *
+         * A trace may be supplied to record debugging information.
          */
-        suspend(work_fun, trace)
+        suspend(work_fun, trace = null)
         {
-            vm.assert_type(work_fun, "function");
             this.continuation = new vm.Continuation(work_fun, this.continuation, trace);
             return this;
         }
@@ -1990,19 +1992,22 @@ function init_control(vm)
      * Experience has shown that having traces in just a couple of
      * places (see eval.mjs) gives usable stack traces.)
      */
-    class Trace
+    vm.Trace = class Trace
     {
+        /*
+         * A trace records a particular expression evaluated in an environment.
+         */
         constructor(expr, env)
         {
-            this.expr = expr;
-            this.env = env;
+            this.expr = vm.assert_type(expr, vm.TYPE_ANY);
+            this.env = vm.assert_type(env, vm.Environment);
         }
     }
 
     /*
      * Construct a trace with the given expression and environment.
      */
-    vm.trace = (expr, env) => new Trace(expr, env);
+    vm.trace = (expr, env) => new vm.Trace(expr, env);
 
     /*** Bind ***/
 
@@ -2014,9 +2019,9 @@ function init_control(vm)
      * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
      *
-     * The trace is attached to the continuation frame for debugging.
+     * The optional trace is attached to the continuation frame for debugging.
      */
-    vm.bind = (first, second, trace) =>
+    vm.bind = (first, second, trace = null) =>
     {
         vm.assert_type(first, "function");
         vm.assert_type(second, "function");
@@ -2041,7 +2046,7 @@ function init_control(vm)
      * must support.  The work functions of the more complicated
      * operators, below, follow this same protocol.
      */
-    function do_bind(first, second, trace, resumption = null)
+    function do_bind(first, second, trace = null, resumption = null)
     {
         /*
          * Evaluate first thunk.
