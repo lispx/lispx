@@ -230,12 +230,13 @@ export function init_control(vm)
      * This is used in eval.mjs for all operators whose semantics are
      * straightforward and only require sequential execution.
      *
-     * The optional trace is attached to the continuation frame for debugging.
+     * The trace is attached to the continuation frame for debugging.
      */
-    vm.bind = (first, second, trace = null) =>
+    vm.bind = (first, second, trace) =>
     {
         vm.assert_type(first, "function");
         vm.assert_type(second, "function");
+        vm.assert_type(trace, vm.Trace);
         return do_bind(first, second, trace);
     };
 
@@ -257,7 +258,7 @@ export function init_control(vm)
      * must support.  The work functions of the more complicated
      * operators, below, follow this same protocol.
      */
-    function do_bind(first, second, trace = null, resumption = null)
+    function do_bind(first, second, trace, resumption = null)
     {
         /*
          * Evaluate first thunk.
@@ -838,7 +839,7 @@ export function init_control(vm)
         vm.assert_type(k, vm.Continuation);
         const exprs = [];
         do {
-            if (k.trace)
+            if (k.trace !== null)
                 exprs.push(k.trace.expr);
         } while((k = k.inner));
         exprs.reverse();
