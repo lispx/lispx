@@ -1,0 +1,58 @@
+;;;                                                     -*- Lisp -*-
+;;; Companion Lisp code to repl-input-buffer.mjs
+;;;
+
+(defmethod stream-read ((input-buffer repl:input-buffer) . #ignore)
+  "Blocking input function for the REPL input buffer.  This gets
+called from `read' when the input stream is a `repl:input-buffer'.
+
+Calls the built-in default implementation of `read', which is
+non-blocking, i.e. immediately signals `end-of-file' instead of
+waiting for more input.
+
+Tries the built-in `read' on the current contents of the input buffer.
+If it successfully reads an object, return it.  If it signals
+`end-of-file', save the current continuation in the input buffer's
+wake-up function.  The wake-up function will be called from JS when
+more input is available, in which case we start over.
+
+Note that the method ignores the generic function's `eof-error-p' and
+`eof-value' parameters because it always blocks on EOF.
+
+To sum up, this method turns `read' from non-blocking into blocking
+when the input stream is a `repl:input-buffer'."
+  (block exit
+    (loop
+      ;; Use a trampoline to avoid stack build-up.
+      ((block trampoline
+         ;; Get a stream containing the current contents of the input buffer.
+         (let ((stream (repl:%make-input-buffer-stream input-buffer)))
+           (handler-case ((end-of-file
+                           (lambda #ignore
+                             ;; We got an end-of-file error: jump into trampoline
+                             ;; and save continuation in wake-up function.
+                             (return-from trampoline
+                               (lambda ()
+                                 (take-subcont +root-prompt+ k
+                                   (repl:%set-input-buffer-wake-up-function
+                                    input-buffer
+                                    (lambda ()
+                                      (push-delim-subcont +root-prompt+ k))))))))
+                          (reader-error
+                           (lambda (e)
+                             ;; We got a `reader-error' -- assume the
+                             ;; input was faulty, so clear the input
+                             ;; buffer to not cause any further
+                             ;; confusion...
+                             (repl:%clear-input-buffer input-buffer)
+                             ;; ...and re-signal it.
+                             (error e))))
+               ;; Call built-in, non-blocking `read' on the stream.
+               ;; This calls the built-in because the stream is a
+               ;; `string-input-stream'.
+               (let ((form (read stream)))
+                 ;; We've successfully read an object: remove the
+                 ;; input we've consumed from the input buffer,
+                 ;; and return the object.
+                 (repl:%truncate-input-buffer input-buffer stream)
+                 (return-from exit form)))))))))
