@@ -1,5 +1,0 @@
-Panicking looks for a .message slot on the exception cause.
-
-But SIMPLE-ERROR is a standard object, so it has no .message slot.
-
-Therefore the panic is uninformative, and doesn't contain the error message.
