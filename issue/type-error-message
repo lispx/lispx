@@ -1,2 +1,3 @@
 The type-error for (the string 12) has a useless message
-"expected #<object> got #<object>" -- why?
+"expected #<<js undefined undefined>> got #<<js undefined undefined>>"
+-- why?
