@@ -3434,7 +3434,7 @@ function init_read(vm)
                 }
             }
         }
-    }
+    };
 
     /*** Reading Strings and Escaped Symbols ***/
 
