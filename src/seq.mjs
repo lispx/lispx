@@ -76,8 +76,15 @@ export function init_seq(vm)
         if (list === vm.nil())
             return vm.nil();
         else
-            return vm.cons(fun(list.car()), vm.mapcar(fun, list.cdr()));
+            return mapcar_aux(fun, list, vm.nil());
     };
+
+    function mapcar_aux(fun, list, accumulator)
+    {
+        do accumulator = vm.cons(fun(list.car()), accumulator);
+        while ((list = list.cdr()) !== vm.nil());
+        return vm.reverse(accumulator);
+    }
 
     /*
      * Calls a function on every list element for effect.
