@@ -1,0 +1,1 @@
+All x instanceof Foo checks should be changed to (x && x instanceof Foo).
