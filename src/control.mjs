@@ -334,7 +334,7 @@ export function init_control(vm)
              * over control in the place where the continuation
              * was originally captured.
              */
-            vm.operate(resumption.handler, vm.nil(), env)
+            vm.eval(cons(resumption.handler, vm.nil()), env)
         );
     }
 
@@ -601,27 +601,7 @@ export function init_control(vm)
     function LOOP(operands, env)
     {
         const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
-        return do_loop(expr, env);
-    }
-
-    function do_loop(expr, env, resumption = null)
-    {
-        let first = true; // Only resume once.
-        while (true) {
-            let result;
-            if (first && (resumption instanceof vm.Resumption)) {
-                first = false;
-                result = resumption.resume();
-            } else {
-                result = vm.eval(expr, env);
-            }
-            if (result instanceof vm.Suspension) {
-                return result.suspend((resumption) =>
-                    do_loop(expr, env, resumption));
-            } else {
-                continue;
-            }
-        }
+        for (;;) vm.eval(PROGN(expr, env), env);
     }
 
     /*

@@ -8,6 +8,15 @@
  */
 export function init_eval(vm)
 {
+    /*** Tail Call Ottimization ***/
+    
+    vm.tco = class Lisp_tco {
+         constructor(form, env) {
+              this.form = form
+              this.env = env
+         }
+    }
+    	
     /*** Evaluation & Operation Core ***/
 
     /*
@@ -27,19 +36,25 @@ export function init_eval(vm)
          * nonlocal exits and panics, are piped into the condition
          * system.
          */
-        return vm.trap_exceptions(() => {
-            vm.assert_type(env, vm.Environment);
-            if (form instanceof vm.Symbol)
-                return evaluate_symbol(form, env);
-            else if (form instanceof vm.Cons)
-                return evaluate_cons(form, env);
-            else
-                /*
-                 * If the form is neither a symbol nor a cons, it
-                 * evaluates to itself.
-                 */
-                return form;
-        });
+        return vm.trap_exceptions(
+            () => {
+                vm.assert_type(env, vm.Environment);
+                for (;;) {
+                    if (form instanceof vm.Symbol)
+                        return evaluate_symbol(form, env);
+                    else if (form instanceof vm.Cons)
+                        return evaluate_cons(form, env);
+                    else if (form instanceof vm.Tco)
+                        var {form, env} = form
+                    else
+                        /*
+                         * If the form is neither a symbol nor a cons, it
+                         * evaluates to itself.
+                         */
+                        return form;
+                }
+            }
+        );
     };
 
     /*
@@ -451,18 +466,27 @@ export function init_eval(vm)
         if (forms === vm.nil())
             return vm.void();
         else
-            return progn(forms);
+            return progn(forms, env);
 
-        function progn(forms)
+        function progn(forms, env, resumption=null)
         {
-            return vm.bind(() => vm.eval(forms.car(), env),
-                           (result) => {
-                               if (forms.cdr() === vm.nil())
-                                   return result;
-                               else
-                                   return progn(forms.cdr());
-                           },
-                           vm.trace(forms.car(), env));
+            let first = true; // Only resume once.
+            while (true) {
+                let { car, cdr } = forms
+                if (cdr == vm.nil) return new vm.tco(car, env)
+                let result;
+                if (first && (resumption instanceof vm.Resumption) && !(first = false)) {
+	                result = resumption.resume();
+                } else {
+                    result = vm.eval(car, env);
+                }
+                if (result instanceof vm.Suspension) {
+                    return result.suspend((resumption) => progn(car, env, resumption));
+                } else {
+                    forms = cdr
+                    continue;
+                }
+            }
         }
     }
 
@@ -486,9 +510,9 @@ export function init_eval(vm)
                        (result) => {
                            vm.assert_type(result, vm.Boolean);
                            if (result == vm.t())
-                               return vm.eval(consequent, env);
+                               return new vm.tco(consequent, env);
                            else
-                               return vm.eval(alternative, env);
+                               return new vm.tco(alternative, env);
                        },
                        vm.trace(test, env));
     }
@@ -531,7 +555,7 @@ export function init_eval(vm)
         const env = vm.get_environment();
         const sym = vm.fsym("error");
         if (env.is_bound(sym)) {
-            return vm.operate(env.lookup(sym), vm.list(exception), vm.make_environment());
+            return vm.eval(cons(env.lookup(sym), vm.list(exception)), vm.make_environment());
         } else {
             vm.panic(exception);
         }
