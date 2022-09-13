@@ -10,7 +10,7 @@ export function init_eval(vm)
 {
     /*** Tail Call Ottimization ***/
     
-    vm.tco = class Lisp_tco {
+    vm.Tco = class Lisp_tco {
          constructor(form, env) {
               this.form = form
               this.env = env
@@ -473,7 +473,7 @@ export function init_eval(vm)
             let first = true; // Only resume once.
             while (true) {
                 let { car, cdr } = forms
-                if (cdr == vm.nil) return new vm.tco(car, env)
+                if (cdr == vm.nil) return new vm.Tco(car, env)
                 let result;
                 if (first && (resumption instanceof vm.Resumption) && !(first = false)) {
 	                result = resumption.resume();
@@ -510,9 +510,9 @@ export function init_eval(vm)
                        (result) => {
                            vm.assert_type(result, vm.Boolean);
                            if (result == vm.t())
-                               return new vm.tco(consequent, env);
+                               return new vm.Tco(consequent, env);
                            else
-                               return new vm.tco(alternative, env);
+                               return new vm.Tco(alternative, env);
                        },
                        vm.trace(test, env));
     }
