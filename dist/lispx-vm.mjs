@@ -1086,19 +1086,39 @@ function init_eval(vm)
          * nonlocal exits and panics, are piped into the condition
          * system.
          */
-        return vm.trap_exceptions(() => {
-            vm.assert_type(env, vm.Environment);
-            if (form instanceof vm.Symbol)
-                return evaluate_symbol(form, env);
-            else if (form instanceof vm.Cons)
-                return evaluate_cons(form, env);
+        return vm.trap_exceptions(() =>
+            vm.eliminate_tail_calls(() => {
+                vm.assert_type(env, vm.Environment);
+                if (form instanceof vm.Symbol)
+                    return evaluate_symbol(form, env);
+                else if (form instanceof vm.Cons)
+                    return evaluate_cons(form, env);
+                else
+                    /*
+                     * If the form is neither a symbol nor a cons, it
+                     * evaluates to itself.
+                     */
+                    return form;
+            }));
+    };
+
+    vm.Tail_call = class Tail_call
+    {
+        constructor(thunk)
+        {
+            this.thunk = thunk;
+        }
+    };
+
+    vm.eliminate_tail_calls = (thunk) =>
+    {
+        while (true) {
+            const result = thunk();
+            if (result instanceof vm.Tail_call)
+                thunk = result;
             else
-                /*
-                 * If the form is neither a symbol nor a cons, it
-                 * evaluates to itself.
-                 */
-                return form;
-        });
+                return result;
+        }
     };
 
     /*
@@ -1163,12 +1183,13 @@ function init_eval(vm)
      */
     vm.operate = (operator, operand, env = vm.get_environment()) =>
     {
-        return vm.trap_exceptions(() => {
-            vm.assert_type(operator, vm.Operator);
-            vm.assert_type(operand, vm.TYPE_ANY);
-            vm.assert_type(env, vm.Environment);
-            return operator.operate(operand, env);
-        });
+        return vm.trap_exceptions(() =>
+            vm.eliminate_tail_calls(() => {
+                vm.assert_type(operator, vm.Operator);
+                vm.assert_type(operand, vm.TYPE_ANY);
+                vm.assert_type(env, vm.Environment);
+                return operator.operate(operand, env);
+            }));
     };
 
     /*** Definiends ***/
