@@ -27,8 +27,8 @@ export function init_eval(vm)
          * nonlocal exits and panics, are piped into the condition
          * system.
          */
-        return vm.trap_exceptions(() =>
-            vm.eliminate_tail_calls(() => {
+        return vm.eliminate_tail_calls(() =>
+            vm.trap_exceptions(() => {
                 vm.assert_type(env, vm.Environment);
                 if (form instanceof vm.Symbol)
                     return evaluate_symbol(form, env);
@@ -47,16 +47,19 @@ export function init_eval(vm)
     {
         constructor(thunk)
         {
+            vm.assert_type(thunk, "function");
             this.thunk = thunk;
         }
     };
+
+    vm.tail_call = (thunk) => new vm.Tail_call(thunk);
 
     vm.eliminate_tail_calls = (thunk) =>
     {
         while (true) {
             const result = thunk();
             if (result instanceof vm.Tail_call)
-                thunk = result;
+                thunk = result.thunk;
             else
                 return result;
         }
@@ -124,8 +127,8 @@ export function init_eval(vm)
      */
     vm.operate = (operator, operand, env = vm.get_environment()) =>
     {
-        return vm.trap_exceptions(() =>
-            vm.eliminate_tail_calls(() => {
+        return vm.eliminate_tail_calls(() =>
+            vm.trap_exceptions(() => {
                 vm.assert_type(operator, vm.Operator);
                 vm.assert_type(operand, vm.TYPE_ANY);
                 vm.assert_type(env, vm.Environment);
@@ -291,7 +294,7 @@ export function init_eval(vm)
             const child_env = vm.make_environment(this.def_env);
             vm.match(this.param_tree, operand, child_env);
             vm.match(this.env_param, dyn_env, child_env);
-            return vm.eval(this.body_form, child_env);
+            return vm.tail_call(() => vm.eval(this.body_form, child_env));
         }
     };
 
@@ -326,7 +329,7 @@ export function init_eval(vm)
         operate(operands, env)
         {
             return vm.bind(() => eval_args(operands, vm.nil()),
-                           (args) => vm.operate(this.wrapped_operator, args, env),
+                           (args) => vm.tail_call(() => vm.operate(this.wrapped_operator, args, env)),
                            vm.trace(vm.cons(this, operands), env));
 
             function eval_args(todo, done)
@@ -507,9 +510,9 @@ export function init_eval(vm)
                        (result) => {
                            vm.assert_type(result, vm.Boolean);
                            if (result == vm.t())
-                               return vm.eval(consequent, env);
+                               return vm.tail_call(() => vm.eval(consequent, env));
                            else
-                               return vm.eval(alternative, env);
+                               return vm.tail_call(() => vm.eval(alternative, env));
                        },
                        vm.trace(test, env));
     }
