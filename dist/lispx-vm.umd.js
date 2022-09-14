@@ -2029,7 +2029,7 @@ function init_control(vm)
         {
             const continuation = this.continuation;
             this.continuation = continuation.inner;
-            return continuation.work_fun(this);
+            return vm.eliminate_tail_calls(() => continuation.work_fun(this));
         }
     };
 
