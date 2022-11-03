@@ -3258,7 +3258,7 @@ function init_read(vm)
         vm.assert_type(eof_value, vm.TYPE_ANY);
 
         /*
-         * Why do we need a unique EOF object can't just check that
+         * Why do we need a unique EOF object and can't just check that
          * the read object isn't the dot?  Because the user might have
          * passed in the dot symbol as their eof_value.
          */
