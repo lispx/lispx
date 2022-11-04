@@ -36,12 +36,12 @@ It has three main parts:
   the boring special case.
   
 * As the "user interface", LispX uses the same *classic Lisp* syntax, naming conventions, 
-  and overall organisation as Common and Emacs Lisp.  It is fully object oriented
-  with single inheritance (`defclass`), has single dispatching generic functions
-  (`defgeneric`, `defmethod`),
+  and overall organisation as Common and Emacs Lisp.  It is a Lisp-2,
+  is fully object oriented with single inheritance (`defclass`),
+  has single-dispatching generic functions (`defgeneric`, `defmethod`),
   the usual simple control forms (`catch`, `throw`, `block`, `return-from`,
-  `unwind-protect`, `loop`, `dotimes`, `dolist`, ...), is a Lisp-2,
-  and implements large parts of the CL condition system including restarts
+  `unwind-protect`, `loop`, `dotimes`, `dolist`, ...),
+  and implements large parts of the CL condition system
   (`handler-bind`, `handler-case`, `restart-case`, `signal`, `error`, `invoke-restart`,
   `invoke-restart-interactively`, `compute-restarts`, ...).
   The condition system is of course written in LispX itself and is a good
