@@ -81,7 +81,7 @@ It has three main parts:
 
 * link:src/read.mjs[] -- Reader code.
 
-* link:src/boot.lispx[] -- Language bootstrap.
+* link:src/boot.lispx[] -- Language bootstrap. *This also documents all built-ins until I put together a reference manual.*
 
 * link:src/cond-sys.lispx[] -- Condition system.
 
