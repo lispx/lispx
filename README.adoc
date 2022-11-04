@@ -73,9 +73,9 @@ It has three main parts:
   
 ## Code map (most important files)
 
-* link:src/vm.mjs[] -- Core VM data structures like symbols, environments, etc.
+* link:src/vm.mjs[] -- Core VM data structures like objects, classes, symbols, environments, etc.
 
-* link:src/eval.mjs[] -- Evaluation of simple forms like `def`, `progn`, etc.
+* link:src/eval.mjs[] -- Evaluation of core forms like `def`, `vau`, `progn`, `if`, etc.
 
 * link:src/control.mjs[] -- Evaluation of control-related forms.
 
