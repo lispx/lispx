@@ -27,8 +27,8 @@ It has three main parts:
   With continuations all async JS APIs (promise- and callback-based)
   can be used as if they were synchronous.
   
-* As the language core, LispX uses John Shutt's
-  link:https://web.cs.wpi.edu/~jshutt/kernel.html[*vau calculus*].
+* As the language core, LispX uses *vau calculus* developed by John Shutt for his
+  link:https://web.cs.wpi.edu/~jshutt/kernel.html[Kernel language].
   Vau calculus is essentially a lambda calculus without implicit evaluation
   of arguments (sometimes called "call-by-text").
   Vau calculus turns the usual programming/metaprogramming dichotomy on its head:
