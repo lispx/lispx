@@ -16,7 +16,7 @@ LispX is a new Lisp I am developing to make web programming bearable.
 
 It has three main parts:
 
-* LispX's raison d'être is to solve the async problem.
+* LispX's raison d'être is to solve JavaScript's async problem.
   It does this with *delimited continuations*.
   It faithfully implements the
   link:https://okmij.org/ftp/continuations/implementations.html#delimcc-paper[delimcc API]
@@ -24,6 +24,8 @@ It has three main parts:
   link:https://okmij.org/ftp//papers/DDBinding.pdf[delimited dynamic binding] 
   by Oleg et al. and can run the full link:test/delimcc-test.lispx[test suite]
   from the delimcc distribution.
+  With continuations all async JS APIs (promise- and callback-based)
+  can be used as if they were synchronous.
   
 * As the language core, LispX uses John Shutt's
   link:https://web.cs.wpi.edu/~jshutt/kernel.html[*vau calculus*].
