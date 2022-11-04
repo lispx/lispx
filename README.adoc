@@ -88,7 +88,7 @@ It has three main parts:
 ## Debugger example
 
  $ ./scripts/node-repl 
- Welcome to Nybble Lisp!
+ Welcome to LispX!
  * (+ 100 x)
  Debugger invoked on condition:
  #<unbound-symbol-error :environment #<environment> :message "Unbound variable: x" :symbol x>
@@ -174,3 +174,23 @@ If it's not a symbol, the operator position of a form is evaluated normally:
    
  ((compose (lambda (x) (+ 1 x)) (lambda (x (* 3 x))) 10)
  => 33
+
+### Uniform compound definiends
+
+The left hand side of definitions and parameter forms can be not only symbols
+but also nested lists.  This provides a uniform solution for destructuring
+and multiple values without any special forms such as `multiple-value-bind`.
+
+ (def (x y) (list 1 2))
+ x
+ => 1
+ y
+ => 2
+ 
+`#ignore` is used to ignore unneeded data:
+ 
+ (let (((((#ignore . rest))) '(((1 2 3)))))
+   rest)
+ => (2 3)
+ 
+If you think that `let` has too many parentheses, LispX might not be for you.
