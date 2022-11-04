@@ -140,6 +140,11 @@ Functions returning options end in `?`.
 
 An option is either nil or a one-element list.
 
+ (get? '(:bar 1 :foo 2) :quux)
+ => ()
+ (get? '(:bar 1 :foo 2) :foo)
+ => (2)
+
 Forms like `if-option` are used for destructuring:
 
  (if-option (value (get? '(:bar 1 :foo 2) :foo))
