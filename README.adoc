@@ -79,7 +79,7 @@ It has three main parts:
 
 * link:src/eval.mjs[] -- Evaluation of core forms like `def`, `vau`, `progn`, `if`, etc.
 
-* link:src/control.mjs[] -- Evaluation of control-related forms.
+* link:src/control.mjs[] -- Evaluation of delimited and simple control forms.
 
 * link:src/read.mjs[] -- Reader code.
 
