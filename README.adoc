@@ -53,7 +53,8 @@ It has three main parts:
      
 ## Implementation characteristics
 
-* The implementation is about 2000 LOC of JS and 1000 LOC of Lisp.
+* The implementation is about 2000 lines of JS and 1000 lines of Lisp
+  (as measured by `cloc`).
 
 * Clean and well-documented code.
 
@@ -72,19 +73,19 @@ It has three main parts:
   
 ## Code map (most important files)
 
-* link:src/vm.mjs[] -- core VM data structures like symbols, environments, etc.
+* link:src/vm.mjs[] -- Core VM data structures like symbols, environments, etc.
 
-* link:src/eval.mjs[] -- evaluation of simple forms like `def`, `progn`, etc.
+* link:src/eval.mjs[] -- Evaluation of simple forms like `def`, `progn`, etc.
 
-* link:src/control.mjs[] -- evaluation of control-related forms.
+* link:src/control.mjs[] -- Evaluation of control-related forms.
 
-* link:src/read.mjs[] -- reader code
+* link:src/read.mjs[] -- Reader code.
 
-* link:src/boot.lispx[] -- language bootstrap
+* link:src/boot.lispx[] -- Language bootstrap.
 
-* link:src/cond-sys.lispx[] -- condition system
+* link:src/cond-sys.lispx[] -- Condition system.
 
-* link:src/js.lispx[] -- JS interface
+* link:src/js.lispx[] -- JS interface.
 
 ## Debugger example
 
@@ -117,7 +118,7 @@ UTF-8.
 
 ### Numbers
 
-Arbitrary-precicion decimals.
+Arbitrary-precision decimals.
 
 ### Booleans
 
