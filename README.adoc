@@ -30,7 +30,7 @@ It has three main parts:
   Vau calculus is essentially a lambda calculus without implicit evaluation
   of arguments (sometimes called "call-by-text").
   Vau calculus turns the usual programming/metaprogramming dichotomy on its head:
-  In vau calculus metaprogramming is the default, and ordinary programming
+  metaprogramming is the default, and ordinary programming
   the boring special case.
   
 * As the "user interface", LispX uses the good old syntax and nomenclature  
@@ -138,9 +138,9 @@ Functions returning booleans end in `p`.
 
 We use options throughout instead of nil-punning.
 
-Functions returning options end in `?`.
-
 An option is either nil or a one-element list.
+
+Functions returning options end in `?`.
 
  (get? '(:bar 1 :foo 2) :quux)
  => ()
