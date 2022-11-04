@@ -174,10 +174,12 @@ function symbols as parameters:
  (defun compose (#'f #'g)
    (lambda (x) (g (f x))))
 
-If it's not a symbol, the operator position of a form is evaluated normally:
+If it's not a symbol, the operator position of a form is evaluated normally, as in Scheme:
    
  ((compose (lambda (x) (+ 1 x)) (lambda (x (* 3 x))) 10)
  => 33
+ 
+(If it's a symbol, the operator of a form like `(foo)` is turned into a function symbol `#'foo` and looked up, as in CL.)
 
 ### Uniform compound definiends
 
