@@ -4,6 +4,106 @@ Copyright (c) 2021, 2022 by Manuel J. Simoni
 
 License: MIT
 
+Status: Work in progress, but mostly stable.  Using it successfully in a bunch of personal projects.
+
 ## Build and Test
 
  yarn install && yarn build && yarn test
+
+## About
+
+LispX is a new Lisp I am developing to make web programming bearable.
+
+It has three main parts:
+
+* LispX's raison d'être is to solve the async problem.
+  It does this with *delimited continuations*.
+  It faithfully implements the
+  link:https://okmij.org/ftp/continuations/implementations.html#delimcc-paper[delimcc API]
+  as well as
+  link:https://okmij.org/ftp//papers/DDBinding.pdf[delimited dynamic binding] 
+  by Oleg et.al. and can run the full link:test/delimcc-test.lispx[test suite]
+  from the delimcc distribution.
+  
+* As the language core, LispX uses John Shutt's
+  link:https://web.cs.wpi.edu/~jshutt/kernel.html[*vau calculus*].
+  Vau calculus is essentially a lambda calculus without implicit evaluation
+  of arguments (sometimes called "call-by-text").
+  Vau calculus turns the usual programming/metaprogramming dichotomy on its head:
+  In vau calculus metaprogramming is the default, and ordinary programming
+  the boring special case.
+  
+* As the "user interface", LispX uses the good old syntax and nomenclature  
+  of *classic Lisps* like Common and Emacs Lisp.  It is fully object oriented
+  with single inheritance (`defclass`), has single dispatching generic functions
+  (`defgeneric`, `defmethod`),
+  the usual simple control forms (`catch`, `throw`, `block`, `return-from`,
+  `unwind-protect`, `loop`, `dotimes`, `dolist`, ...), is a Lisp-2,
+  and implements large parts of the CL condition system including restarts
+  (`handler-bind`, `handler-case`, `restart-case`, `signal`, `error`, `compute-restarts`, ...).
+  The condition system is of course written in LispX itself and is a good
+  demonstration of LispX programming in practice: link:src/cond-sys.lispx[].
+  
+## Example
+
+ (defun sleepsort (numbers)
+   (dolist (n numbers)
+     (coroutine (sleep n) (print n))))
+     
+## Implementation characteristics
+
+* The implementation is about 2000 LOC of JS and 1000 LOC of Lisp.
+
+* Clean and well-documented code.
+
+* The build is *< 20 KB* (minified and gzipped).
+
+* There are more than link:test[thousand unit tests].
+
+* The architecture is a simple tree-walking interpreter so it's not a speed demon,
+  but it's fast enough for many apps, especially GUIs.
+  
+* Readable Lisp stack traces.
+
+* Easy to interface with JS.
+
+* Works practically everywhere (browsers, Node, Deno, QuickJS, Duktape, ...)
+  
+## Code map (most important files)
+
+* link:src/vm.mjs[] -- core VM data structures like symbols, environments, etc.
+
+* link:src/eval.mjs[] -- evaluation of simple forms like `def`, `progn`, etc.
+
+* link:src/control.mjs[] -- evaluation of control-related forms.
+
+* link:src/read.mjs[] -- reader code
+
+* link:src/boot.lispx[] -- language bootstrap
+
+* link:src/cond-sys.lispx[] -- condition system
+
+* link:src/js.lispx[] -- JS interface
+
+## Debugger example
+
+ $ ./scripts/node-repl 
+ Welcome to Nybble Lisp!
+ * (+ 100 x)
+ Debugger invoked on condition:
+ #<unbound-symbol-error :environment #<environment> :message "Unbound variable: x" :symbol x>
+ Available restarts -- use (invoke-restart 'name ...) to invoke:
+ continue
+ use-value
+ store-value
+ abort
+ Backtrace:
+ x
+ (#<function> 100 x)
+ (%eval form environment)
+ (eval (read) repl:+environment+)
+ (#<function> (eval (read) repl:+environment+))
+ (print (eval (read) repl:+environment+))
+ [1] (invoke-restart 'use-value 42)
+ 142
+ * 
