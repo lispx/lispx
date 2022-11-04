@@ -1,4 +1,4 @@
-# LispX Virtual Machine
+# LispX
 
 Copyright (c) 2021, 2022 by Manuel J. Simoni
 
@@ -107,3 +107,65 @@ It has three main parts:
  [1] (invoke-restart 'use-value 42)
  142
  * 
+
+## Language notes
+
+### Strings
+
+UTF-8.
+
+### Numbers
+
+Arbitrary-precicion decimals.
+
+### Booleans
+
+`#t` and `#f` -- only booleans can be used with `if` etc.
+
+Functions returning booleans end in `p`.
+
+### Nil
+
+`#nil` is only the empty list and _not_ a boolean, symbol, or marker for an absent value.
+
+### Void
+
+`#void` is used for absent values, e.g. returned by an empty `(progn)`.
+
+### Options
+
+We use options throughout instead of nil-punning.
+
+Functions returning options end in `?`.
+
+An option is either nil or a one-element list.
+
+Forms like `if-option` are used for destructuring:
+
+ (if-option (value (get? '(:bar 1 :foo 2) :foo))
+   value
+   3)
+ => 2
+
+### Namespaces
+
+There are three namespaces: variable (no particular read syntax), function (sharpsign quote), and class (sharpsign caret).
+
+Unlike in CL, function (and class) symbols can also be used on the left-hand side of definitions and as parameters:
+
+`(defun foo ())` is the same as `(def #'foo (lambda ())`.
+
+### Lisp-1/2
+
+LispX combines the advantages of Lisp-1 and Lisp-2.
+
+We can call functions received as arguments without the need for `funcall` by using
+function symbols as parameters:
+
+ (defun compose (#'f #'g)
+   (lambda (x) (g (f x))))
+
+If it's not a symbol, the operator position of a form is evaluated normally:
+   
+ ((compose (lambda (x) (+ 1 x)) (lambda (x (* 3 x))) 10)
+ => 33
