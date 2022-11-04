@@ -35,8 +35,8 @@ It has three main parts:
   metaprogramming is the default, and ordinary programming
   the boring special case.
   
-* As the "user interface", LispX uses the good old syntax and nomenclature  
-  of *classic Lisps* like Common and Emacs Lisp.  It is fully object oriented
+* As the "user interface", LispX uses the same *classic Lisp* syntax, naming conventions, 
+  and overall organisation as Common and Emacs Lisp.  It is fully object oriented
   with single inheritance (`defclass`), has single dispatching generic functions
   (`defgeneric`, `defmethod`),
   the usual simple control forms (`catch`, `throw`, `block`, `return-from`,
