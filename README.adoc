@@ -24,7 +24,7 @@ It has three main parts:
   link:https://okmij.org/ftp//papers/DDBinding.pdf[delimited dynamic binding] 
   by Oleg et al. and can run the full link:test/delimcc-test.lispx[test suite]
   from the delimcc distribution.
-  With continuations all async JS APIs (promise- and callback-based)
+  With continuations, all async JS APIs (promise- and callback-based)
   can be used as if they were synchronous.
   
 * As the language core, LispX uses *vau calculus* developed by John Shutt for his
@@ -158,7 +158,7 @@ Forms like `if-option` are used for destructuring:
 
 ### Namespaces
 
-There are three namespaces: variable (no particular read syntax), function (sharpsign quote), and class (sharpsign caret).
+There are three namespaces: variable (no particular read syntax), function (sharpsign single-quote), and class (sharpsign caret).
 
 Unlike in CL, function (and class) symbols can also be used on the left-hand side of definitions and as parameters:
 
