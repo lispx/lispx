@@ -54,7 +54,7 @@ vm.define_alien_function("repl:%display-prompt", (level) => {
     rl.prompt();
 });
 
-process.stdout.write("Welcome to Nybble Lisp!\n");
+process.stdout.write("Welcome to LispX!\n");
 
 vm.eval_js_string(repl_code);
 vm.eval_js_string(repl_input_buffer_code);
