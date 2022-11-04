@@ -1,4 +1,4 @@
-;;; Delimited Control Tests
+;;; Delimited Control Tests                                -*- Lisp -*-
 
 ;; The following tests are adapted from the file `testd0.ml' of the
 ;; caml-shift distribution, available at the URL
