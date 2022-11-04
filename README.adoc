@@ -160,7 +160,7 @@ There are three namespaces: variable (no particular read syntax), function (shar
 
 Unlike in CL, function (and class) symbols can also be used on the left-hand side of definitions and as parameters:
 
-`(defun foo ())` is the same as `(def #'foo (lambda ())`.
+`(def #'foo (lambda ()))` has the same effect as `(defun foo ())`.
 
 ### Lisp-1/2
 
