@@ -4,3 +4,6 @@ E.g. "string" means JS objects whose typeof is "string".  "null" is
 special cased (since it's not a valid typeof result).
 
 Maybe better: '(js-typeof "string") and 'js-null.
+
+Maybe not use type specs for JS type errors at all - just have a
+separate error class js-error?
