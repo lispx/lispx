@@ -91,11 +91,14 @@ function minify_defunlike_form(form, docstring_idx)
 {
     // Only remove docstring if it's not the actual only body form.
     if (vm.list_length(form) > (docstring_idx + 1)) {
-        return vm.append(vm.list_subseq(form, 0, docstring_idx),
-                         vm.list_subseq(form, docstring_idx + 1));
-    } else {
-        return form;
+        // Only remove docstring if it's a string
+        if (vm.elt(form, docstring_idx) instanceof vm.String) {
+            return vm.append(vm.list_subseq(form, 0, docstring_idx),
+                             vm.list_subseq(form, docstring_idx + 1));
+        }
     }
+    // Otherwise leave form untouched
+    return form;
 }
 
 // (defgeneric name (args) . properties)
@@ -120,6 +123,7 @@ function minify_defclass(form)
  */
 const input = `
 (defun foo ())
+(defun foo2 () 1 2)
 (defun bar () "Not a docstring") ; a comment
 (defun quux () "A docstring" 100 1000)
 (def x 1 "A docstring")
@@ -152,6 +156,7 @@ y
 
 const expected = [
     `(defun foo ())`,
+    `(defun foo2 () 1 2)`,
     `(defun bar () "Not a docstring")`,
     `(defun quux () 100 1000)`,
     `(def x 1)`,
