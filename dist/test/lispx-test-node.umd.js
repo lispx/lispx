@@ -9617,10 +9617,10 @@ function FakeMap() {
 }
 
 FakeMap.prototype = {
-  get: function getMap(key) {
+  get: function get(key) {
     return key[this._key];
   },
-  set: function setMap(key, value) {
+  set: function set(key, value) {
     if (Object.isExtensible(key)) {
       Object.defineProperty(key, this._key, {
         value: value,
@@ -9812,8 +9812,9 @@ function extensiveDeepEqualByType(leftHandOperand, rightHandOperand, leftHandTyp
     case 'function':
     case 'WeakMap':
     case 'WeakSet':
-    case 'Error':
       return leftHandOperand === rightHandOperand;
+    case 'Error':
+      return keysEqual(leftHandOperand, rightHandOperand, [ 'name', 'message', 'code' ], options);
     case 'Arguments':
     case 'Int8Array':
     case 'Uint8Array':
@@ -9838,6 +9839,19 @@ function extensiveDeepEqualByType(leftHandOperand, rightHandOperand, leftHandTyp
       return entriesEqual(leftHandOperand, rightHandOperand, options);
     case 'Map':
       return entriesEqual(leftHandOperand, rightHandOperand, options);
+    case 'Temporal.PlainDate':
+    case 'Temporal.PlainTime':
+    case 'Temporal.PlainDateTime':
+    case 'Temporal.Instant':
+    case 'Temporal.ZonedDateTime':
+    case 'Temporal.PlainYearMonth':
+    case 'Temporal.PlainMonthDay':
+      return leftHandOperand.equals(rightHandOperand);
+    case 'Temporal.Duration':
+      return leftHandOperand.total('nanoseconds') === rightHandOperand.total('nanoseconds');
+    case 'Temporal.TimeZone':
+    case 'Temporal.Calendar':
+      return leftHandOperand.toString() === rightHandOperand.toString();
     default:
       return objectEqual(leftHandOperand, rightHandOperand, options);
   }
@@ -9983,6 +9997,18 @@ function getEnumerableKeys(target) {
   return keys;
 }
 
+function getEnumerableSymbols(target) {
+  var keys = [];
+  var allKeys = Object.getOwnPropertySymbols(target);
+  for (var i = 0; i < allKeys.length; i += 1) {
+    var key = allKeys[i];
+    if (Object.getOwnPropertyDescriptor(target, key).enumerable) {
+      keys.push(key);
+    }
+  }
+  return keys;
+}
+
 /*!
  * Determines if two objects have matching values, given a set of keys. Defers to deepEqual for the equality check of
  * each key. If any value of the given key is not equal, the function will return false (early).
@@ -10015,14 +10041,16 @@ function keysEqual(leftHandOperand, rightHandOperand, keys, options) {
  * @param {Object} [options] (Optional)
  * @return {Boolean} result
  */
-
 function objectEqual(leftHandOperand, rightHandOperand, options) {
   var leftHandKeys = getEnumerableKeys(leftHandOperand);
   var rightHandKeys = getEnumerableKeys(rightHandOperand);
+  var leftHandSymbols = getEnumerableSymbols(leftHandOperand);
+  var rightHandSymbols = getEnumerableSymbols(rightHandOperand);
+  leftHandKeys = leftHandKeys.concat(leftHandSymbols);
+  rightHandKeys = rightHandKeys.concat(rightHandSymbols);
+
   if (leftHandKeys.length && leftHandKeys.length === rightHandKeys.length) {
-    leftHandKeys.sort();
-    rightHandKeys.sort();
-    if (iterableEqual(leftHandKeys, rightHandKeys) === false) {
+    if (iterableEqual(mapSymbols(leftHandKeys).sort(), mapSymbols(rightHandKeys).sort()) === false) {
       return false;
     }
     return keysEqual(leftHandOperand, rightHandOperand, leftHandKeys, options);
@@ -10057,6 +10085,16 @@ function objectEqual(leftHandOperand, rightHandOperand, options) {
  */
 function isPrimitive(value) {
   return value === null || typeof value !== 'object';
+}
+
+function mapSymbols(arr) {
+  return arr.map(function mapSymbol(entry) {
+    if (typeof entry === 'symbol') {
+      return entry.toString();
+    }
+
+    return entry;
+  });
 }
 
 
@@ -10497,9 +10535,15 @@ module.exports = getFuncName;
   }
 
   function inspectDate(dateObject, options) {
-    // If we need to - truncate the time portion, but never the date
-    var split = dateObject.toJSON().split('T');
-    var date = split[0];
+    var stringRepresentation = dateObject.toJSON();
+
+    if (stringRepresentation === null) {
+      return 'Invalid Date';
+    }
+
+    var split = stringRepresentation.split('T');
+    var date = split[0]; // If we need to - truncate the time portion, but never the date
+
     return options.stylize("".concat(date, "T").concat(truncate(split[1], options.truncate - date.length - 1)), 'date');
   }
 
@@ -10796,7 +10840,32 @@ module.exports = getFuncName;
     nodeInspect = false;
   }
 
-  var constructorMap = new WeakMap();
+  function FakeMap() {
+    // eslint-disable-next-line prefer-template
+    this.key = 'chai/loupe__' + Math.random() + Date.now();
+  }
+
+  FakeMap.prototype = {
+    // eslint-disable-next-line object-shorthand
+    get: function get(key) {
+      return key[this.key];
+    },
+    // eslint-disable-next-line object-shorthand
+    has: function has(key) {
+      return this.key in key;
+    },
+    // eslint-disable-next-line object-shorthand
+    set: function set(key, value) {
+      if (Object.isExtensible(key)) {
+        Object.defineProperty(key, this.key, {
+          // eslint-disable-next-line object-shorthand
+          value: value,
+          configurable: true
+        });
+      }
+    }
+  };
+  var constructorMap = new (typeof WeakMap === 'function' ? WeakMap : FakeMap)();
   var stringTagMap = {};
   var baseTypesMap = {
     undefined: function undefined$1(value, options) {
@@ -10946,7 +11015,7 @@ module.exports = getFuncName;
       return false;
     }
 
-    constructorMap.add(constructor, inspector);
+    constructorMap.set(constructor, inspector);
     return true;
   }
   function registerStringTag(stringTag, inspector) {
