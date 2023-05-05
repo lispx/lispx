@@ -33,6 +33,10 @@ that's callable from JS."
 global doesn't exist."
   (%js-global name))
 
+(defun js-set-global (name value)
+  "Update a JS global by NAME (a string)."
+  (%js-set-global name value))
+
 (defun js-new (constructor . arguments)
   "Call the JS CONSTRUCTOR function with ARGUMENTS."
   (apply #'%js-new (cons constructor arguments)))

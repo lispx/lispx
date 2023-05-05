@@ -257,7 +257,10 @@
      match-error))
 
   (deftest js-global.3
-    (js-eq +js-undefined+ (js-global "ThisGlobalDoesNotExist")))
+    (progn
+      (js-eq +js-undefined+ (js-global "ThisGlobalDoesNotExist"))
+      (js-set-global "ThisGlobalDoesNotExist" (+ 12 12))
+      (= 24 (js-global "ThisGlobalDoesNotExist"))))
 
   (deftest js-global.4
     (signals-error

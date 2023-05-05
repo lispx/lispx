@@ -18,6 +18,15 @@ export function init_js(vm)
     };
 
     /*
+     * Sets a global variable by name.
+     */
+    vm.js_set_global = (name, value) =>
+    {
+        vm.assert_type(name, vm.String);
+        return globalThis[name.to_js_string()] = value;
+    };
+
+    /*
      * Calls a JS constructor with arguments.
      *
      * Note that this is not a fat arrow function because we need
@@ -176,6 +185,8 @@ export function init_js(vm)
     vm.define_constant("+js-undefined+", undefined);
 
     vm.define_alien_function("%js-global", vm.js_global);
+
+    vm.define_alien_function("%js-set-global", vm.js_set_global);
 
     vm.define_alien_function("%js-new", vm.js_new);
 
