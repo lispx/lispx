@@ -24,7 +24,7 @@ var __webpack_exports__ = {};
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "VM": () => (/* binding */ VM)
+  VM: () => (/* binding */ VM)
 });
 
 ;// CONCATENATED MODULE: ./node_modules/big.js/big.mjs
