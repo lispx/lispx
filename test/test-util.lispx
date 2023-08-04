@@ -15,16 +15,16 @@ capture a continuation to the default prompt."
   (mocha:it
    (to-js-string (symbol-name name))
    (js-lambda ()
-     ;; Push the default prompt for asynchronous tests.
+     ;; Run each test in a coroutine.
      ;;
      ;; Note that this is quite subtle: when an asynchronous test
-     ;; captures to this prompt, it returns a promise here.  This
+     ;; captures a continuation, it returns a promise here.  This
      ;; promise is returned to Mocha, which does the right thing (wait
      ;; for it to resolve).
-     (push-prompt +default-prompt+
-       ;; Test and expected expressions are evaluated in fresh child
-       ;; environments of the current environment, so that bindings
-       ;; they create don't affect other tests.
+     (coroutine
+       ;; The test and expected expressions are evaluated in fresh
+       ;; child environments of the current environment, so that
+       ;; bindings they create don't affect other tests.
        (assert (= (eval expression (make-environment env))
                   (eval (optional expected? #t) (make-environment env))))))))
 
@@ -41,8 +41,8 @@ must not capure any continuations."
   (mocha:describe
    (to-js-string (symbol-name name))
    (js-lambda ()
-     ;; We don't push a prompt here.  The reason is that Mocha
-     ;; describe() doesn't support promises anyway.  So any Lisp code
+     ;; We don't run the suite contents in a coroutine.  The reason is
+     ;; that Mocha describe() doesn't support promises.  Any Lisp code
      ;; that tries to capture a continuation directly inside a suite
      ;; will get a "prompt not found" error (due to the barrier inside
      ;; `js-lambda').
@@ -53,7 +53,7 @@ must not capure any continuations."
   (vau forms env
     (mocha-hook-fun
      (js-lambda ()
-       (push-prompt 'default-prompt
+       (coroutine ;; Run in coroutine. See above for explanation.
          (eval (list* #'progn forms) env))))))
 
 (def #'before (lispx::make-mocha-hook #'mocha:before))
