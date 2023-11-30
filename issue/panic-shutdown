@@ -1,0 +1,5 @@
+If the VM panics, the user code might be in an invalid state, due to
+panics not being able to be caught.
+
+We should make it impossible to evaluate any further code after a
+panic by overriding the eval and operate functions to throw an error.
