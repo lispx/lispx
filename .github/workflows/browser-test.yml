@@ -13,6 +13,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
     - name: Install dependencies
       run: yarn install
     - name: Run Browser Tests
