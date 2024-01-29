@@ -619,11 +619,12 @@
     (block exit
       (handler-bind ((object (lambda (c)
                                (let ((message (call-js-method c "toString")))
+                                 (js-log message)
                                  (when (or (js-eq ; Chrome and Firefox
                                             message
                                             (to-js-string "ReferenceError: x is not defined"))
                                            (js-eq ; WebKit
                                             message
-                                            (to-js-string "Can't find variable: x")))
+                                            (to-js-string "LISP panic: Can't find variable: x")))
                                    (return-from exit #t))))))
         (call-js-function (js-global "eval") (to-js-string "x"))))))
