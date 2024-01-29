@@ -618,7 +618,12 @@
   (deftest js-exception-becomes-condition
     (block exit
       (handler-bind ((object (lambda (c)
-                               (when (js-eq (call-js-method c "toString")
+                               (let ((message (call-js-method c "toString")))
+                                 (when (or (js-eq ; Chrome and Firefox
+                                            message
                                             (to-js-string "ReferenceError: x is not defined"))
-                                 (return-from exit #t)))))
+                                           (js-eq ; WebKit
+                                            message
+                                            (to-js-string "Can't find variable: x")))
+                                   (return-from exit #t))))))
         (call-js-function (js-global "eval") (to-js-string "x"))))))
