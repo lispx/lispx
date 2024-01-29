@@ -1,6 +1,10 @@
 /*
  * Configuration for running browser tests with Karma.
  */
+
+const playwright = require("playwright");
+process.env.WEBKIT_HEADLESS_BIN = playwright.webkit.executablePath();
+
 module.exports = function(config)
 {
     config.set({
