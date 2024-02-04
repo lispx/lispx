@@ -24,7 +24,8 @@ var __webpack_exports__ = {};
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  VM: () => (/* binding */ VM)
+  VM: () => (/* binding */ VM),
+  t: () => (/* binding */ make_vm)
 });
 
 ;// CONCATENATED MODULE: ./node_modules/big.js/big.mjs
@@ -1629,7 +1630,7 @@ function init_eval(vm)
      */
     vm.define_variable = (name, object) =>
     {
-        vm.get_environment().put(vm.sym(name), object);
+        vm.define(vm.sym(name), object);
     };
 
     /*
@@ -1645,7 +1646,7 @@ function init_eval(vm)
      */
     vm.define_operator = (name, operator) =>
     {
-        vm.get_environment().put(vm.fsym(name), operator);
+        vm.define(vm.fsym(name), operator);
     };
 
     /*
@@ -4353,6 +4354,16 @@ function init_js(vm)
 
 
 /*
+ * Main entrypoint to create a VM.
+ */
+function make_vm()
+{
+    const vm = new VM();
+    vm.boot();
+    return vm;
+};
+
+/*
  * A virtual machine is a Lisp interpreter.
  *
  * Multiple independent VMs can exist in the same JavaScript
@@ -4361,7 +4372,10 @@ function init_js(vm)
 class VM
 {
     /*
-     * Creates a new VM.
+     * Creates a new VM, but doesn't load the bootstrap Lisp code.
+     *
+     * Always use make_vm (above) instead, unless you are an internal
+     * program that needs to patch the VM before booting.
      */
     constructor()
     {
@@ -4380,10 +4394,13 @@ class VM
         init_read(this);
         init_print(this);
         init_js(this);
+    }
 
-        /*
-         * Evaluate the bootstrap code.
-         */
+    /*
+     * Evaluate the bootstrap code.
+     */
+    boot()
+    {
         this.eval_js_string(boot_lispx);
         this.eval_js_string(cond_sys_lispx);
         this.eval_js_string(stream_lispx);
@@ -5725,6 +5742,14 @@ function init_vm(vm)
     vm.environment = vm.make_environment();
 
     /*
+     * Defines a symbol in the root environment.
+     */
+    vm.define = (symbol, value) =>
+    {
+        vm.environment.put(symbol, value);
+    };
+
+    /*
      * Symbol table, maps symbol keys to interned symbols.
      */
     vm.symbols = Object.create(null);
@@ -5767,7 +5792,7 @@ function init_vm(vm)
     {
         const name_sym = vm.sym(name);
         const lisp_class = vm.bless_class(name_sym, js_class, js_super, js_meta);
-        vm.get_environment().put(name_sym.to_class_symbol(), lisp_class);
+        vm.define(name_sym.to_class_symbol(), lisp_class);
     };
 
     /*
@@ -5843,4 +5868,5 @@ function init_vm(vm)
 };
 
 var __webpack_exports__VM = __webpack_exports__.VM;
-export { __webpack_exports__VM as VM };
+var __webpack_exports__make_vm = __webpack_exports__.t;
+export { __webpack_exports__VM as VM, __webpack_exports__make_vm as make_vm };

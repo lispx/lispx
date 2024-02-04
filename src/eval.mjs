@@ -570,7 +570,7 @@ export function init_eval(vm)
      */
     vm.define_variable = (name, object) =>
     {
-        vm.get_environment().put(vm.sym(name), object);
+        vm.define(vm.sym(name), object);
     };
 
     /*
@@ -586,7 +586,7 @@ export function init_eval(vm)
      */
     vm.define_operator = (name, operator) =>
     {
-        vm.get_environment().put(vm.fsym(name), operator);
+        vm.define(vm.fsym(name), operator);
     };
 
     /*

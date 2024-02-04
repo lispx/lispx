@@ -1,6 +1,6 @@
 import { assert } from "chai";
 
-import { VM } from "lispx-vm";
+import { make_vm } from "lispx-vm";
 
 import test_util_code from "./test-util.lispx";
 import boot_test_code from "./boot-test.lispx";
@@ -11,7 +11,7 @@ import print_test_code from "./print-test.lispx";
 import js_test_code from "./js-test.lispx";
 import hierarchy_test_code from "./hierarchy-test.lispx";
 
-const vm = time("Boot LispX", () => new VM());
+const vm = time("Boot LispX", () => make_vm());
 
 /*
  * This stream is used to prevent stack traces being printed for some

@@ -35,6 +35,16 @@ import print_code from "./print.lispx";
 import js_code from "./js.lispx";
 
 /*
+ * Main entrypoint to create a VM.
+ */
+export function make_vm()
+{
+    const vm = new VM();
+    vm.boot();
+    return vm;
+};
+
+/*
  * A virtual machine is a Lisp interpreter.
  *
  * Multiple independent VMs can exist in the same JavaScript
@@ -43,7 +53,10 @@ import js_code from "./js.lispx";
 export class VM
 {
     /*
-     * Creates a new VM.
+     * Creates a new VM, but doesn't load the bootstrap Lisp code.
+     *
+     * Always use make_vm (above) instead, unless you are an internal
+     * program that needs to patch the VM before booting.
      */
     constructor()
     {
@@ -62,10 +75,13 @@ export class VM
         init_read(this);
         init_print(this);
         init_js(this);
+    }
 
-        /*
-         * Evaluate the bootstrap code.
-         */
+    /*
+     * Evaluate the bootstrap code.
+     */
+    boot()
+    {
         this.eval_js_string(boot_code);
         this.eval_js_string(cond_sys_code);
         this.eval_js_string(stream_code);
@@ -1407,6 +1423,14 @@ function init_vm(vm)
     vm.environment = vm.make_environment();
 
     /*
+     * Defines a symbol in the root environment.
+     */
+    vm.define = (symbol, value) =>
+    {
+        vm.environment.put(symbol, value);
+    };
+
+    /*
      * Symbol table, maps symbol keys to interned symbols.
      */
     vm.symbols = Object.create(null);
@@ -1449,7 +1473,7 @@ function init_vm(vm)
     {
         const name_sym = vm.sym(name);
         const lisp_class = vm.bless_class(name_sym, js_class, js_super, js_meta);
-        vm.get_environment().put(name_sym.to_class_symbol(), lisp_class);
+        vm.define(name_sym.to_class_symbol(), lisp_class);
     };
 
     /*

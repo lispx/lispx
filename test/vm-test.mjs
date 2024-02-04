@@ -3,9 +3,9 @@ import { assert } from "chai";
 import { check_class_name, check_superclass, check_metaclass, check_class_linkage }
 from "./test-util.mjs";
 
-import { VM } from "lispx-vm";
+import { make_vm } from "lispx-vm";
 
-const vm = new VM();
+const vm = make_vm();
 
 describe("Objects", () => {
 

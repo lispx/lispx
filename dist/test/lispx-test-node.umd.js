@@ -11858,7 +11858,7 @@ var external_lispx_vm_umd_min_js_ = __webpack_require__(953);
 
 describe("Lisp Tests", () => {
 
-    const vm = new external_lispx_vm_umd_min_js_.VM();
+    const vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
     vm.eval_js_string(test_util_lispx);
     vm.eval_js_string(test_util_test_lispx);
     vm.eval_js_string(boot_test_lispx);
@@ -11978,7 +11978,7 @@ function check_class_linkage(vm, js_class)
 
 
 
-const vm = new external_lispx_vm_umd_min_js_.VM();
+const vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 describe("Objects", () => {
 
@@ -13079,7 +13079,7 @@ describe("utf8_decode()", () => {
 
 
 
-const eval_test_vm = time("Boot LispX", () => new external_lispx_vm_umd_min_js_.VM());
+const eval_test_vm = time("Boot LispX", () => (0,external_lispx_vm_umd_min_js_.make_vm)());
 
 /*
  * This stream is used to prevent stack traces being printed for some
@@ -13725,7 +13725,7 @@ describe("Panicking", () => {
 
 
 
-const control_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const control_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 function lookup_operator(name)
 {
@@ -13795,7 +13795,7 @@ describe("Dynamic Variables", () => {
 
 
 
-const seq_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const seq_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 /*
  * These tests can be somewhat cursory because we have additional
@@ -13919,7 +13919,7 @@ describe("Sequence & List Utilities", () => {
 
 
 
-const stream_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const stream_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 function string_input_stream(js_string)
 {
@@ -14129,7 +14129,7 @@ describe("String Output Streams", () => {
 
 
 
-const read_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const read_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 function read_test_string_input_stream(js_string)
 {
@@ -14607,7 +14607,7 @@ describe("eval_{stream,string,js_string}", () => {
 
 
 
-const print_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const print_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 function print_test_string_output_stream()
 {
@@ -14722,7 +14722,7 @@ describe("Printer", () => {
 
 
 
-const js_test_vm = new external_lispx_vm_umd_min_js_.VM();
+const js_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
 
 describe("JavaScript Interface", () => {
 

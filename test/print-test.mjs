@@ -1,8 +1,8 @@
 import { assert } from "chai";
 
-import { VM } from "lispx-vm";
+import { make_vm } from "lispx-vm";
 
-const vm = new VM();
+const vm = make_vm();
 
 function string_output_stream()
 {
