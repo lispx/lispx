@@ -3,5 +3,5 @@
 # seems to be slightly broken (sometimes files in dist are missing
 # from a commit...)
 set -eux
-yarn build && yarn test
+yarn build
 git add dist/

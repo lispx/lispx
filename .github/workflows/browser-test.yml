@@ -18,4 +18,4 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Browser Tests
-      run: ./scripts/browser-test
+      run: TEST_ALL_BROWSERS=1 ./scripts/browser-test
