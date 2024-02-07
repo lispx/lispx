@@ -56,7 +56,7 @@ export class VM
      * Creates a new VM, but doesn't load the bootstrap Lisp code.
      *
      * Always use make_vm (above) instead, unless you are an internal
-     * program that needs to patch the VM before booting.
+     * program that needs to create a VM without booting it.
      */
     constructor()
     {
