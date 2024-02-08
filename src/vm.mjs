@@ -1,5 +1,5 @@
 /*
- * LispX Virtual Machine
+ * LispX Virtual Machine Core
  * Copyright (c) 2021 Manuel J. Simoni
  */
 
@@ -24,27 +24,6 @@ import { init_print } from "./print.mjs";
 import { init_js } from "./js.mjs";
 
 /*
- * A build system contraption loads the contents of the files into the
- * variables as strings.
- */
-import boot_code from "./boot.lispx";
-import cond_sys_code from "./cond-sys.lispx";
-import stream_code from "./stream.lispx";
-import read_code from "./read.lispx";
-import print_code from "./print.lispx";
-import js_code from "./js.lispx";
-
-/*
- * Main entrypoint to create a VM.
- */
-export function make_vm()
-{
-    const vm = new VM();
-    vm.boot();
-    return vm;
-};
-
-/*
  * A virtual machine is a Lisp interpreter.
  *
  * Multiple independent VMs can exist in the same JavaScript
@@ -53,10 +32,8 @@ export function make_vm()
 export class VM
 {
     /*
-     * Creates a new VM, but doesn't load the bootstrap Lisp code.
-     *
-     * Always use make_vm (above) instead, unless you are an internal
-     * program that needs to create a VM without booting it.
+     * Creates a new VM core.  This doesn't include the bootstrap Lisp
+     * code yet, see vm-dev.mjs for that.
      */
     constructor()
     {
@@ -75,19 +52,6 @@ export class VM
         init_read(this);
         init_print(this);
         init_js(this);
-    }
-
-    /*
-     * Evaluate the bootstrap code.
-     */
-    boot()
-    {
-        this.eval_js_string(boot_code);
-        this.eval_js_string(cond_sys_code);
-        this.eval_js_string(stream_code);
-        this.eval_js_string(read_code);
-        this.eval_js_string(print_code);
-        this.eval_js_string(js_code);
     }
 
     /*

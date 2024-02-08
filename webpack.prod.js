@@ -21,8 +21,8 @@ module.exports = [
     /*
      * Build minimized outputs.
      */
-    make_entry_esm("lispx-vm", true),
-    make_entry_umd("lispx-vm", true),
+    make_entry_esm("./src/vm-prod.mjs", "lispx-vm", true),
+    make_entry_umd("./src/vm-prod.mjs", "lispx-vm", true),
     /*
      * Build test outputs.
      */

@@ -75,20 +75,20 @@ function make_entry(input_file, output_filename, target_type, minimize)
     }
 }
 
-function make_entry_esm(basename, minimize)
+function make_entry_esm(input_file, basename, minimize)
 {
     const output_filename = basename + (minimize ? ".min.mjs" : ".vm.mjs")
-    const entry = make_entry("./src/vm.mjs", output_filename, "module", minimize);
+    const entry = make_entry(input_file, output_filename, "module", minimize);
     entry.experiments = {
         outputModule: true
     };
     return entry;
 }
 
-function make_entry_umd(basename, minimize)
+function make_entry_umd(input_file, basename, minimize)
 {
     const output_filename = basename + (minimize ? ".umd.min.js" : ".umd.js");
-    const entry = make_entry("./src/vm.mjs", output_filename, "umd", minimize);
+    const entry = make_entry(input_file, output_filename, "umd", minimize);
     entry.output.library = "lispx-vm";
     return entry;
 }

@@ -4467,74 +4467,17 @@ function init_stream(vm)
 };
 
 
-/***/ })
+/***/ }),
 
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
+/***/ "./src/vm.mjs":
 /*!********************!*\
   !*** ./src/vm.mjs ***!
   \********************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   VM: () => (/* binding */ VM),
-/* harmony export */   make_vm: () => (/* binding */ make_vm)
+/* harmony export */   VM: () => (/* binding */ VM)
 /* harmony export */ });
 /* harmony import */ var big_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! big.js */ "./node_modules/big.js/big.mjs");
 /* harmony import */ var _eval_mjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./eval.mjs */ "./src/eval.mjs");
@@ -4544,14 +4487,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _read_mjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./read.mjs */ "./src/read.mjs");
 /* harmony import */ var _print_mjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./print.mjs */ "./src/print.mjs");
 /* harmony import */ var _js_mjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./js.mjs */ "./src/js.mjs");
-/* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
-/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
-/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
-/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
-/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
-/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
 /*
- * LispX Virtual Machine
+ * LispX Virtual Machine Core
  * Copyright (c) 2021 Manuel J. Simoni
  */
 
@@ -4576,27 +4513,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /*
- * A build system contraption loads the contents of the files into the
- * variables as strings.
- */
-
-
-
-
-
-
-
-/*
- * Main entrypoint to create a VM.
- */
-function make_vm()
-{
-    const vm = new VM();
-    vm.boot();
-    return vm;
-};
-
-/*
  * A virtual machine is a Lisp interpreter.
  *
  * Multiple independent VMs can exist in the same JavaScript
@@ -4605,10 +4521,8 @@ function make_vm()
 class VM
 {
     /*
-     * Creates a new VM, but doesn't load the bootstrap Lisp code.
-     *
-     * Always use make_vm (above) instead, unless you are an internal
-     * program that needs to create a VM without booting it.
+     * Creates a new VM core.  This doesn't include the bootstrap Lisp
+     * code yet, see vm-dev.mjs for that.
      */
     constructor()
     {
@@ -4627,19 +4541,6 @@ class VM
         (0,_read_mjs__WEBPACK_IMPORTED_MODULE_5__.init_read)(this);
         (0,_print_mjs__WEBPACK_IMPORTED_MODULE_6__.init_print)(this);
         (0,_js_mjs__WEBPACK_IMPORTED_MODULE_7__.init_js)(this);
-    }
-
-    /*
-     * Evaluate the bootstrap code.
-     */
-    boot()
-    {
-        this.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_8__["default"]);
-        this.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_9__["default"]);
-        this.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_10__["default"]);
-        this.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_11__["default"]);
-        this.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_12__["default"]);
-        this.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_13__["default"]);
     }
 
     /*
@@ -6122,6 +6023,128 @@ function init_vm(vm)
 
     vm.define_condition("assertion-error", vm.Assertion_error, vm.Error);
 
+};
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!************************!*\
+  !*** ./src/vm-dev.mjs ***!
+  \************************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   make_vm: () => (/* binding */ make_vm)
+/* harmony export */ });
+/* harmony import */ var _vm_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vm.mjs */ "./src/vm.mjs");
+/* harmony import */ var _boot_lispx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./boot.lispx */ "./src/boot.lispx");
+/* harmony import */ var _cond_sys_lispx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./cond-sys.lispx */ "./src/cond-sys.lispx");
+/* harmony import */ var _stream_lispx__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./stream.lispx */ "./src/stream.lispx");
+/* harmony import */ var _read_lispx__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./read.lispx */ "./src/read.lispx");
+/* harmony import */ var _print_lispx__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./print.lispx */ "./src/print.lispx");
+/* harmony import */ var _js_lispx__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./js.lispx */ "./src/js.lispx");
+/*
+ * LispX Virtual Machine (development mode)
+ * Copyright (c) 2024 Manuel J. Simoni
+ */
+
+/*
+ * Development-mode VM.
+ *
+ * This is designed for building quickly, and simply evaluates
+ * the bootstrap Lisp code directly.
+ */
+
+/*
+ * Import VM core.
+ */
+
+
+/*
+ * A build system contraption loads the contents of the files into the
+ * variables as strings.
+ */
+
+
+
+
+
+
+
+/*
+ * Main entrypoint to create a development-mode VM.
+ */
+function make_vm()
+{
+    const vm = new _vm_mjs__WEBPACK_IMPORTED_MODULE_0__.VM();
+    /*
+     * Evaluate the bootstrap code.
+     */
+    vm.eval_js_string(_boot_lispx__WEBPACK_IMPORTED_MODULE_1__["default"]);
+    vm.eval_js_string(_cond_sys_lispx__WEBPACK_IMPORTED_MODULE_2__["default"]);
+    vm.eval_js_string(_stream_lispx__WEBPACK_IMPORTED_MODULE_3__["default"]);
+    vm.eval_js_string(_read_lispx__WEBPACK_IMPORTED_MODULE_4__["default"]);
+    vm.eval_js_string(_print_lispx__WEBPACK_IMPORTED_MODULE_5__["default"]);
+    vm.eval_js_string(_js_lispx__WEBPACK_IMPORTED_MODULE_6__["default"]);
+    return vm;
 };
 
 })();

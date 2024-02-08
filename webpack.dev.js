@@ -12,7 +12,7 @@ module.exports = [
     /*
      * Build unminimized VM.
      */
-    make_entry_umd("lispx-vm-dev", false),
+    make_entry_umd("./src/vm-dev.mjs", "lispx-vm-dev", false),
     /*
      * Build browser tests.
      */

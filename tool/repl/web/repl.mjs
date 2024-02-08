@@ -1,4 +1,4 @@
-import { make_vm } from "../../../src/vm.mjs";
+import { make_vm } from "../../../src/vm-prod.mjs";
 import { init_repl_input_buffer } from "../repl-input-buffer.mjs";
 import repl_input_buffer_code from "../repl-input-buffer.lispx";
 import repl_code from "../repl.lispx";
