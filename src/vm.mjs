@@ -501,7 +501,7 @@ function init_vm(vm)
          */
         static make_key(string, namespace)
         {
-            return string.get_utf8_bytes() + "_" + namespace;
+            return namespace + "_" + string.get_utf8_bytes();
         }
     }
 
