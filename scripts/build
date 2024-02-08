@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -eux
+rm -rf docs
 ./scripts/build-dev
 ./node_modules/webpack-cli/bin/cli.js --mode=production --config=webpack.prod.js
+
+# Copy REPL to gh-pages /docs location
+mkdir -p docs/lib
+cp tool/repl/web/repl.html docs/repl.html
+cp tool/repl/web/lib/* docs/lib
+cp dist/repl/web/repl.umd.js docs/repl.umd.js

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# I use this as a Git hook to always have up-to-date dist/ but it
-# seems to be slightly broken (sometimes files in dist are missing
-# from a commit...)
+# I use this as a Git hook to always have up-to-date dist/ and docs/
+# but it seems to be slightly broken (sometimes files in dist are
+# missing from a commit...)
 set -eux
 yarn build
 git add dist/
+git add docs/

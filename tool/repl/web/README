@@ -1,0 +1,2 @@
+The repl.html and lib files get copied to /docs during build,
+together with the VM UMD.
