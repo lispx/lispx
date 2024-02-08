@@ -8,7 +8,10 @@ module.exports = {
     make_entry,
     make_entry_esm,
     make_entry_umd,
-    make_test_entry_browser
+    make_test_entry_browser,
+    make_test_entry_node,
+    make_repl_entry_browser,
+    make_repl_entry_node
 };
 
 /*
@@ -157,7 +160,7 @@ function make_test_entry_node()
 /*
  * Web REPL.
  */
-function make_web_repl_entry()
+function make_repl_entry_browser()
 {
     return {
         entry: "./tool/repl/web/repl.mjs",
@@ -191,7 +194,7 @@ function make_web_repl_entry()
 /*
  * Node REPL.
  */
-function make_node_repl_entry()
+function make_repl_entry_node()
 {
     return {
         entry: "./tool/repl/node/repl.mjs",

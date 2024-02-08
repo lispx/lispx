@@ -5,7 +5,7 @@
  * source.
  */
 
-const vm = require("../dist/lispx-vm.umd.js").make_vm();
+const vm = require("../dist/lispx-vm-dev.umd.js").make_vm();
 
 /*
  * Gets Lisp source string as input, returns minified string.
