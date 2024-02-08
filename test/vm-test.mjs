@@ -719,6 +719,13 @@ describe("#IGNORE", () => {
 
 describe("Environments", () => {
 
+    it("User env is child of system env.", () => {
+        const user_env = vm.get_user_environment();
+        const sys_env = vm.get_system_environment();
+        assert.strictEqual(user_env.parent, sys_env);
+        assert.strictEqual(sys_env.parent, null);
+    });
+
     it("Unbound variables lose.", () => {
 
         const e1 = vm.make_environment();
