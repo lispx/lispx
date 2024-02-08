@@ -1,56 +1,41 @@
 /*
- * Configuration for building JS files in dist/ with Webpack.
- *
- * We build the main interpreter as a UMD as well as an ESM output.
- *
- * For testing we produce two UMD outputs, one for Node and one for
- * the browser.  These depend on and test the main interpreter UMD.
- *
- * The ESM interpreter is currently untested.
+ * Webpack utilities shared between development and production build.
  */
 
 const TerserPlugin = require("terser-webpack-plugin");
 
-module.exports = [
-    /*
-     * Build main outputs.
-     */
-    make_entry_umd(true),
-    make_entry_esm(true),
-    make_entry_umd(false),
-    make_entry_esm(false),
-    /*
-     * Build test outputs.
-     */
-    make_test_entry_browser(),
-    make_test_entry_node(),
-    /*
-     * Build REPLs.
-     */
-    make_web_repl_entry(),
-    make_node_repl_entry()
-];
+module.exports = {
+    make_entry,
+    make_entry_esm,
+    make_entry_umd,
+    make_test_entry_browser
+};
 
 /*
- * Utility to build main entry with configurable target type and
+ * Utility to build VM with configurable target type (ESM or UMD) and
  * minimization setting.
+ *
+ * The input_file references the VM root file.  For building the
+ * initial ESM, we use src/vm.mjs.  For building the UMD, we use the
+ * built ESM.
  *
  * The entry is not complete, the functions make_entry_umd() and
  * make_entry_esm() fill in some missing fields for each target type.
  */
-function make_entry(filename, libraryTarget, minimize)
+function make_entry(input_file, output_filename, target_type, minimize)
 {
     const lisp_loaders = [ { loader: "raw-loader" } ];
     /*
-     * Run our custom minifier.
+     * Run our custom minifier that strips comments and docstrings
+     * from Lisp code.
      */
     if (minimize)
         lisp_loaders.push({ loader: "./tool/minifier.js" });
     return {
-        entry: "./src/vm.mjs",
+        entry: input_file,
         output: {
-            libraryTarget: libraryTarget,
-            filename: filename,
+            libraryTarget: target_type,
+            filename: output_filename,
             globalObject: "this"
         },
         module: {
@@ -61,13 +46,24 @@ function make_entry(filename, libraryTarget, minimize)
                 }
             ]
         },
+        /*
+         * This turns off some debugging stuff otherwise added by
+         * Webpack.
+         */
         devtool: false,
         optimization: {
             minimize: minimize,
             minimizer: [
                 new TerserPlugin({
                     terserOptions: {
+                        /*
+                         * Class names are needed for some tests.
+                         */
                         keep_classnames: true,
+                        /*
+                         * We probably could get rid of function names,
+                         * but it's not a big benefit, size-wise.
+                         */
                         keep_fnames: true
                     }
                 })
@@ -76,21 +72,21 @@ function make_entry(filename, libraryTarget, minimize)
     }
 }
 
-function make_entry_umd(minimize)
+function make_entry_esm(basename, minimize)
 {
-    const name = minimize ? "lispx-vm.umd.min.js" : "lispx-vm.umd.js";
-    const entry = make_entry(name, "umd", minimize);
-    entry.output.library = "lispx-vm";
-    return entry;
-}
-
-function make_entry_esm(minimize)
-{
-    const name = minimize ? "lispx-vm.min.mjs" : "lispx-vm.mjs";
-    const entry = make_entry(name, "module", minimize);
+    const output_filename = basename + (minimize ? ".min.mjs" : ".vm.mjs")
+    const entry = make_entry("./src/vm.mjs", output_filename, "module", minimize);
     entry.experiments = {
         outputModule: true
     };
+    return entry;
+}
+
+function make_entry_umd(basename, minimize)
+{
+    const output_filename = basename + (minimize ? ".umd.min.js" : ".umd.js");
+    const entry = make_entry("./src/vm.mjs", output_filename, "umd", minimize);
+    entry.output.library = "lispx-vm";
     return entry;
 }
 
