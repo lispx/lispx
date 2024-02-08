@@ -265,11 +265,23 @@ export class VM
     }
 
     /*
-     * Returns the VM's root environment;
+     * The two different environments are explained below.
      */
-    get_environment()
+
+    /*
+     * Returns the VM's system environment.
+     */
+    get_system_environment()
     {
-        return this.environment;
+        return this.system_environment;
+    }
+
+    /*
+     * Returns the VM's user environment.
+     */
+    get_user_environment()
+    {
+        return this.user_environment;
     }
 }
 
@@ -1418,16 +1430,28 @@ function init_vm(vm)
     /*** Internal VM Data Structures ***/
 
     /*
-     * The root, or global, environment.
+     * The VM uses two main environments:
+     *
+     * The system environment contains all bindings written in JS.
+     *
+     * The user environment is a child of the system environment (and
+     * therefore inherits all its bindings) and is where all Lisp code
+     * is evaluated.
+     *
+     * This way, we always know whether a binding comes from JS or
+     * Lisp.  When saving an image, we only save bindings produced by
+     * Lisp, an skip those produced by JS.
      */
-    vm.environment = vm.make_environment();
+    vm.system_environment = vm.make_environment();
+    vm.user_environment = vm.make_environment(vm.system_environment);
 
     /*
-     * Defines a symbol in the root environment.
+     * Defines a symbol in the system environment.  This is used for
+     * all definitions produced by JS (and not Lisp).
      */
     vm.define = (symbol, value) =>
     {
-        vm.environment.put(symbol, value);
+        vm.system_environment.put(symbol, value);
     };
 
     /*
@@ -1462,7 +1486,7 @@ function init_vm(vm)
 
     /*
      * Creates a class metaobject for a JS class and registers the
-     * class in the root environment.
+     * class in the system environment.
      *
      * Note that the class gets registered in the class namespace,
      * while its name property is an ordinary variable symbol.

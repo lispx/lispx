@@ -74,7 +74,7 @@ describe("Classes", () => {
      * from test-util.mjs but so far I have been too lazy to do this.
      */
 
-    it("Classes are named and registered in the root environment.", () => {
+    it("Classes are named and registered in the system & user environment.", () => {
 
         function check_vm_class_name(vm, js_class, name)
         {

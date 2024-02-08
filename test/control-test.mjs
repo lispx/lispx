@@ -6,7 +6,7 @@ const vm = make_vm();
 
 function lookup_operator(name)
 {
-    return vm.get_environment().lookup(vm.fsym(name));
+    return vm.get_user_environment().lookup(vm.fsym(name));
 }
 
 describe("Continuations", () => {

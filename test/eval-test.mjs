@@ -35,7 +35,7 @@ function time(name, fun)
 
 function make_child_environment()
 {
-    return vm.make_environment(vm.get_environment());
+    return vm.make_environment(vm.get_user_environment());
 }
 
 function quote(expr)
@@ -57,7 +57,7 @@ describe("Evaluation & Operation", () => {
         ];
 
         for (const name of operators) {
-            const op = vm.get_environment().lookup(vm.fsym(name));
+            const op = vm.get_user_environment().lookup(vm.fsym(name));
             vm.assert_type(op, vm.Built_in_operator);
         }
 
@@ -120,7 +120,7 @@ describe("Evaluation & Operation", () => {
         ];
 
         for (const name of functions) {
-            const op = vm.get_environment().lookup(vm.fsym(name));
+            const op = vm.get_user_environment().lookup(vm.fsym(name));
             vm.assert_type(op, vm.Function);
         }
 
@@ -214,7 +214,7 @@ describe("Evaluation & Operation", () => {
 
     });
 
-    it("%EVAL uses the root environment if no environment is specified.", () => {
+    it("%EVAL uses the user environment if no environment is specified.", () => {
 
         assert.instanceOf(vm.eval(vm.list(vm.sym("%eval"), quote(vm.csym("object")))),
                           vm.Class);
@@ -237,7 +237,7 @@ describe("Evaluation & Operation", () => {
 
     it("Test vm.operate().", () => {
 
-        const list_op = vm.get_environment().lookup(vm.fsym("list"));
+        const list_op = vm.get_user_environment().lookup(vm.fsym("list"));
         assert(vm.equal(vm.operate(list_op, vm.nil()), vm.nil()));
         assert(vm.equal(vm.operate(list_op, vm.list(vm.num(1))), vm.list(vm.num(1))));
 
@@ -245,7 +245,7 @@ describe("Evaluation & Operation", () => {
 
     it("The environment to operate in can be specified.", () => {
 
-        const def_op = vm.get_environment().lookup(vm.fsym("%def"));
+        const def_op = vm.get_user_environment().lookup(vm.fsym("%def"));
         const env = make_child_environment();
         vm.operate(def_op, vm.list(vm.sym("x"), vm.num(1)), env);
         assert(vm.equal(env.lookup(vm.sym("x")), vm.num(1)));
@@ -380,7 +380,7 @@ describe("%DEF", () => {
         vm.assert_type(fexpr, vm.Fexpr);
         assert(vm.equal(vm.eval_js_string("(some-fexpr)", env), vm.num(12)));
         assert(vm.equal(env.lookup(vm.fsym("some-fexpr")), fexpr));
-        assert.throws(() => vm.get_environment().lookup(vm.fsym("some-fexpr")),
+        assert.throws(() => vm.get_user_environment().lookup(vm.fsym("some-fexpr")),
                       "Unbound function: some-fexpr");
 
     });

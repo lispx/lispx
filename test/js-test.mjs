@@ -51,7 +51,7 @@ describe("JavaScript Interface", () => {
 
     it("Test to_js_function().", () => {
 
-        const js_fun = vm.to_js_function(vm.get_environment().lookup(vm.fsym("list")));
+        const js_fun = vm.to_js_function(vm.get_user_environment().lookup(vm.fsym("list")));
         vm.assert_type(js_fun, "function");
         const list = js_fun(vm.num(1), vm.num(2));
         vm.assert_type(list, vm.List);
@@ -65,7 +65,7 @@ describe("JavaScript Interface", () => {
         const js_fun = () => 123;
         const lisp_fun = vm.to_lisp_function(js_fun);
         vm.assert_type(lisp_fun, vm.Operator);
-        vm.get_environment().put(vm.fsym("some-fun"), lisp_fun);
+        vm.get_user_environment().put(vm.fsym("some-fun"), lisp_fun);
         assert.equal(123, vm.eval(vm.list(vm.sym("some-fun"))));
 
     });

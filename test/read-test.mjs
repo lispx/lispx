@@ -452,7 +452,7 @@ describe("eval_{stream,string,js_string}", () => {
             assert(vm.equal(eval_x_fun("1 2 3"), vm.num(3)));
 
             /*
-             * Test that it uses the VM's root environment by default.
+             * Test that it uses the VM's user environment by default.
              */
 
             assert(eval_x_fun("#'%vau") instanceof vm.Built_in_operator);

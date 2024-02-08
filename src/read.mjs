@@ -542,12 +542,12 @@ export function init_read(vm)
      * Reads forms from a stream until EOF and evaluates them
      * in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Returns the value of the last expression or #VOID if the stream
      * is empty.
      */
-    vm.eval_stream = function(stream, env = vm.get_environment())
+    vm.eval_stream = function(stream, env = vm.get_user_environment())
     {
         vm.assert_type(stream, vm.Input_stream);
         vm.assert_type(env, vm.Environment);
@@ -571,9 +571,9 @@ export function init_read(vm)
     /*
      * Evaluates all forms in a string in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.eval_string = function(string, env = vm.get_environment())
+    vm.eval_string = function(string, env = vm.get_user_environment())
     {
         return vm.eval_stream(new vm.String_input_stream(string), env);
     }
@@ -581,9 +581,9 @@ export function init_read(vm)
     /*
      * Evaluates all forms in a JS string in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.eval_js_string = function(js_string, env = vm.get_environment())
+    vm.eval_js_string = function(js_string, env = vm.get_user_environment())
     {
         return vm.eval_string(vm.str(js_string), env);
     }

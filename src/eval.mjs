@@ -14,13 +14,13 @@ export function init_eval(vm)
      * Evaluate a form in an environment.  This is the core internal
      * evaluation mechanism.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Unlike the main evaluation entry point eval_form() (in
      * control.mjs), this may return a Suspension if the code attempts
      * to capture a continuation to an outside prompt.
      */
-    vm.eval = (form, env = vm.get_environment()) =>
+    vm.eval = (form, env = vm.get_user_environment()) =>
     {
         /*
          * All exceptions that happen during evaluation, except
@@ -100,9 +100,9 @@ export function init_eval(vm)
      * Cause an operator to operate on an operand in the given
      * environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.operate = (operator, operand, env = vm.get_environment()) =>
+    vm.operate = (operator, operand, env = vm.get_user_environment()) =>
     {
         return vm.trap_exceptions(() => {
             vm.assert_type(operator, vm.Operator);
@@ -501,7 +501,7 @@ export function init_eval(vm)
      * by this function.
      *
      * If the user defined error handler, ERROR, is defined in the
-     * VM's root environment, it is called with the exception as
+     * VM's user environment, it is called with the exception as
      * argument.  This unifies the JS exception system and the Lisp
      * condition system.
      *
@@ -528,7 +528,7 @@ export function init_eval(vm)
      */
     vm.call_user_error_handler = (exception) =>
     {
-        const env = vm.get_environment();
+        const env = vm.get_user_environment();
         const sym = vm.fsym("error");
         if (env.is_bound(sym)) {
             return vm.operate(env.lookup(sym), vm.list(exception), vm.make_environment());
@@ -566,7 +566,7 @@ export function init_eval(vm)
     /*** Definition Utilities ***/
 
     /*
-     * Registers a global variable in the VM's root environment.
+     * Registers a global variable in the VM's system environment.
      */
     vm.define_variable = (name, object) =>
     {
@@ -574,7 +574,7 @@ export function init_eval(vm)
     };
 
     /*
-     * Registers a constant in the VM's root environment.
+     * Registers a constant in the VM's system environment.
      */
     vm.define_constant = (name, object) =>
     {
@@ -582,7 +582,7 @@ export function init_eval(vm)
     };
 
     /*
-     * Registers an operator in the VM's root environment.
+     * Registers an operator in the VM's system environment.
      */
     vm.define_operator = (name, operator) =>
     {
@@ -590,7 +590,7 @@ export function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering a built-in operator in the VM's root environment.
+     * Shorthand for registering a built-in operator in the VM's system environment.
      */
     vm.define_built_in_operator = (name, fun) =>
     {
@@ -598,7 +598,7 @@ export function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering a built-in function in the VM's root environment.
+     * Shorthand for registering a built-in function in the VM's system environment.
      */
     vm.define_built_in_function = (name, js_fun) =>
     {
@@ -606,7 +606,7 @@ export function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering an alien function in the VM's root environment.
+     * Shorthand for registering an alien function in the VM's system environment.
      */
     vm.define_alien_function = (name, js_fun) =>
     {

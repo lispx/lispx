@@ -813,13 +813,13 @@ export function init_control(vm)
      * Evaluate a form in an environment.  This is the main entry
      * point for calling Lisp from JS.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Pushes a continuation barrier (to prevent continuations from
      * escaping to JS) and the root prompt (to enable taking of stack
      * traces).
      */
-    vm.eval_form = (form, env = vm.get_environment()) =>
+    vm.eval_form = (form, env = vm.get_user_environment()) =>
         vm.push_subcont_barrier(() =>
             vm.push_prompt(ROOT_PROMPT,
                            () => vm.eval(form, env),

@@ -16,7 +16,7 @@ export function check_class(vm, name, js_class, js_superclass, js_metaclass)
 };
 
 /*
- * Verify that a class is properly named and registered in the root environment.
+ * Verify that a class is properly named and registered.
  */
 export function check_class_name(vm, js_class, name)
 {
@@ -28,7 +28,14 @@ export function check_class_name(vm, js_class, name)
 
     // The symbol it's registered under in the environment is a
     // symbol in the class namespace.
-    assert.equal(vm.get_environment().lookup(name_sym.to_class_symbol()),
+
+    // Check that it's registered in system environment.
+    assert.equal(vm.get_system_environment().lookup(name_sym.to_class_symbol()),
+                 lisp_class);
+    // Check that it's registered in user environment.
+    // This should always be the case since the user environment
+    // is a child of the system environment.
+    assert.equal(vm.get_user_environment().lookup(name_sym.to_class_symbol()),
                  lisp_class);
 };
 

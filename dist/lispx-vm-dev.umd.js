@@ -1963,13 +1963,13 @@ function init_control(vm)
      * Evaluate a form in an environment.  This is the main entry
      * point for calling Lisp from JS.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Pushes a continuation barrier (to prevent continuations from
      * escaping to JS) and the root prompt (to enable taking of stack
      * traces).
      */
-    vm.eval_form = (form, env = vm.get_environment()) =>
+    vm.eval_form = (form, env = vm.get_user_environment()) =>
         vm.push_subcont_barrier(() =>
             vm.push_prompt(ROOT_PROMPT,
                            () => vm.eval(form, env),
@@ -2070,13 +2070,13 @@ function init_eval(vm)
      * Evaluate a form in an environment.  This is the core internal
      * evaluation mechanism.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Unlike the main evaluation entry point eval_form() (in
      * control.mjs), this may return a Suspension if the code attempts
      * to capture a continuation to an outside prompt.
      */
-    vm.eval = (form, env = vm.get_environment()) =>
+    vm.eval = (form, env = vm.get_user_environment()) =>
     {
         /*
          * All exceptions that happen during evaluation, except
@@ -2156,9 +2156,9 @@ function init_eval(vm)
      * Cause an operator to operate on an operand in the given
      * environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.operate = (operator, operand, env = vm.get_environment()) =>
+    vm.operate = (operator, operand, env = vm.get_user_environment()) =>
     {
         return vm.trap_exceptions(() => {
             vm.assert_type(operator, vm.Operator);
@@ -2557,7 +2557,7 @@ function init_eval(vm)
      * by this function.
      *
      * If the user defined error handler, ERROR, is defined in the
-     * VM's root environment, it is called with the exception as
+     * VM's user environment, it is called with the exception as
      * argument.  This unifies the JS exception system and the Lisp
      * condition system.
      *
@@ -2584,7 +2584,7 @@ function init_eval(vm)
      */
     vm.call_user_error_handler = (exception) =>
     {
-        const env = vm.get_environment();
+        const env = vm.get_user_environment();
         const sym = vm.fsym("error");
         if (env.is_bound(sym)) {
             return vm.operate(env.lookup(sym), vm.list(exception), vm.make_environment());
@@ -2622,7 +2622,7 @@ function init_eval(vm)
     /*** Definition Utilities ***/
 
     /*
-     * Registers a global variable in the VM's root environment.
+     * Registers a global variable in the VM's system environment.
      */
     vm.define_variable = (name, object) =>
     {
@@ -2630,7 +2630,7 @@ function init_eval(vm)
     };
 
     /*
-     * Registers a constant in the VM's root environment.
+     * Registers a constant in the VM's system environment.
      */
     vm.define_constant = (name, object) =>
     {
@@ -2638,7 +2638,7 @@ function init_eval(vm)
     };
 
     /*
-     * Registers an operator in the VM's root environment.
+     * Registers an operator in the VM's system environment.
      */
     vm.define_operator = (name, operator) =>
     {
@@ -2646,7 +2646,7 @@ function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering a built-in operator in the VM's root environment.
+     * Shorthand for registering a built-in operator in the VM's system environment.
      */
     vm.define_built_in_operator = (name, fun) =>
     {
@@ -2654,7 +2654,7 @@ function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering a built-in function in the VM's root environment.
+     * Shorthand for registering a built-in function in the VM's system environment.
      */
     vm.define_built_in_function = (name, js_fun) =>
     {
@@ -2662,7 +2662,7 @@ function init_eval(vm)
     };
 
     /*
-     * Shorthand for registering an alien function in the VM's root environment.
+     * Shorthand for registering an alien function in the VM's system environment.
      */
     vm.define_alien_function = (name, js_fun) =>
     {
@@ -3886,12 +3886,12 @@ function init_read(vm)
      * Reads forms from a stream until EOF and evaluates them
      * in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      *
      * Returns the value of the last expression or #VOID if the stream
      * is empty.
      */
-    vm.eval_stream = function(stream, env = vm.get_environment())
+    vm.eval_stream = function(stream, env = vm.get_user_environment())
     {
         vm.assert_type(stream, vm.Input_stream);
         vm.assert_type(env, vm.Environment);
@@ -3915,9 +3915,9 @@ function init_read(vm)
     /*
      * Evaluates all forms in a string in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.eval_string = function(string, env = vm.get_environment())
+    vm.eval_string = function(string, env = vm.get_user_environment())
     {
         return vm.eval_stream(new vm.String_input_stream(string), env);
     }
@@ -3925,9 +3925,9 @@ function init_read(vm)
     /*
      * Evaluates all forms in a JS string in a given environment.
      *
-     * The environment defaults to the VM's root environment.
+     * The environment defaults to the VM's user environment.
      */
-    vm.eval_js_string = function(js_string, env = vm.get_environment())
+    vm.eval_js_string = function(js_string, env = vm.get_user_environment())
     {
         return vm.eval_string(vm.str(js_string), env);
     }
@@ -4817,11 +4817,23 @@ class VM
     }
 
     /*
-     * Returns the VM's root environment;
+     * The two different environments are explained below.
      */
-    get_environment()
+
+    /*
+     * Returns the VM's system environment.
+     */
+    get_system_environment()
     {
-        return this.environment;
+        return this.system_environment;
+    }
+
+    /*
+     * Returns the VM's user environment.
+     */
+    get_user_environment()
+    {
+        return this.user_environment;
     }
 }
 
@@ -5970,16 +5982,28 @@ function init_vm(vm)
     /*** Internal VM Data Structures ***/
 
     /*
-     * The root, or global, environment.
+     * The VM uses two main environments:
+     *
+     * The system environment contains all bindings written in JS.
+     *
+     * The user environment is a child of the system environment (and
+     * therefore inherits all its bindings) and is where all Lisp code
+     * is evaluated.
+     *
+     * This way, we always know whether a binding comes from JS or
+     * Lisp.  When saving an image, we only save bindings produced by
+     * Lisp, an skip those produced by JS.
      */
-    vm.environment = vm.make_environment();
+    vm.system_environment = vm.make_environment();
+    vm.user_environment = vm.make_environment(vm.system_environment);
 
     /*
-     * Defines a symbol in the root environment.
+     * Defines a symbol in the system environment.  This is used for
+     * all definitions produced by JS (and not Lisp).
      */
     vm.define = (symbol, value) =>
     {
-        vm.environment.put(symbol, value);
+        vm.system_environment.put(symbol, value);
     };
 
     /*
@@ -6014,7 +6038,7 @@ function init_vm(vm)
 
     /*
      * Creates a class metaobject for a JS class and registers the
-     * class in the root environment.
+     * class in the system environment.
      *
      * Note that the class gets registered in the class namespace,
      * while its name property is an ordinary variable symbol.
