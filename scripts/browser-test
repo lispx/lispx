@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -eux
 # Run the main test suite in a browser.
-./node_modules/karma/bin/karma start
+./node_modules/karma/bin/karma start karma.prod.js
