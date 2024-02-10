@@ -5465,7 +5465,7 @@ function init_vm(vm)
         is_slot_bound(slot_name)
         {
             const slot_key = this.symbol_to_slot_key(slot_name);
-            return slot_key in this;
+            return this.hasOwnProperty(slot_key);
         }
 
         /*
