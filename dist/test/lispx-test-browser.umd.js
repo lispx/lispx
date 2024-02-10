@@ -12741,12 +12741,18 @@ describe("Environments", () => {
         e1.put(vm.sym("x"), 12);
         e1.put(vm.sym("y"), 14);
 
+        assert.deepEqual(new Set(e1.binding_names()), new Set([vm.sym("x"), vm.sym("y")]));
+        assert.deepEqual(new Set(e2.binding_names()), new Set([]));
+
         assert.equal(e1.lookup(vm.sym("x")), 12);
         assert.equal(e1.lookup(vm.sym("y")), 14);
         assert.equal(e2.lookup(vm.sym("x")), 12);
         assert.equal(e2.lookup(vm.sym("y")), 14);
 
         e2.put(vm.sym("x"), 42);
+
+        assert.deepEqual(new Set(e1.binding_names()), new Set([vm.sym("x"), vm.sym("y")]));
+        assert.deepEqual(new Set(e2.binding_names()), new Set([vm.sym("x")]));
 
         assert.equal(e1.lookup(vm.sym("x")), 12);
         assert.equal(e1.lookup(vm.sym("y")), 14);
@@ -12799,6 +12805,9 @@ describe("Environments", () => {
         e1.put(v, 1);
         e1.put(f, 2);
         e1.put(c, 3);
+
+        assert.deepEqual(new Set(e1.binding_names()),
+                         new Set([vm.sym("x"), vm.fsym("x"), vm.csym("x")]));
 
         assert.equal(e1.lookup(v), 1);
         assert.equal(e1.lookup(f), 2);

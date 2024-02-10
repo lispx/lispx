@@ -4992,6 +4992,20 @@ function init_vm(vm)
         {
             return namespace + "_" + string.get_utf8_bytes();
         }
+
+        /*
+         * Utility that returns the symbol referred to by a key.
+         */
+        static from_key(key)
+        {
+            vm.assert_type(key, "string");
+            for (const ns of vm.NAMESPACES) {
+                const prefix = ns + "_";
+                if (key.startsWith(prefix))
+                    return vm.intern(new vm.String(key.slice(prefix.length)), ns);
+            }
+            throw new Error("Not a symbol key: " + key);
+        }
     }
 
     /*
@@ -5001,6 +5015,12 @@ function init_vm(vm)
     vm.FUNCTION_NAMESPACE = "function";
     vm.CLASS_NAMESPACE = "class";
     vm.KEYWORD_NAMESPACE = "keyword";
+    vm.NAMESPACES = [
+        vm.VARIABLE_NAMESPACE,
+        vm.FUNCTION_NAMESPACE,
+        vm.CLASS_NAMESPACE,
+        vm.KEYWORD_NAMESPACE
+    ];
 
     /*
      * Arbitrary-precision decimal number.
@@ -5296,6 +5316,17 @@ function init_vm(vm)
             vm.assert_type(symbol, vm.Symbol);
             const key = symbol.get_key();
             return key in this.bindings;
+        }
+
+        /*
+         * Returns the names of bindings in this environment (but not
+         * its ancestors) as an array of symbols.
+         */
+        binding_names()
+        {
+            return Object.getOwnPropertyNames(this.bindings).map((key) => {
+                return vm.Symbol.from_key(key);
+            });
         }
 
         /*
