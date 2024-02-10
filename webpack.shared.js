@@ -152,7 +152,7 @@ function make_test_entry_node()
     const entry = make_test_entry("lispx-test-node",
                                   "test/lispx-test-node.umd.js");
     entry.externals = {
-        "lispx-vm": "../lispx-vm.umd.min.js"
+        "lispx-vm": "../lispx-vm-dev.umd.js" // xxx also test min
     };
     return entry;
 }

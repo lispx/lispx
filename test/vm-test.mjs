@@ -840,22 +840,26 @@ describe("Standard objects", () => {
         vm.assert(obj instanceof vm.Standard_object);
         vm.assert(obj instanceof vm.Object);
         vm.assert(vm.equal(vm.class_of(obj), vm.lisp_class(vm.Standard_object)));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([]));
 
     });
 
     it("Slots can be created by make_instance() and accessed with slot_value().", () => {
 
+        const js_euro = "\u{20AC}";
+
         const obj = vm.make_instance(vm.lisp_class(vm.Standard_object),
-                                     vm.sym("x"), vm.num(12),
+                                     vm.sym(js_euro), vm.num(12),
                                      vm.kwd("y"), vm.num(24));
 
-        assert(vm.equal(obj.slot_value(vm.sym("x")),
+        assert(vm.equal(obj.slot_value(vm.sym(js_euro)),
                         vm.num(12)));
         assert(vm.equal(obj.slot_value(vm.sym("y")),
                         vm.num(24)));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([vm.sym(js_euro), vm.sym("y")]));
 
         // Can also use keyword symbols.
-        assert(vm.equal(obj.slot_value(vm.kwd("x")),
+        assert(vm.equal(obj.slot_value(vm.kwd(js_euro)),
                         vm.num(12)));
         assert(vm.equal(obj.slot_value(vm.kwd("y")),
                         vm.num(24)));
@@ -879,8 +883,10 @@ describe("Standard objects", () => {
         const obj = vm.make_instance(vm.lisp_class(vm.Standard_object));
         assert.isFalse(obj.is_slot_bound(vm.sym("foo")));
         assert.isFalse(obj.is_slot_bound(vm.sym("bar")));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([]));
 
         obj.set_slot_value(vm.sym("foo"), vm.num(1));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([vm.sym("foo")]));
         assert(obj.is_slot_bound(vm.sym("foo")));
         assert.isFalse(obj.is_slot_bound(vm.sym("bar")));
 

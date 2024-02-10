@@ -5,7 +5,7 @@
  * This builds the VM and the browser test as UMDs.
  */
 
-const { make_entry_umd, make_test_entry_browser }
+const { make_entry_umd, make_test_entry_browser, make_test_entry_node }
       = require("./webpack.shared.js");
 
 module.exports = [
@@ -14,7 +14,8 @@ module.exports = [
      */
     make_entry_umd("./src/vm-dev.mjs", "lispx-vm-dev", false),
     /*
-     * Build browser tests.
+     * Build browser and Node tests.
      */
-    make_test_entry_browser()
+    make_test_entry_browser(),
+    make_test_entry_node()
 ];

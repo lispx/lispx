@@ -5428,6 +5428,11 @@ function init_vm(vm)
     };
 
     /*
+     * Names of slots of standard objects are prefixed with this.
+     */
+    const SLOT_PREFIX = "lisp_slot_";
+
+    /*
      * Superclass of classes defined with DEFCLASS by the user.
      */
     vm.Standard_object = class Lisp_standard_object extends vm.Object
@@ -5437,7 +5442,7 @@ function init_vm(vm)
          */
         slot_value(slot_name)
         {
-            const slot_key = this.slot_key(slot_name);
+            const slot_key = this.symbol_to_slot_key(slot_name);
             if (this.hasOwnProperty(slot_key))
                 return this[slot_key];
             else
@@ -5449,7 +5454,7 @@ function init_vm(vm)
          */
         set_slot_value(slot_name, slot_value)
         {
-            const slot_key = this.slot_key(slot_name);
+            const slot_key = this.symbol_to_slot_key(slot_name);
             return this[slot_key] = slot_value;
         }
 
@@ -5459,19 +5464,38 @@ function init_vm(vm)
          */
         is_slot_bound(slot_name)
         {
-            const slot_key = this.slot_key(slot_name);
+            const slot_key = this.symbol_to_slot_key(slot_name);
             return slot_key in this;
+        }
+
+        /*
+         * Returns the names of slots in an object as an array of symbols.
+         */
+        slot_names()
+        {
+            return Object.getOwnPropertyNames(this).map((key) =>
+                this.slot_key_to_symbol(key));
         }
 
         /*
          * Internal method that constructs the key under
          * which a slot value is stored in the object.
          */
-        slot_key(slot_name)
+        symbol_to_slot_key(slot_name)
         {
             vm.assert_type(slot_name, vm.Symbol);
             const bytes = slot_name.get_string().get_utf8_bytes();
-            return "lisp_slot_" + bytes;
+            return SLOT_PREFIX + bytes;
+        }
+
+        /*
+         * Internal method that turns the key under
+         * which a slot value is stored into a symbol.
+         */
+        slot_key_to_symbol(key)
+        {
+            const bytes = key.slice(SLOT_PREFIX.length);
+            return vm.intern(new vm.String(bytes));
         }
     };
 

@@ -7,7 +7,7 @@
  * Production-mode VM.
  *
  * This is designed for booting quickly, and loads the bootstrap code
- * from a saved image.
+ * from a saved fasl image (../tool/fasl.mjs).
  */
 
 /*

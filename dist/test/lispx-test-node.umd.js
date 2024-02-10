@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("../lispx-vm.umd.min.js"));
+		module.exports = factory(require("../lispx-vm-dev.umd.js"));
 	else if(typeof define === 'function' && define.amd)
-		define(["../lispx-vm.umd.min.js"], factory);
+		define(["../lispx-vm-dev.umd.js"], factory);
 	else if(typeof exports === 'object')
-		exports["lispx-test-node"] = factory(require("../lispx-vm.umd.min.js"));
+		exports["lispx-test-node"] = factory(require("../lispx-vm-dev.umd.js"));
 	else
-		root["lispx-test-node"] = factory(root["../lispx-vm.umd.min.js"]);
-})(this, (__WEBPACK_EXTERNAL_MODULE__953__) => {
+		root["lispx-test-node"] = factory(root["../lispx-vm-dev.umd.js"]);
+})(this, (__WEBPACK_EXTERNAL_MODULE__200__) => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -11744,11 +11744,11 @@ return typeDetect;
 
 /***/ }),
 
-/***/ 953:
+/***/ 200:
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_MODULE__953__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__200__;
 
 /***/ }),
 
@@ -11817,8 +11817,8 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external "../lispx-vm.umd.min.js"
-var external_lispx_vm_umd_min_js_ = __webpack_require__(953);
+// EXTERNAL MODULE: external "../lispx-vm-dev.umd.js"
+var external_lispx_vm_dev_umd_js_ = __webpack_require__(200);
 ;// CONCATENATED MODULE: ./test/test-util.lispx
 /* harmony default export */ const test_util_lispx = (";;; Test Utilities\n\n;; Import Mocha test framework functions from the global scope.\n(def #'mocha:describe (to-lisp-function (js-global \"describe\")))\n(def #'mocha:it (to-lisp-function (js-global \"it\")))\n(def #'mocha:before (to-lisp-function (js-global \"before\")))\n(def #'mocha:before-each (to-lisp-function (js-global \"beforeEach\")))\n(def #'mocha:after (to-lisp-function (js-global \"after\")))\n(def #'mocha:after-each (to-lisp-function (js-global \"afterEach\")))\n\n(defexpr deftest (name expression . expected?) env\n  \"Run the EXPRESSION as a test identified by NAME and compare its\nresult to an EXPECTED value (which defaults to true).  Tests may\ncapture a continuation to the default prompt.\"\n  (mocha:it\n   (to-js-string (symbol-name name))\n   (js-lambda ()\n     ;; Run each test in a coroutine.\n     ;;\n     ;; Note that this is quite subtle: when an asynchronous test\n     ;; captures a continuation, it returns a promise here.  This\n     ;; promise is returned to Mocha, which does the right thing (wait\n     ;; for it to resolve).\n     (coroutine\n       ;; The test and expected expressions are evaluated in fresh\n       ;; child environments of the current environment, so that\n       ;; bindings they create don't affect other tests.\n       (assert (= (eval expression (make-environment env))\n                  (eval (optional expected? #t) (make-environment env))))))))\n\n(defmacro deftest* (name . forms)\n  \"Run the FORMS as a test identified by NAME, but unlike `deftest',\nsimply ignore their result.  The test only fails when the forms signal\nan error.  Use this instead of `deftest' if you just want to run some\nforms, and don't need to compare their result to an expected value.\"\n  (list #'deftest name (list* #'prog1 #t forms)))\n\n(defexpr defsuite (name . forms) env\n  \"Evaluate FORMS as a group of tests identified by NAME.  The forms\nmust not capure any continuations.\"\n  (mocha:describe\n   (to-js-string (symbol-name name))\n   (js-lambda ()\n     ;; We don't run the suite contents in a coroutine.  The reason is\n     ;; that Mocha describe() doesn't support promises.  Any Lisp code\n     ;; that tries to capture a continuation directly inside a suite\n     ;; will get a \"prompt not found\" error (due to the barrier inside\n     ;; `js-lambda').\n     (eval (list* #'progn forms) env))))\n\n(defun lispx::make-mocha-hook (#'mocha-hook-fun)\n  \"Metaprogramming utility to create Mocha hooks.  Hooks may capture.\"\n  (vau forms env\n    (mocha-hook-fun\n     (js-lambda ()\n       (coroutine ;; Run in coroutine. See above for explanation.\n         (eval (list* #'progn forms) env))))))\n\n(def #'before (lispx::make-mocha-hook #'mocha:before))\n(def #'before-each (lispx::make-mocha-hook #'mocha:before-each))\n(def #'after (lispx::make-mocha-hook #'mocha:after))\n(def #'after-each (lispx::make-mocha-hook #'mocha:after-each))\n\n(defexpr signals-error (form condition-class . slot-specs) env\n  \"Evaluate the FORM and assert that it signals a condition of the\ngiven CONDITION-CLASS.  Expected slots of the condition can be\nspecified by SLOT-SPECS (a plist) and will be compared against the\nslots of the signalled condition.\"\n  (let ((class (find-class condition-class env)))\n    (block exit\n      (handler-case ((object (lambda (c)\n                               (if (typep c class)\n                                   (progn\n                                     (loop-let -check-slots- ((slot-specs slot-specs))\n                                       (when (not (null slot-specs))\n                                         (let (((name value . rest-slot-specs) slot-specs))\n                                           (unless (= (slot-value c name) (eval value env))\n                                             (return-from exit #f))\n                                           (-check-slots- rest-slot-specs))))\n                                     (return-from exit #t))\n                                   (return-from exit #f)))))\n        (eval form env))\n      #f)))\n");
 ;// CONCATENATED MODULE: ./test/test-util-test.lispx
@@ -11858,7 +11858,7 @@ var external_lispx_vm_umd_min_js_ = __webpack_require__(953);
 
 describe("Lisp Tests", () => {
 
-    const vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+    const vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
     vm.eval_js_string(test_util_lispx);
     vm.eval_js_string(test_util_test_lispx);
     vm.eval_js_string(boot_test_lispx);
@@ -11985,7 +11985,7 @@ function check_class_linkage(vm, js_class)
 
 
 
-const vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 describe("Objects", () => {
 
@@ -12820,22 +12820,26 @@ describe("Standard objects", () => {
         vm.assert(obj instanceof vm.Standard_object);
         vm.assert(obj instanceof vm.Object);
         vm.assert(vm.equal(vm.class_of(obj), vm.lisp_class(vm.Standard_object)));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([]));
 
     });
 
     it("Slots can be created by make_instance() and accessed with slot_value().", () => {
 
+        const js_euro = "\u{20AC}";
+
         const obj = vm.make_instance(vm.lisp_class(vm.Standard_object),
-                                     vm.sym("x"), vm.num(12),
+                                     vm.sym(js_euro), vm.num(12),
                                      vm.kwd("y"), vm.num(24));
 
-        assert(vm.equal(obj.slot_value(vm.sym("x")),
+        assert(vm.equal(obj.slot_value(vm.sym(js_euro)),
                         vm.num(12)));
         assert(vm.equal(obj.slot_value(vm.sym("y")),
                         vm.num(24)));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([vm.sym(js_euro), vm.sym("y")]));
 
         // Can also use keyword symbols.
-        assert(vm.equal(obj.slot_value(vm.kwd("x")),
+        assert(vm.equal(obj.slot_value(vm.kwd(js_euro)),
                         vm.num(12)));
         assert(vm.equal(obj.slot_value(vm.kwd("y")),
                         vm.num(24)));
@@ -12859,8 +12863,10 @@ describe("Standard objects", () => {
         const obj = vm.make_instance(vm.lisp_class(vm.Standard_object));
         assert.isFalse(obj.is_slot_bound(vm.sym("foo")));
         assert.isFalse(obj.is_slot_bound(vm.sym("bar")));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([]));
 
         obj.set_slot_value(vm.sym("foo"), vm.num(1));
+        assert.deepEqual(new Set(obj.slot_names()), new Set([vm.sym("foo")]));
         assert(obj.is_slot_bound(vm.sym("foo")));
         assert.isFalse(obj.is_slot_bound(vm.sym("bar")));
 
@@ -13093,7 +13099,7 @@ describe("utf8_decode()", () => {
 
 
 
-const eval_test_vm = time("Boot LispX", () => (0,external_lispx_vm_umd_min_js_.make_vm)());
+const eval_test_vm = time("Boot LispX", () => (0,external_lispx_vm_dev_umd_js_.make_vm)());
 
 /*
  * This stream is used to prevent stack traces being printed for some
@@ -13739,7 +13745,7 @@ describe("Panicking", () => {
 
 
 
-const control_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const control_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 function lookup_operator(name)
 {
@@ -13809,7 +13815,7 @@ describe("Dynamic Variables", () => {
 
 
 
-const seq_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const seq_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 /*
  * These tests can be somewhat cursory because we have additional
@@ -13933,7 +13939,7 @@ describe("Sequence & List Utilities", () => {
 
 
 
-const stream_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const stream_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 function string_input_stream(js_string)
 {
@@ -14143,7 +14149,7 @@ describe("String Output Streams", () => {
 
 
 
-const read_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const read_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 function read_test_string_input_stream(js_string)
 {
@@ -14621,7 +14627,7 @@ describe("eval_{stream,string,js_string}", () => {
 
 
 
-const print_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const print_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 function print_test_string_output_stream()
 {
@@ -14736,7 +14742,7 @@ describe("Printer", () => {
 
 
 
-const js_test_vm = (0,external_lispx_vm_umd_min_js_.make_vm)();
+const js_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
 describe("JavaScript Interface", () => {
 
@@ -14892,7 +14898,26 @@ describe("JavaScript Interface", () => {
 
 });
 
+;// CONCATENATED MODULE: ./test/fasl-test.mjs
+
+
+
+
+
+
+const fasl_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
+
+describe("FASL", () => {
+
+    it("Sets.", () => {
+
+
+    });
+
+});
+
 ;// CONCATENATED MODULE: ./test/all-tests.mjs
+
 
 
 
