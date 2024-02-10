@@ -558,16 +558,31 @@ describe("Generic Functions", () => {
 
     it("Test add_method() and find_method().", () => {
 
+        const js_euro = "\u{20AC}";
+
         // Define a method M1 on OBJECT.
-        const method_name = vm.sym("m1");
+        const object_class = vm.lisp_class(vm.Object);
+        const string_class = vm.lisp_class(vm.String);
+        const number_class = vm.lisp_class(vm.Number);
+
+        const method_name = vm.sym(js_euro);
         const method = vm.alien_function(() => vm.void());
-        vm.lisp_class(vm.Object).add_method(method_name, method);
+
+        assert(!new Set(object_class.method_names()).has(method_name));
+        object_class.add_method(method_name, method);
+        assert(method === object_class.find_method(method_name));
+        assert(new Set(object_class.method_names()).has(method_name));
+
+        // Test an unbound method.
+        assert.throws(() => object_class.find_method(vm.sym("m2")),
+                      "Unbound method: m2");
 
         // Test that strings and numbers inherit the method.
-        for (const cls of [vm.lisp_class(vm.Object),
-                           vm.lisp_class(vm.String),
-                           vm.lisp_class(vm.Number)]) {
+        for (const cls of [string_class, number_class]) {
+            // We can find the method...
             assert(method === cls.find_method(method_name));
+            // ...but it's not one of the direct methods of the class
+            assert(!new Set(cls.method_names()).has(method_name));
 
             // Test an unbound method.
             assert.throws(() => cls.find_method(vm.sym("m2")),
@@ -576,13 +591,14 @@ describe("Generic Functions", () => {
 
         // Override the method for strings.
         const str_method = vm.alien_function(() => vm.void());
-        vm.lisp_class(vm.String).add_method(method_name, str_method);
+        string_class.add_method(method_name, str_method);
+        assert(new Set(string_class.method_names()).has(method_name));
 
         // Test that it returns the new method for strings...
-        assert(str_method === vm.lisp_class(vm.String).find_method(method_name));
+        assert(str_method === string_class.find_method(method_name));
         // ...and still the old one for numbers and objects.
-        assert(method === vm.lisp_class(vm.Number).find_method(method_name));
-        assert(method === vm.lisp_class(vm.Object).find_method(method_name));
+        assert(method === number_class.find_method(method_name));
+        assert(method === object_class.find_method(method_name));
     });
 
 });

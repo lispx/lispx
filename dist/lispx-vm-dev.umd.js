@@ -5341,6 +5341,11 @@ function init_vm(vm)
      */
 
     /*
+     * Lisp methods are stored under this prefix in a class.
+     */
+    const METHOD_PREFIX = "lisp_method_";
+
+    /*
      * Superclass of all class metaobjects.
      *
      * This class is abstract; all concrete classes are instances of
@@ -5367,7 +5372,7 @@ function init_vm(vm)
         add_method(name, method)
         {
             vm.assert_type(method, vm.Operator);
-            const key = this.method_key(name);
+            const key = this.symbol_to_method_key(name);
             this.get_js_class().prototype[key] = method;
         }
 
@@ -5378,7 +5383,7 @@ function init_vm(vm)
          */
         find_method(name)
         {
-            const key = this.method_key(name);
+            const key = this.symbol_to_method_key(name);
             const method = this.get_js_class().prototype[key];
             if (method !== undefined)
                 return method;
@@ -5387,14 +5392,39 @@ function init_vm(vm)
         }
 
         /*
+         * Returns the names of the methods of this class (but not its
+         * superclasses) as an array of symbols.
+         */
+        method_names()
+        {
+            const result = [];
+            Object.getOwnPropertyNames(this.get_js_class().prototype).forEach((key) => {
+                if (key.startsWith(METHOD_PREFIX))
+                    result.push(this.method_key_to_symbol(key));
+            });
+            return result;
+        }
+
+        /*
          * Internal method that constructs the key under which a
          * method is stored in the JS class.
          */
-        method_key(method_name)
+        symbol_to_method_key(method_name)
         {
             vm.assert_type(method_name, vm.Symbol);
             const bytes = method_name.get_string().get_utf8_bytes();
-            return "lisp_method_" + bytes;
+            return METHOD_PREFIX + bytes;
+        }
+
+        /*
+         * Internal method that turns the key under which a method is
+         * stored into a symbol.
+         */
+        method_key_to_symbol(key)
+        {
+            vm.assert_type(key, "string");
+            const bytes = key.slice(METHOD_PREFIX.length);
+            return vm.intern(new vm.String(bytes));
         }
 
         /*
@@ -5473,8 +5503,12 @@ function init_vm(vm)
          */
         slot_names()
         {
-            return Object.getOwnPropertyNames(this).map((key) =>
-                this.slot_key_to_symbol(key));
+            const result = [];
+            Object.getOwnPropertyNames(this).forEach((key) => {
+                if (key.startsWith(SLOT_PREFIX))
+                    result.push(this.slot_key_to_symbol(key));
+            });
+            return result;
         }
 
         /*
@@ -5494,6 +5528,7 @@ function init_vm(vm)
          */
         slot_key_to_symbol(key)
         {
+            vm.assert_type(key, "string");
             const bytes = key.slice(SLOT_PREFIX.length);
             return vm.intern(new vm.String(bytes));
         }

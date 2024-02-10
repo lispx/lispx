@@ -13646,16 +13646,31 @@ describe("Generic Functions", () => {
 
     it("Test add_method() and find_method().", () => {
 
+        const js_euro = "\u{20AC}";
+
         // Define a method M1 on OBJECT.
-        const method_name = eval_test_vm.sym("m1");
+        const object_class = eval_test_vm.lisp_class(eval_test_vm.Object);
+        const string_class = eval_test_vm.lisp_class(eval_test_vm.String);
+        const number_class = eval_test_vm.lisp_class(eval_test_vm.Number);
+
+        const method_name = eval_test_vm.sym(js_euro);
         const method = eval_test_vm.alien_function(() => eval_test_vm.void());
-        eval_test_vm.lisp_class(eval_test_vm.Object).add_method(method_name, method);
+
+        assert(!new Set(object_class.method_names()).has(method_name));
+        object_class.add_method(method_name, method);
+        assert(method === object_class.find_method(method_name));
+        assert(new Set(object_class.method_names()).has(method_name));
+
+        // Test an unbound method.
+        assert.throws(() => object_class.find_method(eval_test_vm.sym("m2")),
+                      "Unbound method: m2");
 
         // Test that strings and numbers inherit the method.
-        for (const cls of [eval_test_vm.lisp_class(eval_test_vm.Object),
-                           eval_test_vm.lisp_class(eval_test_vm.String),
-                           eval_test_vm.lisp_class(eval_test_vm.Number)]) {
+        for (const cls of [string_class, number_class]) {
+            // We can find the method...
             assert(method === cls.find_method(method_name));
+            // ...but it's not one of the direct methods of the class
+            assert(!new Set(cls.method_names()).has(method_name));
 
             // Test an unbound method.
             assert.throws(() => cls.find_method(eval_test_vm.sym("m2")),
@@ -13664,13 +13679,14 @@ describe("Generic Functions", () => {
 
         // Override the method for strings.
         const str_method = eval_test_vm.alien_function(() => eval_test_vm.void());
-        eval_test_vm.lisp_class(eval_test_vm.String).add_method(method_name, str_method);
+        string_class.add_method(method_name, str_method);
+        assert(new Set(string_class.method_names()).has(method_name));
 
         // Test that it returns the new method for strings...
-        assert(str_method === eval_test_vm.lisp_class(eval_test_vm.String).find_method(method_name));
+        assert(str_method === string_class.find_method(method_name));
         // ...and still the old one for numbers and objects.
-        assert(method === eval_test_vm.lisp_class(eval_test_vm.Number).find_method(method_name));
-        assert(method === eval_test_vm.lisp_class(eval_test_vm.Object).find_method(method_name));
+        assert(method === number_class.find_method(method_name));
+        assert(method === object_class.find_method(method_name));
     });
 
 });
