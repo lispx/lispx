@@ -15138,29 +15138,29 @@ function init_fasl(vm)
     // FINI
     vm.Cons.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fcons", [vm.dummy_ref(this, ctx), // xxx
+        return vm.emit_call("fcons", [vm.emit(this, ctx),
                                       vm.emit(this.car(), ctx),
                                       vm.emit(this.cdr(), ctx)]);
     };
     vm.Function.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("ffun", [vm.dummy_ref(this, ctx), vm.emit(this.wrapped_operator, ctx)]);
+        return vm.emit_call("ffun", [vm.emit(this, ctx), vm.emit(this.wrapped_operator, ctx)]);
     };
     vm.Fexpr.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("ffex", [vm.dummy_ref(this, ctx), "BODY_FORM..."]);
+        return vm.emit_call("ffex", [vm.emit(this, ctx), "BODY_FORM..."]);
     };
     vm.Standard_object.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fobj", [vm.dummy_ref(this, ctx), "SLOTS"]);
+        return vm.emit_call("fobj", [vm.emit(this, ctx), "SLOTS"]);
     };
     vm.Standard_class.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fcls", [vm.dummy_ref(this, ctx), "METHODS"]);
+        return vm.emit_call("fcls", [vm.emit(this, ctx), "METHODS"]);
     };
     vm.Environment.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fenv", [vm.dummy_ref(this, ctx), "BINDINGS"]);
+        return vm.emit_call("fenv", [vm.emit(this, ctx), "BINDINGS"]);
     };
 
     vm.emit = (obj, ctx) =>
