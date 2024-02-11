@@ -212,29 +212,29 @@ export function init_fasl(vm)
     // FINI
     vm.Cons.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fcons", [vm.emit(this, ctx),
+        return vm.emit_call("fcons", [vm.dummy_ref(this, ctx),
                                       vm.emit(this.car(), ctx),
                                       vm.emit(this.cdr(), ctx)]);
     };
     vm.Function.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("ffun", [vm.emit(this, ctx), vm.emit(this.wrapped_operator, ctx)]);
+        return ffun(this, vm.dummy_ref(this, ctx), ctx);
     };
     vm.Fexpr.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("ffex", [vm.emit(this, ctx), "BODY_FORM..."]);
+        return ffex(this, vm.dummy_ref(this, ctx), ctx);
     };
     vm.Standard_object.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fobj", [vm.emit(this, ctx), "SLOTS"]);
+        return fobj(this, vm.dummy_ref(this, ctx), ctx);
     };
     vm.Standard_class.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fcls", [vm.emit(this, ctx), "METHODS"]);
+        return fcls(this, vm.dummy_ref(this, ctx), ctx);
     };
     vm.Environment.prototype.dummy_fini = function(ctx)
     {
-        return vm.emit_call("fenv", [vm.emit(this, ctx), "BINDINGS"]);
+        return fenv(this, vm.dummy_ref(this, ctx), ctx);
     };
 
     vm.emit = (obj, ctx) =>
@@ -255,14 +255,81 @@ export function init_fasl(vm)
     {
         return vm.emit_call(this.namespace, [JSON.stringify(this.get_string().to_js_string())]);
     };
+    vm.String.prototype.emit = function(ctx) {
+        return JSON.stringify(this.to_js_string());
+    };
     vm.Cons.prototype.emit = function(ctx)
     {
-        return vm.emit_call("C", [vm.emit(this.car(), ctx), vm.emit(this.cdr(), ctx)]);
+        return vm.emit_call("C", [vm.emit(this.car(), ctx),
+                                  vm.emit(this.cdr(), ctx)]);
     };
     vm.Fexpr.prototype.emit = function(ctx)
     {
-        return vm.emit_call("FEX");
+        return ffex(this, this.dummy_init(ctx), ctx);
     };
+    vm.Function.prototype.emit = function(ctx)
+    {
+        return ffun(this, this.dummy_init(ctx), ctx);
+    };
+    vm.Environment.prototype.emit = function(ctx)
+    {
+        return fenv(this, this.dummy_init(ctx), ctx);
+    };
+    vm.Standard_object.prototype.emit = function(ctx)
+    {
+        return fobj(this, this.dummy_init(ctx), ctx);
+    };
+    vm.Standard_class.prototype.emit = function(ctx)
+    {
+        return fcls(this, this.dummy_init(ctx), ctx);
+    };
+    function ffun(fun, dfun, ctx)
+    {
+        return vm.emit_call("ffun", [
+            dfun,
+            vm.emit(fun.wrapped_operator, ctx)]);
+    }
+    function ffex(fexpr, dfex, ctx)
+    {
+        return vm.emit_call("ffex", [
+            dfex,
+            vm.emit(fexpr.param_tree, ctx),
+            vm.emit(fexpr.env_param, ctx),
+            vm.emit(fexpr.body_form, ctx),
+            vm.emit(fexpr.env_param, ctx)
+        ]);
+    }
+    function fobj(obj, dobj, ctx)
+    {
+        const slots = [];
+        for (const slot_name of obj.slot_names()) {
+            const slot_value = obj.slot_value(slot_name);
+            slots.push(vm.emit(slot_name, ctx));
+            slots.push(vm.emit(slot_value, ctx));
+        }
+        return vm.emit_call("fobj", [dobj, slots]);
+    }
+    function fcls(cls, dcls, ctx)
+    {
+        const methods = [];
+        for (const method_name of cls.method_names()) {
+            const method = cls.find_method(method_name);
+            methods.push(vm.emit(method_name, ctx));
+            methods.push(vm.emit(method, ctx));
+        }
+        return vm.emit_call("fcls", [dcls, methods]);
+    }
+    function fenv(env, denv, ctx)
+    {
+        const bindings = [];
+        for (const name of env.binding_names()) {
+            const value = env.lookup(name);
+            bindings.push(vm.emit(name, ctx));
+            bindings.push(vm.emit(value, ctx));
+        }
+        return vm.emit_call("fenv", [denv, bindings]);
+    }
+
 
     vm.dummy_init = (ctx) =>
     {
