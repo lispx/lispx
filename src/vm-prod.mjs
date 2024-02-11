@@ -13,12 +13,15 @@
 /*
  * Import VM core.
  */
-import { make_vm as make_vm_dev } from "./vm-dev.mjs";
+import { VM } from "./vm.mjs";
+import image from "../out.image.mjs";
 
 /*
  * Main entrypoint to create a production-mode VM.
  */
 export function make_vm()
 {
-    return make_vm_dev();
+    const vm = new VM();
+    vm.user_environment = image(vm);
+    return vm;
 };

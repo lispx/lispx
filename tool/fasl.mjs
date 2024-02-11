@@ -91,10 +91,79 @@ export function init_fasl(vm)
         const topo_map = vm.topo_sort(objects, ext_map);
         //topo_map.forEach((v, k) => console.log(v + ":" + vm.write_to_js_string(k)));
         const ctx = { topo_map, ext_map, string_map };
-        vm.dummy_init(ctx);
-        vm.dummy_fini(ctx);
-        console.log("return " + topo_map.get(target));
+        let result = PREAMBLE;
+        ctx.topo_map.forEach((pos, obj) => {
+            result += vm.emit_call("push", [obj.dummy_init(ctx)]) + ";\n";
+        });
+        ctx.topo_map.forEach((pos, obj) => {
+            result += obj.dummy_fini(ctx) + ";\n";
+        });
+        result += "return objects[" + topo_map.get(target) + "];\n"
+        result += POSTAMBLE;
+        console.log(result);
     };
+
+    const PREAMBLE = `
+export default function(vm)
+{
+    const ext_env = vm.get_system_environment();
+    const extref = (sym) => ext_env.lookup(sym);
+    const N = vm.nil();
+    const V = vm.void();
+    const I = vm.ignore();
+    const T = vm.t();
+    const F = vm.f();
+    const _variable = (s) => vm.sym(s);
+    const _function = (s) => vm.fsym(s);
+    const _keyword = (s) => vm.kwd(s);
+    const _class = (s) => vm.csym(s);
+    const str = (x) => vm.str(x);
+    const num = (x) => vm.num(x);
+    const C = (a,b) => vm.cons(a, b);
+
+    const dcons = () => vm.cons(V,V);
+    const dfex = () => new vm.Fexpr(I, I, I, ext_env);
+    const dfun = () => vm.wrap(dfex());
+    const denv = (parent) => vm.make_environment(parent);
+    const dobj = (cls) => vm.make_instance(cls);
+    const dcls = (name, superclass) => vm.make_standard_class(name, superclass);
+
+    const fcons = (cons, car, cdr) => { cons.set_car(car); cons.set_cdr(cdr); return cons; };
+    const ffex = (f, p, ep, b, e) => { f.param_tree=p; f.env_param=ep; f.body_form=b; f.def_env=e; return f; };
+    const ffun = (f, op) => { f.wrapped_operator = op; return f; }
+    const fenv = (e, ...bindings) => {
+        for (let i = 0; i < bindings.length; i = i + 2) {
+            const name = bindings[i];
+            const value = bindings[i + 1];
+            e.put(name, value);
+        }
+        return e;
+    };
+    const fobj = (obj, ...slots) => {
+        for (let i = 0; i < slots.length; i = i + 2) {
+            const name = slots[i];
+            const value = slots[i + 1];
+            obj.set_slot_value(name, value);
+        }
+        return obj;
+    };
+    const fcls = (cls, ...methods) => {
+        for (let i = 0; i < methods.length; i = i + 2) {
+            const name = methods[i];
+            const method = methods[i + 1];
+            cls.add_method(name, method);
+        }
+        return cls;
+    }
+    const objects = [];
+
+    function push(expr) { objects[objects.length] = expr; }
+    function toporef(i) { return objects[i]; }
+`;
+
+    const POSTAMBLE = `
+}
+`;
 
     vm.collect = (target, ext_map) =>
     {
@@ -196,16 +265,17 @@ export function init_fasl(vm)
     };
     vm.Standard_object.prototype.dummy_init = function(ctx)
     {
-        return vm.emit_call("dobj", [vm.dummy_ref(vm.class_of(this), ctx)]);
+        return vm.emit_call("dobj", [vm.emit(vm.class_of(this), ctx)]);
     };
     vm.Standard_class.prototype.dummy_init = function(ctx)
     {
-        return vm.emit_call("dcls", [vm.dummy_ref(this.get_superclass(), ctx)]);
+        return vm.emit_call("dcls", [vm.emit(this.get_name(), ctx),
+                                     vm.emit(this.get_superclass(), ctx)]);
     };
     vm.Environment.prototype.dummy_init = function(ctx)
     {
         const parent_ref = (this.parent !== null)
-              ? vm.dummy_ref(this.parent, ctx)
+              ? vm.emit(this.parent, ctx)
               : "null";
         return vm.emit_call("denv", [parent_ref]);
     };
@@ -253,10 +323,13 @@ export function init_fasl(vm)
     vm.Boolean.prototype.emit = function(ctx) { return (this === vm.t()) ? "T" : "F" }
     vm.Symbol.prototype.emit = function(ctx)
     {
-        return vm.emit_call(this.namespace, [JSON.stringify(this.get_string().to_js_string())]);
+        return vm.emit_call("_" + this.namespace, [JSON.stringify(this.get_string().to_js_string())]);
+    };
+    vm.Number.prototype.emit = function(ctx) {
+        return vm.emit_call("num", [JSON.stringify(vm.write_to_js_string(this))]);
     };
     vm.String.prototype.emit = function(ctx) {
-        return JSON.stringify(this.to_js_string());
+        return vm.emit_call("str", [JSON.stringify(this.to_js_string())]);
     };
     vm.Cons.prototype.emit = function(ctx)
     {
@@ -296,7 +369,7 @@ export function init_fasl(vm)
             vm.emit(fexpr.param_tree, ctx),
             vm.emit(fexpr.env_param, ctx),
             vm.emit(fexpr.body_form, ctx),
-            vm.emit(fexpr.env_param, ctx)
+            vm.emit(fexpr.def_env, ctx)
         ]);
     }
     function fobj(obj, dobj, ctx)
@@ -307,7 +380,7 @@ export function init_fasl(vm)
             slots.push(vm.emit(slot_name, ctx));
             slots.push(vm.emit(slot_value, ctx));
         }
-        return vm.emit_call("fobj", [dobj, slots]);
+        return vm.emit_call("fobj", [dobj, ...slots]);
     }
     function fcls(cls, dcls, ctx)
     {
@@ -317,7 +390,7 @@ export function init_fasl(vm)
             methods.push(vm.emit(method_name, ctx));
             methods.push(vm.emit(method, ctx));
         }
-        return vm.emit_call("fcls", [dcls, methods]);
+        return vm.emit_call("fcls", [dcls, ...methods]);
     }
     function fenv(env, denv, ctx)
     {
@@ -327,34 +400,6 @@ export function init_fasl(vm)
             bindings.push(vm.emit(name, ctx));
             bindings.push(vm.emit(value, ctx));
         }
-        return vm.emit_call("fenv", [denv, bindings]);
+        return vm.emit_call("fenv", [denv, ...bindings]);
     }
-
-
-    vm.dummy_init = (ctx) =>
-    {
-        ctx.topo_map.forEach((pos, obj) => {
-            console.log(obj.dummy_init(ctx));
-        });
-    };
-
-    vm.dummy_fini = (ctx) =>
-    {
-        ctx.topo_map.forEach((pos, obj) => {
-            console.log(obj.dummy_fini(ctx));
-        });
-    };
-
-    const PREAMBLE = `
-function(vm, ext_env)
-{
-    const N = vm.nil();
-    const objects = [];
-    function push(expr) { objects[objects.length] = expr; }
-    const dcons = () => push(vm.cons(N,N));
-`;
-
-    const POSTAMBLE = `
-
-`;
 }

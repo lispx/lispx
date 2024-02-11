@@ -17,20 +17,12 @@ const { make_entry_esm,
         make_repl_entry_node }
       = require("./webpack.shared.js");
 
+
+
 module.exports = [
     /*
      * Build minimized outputs.
      */
-    make_entry_esm("./src/vm-prod.mjs", "lispx-vm", true),
-    make_entry_umd("./src/vm-prod.mjs", "lispx-vm", true),
-    /*
-     * Build test outputs.
-     */
+    make_entry_umd("./src/vm-prod.mjs", "lispx-vm", false),
     make_test_entry_browser(),
-    make_test_entry_node(),
-    /*
-     * Build REPLs.
-     */
-    make_repl_entry_browser(),
-    make_repl_entry_node()
 ];
