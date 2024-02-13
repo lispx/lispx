@@ -1,0 +1,176 @@
+
+        vm.collect = (target, ext_set) =>
+    {
+        const objects = new Map(); // obj -> count
+        const strings = new Map();
+        function add(obj) { objects.add(obj); }
+        function add_str(obj) { if (!strings.has(obj)) strings.set(obj, strings.size); }
+        class Collect_visitor extends vm.Visitor
+        {
+            /*
+             * Skip external and already visited objects.
+             */
+            should_visit(obj)
+            {
+                return (!ext_set.has(obj)) && (!objects.has(obj));
+            }
+            visit_number(x) { add(x); }
+            visit_string(x) { add(x); add_str(x.to_js_string()); }
+            visit_symbol(x) { add(x); this.visit_string(x.get_string()); }
+            visit_cons(x) { add(x); }
+            visit_function(x) { add(x); }
+            visit_fexpr(x) { add(x); }
+            visit_standard_object(x) { add(x); }
+            visit_standard_class(x) { add(x); }
+            visit_environment(x) { add(x); }
+        }
+        vm.visit(new Collect_visitor(), target);
+        return [objects, strings];
+    };
+
+    vm.topo_sort = (objects, ext_set) =>
+    {
+        const topo_map = new Map(); // object -> position in map
+        function topo_add(obj)
+        {
+            if (!topo_map.has(obj))
+                topo_map.set(obj, topo_map.size);
+        }
+        function topo(obj)
+        {
+            if (!ext_set.has(obj)) {
+                /*
+                 * Depending on object type, sort "parent" before it.
+                 * This may recursively sort the grand-parent before
+                 * it, etc.
+                 */
+                if (obj instanceof vm.Environment) {
+                    if (obj.parent !== null) topo(obj.parent);
+                } else if (obj instanceof vm.Standard_object) {
+                    topo(vm.class_of(obj));
+                } else if (obj instanceof vm.Standard_class) {
+                    topo(obj.get_superclass());
+                }
+                topo_add(obj);
+            }
+        }
+        for (const obj of objects) {
+            topo(obj);
+        }
+        return topo_map;
+    };
+
+    vm.dummy_init = (topo_map, string_map, ext_map)
+    {
+
+    };
+}
+
+/*
+ * A fasl contains a serialized Lisp object, typically an environment.
+ *
+ * Fasls are used to speed up booting a Lisp application: instead of
+ * evaluating the application's initialization code at startup, we
+ * save the Lisp objects (like functions and classes) produced by that
+ * code, and simply load them when we start the app, which is
+ * typically much faster.
+ *
+ * In the VM itself a fasl is used for the production-mode VM.  It
+ * contains the user environment populated by the bootstrap Lisp code.
+ * (The development-mode VM simply evaluates all that code on boot.)
+ *
+ * Overview
+ * --------
+ *
+ * A fasl contains a Lisp object graph that we want to save.  The
+ * graph may contain circular references.
+ *
+ * There is also an _external environment_ of things we don't want to
+ * put into the image.  In the VM, this is the system environment,
+ * containing all bindings defined in JS.
+ *
+ * So to create a fasl, you tell the system the object you want to
+ * save (e.g. the user environment), and an external environment of
+ * things you don't want to save.  Objects in the external environment
+ * (and the external environment itself) are referred to by name in
+ * the image.  When you load the fasl, you must supply the exact same
+ * external environment that you used to save it.
+ */
+
+    /*
+     * Find all objects in the graph starting at target that are
+     * referenced more than once.
+     *
+     * This can be because they are ordinarily referenced multiple
+     * times, or because they are in a cycle.
+     */
+    vm.find_multiply_referenced_objects = (target, ext_set) =>
+    {
+        /*
+         * Keep track of how many times we've seen an object.
+         */
+        const counts = new Map(); // object -> count
+        function count(x) { counts.set(x, (counts.get(x) || 0) + 1); }
+        class Find_multiply_referenced_objects_visitor extends Visitor
+        {
+            /*
+             * Skip external objects and objects we've seen 2 or more
+             * times already.  This breaks any cycles.
+             */
+            should_visit(obj)
+            {
+                return (!ext_set.has(obj)) && (!((counts.get(obj) || 0) > 1));
+            }
+            visit_cons(x) { count(x); }
+            visit_function(x) { count(x); }
+            visit_fexpr(x) { count(x); }
+            visit_standard_object(x) { count(x); }
+            visit_standard_class(x) { count(x); }
+            visit_environment(x) { count(x); }
+            /*
+             * Note we don't care about objects like symbols and
+             * numbers here.  We might later treat them specially,
+             * too.
+             */
+        }
+        vm.visit(new Find_multiply_referenced_objects_visitor(), target);
+        /*
+         * Return set of all objects encountered 2 or more times.
+         */
+        return new Set([...counts].filter(([obj, ct]) => ct > 1).map(([obj, _]) => obj));
+    };
+
+    /*
+     * Topologically sort all objects that are referenced multiple
+     * times (from the previous step).
+     *
+     * Here we want: the parent of an environment should be sorted
+     * before the environment, the class of an object before the
+     * object, and the superclass of a class before the class.
+     *
+     * Note that this step may add new objects that aren't in the
+     * multi_set yet, e.g. we add the parent of an environment, even
+     * if that parent is not itself multiply referenced.
+     */
+    vm.topo_sort = (multi_set, ext_set) =>
+    {
+        /*
+         * The topo_map maps every object to the position within it.
+         *
+         * This could be a list or an (insertion-order) set, but then
+         * we couldn't efficiently check whether an object is in the
+         * collection, or get the position of an object, which is
+         * important later.
+         */
+    }
+
+    vm.Image = class Image
+    {
+        constructor()
+        {
+            this.string_map = new Map();
+            this.dummy_init_insn_map = new Map();
+            this.dummy_fini_insn_list = [];
+            this.result_insn;
+        }
+    };

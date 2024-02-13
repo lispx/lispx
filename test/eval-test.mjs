@@ -29,7 +29,7 @@ function time(name, fun)
     const result = fun();
     const end = new Date().getTime();
     const time = end - start;
-    console.log(name + ": "  + time + "ms");
+    console.log(name + ": " + time + "ms");
     return result;
 }
 

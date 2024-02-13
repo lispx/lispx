@@ -3,4 +3,4 @@
  */
 const shared = require("./karma.shared.js");
 
-module.exports = (config) => shared("./dist/lispx-vm.umd.min.js", config);
+module.exports = (config) => shared("./dist/lispx-vm.umd.js", config);
