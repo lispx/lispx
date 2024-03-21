@@ -7,4 +7,3 @@ import "./stream-test.mjs";
 import "./read-test.mjs";
 import "./print-test.mjs";
 import "./js-test.mjs";
-import "./fasl-test.mjs";

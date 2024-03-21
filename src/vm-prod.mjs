@@ -7,11 +7,11 @@
  * Production-mode VM.
  *
  * This is designed for booting quickly, and loads the bootstrap code
- * from a saved fasl image (../tool/fasl.mjs).
+ * from a saved fasl image.  Not implemented yet.
  */
 
 /*
- * Import VM core.
+ * Just reuse development VM for now.
  */
 import { make_vm as make_vm_dev } from "./vm-dev.mjs";
 

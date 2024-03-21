@@ -14923,26 +14923,7 @@ describe("JavaScript Interface", () => {
 
 });
 
-;// CONCATENATED MODULE: ./test/fasl-test.mjs
-
-
-
-
-
-
-const fasl_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
-
-describe("FASL", () => {
-
-    it("Sets.", () => {
-
-
-    });
-
-});
-
 ;// CONCATENATED MODULE: ./test/all-tests.mjs
-
 
 
 
