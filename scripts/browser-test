@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
-set -eux
+set -Eeuo pipefail
+_project_root=$(realpath -Lm $(dirname ${BASH_SOURCE})/..)
+# _phase is 'prod', 'dev', etc. Default is 'prod' if phase isn't explicit in the script name.
+_phase=${BASH_SOURCE##*/}; _phase=${_phase/browser-test}
+[[ -z "${_phase}" ]] && _phase=prod || _phase=dev
+
 # Run the main test suite in a browser.
-./node_modules/karma/bin/karma start karma.prod.js
+(set -x; ${_project_root}/node_modules/karma/bin/karma start ${_project_root}/karma.${_phase}.js)

@@ -6,5 +6,10 @@
 #
 # Note: doesn't build the tests, so don't forget to call ./scripts/build before.
 
-set -eux
-./node_modules/mocha/bin/mocha.js --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js --grep $1
+set -Eeuo pipefail
+cd $(realpath -Lm $(dirname ${BASH_SOURCE})/..)
+if [[ "$1" = "--build" ]]; then
+    shift
+    ./scripts/build
+fi
+(set -x; ./node_modules/mocha/bin/mocha.js --slow 5000 --timeout 10000 dist/test/lispx-test-node.umd.js --grep ${1:?'mocha expecting a pattern'})
