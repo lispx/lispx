@@ -2,7 +2,9 @@
 # I use this as a Git hook to always have up-to-date dist/ and docs/
 # but it seems to be slightly broken (sometimes files in dist are
 # missing from a commit...)
-set -eux
+set -Eeuo pipefail
+cd $(realpath -Lm $(dirname ${BASH_SOURCE})/..)
+set -x
 yarn build
 git add dist/
 git add docs/

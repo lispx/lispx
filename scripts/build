@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-set -eux
+set -Eeuo pipefail
+cd $(realpath -Lm $(dirname ${BASH_SOURCE})/..)
+set -x
 rm -rf docs
 ./scripts/build-dev
 ./node_modules/webpack-cli/bin/cli.js --mode=production --config=webpack.prod.js

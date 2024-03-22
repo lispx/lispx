@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-set -eu
-node dist/repl/node/repl.umd.js
+set -Eeuo pipefail
+_project_root=$(realpath -Lm $(dirname ${BASH_SOURCE})/..)
+node ${_project_root}/dist/repl/node/repl.umd.js
