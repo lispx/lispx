@@ -1,0 +1,5 @@
+Right now check_superclass just checks whether the class is a
+(deep) instance of the superclass.
+
+Would be better to demand that the superclass is exactly the
+superclass, not just an ancestor.
