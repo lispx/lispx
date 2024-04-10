@@ -62,10 +62,10 @@ must not capure any continuations."
 (def #'after-each (lispx::make-mocha-hook #'mocha:after-each))
 
 (defexpr signals-error (form condition-class . slot-specs) env
-  "Evaluate the FORM and assert that it signals a condition of the
-given CONDITION-CLASS.  Expected slots of the condition can be
-specified by SLOT-SPECS (a plist) and will be compared against the
-slots of the signalled condition."
+  "Evaluate the FORM and return true if it signals a condition of the
+given CONDITION-CLASS, false otherwise.  Expected slots of the
+condition can be specified by SLOT-SPECS (a plist) and will be
+compared against the slots of the signalled condition."
   (let ((class (find-class condition-class env)))
     (block exit
       (handler-case ((object (lambda (c)
