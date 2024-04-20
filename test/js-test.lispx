@@ -548,7 +548,7 @@
 (defsuite sleep
 
   (deftest sleep.1
-    (progn (sleep 1) #t))
+    (progn (sleep 1) (sleep 1) #t))
 
   (deftest sleep.2
     (signals-error
