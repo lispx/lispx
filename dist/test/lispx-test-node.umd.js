@@ -14777,46 +14777,7 @@ describe("Printer", () => {
 
 const js_test_vm = (0,external_lispx_vm_dev_umd_js_.make_vm)();
 
-function* call_lisp_from_generator(prog)
-{
-    let action = () => js_test_vm.eval_form_core(js_test_vm.read(new js_test_vm.String_input_stream(js_test_vm.str(prog))));
-    while (true) {
-        const result = action();
-        if (result instanceof js_test_vm.Suspension) {
-            const resumption = yield result;
-            action = () => resumption.resume();
-        } else {
-            return result;
-        }
-    }
-}
-
-function call_generator_from_lisp(generator, resumption = null)
-{
-    const result = generator.next(resumption);
-    if (result.done) {
-        return result.value;
-    } else {
-        return result.value.suspend((resumption) => call_generator_from_lisp(generator, resumption));
-    }
-}
-
 describe("JavaScript Interface", () => {
-
-    it("Test promises.", () => {
-
-        function* do_something()
-        {
-            const value1 = yield* call_lisp_from_generator("(progn (sleep 1) (sleep 1) 10)");
-            const value2 = yield* call_lisp_from_generator("(progn (sleep 1) (sleep 1) 100)");
-            return js_test_vm.add(value1, value2);
-        }
-
-        js_test_vm.define_alien_function("do-something", () => call_generator_from_lisp(do_something()));
-        return js_test_vm.eval_js_string("(coroutine (print (do-something)))");
-        // prints 110
-
-    });
 
     it("Test to_lisp_boolean().", () => {
 

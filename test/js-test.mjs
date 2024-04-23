@@ -4,46 +4,7 @@ import { make_vm } from "lispx-vm";
 
 const vm = make_vm();
 
-function* call_lisp_from_generator(prog)
-{
-    let action = () => vm.eval_form_core(vm.read(new vm.String_input_stream(vm.str(prog))));
-    while (true) {
-        const result = action();
-        if (result instanceof vm.Suspension) {
-            const resumption = yield result;
-            action = () => resumption.resume();
-        } else {
-            return result;
-        }
-    }
-}
-
-function call_generator_from_lisp(generator, resumption = null)
-{
-    const result = generator.next(resumption);
-    if (result.done) {
-        return result.value;
-    } else {
-        return result.value.suspend((resumption) => call_generator_from_lisp(generator, resumption));
-    }
-}
-
 describe("JavaScript Interface", () => {
-
-    it("Test promises.", () => {
-
-        function* do_something()
-        {
-            const value1 = yield* call_lisp_from_generator("(progn (sleep 1) (sleep 1) 10)");
-            const value2 = yield* call_lisp_from_generator("(progn (sleep 1) (sleep 1) 100)");
-            return vm.add(value1, value2);
-        }
-
-        vm.define_alien_function("do-something", () => call_generator_from_lisp(do_something()));
-        return vm.eval_js_string("(coroutine (print (do-something)))");
-        // prints 110
-
-    });
 
     it("Test to_lisp_boolean().", () => {
 

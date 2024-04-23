@@ -60,6 +60,29 @@
  */
 export function init_control(vm)
 {
+    vm.call_lisp_from_generator = function* (action)
+    {
+        while (true) {
+            const result = action();
+            if (result instanceof vm.Suspension) {
+                const resumption = yield result;
+                action = () => resumption.resume();
+            } else {
+                return result;
+            }
+        }
+    };
+
+    vm.call_generator_from_lisp = function(generator, resumption = null)
+    {
+        const result = generator.next(resumption);
+        if (result.done) {
+            return result.value;
+        } else {
+            return result.value.suspend((resumption) => vm.call_generator_from_lisp(generator, resumption));
+        }
+    }
+
     /*** Continuations ***/
 
     /*
@@ -715,89 +738,17 @@ export function init_control(vm)
      */
     function UNWIND_PROTECT(operands, env)
     {
+        return vm.call_generator_from_lisp(unwind_protect_gen(operands, env));
+    }
+
+    function* unwind_protect_gen(operands, env)
+    {
         const protected_expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
         const cleanup_expr = vm.assert_type(vm.elt(operands, 1), vm.TYPE_ANY);
-        return do_unwind_protect_1(protected_expr, cleanup_expr, env);
+        try { return yield* vm.call_lisp_from_generator(() => vm.eval(protected_expr, env)); }
+        finally { yield* vm.call_lisp_from_generator(() => vm.eval(cleanup_expr, env)); }
     }
 
-    /*
-     * This must be implemented in two steps, with two work functions.
-     *
-     * The first one evaluates the protected expression, which may (a)
-     * return normally, or (b) exit nonlocally with an exception, or (c)
-     * capture a continuation.
-     *
-     * If it does capture, we'll have to restart at step 1 later.  If
-     * it does not capture, we can go to step 2, but have to remember
-     * whether step 1 returned successfully or threw an exception.
-     *
-     * The second work function, step 2, evaluates the cleanup
-     * expression and afterwards either returns the result produced by
-     * the protected expression, or (re)throws the exception
-     * thrown by it.
-     */
-    function do_unwind_protect_1(protected_expr, cleanup_expr, env, resumption = null)
-    {
-        try {
-            let result;
-            if (resumption instanceof vm.Resumption)
-                result = resumption.resume();
-            else
-                result = vm.eval(protected_expr, env);
-            if (result instanceof vm.Suspension)
-                /*
-                 * (c) Protected expression captured - stay at step 1.
-                 */
-                return result.suspend((resumption) =>
-                    do_unwind_protect_1(protected_expr, cleanup_expr, env, resumption));
-            else
-                /*
-                 * (a) Protected expression returned normally - go to step 2,
-                 * remembering that step 1 was successful.
-                 */
-                return do_unwind_protect_2(cleanup_expr, result, true, env);
-        } catch (exception) {
-            /*
-             * (b) Protected expression threw - go to step 2,
-             * remembering that step 1 failed.
-             */
-            return do_unwind_protect_2(cleanup_expr, exception, false, env);
-        }
-    }
-
-    /*
-     * Second step of UNWIND-PROTECT.  We evaluate the cleanup
-     * expression, which of course may suspend, itself.
-     *
-     * Afterwards we either return the result of the protected
-     * expression, or rethrow the exception thrown by it.
-     */
-    function do_unwind_protect_2(cleanup_expr, value, success, env, resumption = null)
-    {
-        let result;
-        if (resumption instanceof vm.Resumption)
-            result = resumption.resume();
-        else
-            result = vm.eval(cleanup_expr, env);
-        if (result instanceof vm.Suspension) {
-            return result.suspend((resumption) =>
-                do_unwind_protect_2(cleanup_expr, value, success, env, resumption));
-        } else {
-            /*
-             * After the cleanup expression has been evaluated:
-             *
-             * If the protected expression returned normally (a),
-             * return its result now.
-             *
-             * If it threw an exception (b), rethrow the exception
-             * now.
-             */
-            if (success)
-                return value;
-            else
-                throw value;
-        }
-    }
 
     /*** Root Prompt and Evaluation Entry Point ***/
 
