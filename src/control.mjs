@@ -623,28 +623,14 @@ export function init_control(vm)
      */
     function LOOP(operands, env)
     {
-        const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
-        return do_loop(expr, env);
+        return vm.call_generator_from_lisp(loop_gen(operands, env));
     }
 
-    function do_loop(expr, env, resumption = null)
+    function* loop_gen(operands, env)
     {
-        let first = true; // Only resume once.
-        while (true) {
-            let result;
-            if (first && (resumption instanceof vm.Resumption)) {
-                first = false;
-                result = resumption.resume();
-            } else {
-                result = vm.eval(expr, env);
-            }
-            if (result instanceof vm.Suspension) {
-                return result.suspend((resumption) =>
-                    do_loop(expr, env, resumption));
-            } else {
-                continue;
-            }
-        }
+        const expr = vm.assert_type(vm.elt(operands, 0), vm.TYPE_ANY);
+        while (true)
+            yield* vm.call_lisp_from_generator(() => vm.eval(expr, env));
     }
 
     /*
@@ -748,7 +734,6 @@ export function init_control(vm)
         try { return yield* vm.call_lisp_from_generator(() => vm.eval(protected_expr, env)); }
         finally { yield* vm.call_lisp_from_generator(() => vm.eval(cleanup_expr, env)); }
     }
-
 
     /*** Root Prompt and Evaluation Entry Point ***/
 
