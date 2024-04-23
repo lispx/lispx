@@ -1970,11 +1970,10 @@ function init_control(vm)
      * traces).
      */
     vm.eval_form = (form, env = vm.get_user_environment()) =>
-        vm.push_subcont_barrier(() =>
-            vm.push_prompt(ROOT_PROMPT,
-                           () => vm.eval(form, env),
-                           env),
-            env);
+        vm.push_subcont_barrier(() => vm.eval_form_core(form, env), env);
+
+    vm.eval_form_core = (form, env = vm.get_user_environment()) =>
+        vm.push_prompt(ROOT_PROMPT, () => vm.eval(form, env), env);
 
     /*** Stack Trace ***/
 
