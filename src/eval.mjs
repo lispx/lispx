@@ -478,19 +478,20 @@ export function init_eval(vm)
      */
     function IF(operands, env)
     {
+        return vm.call_generator_from_lisp(if_gen(operands, env));
+    }
+
+    function* if_gen(operands, env)
+    {
         const test = vm.elt(operands, 0);
         const consequent = vm.elt(operands, 1);
         const alternative = vm.elt(operands, 2);
-
-        return vm.bind(() => vm.eval(test, env),
-                       (result) => {
-                           vm.assert_type(result, vm.Boolean);
-                           if (result == vm.t())
-                               return vm.eval(consequent, env);
-                           else
-                               return vm.eval(alternative, env);
-                       },
-                       vm.trace(test, env));
+        const result = yield* vm.call_lisp_from_generator(() => vm.eval(test, env));
+        vm.assert_type(result, vm.Boolean);
+        if (result === vm.t())
+            return yield* vm.call_lisp_from_generator(() => vm.eval(consequent, env));
+        else
+            return yield* vm.call_lisp_from_generator(() => vm.eval(alternative, env));
     }
 
     /*** Exception Trapping and Panicking ***/

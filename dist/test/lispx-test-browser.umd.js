@@ -7,11 +7,11 @@
 		exports["lispx-test-browser"] = factory(require("lispx-vm"));
 	else
 		root["lispx-test-browser"] = factory(root["lispx-vm"]);
-})(this, (__WEBPACK_EXTERNAL_MODULE__677__) => {
+})(this, (__WEBPACK_EXTERNAL_MODULE__478__) => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 126:
+/***/ 296:
 /***/ ((module) => {
 
 /*!
@@ -134,15 +134,15 @@ AssertionError.prototype.toJSON = function (stack) {
 
 /***/ }),
 
-/***/ 960:
+/***/ 324:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-module.exports = __webpack_require__(928);
+module.exports = __webpack_require__(731);
 
 
 /***/ }),
 
-/***/ 928:
+/***/ 731:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /*!
@@ -163,13 +163,13 @@ exports.version = '4.3.3';
  * Assertion Error
  */
 
-exports.AssertionError = __webpack_require__(126);
+exports.AssertionError = __webpack_require__(296);
 
 /*!
  * Utils for plugins (not exported)
  */
 
-var util = __webpack_require__(920);
+var util = __webpack_require__(118);
 
 /**
  * # .use(function)
@@ -200,48 +200,48 @@ exports.util = util;
  * Configuration
  */
 
-var config = __webpack_require__(448);
+var config = __webpack_require__(752);
 exports.config = config;
 
 /*!
  * Primary `Assertion` prototype
  */
 
-var assertion = __webpack_require__(507);
+var assertion = __webpack_require__(896);
 exports.use(assertion);
 
 /*!
  * Core Assertions
  */
 
-var core = __webpack_require__(536);
+var core = __webpack_require__(289);
 exports.use(core);
 
 /*!
  * Expect interface
  */
 
-var expect = __webpack_require__(7);
+var expect = __webpack_require__(667);
 exports.use(expect);
 
 /*!
  * Should interface
  */
 
-var should = __webpack_require__(292);
+var should = __webpack_require__(705);
 exports.use(should);
 
 /*!
  * Assert interface
  */
 
-var assert = __webpack_require__(155);
+var assert = __webpack_require__(740);
 exports.use(assert);
 
 
 /***/ }),
 
-/***/ 507:
+/***/ 896:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -251,7 +251,7 @@ exports.use(assert);
  * MIT Licensed
  */
 
-var config = __webpack_require__(448);
+var config = __webpack_require__(752);
 
 module.exports = function (_chai, util) {
   /*!
@@ -423,7 +423,7 @@ module.exports = function (_chai, util) {
 
 /***/ }),
 
-/***/ 448:
+/***/ 752:
 /***/ ((module) => {
 
 module.exports = {
@@ -524,7 +524,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 536:
+/***/ 289:
 /***/ ((module) => {
 
 /*!
@@ -4384,7 +4384,7 @@ module.exports = function (chai, _) {
 
 /***/ }),
 
-/***/ 155:
+/***/ 740:
 /***/ ((module) => {
 
 /*!
@@ -7504,7 +7504,7 @@ module.exports = function (chai, util) {
 
 /***/ }),
 
-/***/ 7:
+/***/ 667:
 /***/ ((module) => {
 
 /*!
@@ -7558,7 +7558,7 @@ module.exports = function (chai, util) {
 
 /***/ }),
 
-/***/ 292:
+/***/ 705:
 /***/ ((module) => {
 
 /*!
@@ -7784,7 +7784,7 @@ module.exports = function (chai, util) {
 
 /***/ }),
 
-/***/ 707:
+/***/ 949:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -7797,11 +7797,11 @@ module.exports = function (chai, util) {
  * Module dependencies
  */
 
-var addLengthGuard = __webpack_require__(758);
-var chai = __webpack_require__(928);
-var flag = __webpack_require__(183);
-var proxify = __webpack_require__(925);
-var transferFlags = __webpack_require__(897);
+var addLengthGuard = __webpack_require__(100);
+var chai = __webpack_require__(731);
+var flag = __webpack_require__(226);
+var proxify = __webpack_require__(515);
+var transferFlags = __webpack_require__(316);
 
 /*!
  * Module variables
@@ -7943,7 +7943,7 @@ module.exports = function addChainableMethod(ctx, name, method, chainingBehavior
 
 /***/ }),
 
-/***/ 758:
+/***/ 100:
 /***/ ((module) => {
 
 var fnLengthDesc = Object.getOwnPropertyDescriptor(function () {}, 'length');
@@ -8010,7 +8010,7 @@ module.exports = function addLengthGuard (fn, assertionName, isChainable) {
 
 /***/ }),
 
-/***/ 775:
+/***/ 180:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8019,11 +8019,11 @@ module.exports = function addLengthGuard (fn, assertionName, isChainable) {
  * MIT Licensed
  */
 
-var addLengthGuard = __webpack_require__(758);
-var chai = __webpack_require__(928);
-var flag = __webpack_require__(183);
-var proxify = __webpack_require__(925);
-var transferFlags = __webpack_require__(897);
+var addLengthGuard = __webpack_require__(100);
+var chai = __webpack_require__(731);
+var flag = __webpack_require__(226);
+var proxify = __webpack_require__(515);
+var transferFlags = __webpack_require__(316);
 
 /**
  * ### .addMethod(ctx, name, method)
@@ -8085,7 +8085,7 @@ module.exports = function addMethod(ctx, name, method) {
 
 /***/ }),
 
-/***/ 152:
+/***/ 444:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8094,10 +8094,10 @@ module.exports = function addMethod(ctx, name, method) {
  * MIT Licensed
  */
 
-var chai = __webpack_require__(928);
-var flag = __webpack_require__(183);
-var isProxyEnabled = __webpack_require__(35);
-var transferFlags = __webpack_require__(897);
+var chai = __webpack_require__(731);
+var flag = __webpack_require__(226);
+var isProxyEnabled = __webpack_require__(993);
+var transferFlags = __webpack_require__(316);
 
 /**
  * ### .addProperty(ctx, name, getter)
@@ -8164,7 +8164,7 @@ module.exports = function addProperty(ctx, name, getter) {
 
 /***/ }),
 
-/***/ 391:
+/***/ 682:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8177,7 +8177,7 @@ module.exports = function addProperty(ctx, name, getter) {
  * Module dependencies
  */
 
-var inspect = __webpack_require__(563);
+var inspect = __webpack_require__(154);
 
 /**
  * ### .compareByInspect(mixed, mixed)
@@ -8202,7 +8202,7 @@ module.exports = function compareByInspect(a, b) {
 
 /***/ }),
 
-/***/ 265:
+/***/ 964:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8225,9 +8225,9 @@ module.exports = function compareByInspect(a, b) {
  * @api public
  */
 
-var AssertionError = __webpack_require__(126);
-var flag = __webpack_require__(183);
-var type = __webpack_require__(13);
+var AssertionError = __webpack_require__(296);
+var flag = __webpack_require__(226);
+var type = __webpack_require__(855);
 
 module.exports = function expectTypes(obj, types) {
   var flagMsg = flag(obj, 'message');
@@ -8260,7 +8260,7 @@ module.exports = function expectTypes(obj, types) {
 
 /***/ }),
 
-/***/ 183:
+/***/ 226:
 /***/ ((module) => {
 
 /*!
@@ -8300,7 +8300,7 @@ module.exports = function flag(obj, key, value) {
 
 /***/ }),
 
-/***/ 428:
+/***/ 808:
 /***/ ((module) => {
 
 /*!
@@ -8327,7 +8327,7 @@ module.exports = function getActual(obj, args) {
 
 /***/ }),
 
-/***/ 540:
+/***/ 807:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8340,9 +8340,9 @@ module.exports = function getActual(obj, args) {
  * Module dependencies
  */
 
-var flag = __webpack_require__(183)
-  , getActual = __webpack_require__(428)
-  , objDisplay = __webpack_require__(20);
+var flag = __webpack_require__(226)
+  , getActual = __webpack_require__(808)
+  , objDisplay = __webpack_require__(917);
 
 /**
  * ### .getMessage(object, message, negateMessage)
@@ -8384,12 +8384,12 @@ module.exports = function getMessage(obj, args) {
 
 /***/ }),
 
-/***/ 219:
+/***/ 602:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var type = __webpack_require__(13);
+var type = __webpack_require__(855);
 
-var flag = __webpack_require__(183);
+var flag = __webpack_require__(226);
 
 function isObjectType(obj) {
   var objectType = type(obj);
@@ -8446,7 +8446,7 @@ module.exports = function getOperator(obj, args) {
 
 /***/ }),
 
-/***/ 711:
+/***/ 491:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8459,7 +8459,7 @@ module.exports = function getOperator(obj, args) {
  * Module dependencies
  */
 
-var getOwnEnumerablePropertySymbols = __webpack_require__(663);
+var getOwnEnumerablePropertySymbols = __webpack_require__(806);
 
 /**
  * ### .getOwnEnumerableProperties(object)
@@ -8482,7 +8482,7 @@ module.exports = function getOwnEnumerableProperties(obj) {
 
 /***/ }),
 
-/***/ 663:
+/***/ 806:
 /***/ ((module) => {
 
 /*!
@@ -8516,7 +8516,7 @@ module.exports = function getOwnEnumerablePropertySymbols(obj) {
 
 /***/ }),
 
-/***/ 475:
+/***/ 188:
 /***/ ((module) => {
 
 /*!
@@ -8559,7 +8559,7 @@ module.exports = function getProperties(object) {
 
 /***/ }),
 
-/***/ 920:
+/***/ 118:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 /*!
@@ -8572,66 +8572,66 @@ module.exports = function getProperties(object) {
  * Dependencies that are used for multiple exports are required here only once
  */
 
-var pathval = __webpack_require__(539);
+var pathval = __webpack_require__(893);
 
 /*!
  * test utility
  */
 
-exports.test = __webpack_require__(765);
+exports.test = __webpack_require__(608);
 
 /*!
  * type utility
  */
 
-exports.type = __webpack_require__(13);
+exports.type = __webpack_require__(855);
 
 /*!
  * expectTypes utility
  */
-exports.expectTypes = __webpack_require__(265);
+exports.expectTypes = __webpack_require__(964);
 
 /*!
  * message utility
  */
 
-exports.getMessage = __webpack_require__(540);
+exports.getMessage = __webpack_require__(807);
 
 /*!
  * actual utility
  */
 
-exports.getActual = __webpack_require__(428);
+exports.getActual = __webpack_require__(808);
 
 /*!
  * Inspect util
  */
 
-exports.inspect = __webpack_require__(563);
+exports.inspect = __webpack_require__(154);
 
 /*!
  * Object Display util
  */
 
-exports.objDisplay = __webpack_require__(20);
+exports.objDisplay = __webpack_require__(917);
 
 /*!
  * Flag utility
  */
 
-exports.flag = __webpack_require__(183);
+exports.flag = __webpack_require__(226);
 
 /*!
  * Flag transferring utility
  */
 
-exports.transferFlags = __webpack_require__(897);
+exports.transferFlags = __webpack_require__(316);
 
 /*!
  * Deep equal utility
  */
 
-exports.eql = __webpack_require__(310);
+exports.eql = __webpack_require__(583);
 
 /*!
  * Deep path info
@@ -8649,109 +8649,109 @@ exports.hasProperty = pathval.hasProperty;
  * Function name
  */
 
-exports.getName = __webpack_require__(643);
+exports.getName = __webpack_require__(708);
 
 /*!
  * add Property
  */
 
-exports.addProperty = __webpack_require__(152);
+exports.addProperty = __webpack_require__(444);
 
 /*!
  * add Method
  */
 
-exports.addMethod = __webpack_require__(775);
+exports.addMethod = __webpack_require__(180);
 
 /*!
  * overwrite Property
  */
 
-exports.overwriteProperty = __webpack_require__(599);
+exports.overwriteProperty = __webpack_require__(374);
 
 /*!
  * overwrite Method
  */
 
-exports.overwriteMethod = __webpack_require__(632);
+exports.overwriteMethod = __webpack_require__(78);
 
 /*!
  * Add a chainable method
  */
 
-exports.addChainableMethod = __webpack_require__(707);
+exports.addChainableMethod = __webpack_require__(949);
 
 /*!
  * Overwrite chainable method
  */
 
-exports.overwriteChainableMethod = __webpack_require__(796);
+exports.overwriteChainableMethod = __webpack_require__(863);
 
 /*!
  * Compare by inspect method
  */
 
-exports.compareByInspect = __webpack_require__(391);
+exports.compareByInspect = __webpack_require__(682);
 
 /*!
  * Get own enumerable property symbols method
  */
 
-exports.getOwnEnumerablePropertySymbols = __webpack_require__(663);
+exports.getOwnEnumerablePropertySymbols = __webpack_require__(806);
 
 /*!
  * Get own enumerable properties method
  */
 
-exports.getOwnEnumerableProperties = __webpack_require__(711);
+exports.getOwnEnumerableProperties = __webpack_require__(491);
 
 /*!
  * Checks error against a given set of criteria
  */
 
-exports.checkError = __webpack_require__(182);
+exports.checkError = __webpack_require__(360);
 
 /*!
  * Proxify util
  */
 
-exports.proxify = __webpack_require__(925);
+exports.proxify = __webpack_require__(515);
 
 /*!
  * addLengthGuard util
  */
 
-exports.addLengthGuard = __webpack_require__(758);
+exports.addLengthGuard = __webpack_require__(100);
 
 /*!
  * isProxyEnabled helper
  */
 
-exports.isProxyEnabled = __webpack_require__(35);
+exports.isProxyEnabled = __webpack_require__(993);
 
 /*!
  * isNaN method
  */
 
-exports.isNaN = __webpack_require__(46);
+exports.isNaN = __webpack_require__(915);
 
 /*!
  * getOperator method
  */
 
-exports.getOperator = __webpack_require__(219);
+exports.getOperator = __webpack_require__(602);
 
 /***/ }),
 
-/***/ 563:
+/***/ 154:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 // This is (almost) directly from Node.js utils
 // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
 
-var getName = __webpack_require__(643);
-var loupe = __webpack_require__(161);
-var config = __webpack_require__(448);
+var getName = __webpack_require__(708);
+var loupe = __webpack_require__(255);
+var config = __webpack_require__(752);
 
 module.exports = inspect;
 
@@ -8783,7 +8783,7 @@ function inspect(obj, showHidden, depth, colors) {
 
 /***/ }),
 
-/***/ 46:
+/***/ 915:
 /***/ ((module) => {
 
 /*!
@@ -8816,10 +8816,10 @@ module.exports = Number.isNaN || isNaN;
 
 /***/ }),
 
-/***/ 35:
+/***/ 993:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var config = __webpack_require__(448);
+var config = __webpack_require__(752);
 
 /*!
  * Chai - isProxyEnabled helper
@@ -8847,7 +8847,7 @@ module.exports = function isProxyEnabled() {
 
 /***/ }),
 
-/***/ 20:
+/***/ 917:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8860,8 +8860,8 @@ module.exports = function isProxyEnabled() {
  * Module dependencies
  */
 
-var inspect = __webpack_require__(563);
-var config = __webpack_require__(448);
+var inspect = __webpack_require__(154);
+var config = __webpack_require__(752);
 
 /**
  * ### .objDisplay(object)
@@ -8904,7 +8904,7 @@ module.exports = function objDisplay(obj) {
 
 /***/ }),
 
-/***/ 796:
+/***/ 863:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8913,8 +8913,8 @@ module.exports = function objDisplay(obj) {
  * MIT Licensed
  */
 
-var chai = __webpack_require__(928);
-var transferFlags = __webpack_require__(897);
+var chai = __webpack_require__(731);
+var transferFlags = __webpack_require__(316);
 
 /**
  * ### .overwriteChainableMethod(ctx, name, method, chainingBehavior)
@@ -8980,7 +8980,7 @@ module.exports = function overwriteChainableMethod(ctx, name, method, chainingBe
 
 /***/ }),
 
-/***/ 632:
+/***/ 78:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -8989,11 +8989,11 @@ module.exports = function overwriteChainableMethod(ctx, name, method, chainingBe
  * MIT Licensed
  */
 
-var addLengthGuard = __webpack_require__(758);
-var chai = __webpack_require__(928);
-var flag = __webpack_require__(183);
-var proxify = __webpack_require__(925);
-var transferFlags = __webpack_require__(897);
+var addLengthGuard = __webpack_require__(100);
+var chai = __webpack_require__(731);
+var flag = __webpack_require__(226);
+var proxify = __webpack_require__(515);
+var transferFlags = __webpack_require__(316);
 
 /**
  * ### .overwriteMethod(ctx, name, fn)
@@ -9079,7 +9079,7 @@ module.exports = function overwriteMethod(ctx, name, method) {
 
 /***/ }),
 
-/***/ 599:
+/***/ 374:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -9088,10 +9088,10 @@ module.exports = function overwriteMethod(ctx, name, method) {
  * MIT Licensed
  */
 
-var chai = __webpack_require__(928);
-var flag = __webpack_require__(183);
-var isProxyEnabled = __webpack_require__(35);
-var transferFlags = __webpack_require__(897);
+var chai = __webpack_require__(731);
+var flag = __webpack_require__(226);
+var isProxyEnabled = __webpack_require__(993);
+var transferFlags = __webpack_require__(316);
 
 /**
  * ### .overwriteProperty(ctx, name, fn)
@@ -9178,13 +9178,13 @@ module.exports = function overwriteProperty(ctx, name, getter) {
 
 /***/ }),
 
-/***/ 925:
+/***/ 515:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-var config = __webpack_require__(448);
-var flag = __webpack_require__(183);
-var getProperties = __webpack_require__(475);
-var isProxyEnabled = __webpack_require__(35);
+var config = __webpack_require__(752);
+var flag = __webpack_require__(226);
+var getProperties = __webpack_require__(188);
+var isProxyEnabled = __webpack_require__(993);
 
 /*!
  * Chai - proxify utility
@@ -9332,7 +9332,7 @@ function stringDistanceCapped(strA, strB, cap) {
 
 /***/ }),
 
-/***/ 765:
+/***/ 608:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 /*!
@@ -9345,7 +9345,7 @@ function stringDistanceCapped(strA, strB, cap) {
  * Module dependencies
  */
 
-var flag = __webpack_require__(183);
+var flag = __webpack_require__(226);
 
 /**
  * ### .test(object, expression)
@@ -9367,7 +9367,7 @@ module.exports = function test(obj, args) {
 
 /***/ }),
 
-/***/ 897:
+/***/ 316:
 /***/ ((module) => {
 
 /*!
@@ -9419,8 +9419,8 @@ module.exports = function transferFlags(assertion, object, includeAll) {
 
 /***/ }),
 
-/***/ 182:
-/***/ ((module) => {
+/***/ 360:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
@@ -9431,6 +9431,7 @@ module.exports = function transferFlags(assertion, object, includeAll) {
  * MIT Licensed
  */
 
+var getFunctionName = __webpack_require__(708);
 /**
  * ### .checkError
  *
@@ -9511,34 +9512,6 @@ function compatibleMessage(thrown, errMatcher) {
 }
 
 /**
- * ### .getFunctionName(constructorFn)
- *
- * Returns the name of a function.
- * This also includes a polyfill function if `constructorFn.name` is not defined.
- *
- * @name getFunctionName
- * @param {Function} constructorFn
- * @namespace Utils
- * @api private
- */
-
-var functionNameMatch = /\s*function(?:\s|\s*\/\*[^(?:*\/)]+\*\/\s*)*([^\(\/]+)/;
-function getFunctionName(constructorFn) {
-  var name = '';
-  if (typeof constructorFn.name === 'undefined') {
-    // Here we run a polyfill if constructorFn.name is not defined
-    var match = String(constructorFn).match(functionNameMatch);
-    if (match) {
-      name = match[1];
-    }
-  } else {
-    name = constructorFn.name;
-  }
-
-  return name;
-}
-
-/**
  * ### .getConstructorName(errorLike)
  *
  * Gets the constructor name for an Error instance or constructor itself.
@@ -9557,8 +9530,11 @@ function getConstructorName(errorLike) {
     // If `err` is not an instance of Error it is an error constructor itself or another function.
     // If we've got a common function we get its name, otherwise we may need to create a new instance
     // of the error just in case it's a poorly-constructed error. Please see chaijs/chai/issues/45 to know more.
-    constructorName = getFunctionName(errorLike).trim() ||
-        getFunctionName(new errorLike()); // eslint-disable-line new-cap
+    constructorName = getFunctionName(errorLike);
+    if (constructorName === '') {
+      var newConstructorName = getFunctionName(new errorLike()); // eslint-disable-line new-cap
+      constructorName = newConstructorName || constructorName;
+    }
   }
 
   return constructorName;
@@ -9599,7 +9575,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 310:
+/***/ 583:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
@@ -9611,7 +9587,7 @@ module.exports = {
  * MIT Licensed
  */
 
-var type = __webpack_require__(13);
+var type = __webpack_require__(855);
 function FakeMap() {
   this._key = 'chai/deep-eql__' + Math.random() + Date.now();
 }
@@ -10100,7 +10076,7 @@ function mapSymbols(arr) {
 
 /***/ }),
 
-/***/ 643:
+/***/ 708:
 /***/ ((module) => {
 
 "use strict";
@@ -10160,7 +10136,7 @@ module.exports = getFuncName;
 
 /***/ }),
 
-/***/ 161:
+/***/ 255:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 (function (global, factory) {
@@ -10473,6 +10449,7 @@ module.exports = getFuncName;
 
   var toString = Function.prototype.toString;
   var functionNameMatch = /\s*function(?:\s|\s*\/\*[^(?:*\/)]+\*\/\s*)*([^\s\(\/]+)/;
+  var maxFunctionSourceLength = 512;
   function getFuncName(aFunc) {
     if (typeof aFunc !== 'function') {
       return null;
@@ -10480,8 +10457,15 @@ module.exports = getFuncName;
 
     var name = '';
     if (typeof Function.prototype.name === 'undefined' && typeof aFunc.name === 'undefined') {
+      // eslint-disable-next-line prefer-reflect
+      var functionSource = toString.call(aFunc);
+      // To avoid unconstrained resource consumption due to pathalogically large function names,
+      // we limit the available return value to be less than 512 characters.
+      if (functionSource.indexOf('(') > maxFunctionSourceLength) {
+        return name;
+      }
       // Here we run a polyfill if Function does not support the `name` property and if aFunc.name is not defined
-      var match = toString.call(aFunc).match(functionNameMatch);
+      var match = functionSource.match(functionNameMatch);
       if (match) {
         name = match[1];
       }
@@ -10841,7 +10825,7 @@ module.exports = getFuncName;
 
   try {
     // eslint-disable-next-line global-require
-    var nodeUtil = __webpack_require__(952);
+    var nodeUtil = __webpack_require__(786);
 
     nodeInspect = nodeUtil.inspect ? nodeUtil.inspect.custom : false;
   } catch (noNodeInspect) {
@@ -11049,7 +11033,7 @@ module.exports = getFuncName;
 
 /***/ }),
 
-/***/ 539:
+/***/ 893:
 /***/ ((module) => {
 
 "use strict";
@@ -11358,7 +11342,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 13:
+/***/ 855:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 (function (global, factory) {
@@ -11752,15 +11736,15 @@ return typeDetect;
 
 /***/ }),
 
-/***/ 677:
+/***/ 478:
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_MODULE__677__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__478__;
 
 /***/ }),
 
-/***/ 952:
+/***/ 786:
 /***/ (() => {
 
 /* (ignored) */
@@ -11826,7 +11810,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: external "lispx-vm"
-var external_lispx_vm_ = __webpack_require__(677);
+var external_lispx_vm_ = __webpack_require__(478);
 ;// CONCATENATED MODULE: ./test/test-util.lispx
 /* harmony default export */ const test_util_lispx = (";;; Test Utilities\n\n;; Import Mocha test framework functions from the global scope.\n(def #'mocha:describe (to-lisp-function (js-global \"describe\")))\n(def #'mocha:it (to-lisp-function (js-global \"it\")))\n(def #'mocha:before (to-lisp-function (js-global \"before\")))\n(def #'mocha:before-each (to-lisp-function (js-global \"beforeEach\")))\n(def #'mocha:after (to-lisp-function (js-global \"after\")))\n(def #'mocha:after-each (to-lisp-function (js-global \"afterEach\")))\n\n(defexpr deftest (name expression . expected?) env\n  \"Run the EXPRESSION as a test identified by NAME and compare its\nresult to an EXPECTED value (which defaults to true).  Tests may\ncapture a continuation to the default prompt.\"\n  (mocha:it\n   (to-js-string (symbol-name name))\n   (js-lambda ()\n     ;; Run each test in a coroutine.\n     ;;\n     ;; Note that this is quite subtle: when an asynchronous test\n     ;; captures a continuation, it returns a promise here.  This\n     ;; promise is returned to Mocha, which does the right thing (wait\n     ;; for it to resolve).\n     (coroutine\n       ;; The test and expected expressions are evaluated in fresh\n       ;; child environments of the current environment, so that\n       ;; bindings they create don't affect other tests.\n       (assert (= (eval expression (make-environment env))\n                  (eval (optional expected? #t) (make-environment env))))))))\n\n(defmacro deftest* (name . forms)\n  \"Run the FORMS as a test identified by NAME, but unlike `deftest',\nsimply ignore their result.  The test only fails when the forms signal\nan error.  Use this instead of `deftest' if you just want to run some\nforms, and don't need to compare their result to an expected value.\"\n  (list #'deftest name (list* #'prog1 #t forms)))\n\n(defexpr defsuite (name . forms) env\n  \"Evaluate FORMS as a group of tests identified by NAME.  The forms\nmust not capure any continuations.\"\n  (mocha:describe\n   (to-js-string (symbol-name name))\n   (js-lambda ()\n     ;; We don't run the suite contents in a coroutine.  The reason is\n     ;; that Mocha describe() doesn't support promises.  Any Lisp code\n     ;; that tries to capture a continuation directly inside a suite\n     ;; will get a \"prompt not found\" error (due to the barrier inside\n     ;; `js-lambda').\n     (eval (list* #'progn forms) env))))\n\n(defun lispx::make-mocha-hook (#'mocha-hook-fun)\n  \"Metaprogramming utility to create Mocha hooks.  Hooks may capture.\"\n  (vau forms env\n    (mocha-hook-fun\n     (js-lambda ()\n       (coroutine ;; Run in coroutine. See above for explanation.\n         (eval (list* #'progn forms) env))))))\n\n(def #'before (lispx::make-mocha-hook #'mocha:before))\n(def #'before-each (lispx::make-mocha-hook #'mocha:before-each))\n(def #'after (lispx::make-mocha-hook #'mocha:after))\n(def #'after-each (lispx::make-mocha-hook #'mocha:after-each))\n\n(defexpr signals-error (form condition-class . slot-specs) env\n  \"Evaluate the FORM and return true if it signals a condition of the\ngiven CONDITION-CLASS, false otherwise.  Expected slots of the\ncondition can be specified by SLOT-SPECS (a plist) and will be\ncompared against the slots of the signalled condition.\"\n  (let ((class (find-class condition-class env)))\n    (block exit\n      (handler-case ((object (lambda (c)\n                               (if (typep c class)\n                                   (progn\n                                     (loop-let -check-slots- ((slot-specs slot-specs))\n                                       (when (not (null slot-specs))\n                                         (let (((name value . rest-slot-specs) slot-specs))\n                                           (unless (= (slot-value c name) (eval value env))\n                                             (return-from exit #f))\n                                           (-check-slots- rest-slot-specs))))\n                                     (return-from exit #t))\n                                   (return-from exit #f)))))\n        (eval form env))\n      #f)))\n");
 ;// CONCATENATED MODULE: ./test/test-util-test.lispx
@@ -11838,7 +11822,7 @@ var external_lispx_vm_ = __webpack_require__(677);
 ;// CONCATENATED MODULE: ./test/control-test.lispx
 /* harmony default export */ const control_test_lispx = (";;; Control-related Tests\n\n;;; Fibers\n\n;; The following implementation of fibers follows the one at URL\n;; `http://okmij.org/ftp/continuations/implementations.html#dynamic-wind'\n;;\n;; We're calling them fibers instead of coroutines so as to not\n;; conflict with the built-in coroutine operators.\n;;\n;; We use it for testing that built-in operators properly suspend and\n;; resume.\n\n(defconstant +fiber-prompt+ 'fiber-prompt\n  \"The prompt used for delimiting fibers.\")\n\n(defclass yield-record ()\n  (value continuation)\n  (:documentation \"Instances of this class are yielded.\"))\n\n(defun make-yield-record (v k)\n  \"Create a new yield record with the given yielded value and resume continuation.\"\n  (make-instance #^yield-record :value v :continuation k))\n\n(defun fiber-yield v?\n  \"Yield a value (which defaults to void).\"\n  (take-subcont +fiber-prompt+ k\n    (make-yield-record (optional v?) k)))\n\n(defun fiber-resume (yield-record . v?)\n  \"Resume a suspended fiber with a value (which defaults to void).\"\n  (push-delim-subcont +fiber-prompt+ (slot-value yield-record 'continuation)\n    (optional v?)))\n\n(defmacro fiber body\n  \"Evaluate the body expressions as a fiber.\"\n  (list* #'push-prompt '+fiber-prompt+ body))\n\n(defun run-fiber (#'thunk)\n  \"Get all values yielded by a fiber, and its final result, and\ncollect them in a list.\"\n  (loop-let -run- ((result (fiber (thunk))))\n    (if (typep result #^yield-record)\n        (cons (slot-value result 'value) (-run- (fiber-resume result)))\n        (list result))))\n\n(defun run-fiber-with-values (#'thunk values)\n  \"Like `run-fiber' but uses a list of values that are sent to the\nfiber with `fiber-resume'.\"\n  (loop-let -run- ((result (fiber (thunk))) (values values))\n    (if (typep result #^yield-record)\n        (cons (slot-value result 'value)\n              (-run- (fiber-resume result (car values)) (cdr values)))\n        (list result))))\n\n(defsuite fibers\n\n  (deftest fiber.1\n    (fiber 1 2 (= 1 1))\n    #t)\n\n  (deftest fiber.2\n    (progn\n      (def yield-record (fiber 1 2 (+ (fiber-yield (= 1 1)) 3)))\n      (assert (typep yield-record #^yield-record))\n      (assert (= #t (slot-value yield-record 'value)))\n      (assert (= 33 (fiber-resume yield-record 30))))\n    #void)\n\n  (deftest fiber.progn.1\n    (run-fiber\n     (lambda ()\n       (progn\n         (fiber-yield 1)\n         (fiber-yield 2)\n         3)))\n    '(1 2 3))\n\n  (deftest fiber.progn.2\n    (run-fiber-with-values\n     (lambda ()\n       (progn\n         (fiber-yield 1)\n         (fiber-yield 2)))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.vau.1\n    (run-fiber\n     (lambda ()\n       ((vau () #ignore\n          (fiber-yield 1)\n          (fiber-yield 2)\n          3))))\n    '(1 2 3))\n\n  (deftest fiber.vau.2\n    (run-fiber-with-values\n     (lambda ()\n       ((vau () #ignore\n          (fiber-yield 1)\n          (fiber-yield 2))))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.lambda.1\n    (run-fiber\n     (lambda ()\n       ((lambda ()\n          (fiber-yield 1)\n          (fiber-yield 2)\n          3))))\n    '(1 2 3))\n\n  (deftest fiber.lambda.2\n    (run-fiber-with-values\n     (lambda ()\n       ((lambda ()\n          (fiber-yield 1)\n          (fiber-yield 2))))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.def.1\n    (run-fiber\n     (lambda ()\n       (def (x y) (list (fiber-yield 1) (fiber-yield 2)))\n       (list x y)))\n    '(1 2 (#void #void)))\n\n  (deftest fiber.def.2\n    (run-fiber-with-values\n     (lambda ()\n       (def (x y) (list (fiber-yield 1) (fiber-yield 2)))\n       (list x y))\n     '(3 4))\n    '(1 2 (3 4)))\n\n  (deftest fiber.if.1\n    (run-fiber\n     (lambda ()\n       (if #t (fiber-yield 1) (fiber-yield 2))))\n    '(1 #void))\n\n  (deftest fiber.if.2\n    (run-fiber-with-values\n     (lambda ()\n       (if #t (fiber-yield 1) (fiber-yield 2)))\n     '(3))\n    '(1 3))\n\n  (deftest fiber.if.3\n    (run-fiber\n     (lambda ()\n       (if #f (fiber-yield 1) (fiber-yield 2))))\n    '(2 #void))\n\n  (deftest fiber.if.4\n    (run-fiber-with-values\n     (lambda ()\n       (if #f (fiber-yield 1) (fiber-yield 2)))\n     '(3))\n    '(2 3))\n\n  (deftest fiber.if.5\n    (run-fiber-with-values\n     (lambda ()\n       (if (fiber-yield 1) (fiber-yield 2) (fiber-yield 3)))\n     '(#t 4))\n    '(1 2 4))\n\n  (deftest fiber.if.6\n    (run-fiber-with-values\n     (lambda ()\n       (if (fiber-yield 1) (fiber-yield 2) (fiber-yield 3)))\n     '(#f 4))\n    '(1 3 4))\n\n  (deftest fiber.if.7\n    (run-fiber-with-values\n     (lambda ()\n       (if (progn (fiber-yield 1) (fiber-yield 2))\n           (progn (fiber-yield 3) (fiber-yield 3.5))\n           (progn (fiber-yield 4) (fiber-yield 4.5))))\n     '(#void #t #void 5))\n    '(1 2 3 3.5 5))\n\n  (deftest fiber.if.8\n    (run-fiber-with-values\n     (lambda ()\n       (if (progn (fiber-yield 1) (fiber-yield 2))\n           (progn (fiber-yield 3) (fiber-yield 3.5))\n           (progn (fiber-yield 4) (fiber-yield 4.5))))\n     '(#void #f #void 5))\n    '(1 2 4 4.5 5))\n\n  (deftest fiber.loop.1\n    (run-fiber\n     (lambda ()\n       (def ct 1)\n       (def env (the-environment))\n       (block exit\n         (loop\n          (if (= ct 5)\n              (return-from exit ct)\n              (progn\n                (fiber-yield ct)\n                (fiber-yield (- ct))\n                (set env ct (+ ct 1))))))))\n    '(1 -1 2 -2 3 -3 4 -4 5))\n\n  (deftest fiber.block.1\n    (run-fiber\n     (lambda ()\n       (block b\n         (fiber-yield 1)\n         (fiber-yield 2)\n         3)))\n    '(1 2 3))\n\n  (deftest fiber.block.2\n    (run-fiber-with-values\n     (lambda ()\n       (block b\n         (fiber-yield 1)\n         (fiber-yield 2)))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.block.3\n    (run-fiber\n     (lambda ()\n       (block b\n         (fiber-yield 1)\n         (fiber-yield 2)\n         (return-from b 3))))\n    '(1 2 3))\n\n  (deftest fiber.block.4\n    (run-fiber-with-values\n     (lambda ()\n       (block b\n         (fiber-yield 1)\n         (return-from b (fiber-yield 2))))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.catch.1\n    (run-fiber\n     (lambda ()\n       (catch 'b\n         (fiber-yield 1)\n         (fiber-yield 2)\n         3)))\n    '(1 2 3))\n\n  (deftest fiber.catch.2\n    (run-fiber-with-values\n     (lambda ()\n       (catch 'b\n         (fiber-yield 1)\n         (fiber-yield 2)))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.catch.3\n    (run-fiber\n     (lambda ()\n       (catch 'b\n         (fiber-yield 1)\n         (fiber-yield 2)\n         (throw 'b 3))))\n    '(1 2 3))\n\n  (deftest fiber.catch.4\n    (run-fiber-with-values\n     (lambda ()\n       (catch 'b\n         (fiber-yield 1)\n         (throw 'b (fiber-yield 2))))\n     '(#void 3))\n    '(1 2 3))\n\n  (deftest fiber.unwind-protect.1\n    (run-fiber-with-values\n     (lambda ()\n       (unwind-protect (fiber-yield 1)\n         (fiber-yield 2)\n         (fiber-yield 2.5)\n         3))\n     '(4 #void #void))\n    '(1 2 2.5 4))\n\n  (deftest fiber.unwind-protect.2\n    (run-fiber-with-values\n     (lambda ()\n       (block exit\n         (unwind-protect (return-from exit (fiber-yield 1))\n           (fiber-yield 2)\n           (fiber-yield 2.5)\n           3)))\n     '(4 #void #void))\n    '(1 2 2.5 4))\n\n  (deftest fiber.unwind-protect.3\n    (run-fiber-with-values\n     (lambda ()\n       (block exit\n         (unwind-protect (return-from exit 4)\n           (fiber-yield 2)\n           (fiber-yield 2.5)\n           3)))\n     '(#void #void))\n    '(2 2.5 4))\n\n  (deftest fiber.unwind-protect.4\n    (run-fiber-with-values\n     (lambda ()\n       (block exit\n         (unwind-protect (progn (fiber-yield 1) (fiber-yield 1.5))\n           (fiber-yield 2)\n           (fiber-yield 2.5)\n           3)))\n     '(#void 4 #void #void))\n    '(1 1.5 2 2.5 4))\n\n  (deftest fiber.progv.1\n    (run-fiber\n     (lambda ()\n       (defdynamic *x*)\n       (progv (list *x*) (list 1)\n         (fiber-yield (dynamic *x*))\n         (fiber-yield (dynamic *x*))\n         (progv (list *x*) (list 2)\n           (fiber-yield (dynamic *x*))\n           (fiber-yield (dynamic *x*))\n           3))))\n    '(1 1 2 2 3))\n\n  (deftest fiber.progv.2\n    (run-fiber-with-values\n     (lambda ()\n       (defdynamic *x*)\n       (progv (list *x*) (list 1)\n         (fiber-yield (dynamic *x*))\n         (fiber-yield (dynamic *x*))\n         (progv (list *x*) (list 2)\n           (fiber-yield (dynamic *x*))\n           (fiber-yield (dynamic *x*)))))\n     '(#void #void #void 3))\n    '(1 1 2 2 3))\n\n  (deftest fiber.fun.1\n    (run-fiber\n     (lambda ()\n       (list (fiber-yield 1) (fiber-yield 2))))\n    '(1 2 (#void #void)))\n\n  (deftest fiber.fun.2\n    (run-fiber-with-values\n     (lambda () (list (fiber-yield 1) (fiber-yield 2)))\n     '(3 4))\n    '(1 2 (3 4))))\n\n;;; Basic Operator Tests\n\n(defsuite push-prompt\n\n  (deftest push-prompt.1\n    (signals-error\n     (push-prompt)\n     match-error))\n\n  (deftest push-prompt.2\n    (push-prompt 'p)\n    #void)\n\n  (deftest push-prompt.3\n    (push-prompt 'p 1 2 (= 1 1))\n    #t)\n\n  (deftest push-prompt.4\n    (progn\n      (block ret\n        (push-prompt 'p\n          (assert (prompt-set-p 'p))\n          (return-from ret)))\n      (assert (not (prompt-set-p 'p))))\n    #void)\n\n  (deftest push-prompt.5\n    (progn\n      (assert (not (prompt-set-p 'p)))\n      (assert (not (prompt-set-p 'q)))\n      (push-prompt 'p\n        (assert (prompt-set-p 'p))\n        (assert (not (prompt-set-p 'q)))\n        (push-prompt 'q\n          (assert (prompt-set-p 'p))\n          (assert (prompt-set-p 'q)))\n        (assert (prompt-set-p 'p))\n        (assert (not (prompt-set-p 'q))))\n      (assert (not (prompt-set-p 'p)))\n      (assert (not (prompt-set-p 'q))))\n    #void))\n\n(defsuite take-subcont\n\n  (deftest take-subcont.1\n    (signals-error\n     (take-subcont)\n     match-error))\n\n  (deftest take-subcont.2\n    (signals-error\n     (take-subcont 'p)\n     match-error))\n\n  (deftest take-subcont.3\n    (signals-error\n     (take-subcont 'p #ignore)\n     prompt-not-found-error :prompt 'p))\n\n  (deftest take-subcont.4\n    (signals-error\n     (push-prompt 'p (take-subcont 'q #ignore))\n     prompt-not-found-error :prompt 'q))\n\n  (deftest take-subcont.5\n    (push-prompt 'p (take-subcont 'p #ignore))\n    #void)\n\n  (deftest take-subcont.6\n    (push-prompt 'p (take-subcont 'p #ignore (= 1 1)))\n    #t)\n\n  (deftest take-subcont.7\n    (push-prompt 'p (take-subcont 'p k (push-delim-subcont 'p k (= 1 1))))\n    #t))\n\n(defsuite push-delim-subcont\n\n  (deftest push-delim-subcont.1\n    (signals-error\n     (push-delim-subcont)\n     match-error))\n\n  (deftest push-delim-subcont.2\n    (signals-error\n     (push-delim-subcont 'p)\n     match-error))\n\n  (deftest push-delim-subcont.3\n    (signals-error\n     (push-delim-subcont 'p 12)\n     type-error :datum 12))\n\n  (deftest push-delim-subcont.4\n    (let ((k (push-prompt 'p (+ 100 (take-subcont 'p k k)))))\n      (assert (= 102 (push-delim-subcont 'p k (+ 1 1))))\n      (assert (= 120 (push-delim-subcont 'p k (+ 10 10)))))\n    #void)\n\n  (deftest push-delim-subcont.5\n    (let ((k (push-prompt 'p (push-prompt 'q (take-subcont 'p k k)))))\n      (push-delim-subcont 'p k\n        (assert (prompt-set-p 'q))\n        (assert (prompt-set-p 'p))))\n    #void))\n\n(defsuite prompt-set-p\n\n  (deftest prompt-set-p.1\n    (signals-error\n     (prompt-set-p)\n     match-error))\n\n  (deftest prompt-set-p.2\n    (prompt-set-p 'p)\n    #f)\n\n  (deftest prompt-set-p.3\n    (push-prompt 'p (progn (prompt-set-p 'p)))\n    #t))\n\n(defsuite push-subcont-barrier\n\n  (deftest push-subcont-barrier.1\n    (signals-error\n     (push-subcont-barrier\n      (take-subcont 'p1 sk))\n     prompt-not-found-error :prompt 'p1))\n\n  (deftest push-subcont-barrier.2\n    (signals-error\n     (push-prompt 'p1\n       (push-subcont-barrier\n         (take-subcont 'p1 sk)))\n     prompt-not-found-error :prompt 'p1)))\n\n(defsuite dynamics\n\n  (deftest defdynamic.1\n    (progn\n      (defdynamic *x* 1)\n      (defdynamic *y* (+ 1 1))\n      (assert (= (dynamic *x*) 1))\n      (assert (= (dynamic *y*) 2))\n      (dynamic-let ((*x* 3))\n        (assert (= (dynamic *x*) 3))\n        (assert (= (dynamic *y*) 2))\n        (dynamic-let ((*y* 4))\n          (assert (= (dynamic *x*) 3))\n          (assert (= (dynamic *y*) 4)))\n        (assert (= (dynamic *x*) 3))\n        (assert (= (dynamic *y*) 2)))\n      (assert (= (dynamic *x*) 1))\n      (assert (= (dynamic *y*) 2)))\n    #void)\n\n  (deftest* defdynamic.redefine\n    (defdynamic *a* (+ 1 1))\n    (def old-a *a*)\n    (assert (= (dynamic *a*) 2))\n    (assert (= (dynamic old-a) 2))\n    (defdynamic *a* (+ 2 2))\n    (assert (= (dynamic *a*) 4))\n    (assert (= (dynamic old-a) 4))\n    (assert (eq old-a *a*))\n    (defdynamic *a*)\n    (assert (= (dynamic *a*) #void))\n    (assert (= (dynamic old-a) #void))\n    (assert (eq old-a *a*)))\n\n  (deftest progv.1\n    (progn\n      (defdynamic *x* 1)\n      (defdynamic *y* 2)\n      (assert (= (dynamic *x*) 1))\n      (assert (= (dynamic *y*) 2))\n      (progv (list *x*) (list 3)\n        (assert (= (dynamic *x*) 3))\n        (assert (= (dynamic *y*) 2))\n        (progv (list *y*) (list 4)\n          (assert (= (dynamic *x*) 3))\n          (assert (= (dynamic *y*) 4)))\n        (assert (= (dynamic *x*) 3))\n        (assert (= (dynamic *y*) 2)))\n      (assert (= (dynamic *x*) 1))\n      (assert (= (dynamic *y*) 2)))\n    #void)\n\n  (deftest dynamic.1\n    (progn\n      (defdynamic *foo*)\n      (assert (= (dynamic *foo*) #void))\n      (assert (= (slot-value *foo* 'value) #void))\n      (assert (typep *foo* #^dynamic))\n      (assert (typep *foo* #^standard-object))\n      (assert (typep *foo* #^object))\n      (assert (subclassp #^dynamic #^standard-object))\n      (assert (subclassp #^dynamic #^object)))\n    #void)\n\n  (deftest set-dynamic.1\n    (progn\n      (defdynamic *bar*)\n      (dynamic-let ((*bar* 1))\n        (set-dynamic *bar* 2)\n        (assert (= 2 (dynamic *bar*)))\n        (dynamic-let ((*bar* 3))\n          (assert (= 3 (dynamic *bar*))))\n        (assert (= 2 (dynamic *bar*)))\n        (set-dynamic *bar* 4)\n        (assert (= 4 (dynamic *bar*))))\n      (assert (= #void (dynamic *bar*)))\n      #t))\n\n  (deftest dynamic-let*.1\n    (dynamic-let* () (+ 1 1))\n    2)\n\n  (deftest dynamic-let*.2\n    (progn\n      (defdynamic *x* 1)\n      (dynamic-let* ((*x* 2)) (+ 1 (dynamic *x*))))\n    3)\n\n  (deftest dynamic-let*.2\n    (progn\n      (defdynamic *x* 1)\n      (defdynamic *y* 0)\n      (dynamic-let* ((*x* 2) (*y* (+ (dynamic *x*) 1)))\n        (list (dynamic *x*) (dynamic *y*))))\n    '(2 3))\n\n  (deftest dynamic-let-sanity-check\n    (progn\n      (defdynamic *x* 1)\n      (defdynamic *y* 0)\n      (dynamic-let ((*x* 2) (*y* (+ (dynamic *x*) 1)))\n        (list (dynamic *x*) (dynamic *y*))))\n    '(2 2)))\n\n(defsuite built-in-prompts\n\n  (deftest |Default prompt exists|\n    (boundp '+default-prompt+ (the-environment)))\n\n  (deftest |Root prompt exists|\n    (boundp '+root-prompt+ (the-environment)))\n\n  (deftest |Root prompt is set|\n    ;; I have no idea why this works.  I mean it's the right thing,\n    ;; but it's unclear how it interacts with test-util.lispx's\n    ;; Mocha stuff that runs this test.\n    (take-subcont +root-prompt+ #ignore)\n    #void))\n\n;;; Simple Control Operators\n\n(defsuite loop\n\n  (deftest loop.1\n    (let ((ct 0))\n      (def env (the-environment))\n      (block exit\n        (loop 'just-a-symbol-to-test-implicit-progn\n              (if (= ct 10)\n                  (return-from exit ct)\n                  (set env ct (+ ct 1))))))\n    10))\n\n(defsuite catch/throw\n\n  (deftest catch.1\n    (signals-error\n     (catch)\n     match-error))\n\n  (deftest catch.2\n    (catch 'x)\n    #void)\n\n  (deftest catch.3\n    (catch 'x 1 2 3 (= 1 1))\n    #t)\n\n  (deftest catch.4\n    (catch 'x 1 (throw 'x (= 1 2)) 3 (= 1 1))\n    #f)\n\n  (deftest catch.5\n    (catch 'x 1 (throw 'x) 3 (= 1 1))\n    #void)\n\n  (deftest catch.6\n    (catch 'x 1 (catch 'y (throw 'x 44)) 3 (= 1 1))\n    44)\n\n  (deftest catch.7\n    (catch 'x 1 (catch 'y (throw 'y 2)) 3 55)\n    55)\n\n  (deftest catch.8\n    (catch 'x 1 (catch 'y (throw 'y 2)))\n    2)\n\n  (deftest catch.9\n    (catch 'x 1 (catch 'y (throw 'y)))\n    #void))\n\n(defsuite block/return-from\n\n  (deftest block.1\n    (signals-error\n     (block)\n     match-error))\n\n  (deftest block.2\n    (block x)\n    #void)\n\n  (deftest block.3\n    (block x 1 2 3 (= 1 1))\n    #t)\n\n  (deftest block.4\n    (block x 1 (return-from x (= 1 2)) 3 (= 1 1))\n    #f)\n\n  (deftest block.5\n    (block x 1 (return-from x) 3 (= 1 1))\n    #void)\n\n  (deftest block.6\n    (block x 1 (block y (return-from x (= 1 2))) 3 (= 1 1))\n    #f)\n\n  (deftest block.7\n    (block x 1 (block y (return-from y 2)) 3 (= 1 1))\n    #t)\n\n  (deftest block.8\n    (block x 1 (block y (return-from y 2)))\n    2)\n\n  (deftest block.9\n    (block x 1 (block y (return-from y)))\n    #void))\n\n(defsuite unwind-protect\n\n  (deftest unwind-protect.1\n    (signals-error\n     (unwind-protect)\n     match-error))\n\n  (deftest unwind-protect.2\n    (unwind-protect (= 1 1))\n    #t)\n\n  (deftest unwind-protect.3\n    (progn\n      (def env (the-environment))\n      (+ (unwind-protect 1 2 3 (set env x 10))\n         x))\n    11)\n\n  (deftest unwind-protect.4\n    (progn\n      (def env (the-environment))\n      (+ (block exit\n           (unwind-protect (return-from exit 1) 2 3 (set env x 10)))\n         x))\n    11)\n\n  (deftest unwind-protect.5\n    (block exit\n      (unwind-protect 1 2 3 (return-from exit 4)))\n    4)\n\n  (deftest unwind-protect.6\n    (block exit\n      (unwind-protect (return-from exit 1) 2 3 (return-from exit 4)))\n    4))\n");
 ;// CONCATENATED MODULE: ./test/delimcc-test.lispx
-/* harmony default export */ const delimcc_test_lispx = (";;; Delimited Control Tests                                -*- Lisp -*-\n\n;; The following tests are adapted from the file `testd0.ml' of the\n;; caml-shift distribution, available at the URL\n;; `http://okmij.org/ftp/continuations/implementations.html'\n\n;; First, some preliminary definitions.\n\n(defun abort-subcont (prompt value)\n  \"Utility that captures the continuation but just ignores it.\"\n  (take-subcont prompt #ignore value))\n\n(defmacro push-subcont (k . forms)\n  \"We don't have `push-subcont' but for these tests we can emulate it\nwith a `push-delim-subcont' that pushes an unused prompt.\"\n  (list* #'push-delim-subcont ''unused-prompt k forms))\n\n(defun shift (p #'f)\n  \"The `shift' operator, adapted from the file `delimcc.ml'.\"\n  (take-subcont p sk\n    (push-prompt p\n      (f (lambda (#'c)\n           (push-delim-subcont p sk (c)))))))\n\n(defun prompt-set-p (prompt)\n  \"Return true if a prompt is set, false otherwise.\n(Note that this leads to stack growth, i.e. leaks.)\"\n  (handler-case ((prompt-not-found-error (lambda #ignore #f)))\n    (take-subcont prompt k (push-delim-subcont prompt k #t))))\n\n;; The actual tests.\n\n(defsuite caml-shift\n\n  (deftest test1\n    (progn\n      (assert (not (prompt-set-p 'p)))\n      (push-prompt 'p\n        (assert (prompt-set-p 'p))\n        1))\n    1)\n\n  (deftest test2\n    (+ (push-prompt 'p (push-prompt 'p 5))\n       4)\n    9)\n\n  (deftest test3\n    (+ (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n       4)\n    9)\n\n  (deftest |test3'|\n    (+ (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5))))\n       4)\n    9)\n\n  (deftest |test3''|\n    (+ (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n         (+ (abort-subcont 'p 7)\n            10))\n       20)\n    27)\n\n  (deftest |test3'''|\n    (signals-error\n     (progn\n       (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n         (+ (abort-subcont 'p 7)\n            10))\n       (abort-subcont 'p 9))\n     prompt-not-found-error :prompt 'p))\n\n  (deftest test4\n    (+ (push-prompt 'p\n         (+ (take-subcont 'p sk\n              (push-prompt 'p\n                (push-subcont sk 5)))\n            10))\n       20)\n    35)\n\n  (deftest test5\n    (+ (push-prompt 'p0\n         (+ (shift 'p0 (lambda (#'sk)\n                         (+ 100 (sk (lambda () (sk (lambda () 3)))))))\n            2))\n       10)\n    117)\n\n  (deftest |test5'|\n    (+ 10 (push-prompt 'p0\n            (+ 2 (shift 'p0 (lambda (#'sk)\n                              (sk (lambda () (+ 3 100))))))))\n    115)\n\n  (deftest |test5''|\n    (+ (push-prompt 'p0\n         (+ (shift 'p0 (lambda (#'sk)\n                         (+ (sk (lambda ()\n                                  (push-prompt 'p1\n                                    (+ 9 (sk (lambda () (abort-subcont 'p1 3)))))))\n                            100)))\n            2))\n       10)\n    115)\n\n  (deftest |test5'''|\n    (+ (push-prompt 'p0\n         (let ((v (shift 'p0 (lambda (#'sk)\n                               (+ (sk (lambda ()\n                                        (push-prompt 'p1\n                                          (+ 9 (sk (lambda ()\n                                                     (abort-subcont 'p1 3)))))))\n                                  100)))))\n           (+ v 2)))\n       10)\n    115)\n\n  (deftest test54\n    (+ (push-prompt 'p0\n         (let ((v (shift 'p0 (lambda (#'sk)\n                               (+ (sk (lambda ()\n                                        (push-prompt 'p1\n                                          (+ 9 (sk (lambda ()\n                                                     (abort-subcont 'p0 3)))))))\n                                  100)))))\n           (+ v 2)))\n       10)\n    124)\n\n  (deftest test6\n    (+ (flet ((push-twice (sk)\n                (push-subcont sk (push-subcont sk 3))))\n         (push-prompt 'p1\n           (push-prompt 'p2\n             (+ (take-subcont 'p1 sk\n                  (push-twice sk))\n                1))))\n       10)\n    15)\n\n  (deftest test7\n    (+ (flet ((push-twice (sk)\n                (push-subcont sk\n                  (push-subcont sk\n                    (take-subcont 'p2 sk2\n                      (push-subcont sk2\n                        (push-subcont sk2 3)))))))\n         (push-prompt 'p1\n           (+ (push-prompt 'p2\n                (+ 10 (push-prompt 'p3\n                        (take-subcont 'p1 sk (push-twice sk)))))\n              1)))\n       100)\n    135)\n\n  (deftest |test7'|\n    (+ (flet ((push-twice (#'sk)\n                (sk (lambda ()\n                      (sk (lambda ()\n                            (shift 'p2 (lambda (#'sk2)\n                                         (sk2 (lambda ()\n                                                (sk2 (lambda () 3))))))))))))\n         (push-prompt 'p1\n           (+ (push-prompt 'p2\n                (+ 10 (push-prompt 'p3\n                        (shift 'p1 (lambda (#'sk) (push-twice #'sk))))))\n              1)))\n       100)\n    135))\n\n;;; Delimited Dynamic Binding\n\n;; The following tests are adapted from the files `caml-dynvar.ml' and\n;; `dynvar-scheme48-problem.scm' of the DBplusDC distribution, available\n;; at the URL `http://okmij.org/ftp/Computation/dynamic-binding.html'\n\n(defun dset (dynvar value)\n  \"Set the value of a dynamic variable and return the old value.\"\n  (prog1 (dynamic dynvar)\n    (set-dynamic dynvar value)))\n\n(defsuite dbplusdc\n\n  (deftest testc\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 0))\n        (flet ((f () (dynamic *p*)))\n          (let ((x (f))\n                (y (dynamic-let ((*p* 1)) (f)))\n                (z (f)))\n            (list x y z)))))\n    '(0 1 0))\n\n  (deftest test1\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (list (dynamic *p*) (dynamic *p*))))\n    '(1 1))\n\n  (deftest test11\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (list (dynamic *p*)\n              (dynamic *p*)\n              (dynamic-let ((*p* 2))\n                (dynamic *p*)))))\n    '(1 1 2))\n\n  ;; It's probably a happy accident that this test works, since\n  ;; our `dset' is pretty different from DBplusDC's.\n  (deftest test12\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (let* ((v1 (dynamic *p*))\n               (v2 (dynamic-let ((*p* 2))\n                     (let ((v3 (dset *p* 12))\n                           (v4 (dynamic *p*)))\n                       (list v3 v4)))))\n          (let ((v5 (dynamic *p*)))\n            (list v1 v2 v5)))))\n    '(1 (2 12) 1))\n\n  (deftest test_eq4\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (push-prompt 'p0\n          (dynamic *p*))))\n    1)\n\n  (deftest test_eq5\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (push-prompt 'p0\n          (dynamic-let ((*p* 2))\n            (take-subcont 'p0 #ignore\n              (dynamic *p*))))))\n    1)\n\n  (deftest test_eq6\n    (progn\n      (defdynamic *p*)\n      (defdynamic *q*)\n      ((lambda (#'f)\n         (dynamic-let ((*p* 2) (*q* 20))\n           (#'f (lambda () 0))))\n       (dynamic-let ((*p* 1))\n         (push-prompt 'p\n           (dynamic-let ((*q* 10))\n             ((lambda (x) (+ (dynamic *p*) (dynamic *q*)))\n              (shift 'p (lambda (f) f))))))))\n    12))\n\n;;; Tests for single prompt coroutines\n\n(defsuite |Coroutines|\n\n  (deftest |Adapted from A Monadic Framework for Delimited Continuations|\n    (+ 2 (coroutine (if (yield k (+ (resume k #f) (resume k #t)))\n                        3\n                        4)))\n    9))\n");
+/* harmony default export */ const delimcc_test_lispx = (";;; Delimited Control Tests                                -*- Lisp -*-\n\n;; The following tests are adapted from the file `testd0.ml' of the\n;; caml-shift distribution, available at the URL\n;; `http://okmij.org/ftp/continuations/implementations.html'\n\n;; First, some preliminary definitions.\n\n(defun abort-subcont (prompt value)\n  \"Utility that captures the continuation but just ignores it.\"\n  (take-subcont prompt #ignore value))\n\n(defmacro push-subcont (k . forms)\n  \"We don't have `push-subcont' but for these tests we can emulate it\nwith a `push-delim-subcont' that pushes an unused prompt.\"\n  (list* #'push-delim-subcont ''unused-prompt k forms))\n\n(defun shift (p #'f)\n  \"The `shift' operator, adapted from the file `delimcc.ml'.\"\n  (take-subcont p sk\n    (push-prompt p\n      (f (lambda (#'c)\n           (push-delim-subcont p sk (c)))))))\n\n(defun prompt-set-p (prompt)\n  \"Return true if a prompt is set, false otherwise.\n(Note that this leads to stack growth, i.e. leaks.)\"\n  (handler-case ((prompt-not-found-error (lambda #ignore #f)))\n    (take-subcont prompt k (push-delim-subcont prompt k #t))))\n\n;; The actual tests.\n\n(defsuite caml-shift\n\n  (deftest test1\n    (progn\n      (assert (not (prompt-set-p 'p)))\n      (push-prompt 'p\n        (assert (prompt-set-p 'p))\n        1))\n    1)\n\n  (deftest test2\n    (+ (push-prompt 'p (push-prompt 'p 5))\n       4)\n    9)\n\n  (deftest test3\n    (+ (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n       4)\n    9)\n\n  (deftest |test3'|\n    (+ (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5))))\n       4)\n    9)\n\n  (deftest |test3''|\n    (+ (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n         (+ (abort-subcont 'p 7)\n            10))\n       20)\n    27)\n\n  (deftest |test3'''|\n    (signals-error\n     (progn\n       (push-prompt 'p\n         (push-prompt 'p (+ 6 (abort-subcont 'p 5)))\n         (+ (abort-subcont 'p 7)\n            10))\n       (abort-subcont 'p 9))\n     prompt-not-found-error :prompt 'p))\n\n  (deftest test4\n    (+ (push-prompt 'p\n         (+ (take-subcont 'p sk\n              (push-prompt 'p\n                (push-subcont sk 5)))\n            10))\n       20)\n    35)\n\n  (deftest test5\n    (+ (push-prompt 'p0\n         (+ (shift 'p0 (lambda (#'sk)\n                         (+ 100 (sk (lambda () (sk (lambda () 3)))))))\n            2))\n       10)\n    117)\n\n  (deftest |test5'|\n    (+ 10 (push-prompt 'p0\n            (+ 2 (shift 'p0 (lambda (#'sk)\n                              (sk (lambda () (+ 3 100))))))))\n    115)\n\n  (deftest |test5''|\n    (+ (push-prompt 'p0\n         (+ (shift 'p0 (lambda (#'sk)\n                         (+ (sk (lambda ()\n                                  (push-prompt 'p1\n                                    (+ 9 (sk (lambda () (abort-subcont 'p1 3)))))))\n                            100)))\n            2))\n       10)\n    115)\n\n  (deftest |test5'''|\n    (+ (push-prompt 'p0\n         (let ((v (shift 'p0 (lambda (#'sk)\n                               (+ (sk (lambda ()\n                                        (push-prompt 'p1\n                                          (+ 9 (sk (lambda ()\n                                                     (abort-subcont 'p1 3)))))))\n                                  100)))))\n           (+ v 2)))\n       10)\n    115)\n\n  (deftest test54\n    (+ (push-prompt 'p0\n         (let ((v (shift 'p0 (lambda (#'sk)\n                               (+ (sk (lambda ()\n                                        (push-prompt 'p1\n                                          (+ 9 (sk (lambda ()\n                                                     (abort-subcont 'p0 3)))))))\n                                  100)))))\n           (+ v 2)))\n       10)\n    124)\n\n  (deftest test6\n    (+ (flet ((push-twice (sk)\n                (push-subcont sk (push-subcont sk 3))))\n         (push-prompt 'p1\n           (push-prompt 'p2\n             (+ (take-subcont 'p1 sk\n                  (push-twice sk))\n                1))))\n       10)\n    15)\n\n  (deftest test7\n    (+ (flet ((push-twice (sk)\n                (push-subcont sk\n                  (push-subcont sk\n                    (take-subcont 'p2 sk2\n                      (push-subcont sk2\n                        (push-subcont sk2 3)))))))\n         (push-prompt 'p1\n           (+ (push-prompt 'p2\n                (+ 10 (push-prompt 'p3\n                        (take-subcont 'p1 sk (push-twice sk)))))\n              1)))\n       100)\n    135)\n\n  (deftest |test7'|\n    (+ (flet ((push-twice (#'sk)\n                (sk (lambda ()\n                      (sk (lambda ()\n                            (shift 'p2 (lambda (#'sk2)\n                                         (sk2 (lambda ()\n                                                (sk2 (lambda () 3))))))))))))\n         (push-prompt 'p1\n           (+ (push-prompt 'p2\n                (+ 10 (push-prompt 'p3\n                        (shift 'p1 (lambda (#'sk) (push-twice #'sk))))))\n              1)))\n       100)\n    135))\n\n;;; Delimited Dynamic Binding\n\n;; The following tests are adapted from the files `caml-dynvar.ml' and\n;; `dynvar-scheme48-problem.scm' of the DBplusDC distribution, available\n;; at the URL `http://okmij.org/ftp/Computation/dynamic-binding.html'\n\n(defun dset (dynvar value)\n  \"Set the value of a dynamic variable and return the old value.\"\n  (prog1 (dynamic dynvar)\n    (set-dynamic dynvar value)))\n\n(defsuite dbplusdc\n\n  (deftest testc\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 0))\n        (flet ((f () (dynamic *p*)))\n          (let ((x (f))\n                (y (dynamic-let ((*p* 1)) (f)))\n                (z (f)))\n            (list x y z)))))\n    '(0 1 0))\n\n  (deftest test1\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (list (dynamic *p*) (dynamic *p*))))\n    '(1 1))\n\n  (deftest test11\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (list (dynamic *p*)\n              (dynamic *p*)\n              (dynamic-let ((*p* 2))\n                (dynamic *p*)))))\n    '(1 1 2))\n\n  ;; It's probably a happy accident that this test works, since\n  ;; our `dset' is pretty different from DBplusDC's.\n  (deftest test12\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (let* ((v1 (dynamic *p*))\n               (v2 (dynamic-let ((*p* 2))\n                     (let ((v3 (dset *p* 12))\n                           (v4 (dynamic *p*)))\n                       (list v3 v4)))))\n          (let ((v5 (dynamic *p*)))\n            (list v1 v2 v5)))))\n    '(1 (2 12) 1))\n\n  (deftest test_eq4\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (push-prompt 'p0\n          (dynamic *p*))))\n    1)\n\n  (deftest test_eq5\n    (progn\n      (defdynamic *p*)\n      (dynamic-let ((*p* 1))\n        (push-prompt 'p0\n          (dynamic-let ((*p* 2))\n            (take-subcont 'p0 #ignore\n              (dynamic *p*))))))\n    1)\n\n  (deftest test_eq6\n    (progn\n      (defdynamic *p*)\n      (defdynamic *q*)\n      ((lambda (#'f)\n         (dynamic-let ((*p* 2) (*q* 20))\n           (#'f (lambda () 0))))\n       (dynamic-let ((*p* 1))\n         (push-prompt 'p\n           (dynamic-let ((*q* 10))\n             ((lambda (x) (+ (dynamic *p*) (dynamic *q*)))\n              (shift 'p (lambda (f) f))))))))\n    12))\n\n;;; Tests for single prompt coroutines\n#|\n(defsuite |Coroutines|\n\n  (deftest |Adapted from A Monadic Framework for Delimited Continuations|\n    (+ 2 (coroutine (if (yield k (+ (resume k #f) (resume k #t)))\n                        3\n                        4)))\n    9))\n|#\n");
 ;// CONCATENATED MODULE: ./test/stream-test.lispx
 /* harmony default export */ const stream_test_lispx = (";;; Stream Tests\n\n(defsuite stream-tests\n\n  (deftest standard-streams-defined\n    (and (typep *standard-input* #^dynamic)\n         (typep *standard-output* #^dynamic))))\n\n(defsuite string-input-streams\n\n  (deftest make-string-input-stream.1\n    (typep (make-string-input-stream \"foo\") #^string-input-stream))\n\n  (deftest make-string-input-stream.2\n    (signals-error\n     (make-string-input-stream)\n     match-error))\n\n  (deftest make-string-input-stream.3\n    (signals-error\n     (make-string-input-stream 12)\n     type-error :datum 12 :expected-type 'string))\n\n  (deftest with-standard-input-from-string.1\n    (with-standard-input-from-string \"foo\")\n    #void)\n\n  (deftest with-standard-input-from-string.2\n    (with-standard-input-from-string \"12\" (read))\n    12)\n\n  (deftest with-standard-input-from-string.2\n    (with-standard-input-from-string \"12 #t\" (list (read) (read)))\n    (list 12 #t)))\n\n(defsuite string-output-streams\n\n  (deftest make-string-output-stream.1\n    (typep (make-string-output-stream) #^string-output-stream))\n\n  (deftest with-standard-output-to-string.1\n    (with-standard-output-to-string (print \"foo\") (print \"bar\"))\n    \"\\n\\\"foo\\\"\\n\\\"bar\\\"\")\n\n  (deftest with-standard-output-to-string.2\n    (with-standard-output-to-string)\n    \"\")\n\n  (deftest get-output-stream-string.1\n    (let ((s (make-string-output-stream)))\n      (get-output-stream-string s))\n    \"\")\n\n  (deftest get-output-stream-string.2\n    (signals-error\n     (get-output-stream-string)\n     match-error))\n\n  (deftest get-output-stream-string.3\n    (signals-error\n     (get-output-stream-string 1)\n     type-error :datum 1 :expected-type 'string-output-stream)))\n\n(defsuite fresh-line\n\n  (deftest fresh-line.1\n    (with-standard-output-to-string (fresh-line) (uprint1 \"a\") (fresh-line))\n    \"\\na\\n\")\n\n  (deftest fresh-line.2\n    (let ((sos (make-string-output-stream)))\n      (with-standard-output-to-string\n       (fresh-line) (uprint1 \"a\") (fresh-line)\n       (fresh-line sos) (dynamic-let ((*standard-output* sos)) (uprint1 \"b\")) (fresh-line sos)\n       (assert (= \"\\nb\\n\" (get-output-stream-string sos)))))\n    \"\\na\\n\"))\n");
 ;// CONCATENATED MODULE: ./test/read-test.lispx
@@ -11882,7 +11866,7 @@ describe("Lisp Tests", () => {
 }).timeout(100000);
 
 // EXTERNAL MODULE: ./node_modules/chai/index.js
-var node_modules_chai = __webpack_require__(960);
+var node_modules_chai = __webpack_require__(324);
 ;// CONCATENATED MODULE: ./node_modules/chai/index.mjs
 
 

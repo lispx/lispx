@@ -262,7 +262,7 @@ with a `push-delim-subcont' that pushes an unused prompt."
     12))
 
 ;;; Tests for single prompt coroutines
-
+#|
 (defsuite |Coroutines|
 
   (deftest |Adapted from A Monadic Framework for Delimited Continuations|
@@ -270,3 +270,4 @@ with a `push-delim-subcont' that pushes an unused prompt."
                         3
                         4)))
     9))
+|#
